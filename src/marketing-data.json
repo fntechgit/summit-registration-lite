@@ -1,0 +1,10 @@
+{
+    "colors": {
+        "color_primary": "#5e5f62",
+        "color_primary_contrast": "#ffffff",
+        "color_secondary": "#262673",
+        "color_secondary_contrast": "#8CC639",
+        "color_text_dark": "#5e5f62",
+        "color_text_light": "#ffffff"
+    }
+}
