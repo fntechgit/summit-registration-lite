@@ -26,6 +26,8 @@ const DEFAULT_STATE = {
     settings: {
         marketingData: null,
         getAccessToken: null,
+        closeWidget: null,
+        onRef: null,
     },
     widgetLoading: false,
 };
@@ -48,6 +50,7 @@ const WidgetReducer = (state = DEFAULT_STATE, action) => {
             const newSettings = {
                 onRef: payload.onRef,
                 getAccessToken: payload.getAccessToken,
+                closeWidget: payload.closeWidget,
                 marketingData: payload.marketingData
             };
 

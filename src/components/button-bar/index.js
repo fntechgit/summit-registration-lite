@@ -16,7 +16,7 @@ import PropTypes from 'prop-types';
 
 import styles from "./index.module.scss";
 
-const ButtonBarComponent = () => {
+const ButtonBarComponent = ({ step }) => {
 
     return (
         <div className={`${styles.outerWrapper}`}>

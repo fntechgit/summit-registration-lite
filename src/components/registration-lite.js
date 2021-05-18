@@ -26,7 +26,7 @@ import PersonalInfoComponent from './personal-information';
 import TicketTypeComponent from './ticket-type';
 import ButtonBarComponent from './button-bar';
 
-const RegistrationLite = ({ loadSession, setMarketingSettings, settings, ticketTypes, widgetLoading, ...rest }) => {
+const RegistrationLite = ({ loadSession, setMarketingSettings, profile, summit, ticketTypes, settings, widgetLoading, ...rest }) => {
 
     const [step, setStep] = useState(0);
 
@@ -55,10 +55,16 @@ const RegistrationLite = ({ loadSession, setMarketingSettings, settings, ticketT
                                 <i className="fa fa-close" aria-label="close"></i>
                             </div>
                             <div className={styles.stepsWrapper}>
-                                <LoginComponent />
-                                <TicketTypeComponent ticketTypes={ticketTypes} isActive={step === 0} />
-                                <PersonalInfoComponent isActive={step === 1} />
-                                <PaymentComponent isActive={step === 2} />
+                                {!profile &&
+                                    <LoginComponent />
+                                }
+                                {profile &&
+                                    <>
+                                        <TicketTypeComponent ticketTypes={ticketTypes} isActive={step === 0} />
+                                        <PersonalInfoComponent isActive={step === 1} />
+                                        <PaymentComponent isActive={step === 2} />
+                                    </>
+                                }
                             </div>
                             <ButtonBarComponent step={step} registrationForm={registrationForm} />
                         </div>
@@ -69,9 +75,9 @@ const RegistrationLite = ({ loadSession, setMarketingSettings, settings, ticketT
     );
 }
 
-const mapStateToProps = (scheduleReducer) => {
+const mapStateToProps = (registrationReducer) => {
     return {
-        ...scheduleReducer
+        ...registrationReducer
     }
 }
 

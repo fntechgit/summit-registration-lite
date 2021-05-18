@@ -24,6 +24,7 @@ const filterProps = {
     profileData: ProfileData,
     marketingData: MarketingData.colors,
     getAccessToken: () => console.log('access token request'),
+    closeWidget: () => console.log('close widget'),
     onRef: console.log,
 };
 

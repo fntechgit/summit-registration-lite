@@ -129,6 +129,7 @@
   "dependencies": {
     "dropzone": "^5.9.2",
     "react-spring": "^9.1.2",
+    "react-stripe-elements": "^6.1.2",
     "react-use": "^17.2.4",
     "resize-observer-polyfill": "^1.5.1",
     "use-debounce": "^6.0.1"
