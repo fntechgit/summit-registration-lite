@@ -1,0 +1,32 @@
+.placeholder {
+    border-radius: 5px;
+    width: 100%;
+    background-color: #e6f3ff;
+    border: 1px solid #3fa2f7;
+    padding: 5px;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 10px 0;
+    i {
+        padding: 2px 5px;
+        border-left: 1px solid #3fa2f7;
+    }
+}
+
+.dropdown {
+    margin-top:10px;
+    border-radius: 5px;
+    width: 100%;
+    background-color: #e6f3ff;
+    border: 1px solid #3fa2f7;    
+    cursor: pointer;
+    div {
+        padding: 5px;
+       &:hover {
+           background-color: #396bd0;
+           color: #e6f3ff;
+       }
+    }
+}

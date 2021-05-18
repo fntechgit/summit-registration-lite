@@ -1,0 +1,18 @@
+.outerWrapper {
+    border: 1px solid lightgray;    
+    background-color: white;
+    border-radius: 5px;
+}
+
+.innerWrapper {
+    padding: 10px;    
+}
+
+.title {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    i {
+        cursor: pointer;
+    }
+}

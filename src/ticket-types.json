@@ -1,0 +1,35 @@
+[{
+        "badge_type_id": 8,
+        "cost": 100,
+        "created": 1596642752,
+        "currency": "USD",
+        "description": "nada",
+        "external_id": null,
+        "id": 12,
+        "last_edited": 1596642752,
+        "max_quantity_per_order": 2,
+        "name": "General",
+        "quantity_2_sell": 1000,
+        "quantity_sold": 30,
+        "sales_end_date": 1608962400,
+        "sales_start_date": 1604728800,
+        "summit_id": 16
+    },
+    {
+        "badge_type_id": 8,
+        "cost": 200,
+        "created": 1596642752,
+        "currency": "USD",
+        "description": "nada",
+        "external_id": null,
+        "id": 13,
+        "last_edited": 1596642752,
+        "max_quantity_per_order": 2,
+        "name": "Genereal 2",
+        "quantity_2_sell": 1000,
+        "quantity_sold": 30,
+        "sales_end_date": 1608962400,
+        "sales_start_date": 1604728800,
+        "summit_id": 16
+    }
+]

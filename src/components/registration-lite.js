@@ -11,7 +11,7 @@
  * limitations under the License.
  **/
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from "react-redux";
 import { AjaxLoader } from 'openstack-uicore-foundation/lib/components';
@@ -19,40 +19,59 @@ import { loadSession, setMarketingSettings } from "../actions";
 
 import styles from "../styles/general.module.scss";
 import 'openstack-uicore-foundation/lib/css/components.css';
+import '../styles/styles.scss';
 
-class RegistrationLite extends React.Component {
+import LoginComponent from './login';
+import PaymentComponent from './payment';
+import PersonalInfoComponent from './personal-information';
+import TicketTypeComponent from './ticket-type';
+import ButtonBarComponent from './button-bar';
 
-    componentDidMount() {
-        const { loadSession, setMarketingSettings, filters, ...rest } = this.props;
+const RegistrationLite = ({ loadSession, setMarketingSettings, settings, ticketTypes, widgetLoading, ...rest }) => {
 
+    const [step, setStep] = useState(0);
+
+    const [registrationForm, setRegistrationForm] = useState(
+        {
+            ticketType: null,
+            personalInformation: null,
+            paymentInformation: null,
+        }
+    );
+
+    useEffect(() => {
         loadSession(rest).then(() => {
             setMarketingSettings();
         });
+    }, [])
 
-        this.props.onRef(this)
-    }
-
-    componentWillUnmount() {
-        this.props.onRef(undefined)
-    }
-
-    render() {
-        const { settings, widgetLoading } = this.props;
-
-        return (
-            <div className={`${styles.outerWrapper} schedule-widget`} ref={el => this.wrapperElem = el} data-testid="registration-lite-wrapper">
-                <AjaxLoader show={widgetLoading} size={60} relative />
-                <>
-                    <div className={`${styles.innerWrapper}`} data-testid="registration-lite-list">
-                        registration lite
-                    </div>
-                </>
+    return (
+        <div id="modal" className="modal is-active">
+            <div className="modal-background"></div>
+            <div className="modal-content">
+                <div className={`${styles.outerWrapper} registration-lite-widget`}>
+                    <AjaxLoader show={widgetLoading} size={60} relative />
+                    <>
+                        <div className={`${styles.innerWrapper}`}>
+                            <div className={styles.title} >
+                                <i className="fa fa-close" aria-label="close"></i>
+                            </div>
+                            <div className={styles.stepsWrapper}>
+                                <LoginComponent />
+                                <TicketTypeComponent ticketTypes={ticketTypes} isActive={step === 0} />
+                                <PersonalInfoComponent isActive={step === 1} />
+                                <PaymentComponent isActive={step === 2} />
+                            </div>
+                            <ButtonBarComponent step={step} registrationForm={registrationForm} />
+                        </div>
+                    </>
+                </div>
             </div>
-        );
-    }
+        </div>
+    );
 }
 
-function mapStateToProps(scheduleReducer) {
+const mapStateToProps = (scheduleReducer) => {
     return {
         ...scheduleReducer
     }

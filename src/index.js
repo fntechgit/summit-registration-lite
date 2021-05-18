@@ -16,13 +16,13 @@ import ReactDOM from 'react-dom';
 import RegistrationLiteWidget from './registration-lite-widget';
 
 import MarketingData from './marketing-data.json';
+import TicketsData from './ticket-types.json';
 
 const filterProps = {
     accessToken: '',
-    ticketTypes: [],
+    ticketTypes: TicketsData,
     stripeConfig: null,
-    marketingData: MarketingData.colors,    
-    title: 'Filter by',
+    marketingData: MarketingData.colors,
     onRef: console.log,
 };
 
@@ -30,7 +30,7 @@ const filterProps = {
 // width 780px or 230px
 
 ReactDOM.render(
-    <div style={{ width: '780px', margin: '0 auto' }}>
+    <div style={{ width: '1080px', margin: '0 auto' }}>
         <RegistrationLiteWidget {...filterProps} />
     </div>,
     document.querySelector('#root')

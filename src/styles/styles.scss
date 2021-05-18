@@ -1,0 +1,29 @@
+@import "./colors.scss";
+
+.step-wrapper {
+  padding: 10px;
+  margin: 10px;
+  border: 1px solid lightgray;
+  border-radius: 5px;
+}
+
+.registration-lite-widget {
+  color: var(--color_primary);
+}
+
+.button {
+  background-color: $lblue_color_2;
+  border-color: #d4e5f4;
+  padding: 0px 15px;
+  color: $lblue_color_1;
+  font-weight: bold;
+  border-radius: 5px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  &:hover {
+    background-color: #297fca;
+    color: #fff;
+  }
+}
