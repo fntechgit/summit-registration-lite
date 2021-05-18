@@ -11,30 +11,28 @@
  * limitations under the License.
  **/
 
-import { LOGOUT_USER } from 'openstack-uicore-foundation/lib/actions';
-
 
 import {
     START_WIDGET_LOADING,
     STOP_WIDGET_LOADING,
-    LOAD_INITIAL_VARS    
+    LOAD_INITIAL_VARS
 } from './actions';
 
 const DEFAULT_STATE = {
+    summit: null,
+    ticketTypes: null,
+    profile: null,
+    reservedTicket: null,
     settings: {
-        title: null,
-        filterCallback: null,
         marketingData: null,
-    },    
+        getAccessToken: null,
+    },
     widgetLoading: false,
 };
 
 const WidgetReducer = (state = DEFAULT_STATE, action) => {
     const { type, payload } = action;
     switch (type) {
-        case LOGOUT_USER: {
-            return DEFAULT_STATE;
-        }
         case START_WIDGET_LOADING: {
             let widgetLoading = state.widgetLoading + 1;
             return { ...state, widgetLoading };
@@ -45,19 +43,19 @@ const WidgetReducer = (state = DEFAULT_STATE, action) => {
         }
         case LOAD_INITIAL_VARS:
 
-            const { filtersData, filteredData } = payload;
+            const { summitData, profileData } = payload;
 
             const newSettings = {
-                title: payload.title,
                 onRef: payload.onRef,
-                filterCallback: payload.filterCallback,
+                getAccessToken: payload.getAccessToken,
                 marketingData: payload.marketingData
             };
 
             return {
                 ...state,
-                filters: filtersData,
-                filtered: filteredData,
+                summit: summitData,
+                ticketTypes: summitData.ticket_types,
+                profile: profileData,
                 settings: {
                     ...state.settings,
                     ...newSettings

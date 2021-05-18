@@ -14,7 +14,6 @@
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from "react-redux";
-import { AjaxLoader } from 'openstack-uicore-foundation/lib/components';
 import { loadSession, setMarketingSettings } from "../actions";
 
 import styles from "../styles/general.module.scss";
@@ -50,7 +49,6 @@ const RegistrationLite = ({ loadSession, setMarketingSettings, settings, ticketT
             <div className="modal-background"></div>
             <div className="modal-content">
                 <div className={`${styles.outerWrapper} registration-lite-widget`}>
-                    <AjaxLoader show={widgetLoading} size={60} relative />
                     <>
                         <div className={`${styles.innerWrapper}`}>
                             <div className={styles.title} >

@@ -16,13 +16,14 @@ import ReactDOM from 'react-dom';
 import RegistrationLiteWidget from './registration-lite-widget';
 
 import MarketingData from './marketing-data.json';
-import TicketsData from './ticket-types.json';
+import SummitData from './summit-data.json';
+import ProfileData from './profile.json';
 
 const filterProps = {
-    accessToken: '',
-    ticketTypes: TicketsData,
-    stripeConfig: null,
+    summitData: SummitData.summit,
+    profileData: ProfileData,
     marketingData: MarketingData.colors,
+    getAccessToken: () => console.log('access token request'),
     onRef: console.log,
 };
 

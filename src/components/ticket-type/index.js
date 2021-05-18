@@ -14,8 +14,6 @@
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 
-import { Dropdown } from 'openstack-uicore-foundation/lib/components'
-
 import styles from "./index.module.scss";
 import TicketDropdownComponent from '../ticket-dropdown';
 
