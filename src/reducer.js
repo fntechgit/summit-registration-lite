@@ -18,17 +18,8 @@ import {
     LOAD_INITIAL_VARS
 } from './actions';
 
-const DEFAULT_STATE = {
-    summit: null,
-    ticketTypes: null,
-    profile: null,
+const DEFAULT_STATE = {    
     reservedTicket: null,
-    settings: {
-        getAccessToken: null,
-        closeWidget: null,
-        goToExtraQuestions: null,
-        marketingData: null,
-    },
     widgetLoading: false,
 };
 
@@ -45,23 +36,13 @@ const WidgetReducer = (state = DEFAULT_STATE, action) => {
         }
         case LOAD_INITIAL_VARS:
 
-            const { summitData, profileData } = payload;
-
-            const newSettings = {
-                goToExtraQuestions: payload.goToExtraQuestions,
-                getAccessToken: payload.getAccessToken,
-                closeWidget: payload.closeWidget,
-                marketingData: payload.marketingData
-            };
+            const { marketingData } = payload;
 
             return {
                 ...state,
-                summit: summitData,
-                ticketTypes: summitData.ticket_types,
-                profile: profileData,
                 settings: {
                     ...state.settings,
-                    ...newSettings
+                    marketingData: marketingData
                 }
             };
         default: {

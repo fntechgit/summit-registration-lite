@@ -15,10 +15,10 @@ import {
     createAction
 } from "openstack-uicore-foundation/lib/methods";
 
-export const START_WIDGET_LOADING           = 'START_WIDGET_LOADING';
-export const STOP_WIDGET_LOADING            = 'STOP_WIDGET_LOADING';
-export const LOAD_INITIAL_VARS              = 'LOAD_INITIAL_VARS';
-export const RECEIVE_MARKETING_SETTINGS     = 'RECEIVE_MARKETING_SETTINGS';
+export const START_WIDGET_LOADING = 'START_WIDGET_LOADING';
+export const STOP_WIDGET_LOADING = 'STOP_WIDGET_LOADING';
+export const LOAD_INITIAL_VARS = 'LOAD_INITIAL_VARS';
+export const RECEIVE_MARKETING_SETTINGS = 'RECEIVE_MARKETING_SETTINGS';
 
 
 const startWidgetLoading = () => (dispatch) => {
@@ -38,7 +38,7 @@ export const setMarketingSettings = () => (dispatch, getState) => {
 
     dispatch(startWidgetLoading());
 
-    let { settings } = getState();
+    let { widgetState: { settings } } = getState();
     let { marketingData } = settings;
 
     dispatch(createAction(RECEIVE_MARKETING_SETTINGS)({}));

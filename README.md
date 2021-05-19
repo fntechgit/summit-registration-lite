@@ -10,6 +10,19 @@ React component for the registration lite widget
    **profileData**            = object with the profile data from the user
    
    **marketingData**          = object with the settings from the marketing API
+
+   **loginOptions**           = array with the options to show on the login screen
+
+   Example
+   
+   ```
+   [
+      { button_color: '#082238', provider_label: 'FNid', provider_param: 'fnid' },
+      { button_color: '#0370C5', provider_label: 'Facebook', provider_param: 'facebook' }
+   ]
+   ```
+
+   **authUser**               = method passed that will be called on user login. param -> (provider) => console.log('login with', provider)
    
    **getAccessToken**         = method passed that will be called to request the access token
    

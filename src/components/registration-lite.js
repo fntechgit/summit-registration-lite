@@ -26,7 +26,7 @@ import PersonalInfoComponent from './personal-information';
 import TicketTypeComponent from './ticket-type';
 import ButtonBarComponent from './button-bar';
 
-const RegistrationLite = ({ loadSession, setMarketingSettings, profile, summit, ticketTypes, settings, widgetLoading, ...rest }) => {
+const RegistrationLite = ({ loadSession, setMarketingSettings, loginOptions, transaction, profile, ticketTypes, widgetLoading, ...rest }) => {
 
     const [step, setStep] = useState(0);
 
@@ -52,11 +52,11 @@ const RegistrationLite = ({ loadSession, setMarketingSettings, profile, summit, 
                     <>
                         <div className={`${styles.innerWrapper}`}>
                             <div className={styles.title} >
-                                <i className="fa fa-close" aria-label="close"></i>
+                                <i className="fa fa-close" aria-label="close" onClick={() => rest.closeWidget()}></i>
                             </div>
                             <div className={styles.stepsWrapper}>
                                 {!profile &&
-                                    <LoginComponent />
+                                    <LoginComponent options={loginOptions} login={(provider) => rest.authUser(provider)} />
                                 }
                                 {profile &&
                                     <>
@@ -66,7 +66,7 @@ const RegistrationLite = ({ loadSession, setMarketingSettings, profile, summit, 
                                     </>
                                 }
                             </div>
-                            <ButtonBarComponent step={step} registrationForm={registrationForm} />
+                            {profile && <ButtonBarComponent step={step} registrationForm={registrationForm} />}
                         </div>
                     </>
                 </div>
@@ -75,11 +75,9 @@ const RegistrationLite = ({ loadSession, setMarketingSettings, profile, summit, 
     );
 }
 
-const mapStateToProps = (registrationReducer) => {
-    return {
-        ...registrationReducer
-    }
-}
+const mapStateToProps = ({ widgetState }) => ({
+    transaction: widgetState.reservedTicket
+})
 
 export default connect(mapStateToProps, {
     loadSession,

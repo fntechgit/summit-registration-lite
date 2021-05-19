@@ -15,27 +15,39 @@ import React from 'react';
 import { Provider } from 'react-redux'
 import { createStore, applyMiddleware, compose } from 'redux';
 import thunk from 'redux-thunk';
+import { persistStore, persistCombineReducers } from 'redux-persist'
+import storage from 'redux-persist/es/storage' // default: localStorage if web, AsyncStorage if react-native
+import { PersistGate } from 'redux-persist/integration/react';
 import WidgetReducer from './reducer'
 import RegistrationLite from "./components/registration-lite";
 
-class RegistrationLiteWidget extends React.PureComponent {
-
-    constructor(props) {
-        super(props);
-
-        const composeEnhancers = typeof window === 'object' && window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ ? window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ : compose;
-        this.store = createStore(WidgetReducer, composeEnhancers(applyMiddleware(thunk)));
-
-        // this.store = createStore(WidgetReducer, applyMiddleware(thunk));
+const RegistrationLiteWidget = ( props ) => {    
+    
+    const config = {
+        key: `root_registration_lite`,
+        storage,
     }
 
-    render() {
-        return (
-            <Provider store={this.store}>
-                <RegistrationLite {...this.props} />
-            </Provider>
-        );
-    }
+    const persistedReducers = persistCombineReducers(config, {
+        widgetState: WidgetReducer
+    });
+
+    const composeEnhancers = typeof window === 'object' && window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ ? window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ : compose;
+
+    const store = createStore(persistedReducers, composeEnhancers(applyMiddleware(thunk)));
+
+    const onRehydrateComplete = () => { }
+
+    const persistor = persistStore(store, null, onRehydrateComplete);
+
+
+    return (
+        <Provider store={store}>
+            <PersistGate persistor={persistor}>
+                <RegistrationLite {...props} />
+            </PersistGate>
+        </Provider>
+    );
 }
 
 export default RegistrationLiteWidget;

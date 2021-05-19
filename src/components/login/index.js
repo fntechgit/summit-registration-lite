@@ -16,18 +16,22 @@ import PropTypes from 'prop-types';
 
 import styles from "./index.module.scss";
 
-const LoginComponent = () => {
+const LoginComponent = ({ options, login }) => {
 
     return (
         <div className={`${styles.loginWrapper} step-wrapper`}>
             <>
                 <div className={`${styles.innerWrapper}`}>
                     <span>Log in with one of the following</span>
-                    <div className={styles.button} style={{backgroundColor: '#082238'}}>FNid</div>
-                    <div className={styles.button} style={{backgroundColor: '#0370C5'}}>Facebook</div>
-                    <div className={styles.button} style={{backgroundColor: '#DD4437'}}>Google</div>
-                    <div className={styles.button} style={{backgroundColor: '#000000'}}>Apple ID</div>
-                    <div className={styles.button} style={{backgroundColor: '#2272E7'}}>Microsoft</div>
+                    {options.map(o => {
+                        return (
+                            <div className={styles.button} key={o.provider_param}
+                                style={{ backgroundColor: o.button_color }}
+                                onClick={() => login(o.provider_param)}>
+                                {o.provider_label}
+                            </div>
+                        )
+                    })}
                     <div className={styles.loginCode}>
                         or get a login code emailed to you
                         <div className={styles.input}>

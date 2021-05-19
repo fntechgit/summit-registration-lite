@@ -23,6 +23,14 @@ const filterProps = {
     summitData: SummitData.summit,
     profileData: ProfileData,
     marketingData: MarketingData.colors,
+    loginOptions: [
+        { button_color: '#082238', provider_label: 'FNid', provider_param: 'fnid' },
+        { button_color: '#0370C5', provider_label: 'Facebook', provider_param: 'facebook' },
+        { button_color: '#DD4437', provider_label: 'Google', provider_param: 'google' },
+        { button_color: '#000000', provider_label: 'Apple ID', provider_param: 'apple_id' },
+        { button_color: '#2272E7', provider_label: 'Microsoft', provider_param: 'microsoft' },
+    ],
+    authUser: (provider) => console.log('login with ', provider),
     getAccessToken: () => console.log('access token request'),
     closeWidget: () => console.log('close widget'),
     goToExtraQuestions: () => console.log('extra questions required')
