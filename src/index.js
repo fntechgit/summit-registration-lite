@@ -25,7 +25,7 @@ const filterProps = {
     marketingData: MarketingData.colors,
     getAccessToken: () => console.log('access token request'),
     closeWidget: () => console.log('close widget'),
-    onRef: console.log,
+    goToExtraQuestions: () => console.log('extra questions required')
 };
 
 

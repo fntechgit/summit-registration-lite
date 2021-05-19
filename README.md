@@ -1,14 +1,21 @@
 # registration-lite-widget
-React component for the schedule filter widget
+React component for the registration lite widget
 
 
-## Schedule Filter config      
+## Registration Lite config
 
-   **title**            = widget title
    
-   **onRef**            = method to retrieve schedule component ref. Usage -> {ref => (this.child = ref)}   
-
-   **marketingData**    = object with the settings from the marketing API      
+   **summitData**             = object with the data from the summit
+   
+   **profileData**            = object with the profile data from the user
+   
+   **marketingData**          = object with the settings from the marketing API
+   
+   **getAccessToken**         = method passed that will be called to request the access token
+   
+   **closeWidget**            = method passed that will be called if the user tries to close the widget
+   
+   **goToExtraQuestions**     = method passed that will be called by component to redirect to extra questions page
 
    
 ## PUBLISH TO NPM:

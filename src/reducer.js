@@ -24,10 +24,10 @@ const DEFAULT_STATE = {
     profile: null,
     reservedTicket: null,
     settings: {
-        marketingData: null,
         getAccessToken: null,
         closeWidget: null,
-        onRef: null,
+        goToExtraQuestions: null,
+        marketingData: null,
     },
     widgetLoading: false,
 };
@@ -48,7 +48,7 @@ const WidgetReducer = (state = DEFAULT_STATE, action) => {
             const { summitData, profileData } = payload;
 
             const newSettings = {
-                onRef: payload.onRef,
+                goToExtraQuestions: payload.goToExtraQuestions,
                 getAccessToken: payload.getAccessToken,
                 closeWidget: payload.closeWidget,
                 marketingData: payload.marketingData

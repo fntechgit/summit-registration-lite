@@ -18,13 +18,6 @@ import {
 export const START_WIDGET_LOADING           = 'START_WIDGET_LOADING';
 export const STOP_WIDGET_LOADING            = 'STOP_WIDGET_LOADING';
 export const LOAD_INITIAL_VARS              = 'LOAD_INITIAL_VARS';
-export const REQUEST_SUMMIT                 = 'REQUEST_SUMMIT';
-export const RECEIVE_SUMMIT                 = 'RECEIVE_SUMMIT';
-export const CHANGE_FILTER                  = 'CHANGE_FILTER';
-export const ADD_FILTER                     = 'ADD_FILTER';
-export const REMOVE_FILTER                  = 'REMOVE_FILTER';
-export const RESET_FILTERS                  = 'RESET_FILTERS';
-export const SET_FILTERS                    = 'SET_FILTERS';
 export const RECEIVE_MARKETING_SETTINGS     = 'RECEIVE_MARKETING_SETTINGS';
 
 
