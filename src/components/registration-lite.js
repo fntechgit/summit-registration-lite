@@ -17,7 +17,6 @@ import { connect } from "react-redux";
 import { loadSession, setMarketingSettings } from "../actions";
 
 import styles from "../styles/general.module.scss";
-import 'openstack-uicore-foundation/lib/css/components.css';
 import '../styles/styles.scss';
 
 import LoginComponent from './login';
