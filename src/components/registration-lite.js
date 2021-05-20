@@ -26,9 +26,7 @@ import PersonalInfoComponent from './personal-information';
 import TicketTypeComponent from './ticket-type';
 import ButtonBarComponent from './button-bar';
 
-const RegistrationLite = ({ loadSession, setMarketingSettings, loginOptions, transaction, profile, ticketTypes, widgetLoading, ...rest }) => {
-
-    const [step, setStep] = useState(0);
+const RegistrationLite = ({ loadSession, setMarketingSettings, loginOptions, transaction, step, profile, ticketTypes, widgetLoading, ...rest }) => {
 
     const [registrationForm, setRegistrationForm] = useState(
         {
@@ -76,7 +74,8 @@ const RegistrationLite = ({ loadSession, setMarketingSettings, loginOptions, tra
 }
 
 const mapStateToProps = ({ widgetState }) => ({
-    transaction: widgetState.reservedTicket
+    transaction: widgetState.reservedTicket,
+    step: widgetState.step
 })
 
 export default connect(mapStateToProps, {

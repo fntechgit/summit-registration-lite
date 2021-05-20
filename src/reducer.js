@@ -20,6 +20,7 @@ import {
 
 const DEFAULT_STATE = {    
     reservedTicket: null,
+    step: 0,
     widgetLoading: false,
 };
 

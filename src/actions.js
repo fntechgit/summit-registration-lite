@@ -19,6 +19,7 @@ export const START_WIDGET_LOADING = 'START_WIDGET_LOADING';
 export const STOP_WIDGET_LOADING = 'STOP_WIDGET_LOADING';
 export const LOAD_INITIAL_VARS = 'LOAD_INITIAL_VARS';
 export const RECEIVE_MARKETING_SETTINGS = 'RECEIVE_MARKETING_SETTINGS';
+export const CHANGE_STEP = 'CHANGE_STEP';
 
 
 const startWidgetLoading = () => (dispatch) => {
@@ -57,3 +58,9 @@ export const setMarketingSettings = () => (dispatch, getState) => {
 /*********************************************************************************/
 /*                               TICKETS                                         */
 /*********************************************************************************/
+
+export const changeStep = (step) => (dispatch, getState) => {
+    dispatch(startWidgetLoading());
+    dispatch(createAction(CHANGE_STEP)(step));
+    dispatch(stopWidgetLoading());
+}

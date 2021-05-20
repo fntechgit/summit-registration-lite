@@ -13,6 +13,9 @@
 
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
+import { connect } from "react-redux";
+
+import { changeStep } from '../../actions';
 
 import styles from "./index.module.scss";
 
@@ -35,6 +38,5 @@ const ButtonBarComponent = ({ step }) => {
     );
 }
 
-
-export default ButtonBarComponent
+export default connect(null, { changeStep })(ButtonBarComponent)
 
