@@ -45,7 +45,7 @@ const RegistrationLite = ({ loadSession, setMarketingSettings, loginOptions, tra
         <div id="modal" className="modal is-active">
             <div className="modal-background"></div>
             <div className="modal-content">
-                <div className={`${styles.outerWrapper} registration-lite-widget`}>
+                <div className={`${styles.outerWrapper} summit-registration-lite`}>
                     <>
                         <div className={`${styles.innerWrapper}`}>
                             <div className={styles.title} >

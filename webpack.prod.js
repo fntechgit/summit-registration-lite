@@ -8,18 +8,17 @@ const { CleanWebpackPlugin }    = require('clean-webpack-plugin');
 const MiniCssExtractPlugin      = require("mini-css-extract-plugin");
 
 module.exports = merge(common, {
-    entry: './src/registration-lite-widget.js',
+    entry: './src/summit-registration-lite.js',
     plugins: [
         new CleanWebpackPlugin(),
         new MiniCssExtractPlugin({
             filename: './index.css',
         }),
-        ["react-remove-properties", {"properties": ["data-testid"]}]
     ],
     output: {
         filename: 'index.js',
         path: path.resolve(__dirname, 'dist'),
-        library: 'registration-lite-widget',
+        library: 'summit-registration-lite',
         libraryTarget: 'umd',
         umdNamedDefine: true,
         publicPath: '/dist/',

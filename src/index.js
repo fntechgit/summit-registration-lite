@@ -13,7 +13,7 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import RegistrationLiteWidget from './registration-lite-widget';
+import RegistrationLiteWidget from './summit-registration-lite';
 
 import MarketingData from './marketing-data.json';
 import SummitData from './summit-data.json';

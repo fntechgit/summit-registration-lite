@@ -1,7 +1,7 @@
 {
-  "name": "registration-lite-widget",
+  "name": "summit-registration-lite",
   "version": "1.0.1",
-  "description": "Registration Lite Widget",
+  "description": "Summit Registration Lite",
   "main": "index.js",
   "scripts": {
     "build-dev": "./node_modules/.bin/webpack --config webpack.dev.js",
@@ -15,7 +15,7 @@
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
-    "url": "git@github.com:fntechgit/registration-lite-widget.git"
+    "url": "git@github.com:fntechgit/summit-registration-lite.git"
   },
   "jest": {
     "moduleNameMapper": {
