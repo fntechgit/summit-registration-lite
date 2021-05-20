@@ -25,7 +25,7 @@ import PersonalInfoComponent from './personal-information';
 import TicketTypeComponent from './ticket-type';
 import ButtonBarComponent from './button-bar';
 
-const RegistrationLite = ({ loadSession, setMarketingSettings, loginOptions, transaction, step, profile, ticketTypes, widgetLoading, ...rest }) => {
+const RegistrationLite = ({ loadSession, setMarketingSettings, loginOptions, transaction, step, profileData, ticketTypes, widgetLoading, ...rest }) => {
 
     const [registrationForm, setRegistrationForm] = useState(
         {
@@ -52,10 +52,10 @@ const RegistrationLite = ({ loadSession, setMarketingSettings, loginOptions, tra
                                 <i className="fa fa-close" aria-label="close" onClick={() => rest.closeWidget()}></i>
                             </div>
                             <div className={styles.stepsWrapper}>
-                                {!profile &&
+                                {!profileData &&
                                     <LoginComponent options={loginOptions} login={(provider) => rest.authUser(provider)} />
                                 }
-                                {profile &&
+                                {profileData &&
                                     <>
                                         <TicketTypeComponent ticketTypes={ticketTypes} isActive={step === 0} />
                                         <PersonalInfoComponent isActive={step === 1} />
@@ -63,7 +63,7 @@ const RegistrationLite = ({ loadSession, setMarketingSettings, loginOptions, tra
                                     </>
                                 }
                             </div>
-                            {profile && <ButtonBarComponent step={step} registrationForm={registrationForm} />}
+                            {profileData && <ButtonBarComponent step={step} registrationForm={registrationForm} />}
                         </div>
                     </>
                 </div>

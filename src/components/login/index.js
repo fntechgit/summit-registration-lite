@@ -31,7 +31,8 @@ const LoginComponent = ({ options, login }) => {
                                 {o.provider_label}
                             </div>
                         )
-                    })}
+                    })}                    
+                    {/* SOON...                        
                     <div className={styles.loginCode}>
                         or get a login code emailed to you
                         <div className={styles.input}>
@@ -40,7 +41,7 @@ const LoginComponent = ({ options, login }) => {
                                 &gt;
                             </div>
                         </div>
-                    </div>
+                    </div> */}
                 </div>
             </>
         </div>
