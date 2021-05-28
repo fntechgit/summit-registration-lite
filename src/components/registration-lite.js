@@ -14,7 +14,7 @@
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from "react-redux";
-import { loadSession, setMarketingSettings } from "../actions";
+import { loadSession, setMarketingSettings, changeStep, reserveTicket, removeReservedTicket, payTicket } from "../actions";
 
 import styles from "../styles/general.module.scss";
 import '../styles/styles.scss';
@@ -24,8 +24,27 @@ import PaymentComponent from './payment';
 import PersonalInfoComponent from './personal-information';
 import TicketTypeComponent from './ticket-type';
 import ButtonBarComponent from './button-bar';
+import PurchaseComplete from './purchase-complete';
 
-const RegistrationLite = ({ loadSession, setMarketingSettings, loginOptions, transaction, step, profileData, ticketTypes, widgetLoading, ...rest }) => {
+const RegistrationLite = (
+    {
+        loadSession,
+        setMarketingSettings,
+        changeStep,
+        removeReservedTicket,
+        reserveTicket,
+        payTicket,
+        loginOptions,
+        reservation,
+        step,
+        goToExtraQuestions,
+        goToEvent,
+        profileData,
+        summitData,
+        getAccessToken,        
+        widgetLoading,
+        ...rest
+    }) => {
 
     const [registrationForm, setRegistrationForm] = useState(
         {
@@ -35,11 +54,23 @@ const RegistrationLite = ({ loadSession, setMarketingSettings, loginOptions, tra
         }
     );
 
+    console.log(rest);
+
     useEffect(() => {
-        loadSession(rest).then(() => {
+        loadSession({ ...rest, getAccessToken, summitData, profileData }).then(() => {
             setMarketingSettings();
         });
     }, [])
+
+    useEffect(() => {
+        if (step === 1 && registrationForm.ticketType && registrationForm.personalInformation) {
+            ticketReservation();
+        }
+    }, [registrationForm])
+
+    const ticketReservation = () => {
+        reserveTicket(registrationForm.personalInformation, registrationForm.ticketType, getAccessToken)
+    }
 
     return (
         <div id="modal" className="modal is-active">
@@ -49,6 +80,7 @@ const RegistrationLite = ({ loadSession, setMarketingSettings, loginOptions, tra
                     <>
                         <div className={`${styles.innerWrapper}`}>
                             <div className={styles.title} >
+                                <span>{summitData.name}</span>
                                 <i className="fa fa-close" aria-label="close" onClick={() => rest.closeWidget()}></i>
                             </div>
                             <div className={styles.stepsWrapper}>
@@ -56,14 +88,37 @@ const RegistrationLite = ({ loadSession, setMarketingSettings, loginOptions, tra
                                     <LoginComponent options={loginOptions} login={(provider) => rest.authUser(provider)} />
                                 }
                                 {profileData &&
+                                    step !== 3 ?
                                     <>
-                                        <TicketTypeComponent ticketTypes={ticketTypes} isActive={step === 0} />
-                                        <PersonalInfoComponent isActive={step === 1} />
-                                        <PaymentComponent isActive={step === 2} />
+                                        <TicketTypeComponent
+                                            ticketTypes={summitData.ticket_types}
+                                            reservation={reservation}
+                                            isActive={step === 0}
+                                            changeForm={t => setRegistrationForm({ ...registrationForm, ticketType: t })}
+                                        />
+                                        <PersonalInfoComponent
+                                            isActive={step === 1}
+                                            reservation={reservation}
+                                            changeForm={personalForm => setRegistrationForm({ ...registrationForm, personalInformation: personalForm })}
+                                        />
+                                        <PaymentComponent
+                                            isActive={step === 2}
+                                            reservation={reservation}
+                                            payTicket={payTicket}
+                                            summit={summitData}
+                                        />
                                     </>
+
+                                    :
+                                    <PurchaseComplete
+                                        reservation={reservation}
+                                        payTicket={payTicket}
+                                        summit={summitData}
+                                        goToExtraQuestions={goToExtraQuestions}
+                                    />
                                 }
                             </div>
-                            {profileData && <ButtonBarComponent step={step} registrationForm={registrationForm} />}
+                            {profileData && step !== 3 && <ButtonBarComponent step={step} registrationForm={registrationForm} removeReservedTicket={removeReservedTicket} changeStep={changeStep} />}
                         </div>
                     </>
                 </div>
@@ -73,12 +128,16 @@ const RegistrationLite = ({ loadSession, setMarketingSettings, loginOptions, tra
 }
 
 const mapStateToProps = ({ widgetState }) => ({
-    transaction: widgetState.reservedTicket,
+    reservation: widgetState.reservation,
     step: widgetState.step
 })
 
 export default connect(mapStateToProps, {
     loadSession,
-    setMarketingSettings
+    setMarketingSettings,
+    changeStep,
+    reserveTicket,
+    removeReservedTicket,
+    payTicket
 })(RegistrationLite)
 

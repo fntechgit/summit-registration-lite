@@ -13,30 +13,34 @@
 
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import { connect } from "react-redux";
-
-import { changeStep } from '../../actions';
 
 import styles from "./index.module.scss";
 
-const ButtonBarComponent = ({ step }) => {
+const ButtonBarComponent = ({ step, changeStep, registrationForm, removeReservedTicket }) => {
 
     return (
         <div className={`${styles.outerWrapper}`}>
-            <>
-                <div className={`${styles.innerWrapper}`}>
-                    <div className={styles.required} >
-                        <span>* Required fields</span>
+            {step !== 3 &&
+                <>
+                    <div className={`${styles.innerWrapper}`}>
+                        <div className={styles.required} >
+                            {step !== 0 && <span>* Required fields</span>}
+                        </div>
+                        <div className={styles.buttons} >
+                            {/* Back Button */}
+                            {step !== 0 && step !== 2 && <button className="button" onClick={() => changeStep(step - 1)}>&lt; Back</button>}
+                            {step !== 0 && step === 2 && <button className="button" onClick={() => removeReservedTicket()}>&lt; Boom</button>}
+                            {/* Next Button */}
+                            {step === 0 && <button disabled={!registrationForm.ticketType} className="button" onClick={() => changeStep(step + 1)}>Save and Continue</button>}
+                            {step === 1 && <button className="button" type="submit" form="personal-info-form">Save and Continue</button>}
+                            {step === 2 && <button className="button" type="submit" form="payment-form">Pay Now</button>}
+                        </div>
                     </div>
-                    <div className={styles.buttons} >
-                        <button className="button">&lt; Back</button>
-                        <button className="button">Save and Continue</button>
-                    </div>
-                </div>
-            </>
+                </>
+            }
         </div>
     );
 }
 
-export default connect(null, { changeStep })(ButtonBarComponent)
+export default ButtonBarComponent;
 

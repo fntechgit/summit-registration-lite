@@ -14,9 +14,13 @@
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 
+import { useForm } from 'react-hook-form';
+import { useSpring, config, animated } from "react-spring";
+import { useMeasure } from "react-use";
+
 import styles from "./index.module.scss";
 
-const PersonalInfoComponent = ({ isActive }) => {
+const PersonalInfoComponent = ({ isActive, changeForm, reservation }) => {
 
     const [personalInfo, setPersonalInfo] = useState(
         {
@@ -28,8 +32,36 @@ const PersonalInfoComponent = ({ isActive }) => {
         }
     )
 
-    useEffect(() => {        
-    }, [personalInfo])
+    const { register, handleSubmit, formState: { errors } } = useForm();
+
+    useEffect(() => {
+        if (reservation) {
+            setPersonalInfo({
+                firstName: reservation.owner_first_name,
+                lastName: reservation.owner_last_name,
+                email: reservation.owner_email,
+                company: reservation.owner_company,
+            });
+        }
+    }, [])
+
+    const onSubmit = data => {
+        console.log('data submit', data);
+        setPersonalInfo(data);
+        changeForm(data);
+    };
+
+    const [ref, { height }] = useMeasure();
+
+    const toggleAnimation = useSpring({
+        config: { bounce: 0, ...config.stiff },
+        from: { opacity: 0, height: 0 },
+        to: {
+            opacity: 1,
+            height: isActive ? height + 10 : 0,
+            marginBottom: isActive ? 5 : 0
+        }
+    });
 
     return (
         <div className={`${styles.outerWrapper} step-wrapper`}>
@@ -37,34 +69,44 @@ const PersonalInfoComponent = ({ isActive }) => {
                 <div className={`${styles.innerWrapper}`}>
                     <div className={styles.title} >
                         <span>Personal Information</span>
+                        {!isActive &&
+                            <div>
+                                <span>
+                                    {`${personalInfo.firstName} ${personalInfo.lastName} ${personalInfo.company ? `- ${personalInfo.company}` : ''}`}
+                                </span>
+                                <br />
+                                <span>
+                                    {personalInfo.email}
+                                </span>
+                            </div>
+                        }
                     </div>
-                    <div className={styles.form}>
-                        <input
-                            onChange={e => setPersonalInfo({ ...personalInfo, firstName: e.target.value })}
-                            value={personalInfo.firstName}
-                            placeholder="First Name *"
-                        />
-                        <input
-                            onChange={e => setPersonalInfo({ ...personalInfo, lastName: e.target.value })}
-                            value={personalInfo.lastName}
-                            placeholder="Last Name *"
-                        />
-                        <input
-                            onChange={e => setPersonalInfo({ ...personalInfo, email: e.target.value })}
-                            value={personalInfo.email}
-                            placeholder="Email *"
-                        />
-                        <input
-                            onChange={e => setPersonalInfo({ ...personalInfo, company: e.target.value })}
-                            value={personalInfo.company}
-                            placeholder="Company *"
-                        />
-                        <input
-                            onChange={e => setPersonalInfo({ ...personalInfo, promoCode: e.target.value })}
-                            value={personalInfo.promoCode}
-                            placeholder="Promo Code (optional)"
-                        />
-                    </div>
+                    <animated.div style={{ overflow: 'hidden', ...toggleAnimation }}>
+                        <div ref={ref}>
+                            <form id="personal-info-form" onSubmit={handleSubmit(onSubmit)} className={styles.form}>
+                                <div>
+                                    <input type="text" placeholder="First name *" {...register("firstName", { required: true, maxLength: 80 })} />
+                                    {errors.firstName && <span>This field is required</span>}
+                                </div>
+                                <div>
+                                    <input type="text" placeholder="Last name *" {...register("lastName", { required: true, maxLength: 100 })} />
+                                    {errors.lastName && <span>This field is required</span>}
+                                </div>
+                                <div>
+                                    <input type="text" placeholder="Email *" {...register("email", { required: true, pattern: /^\S+@\S+$/i })} />
+                                    {errors.email?.type === 'required' && <span>This field is required</span>}
+                                    {errors.email?.type === 'pattern' && <span>The email is invalid</span>}
+                                </div>
+                                <div>
+                                    <input type="text" placeholder="Company *" {...register("company", { required: true })} />
+                                    {errors.company && <span>This field is required</span>}
+                                </div>
+                                <div>
+                                    <input type="text" placeholder="Promo Code" {...register("promoCode")} />
+                                </div>
+                            </form>
+                        </div>
+                    </animated.div>
                 </div>
             </>
         </div>

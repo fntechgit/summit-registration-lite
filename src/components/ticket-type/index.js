@@ -14,17 +14,37 @@
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 
+import { useSpring, config, animated } from "react-spring";
+import { useMeasure } from "react-use";
+
 import styles from "./index.module.scss";
 import TicketDropdownComponent from '../ticket-dropdown';
+import { changeStep } from '../../actions';
 
-const TicketTypeComponent = ({ ticketTypes, isActive }) => {
+const TicketTypeComponent = ({ ticketTypes, isActive, changeForm, reservation }) => {
 
     const [ticket, setTicket] = useState(null);
 
-    useEffect(() => {
-        if (ticket) {
-            console.log('ticket changed', ticket);
+    const [ref, { height }] = useMeasure();
+
+    const toggleAnimation = useSpring({
+        config: { bounce: 0, ...config.stiff },
+        from: { opacity: 0, height: 0 },
+        to: {
+            opacity: 1,
+            height: isActive ? height + 10 : 0,
+            marginBottom: isActive ? 5 : 0
         }
+    });
+
+    useEffect(() => {
+        if (reservation.tickets?.length > 0) {
+            setTicket(ticketTypes.find(t => t.id === reservation.tickets[0].ticket_type_id))
+        }
+    }, [])
+
+    useEffect(() => {
+        changeForm(ticket);
     }, [ticket])
 
     const ticketSelect = (t) => {
@@ -36,15 +56,14 @@ const TicketTypeComponent = ({ ticketTypes, isActive }) => {
             <>
                 <div className={`${styles.innerWrapper}`}>
                     <div className={styles.title} >
-                        <span>TicketType</span>
+                        <span>Ticket</span>
+                        {!isActive && <span>{ticket ? `${ticket.name} - $${ticket.cost} ${ticket.currency}` : 'No ticket selected'}</span>}
                     </div>
-                    {isActive ?
-                        <div className={styles.dropdown}>
+                    <animated.div style={{ overflow: 'hidden', ...toggleAnimation }}>
+                        <div ref={ref} className={styles.dropdown}>
                             <TicketDropdownComponent selectedTicket={ticket} ticketTypes={ticketTypes} onTicketSelect={(t) => ticketSelect(t)} />
                         </div>
-                        :
-                        <span>{ticket ? `${ticket.name} - $${ticket.cost} ${ticket.currency}` : 'No ticket selected'}</span>
-                    }
+                    </animated.div>
                 </div>
             </>
         </div>

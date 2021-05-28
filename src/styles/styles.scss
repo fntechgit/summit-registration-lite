@@ -26,4 +26,7 @@
     background-color: #297fca;
     color: #fff;
   }
+  &:active, &:focus {
+    color: #fff;
+  }
 }

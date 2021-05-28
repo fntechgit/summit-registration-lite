@@ -15,13 +15,25 @@
 import {
     START_WIDGET_LOADING,
     STOP_WIDGET_LOADING,
-    LOAD_INITIAL_VARS
+    LOAD_INITIAL_VARS,
+    CHANGE_STEP,
+    CREATE_RESERVATION_SUCCESS,
+    DELETE_RESERVATION_SUCCESS,
+    CLEAR_RESERVATION,
+    PAY_RESERVATION
 } from './actions';
 
-const DEFAULT_STATE = {    
-    reservedTicket: null,
+const DEFAULT_STATE = {
+    reservation: null,
+    checkout: null,
     step: 0,
     widgetLoading: false,
+    settings: {
+        apiBaseUrl: null,
+        summitId: null,
+        marketingData: null,
+        getAccessToken: null,
+    }
 };
 
 const WidgetReducer = (state = DEFAULT_STATE, action) => {
@@ -37,15 +49,38 @@ const WidgetReducer = (state = DEFAULT_STATE, action) => {
         }
         case LOAD_INITIAL_VARS:
 
-            const { marketingData } = payload;
+            const { marketingData, summitData, apiBaseUrl, profileData } = payload;
 
             return {
                 ...state,
                 settings: {
                     ...state.settings,
-                    marketingData: marketingData
+                    marketingData: marketingData,
+                    ticketTypes: summitData.ticket_types,
+                    summitId: summitData.id,
+                    userProfile: profileData,
+                    apiBaseUrl: apiBaseUrl
                 }
             };
+        case CHANGE_STEP: {
+            return { ...state, step: payload }
+        }
+        case CREATE_RESERVATION_SUCCESS: {
+            const reservation = payload.response;
+            return { ...state, reservation }
+        }
+        case DELETE_RESERVATION_SUCCESS:
+            return { ...state, reservation: null }
+        case CLEAR_RESERVATION: {
+            return { ...state, reservation: null }
+        }
+        case PAY_RESERVATION: {
+            const { settings: { ticketTypes }, reservation } = state;
+            console.log(ticketTypes, reservation);
+            return {
+                ...state, checkout: payload.response
+            };
+        }
         default: {
             return state;
         }

@@ -20,6 +20,12 @@ import SummitData from './summit-data.json';
 import ProfileData from './profile.json';
 
 const filterProps = {
+    authUser: (provider) => console.log('login with ', provider),
+    getAccessToken: () => 'userAccesToken',
+    closeWidget: () => console.log('close widget'),
+    goToExtraQuestions: () => console.log('extra questions required'),
+    goToEvent: () => console.log('go to event'),
+    apiBaseUrl: 'https://api.dev.fnopen.com',
     summitData: SummitData.summit,
     profileData: ProfileData,
     marketingData: MarketingData.colors,
@@ -30,10 +36,6 @@ const filterProps = {
         { button_color: '#000000', provider_label: 'Apple ID', provider_param: 'apple_id' },
         { button_color: '#2272E7', provider_label: 'Microsoft', provider_param: 'microsoft' },
     ],
-    authUser: (provider) => console.log('login with ', provider),
-    getAccessToken: () => console.log('access token request'),
-    closeWidget: () => console.log('close widget'),
-    goToExtraQuestions: () => console.log('extra questions required')
 };
 
 

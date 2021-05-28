@@ -14,21 +14,39 @@
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 
+import { useSpring, config, animated } from "react-spring";
+import { useMeasure } from "react-use";
+
+import { loadStripe } from '@stripe/stripe-js';
+import { Elements } from '@stripe/react-stripe-js';
+
 import styles from "./index.module.scss";
+import StripeForm from '../stripe-form';
 
-const PaymentComponent = ({ isActive }) => {
 
-    const [paymentInfo, setPaymentInfo] = useState(
-        {
-            cardNumber: '',
-            expirationDate: '',
-            cvc: '',
-            zipCode: '',
+const PaymentComponent = ({ isActive, summit, reservation, payTicket }) => {
+
+    const [ref, { height }] = useMeasure();    
+
+    const toggleAnimation = useSpring({
+        config: { bounce: 0, ...config.stiff },
+        from: { opacity: 0, height: 0 },
+        to: {
+            opacity: 1,
+            height: isActive ? height + 10 : 0,
+            marginBottom: isActive ? 5 : 0
         }
-    )
+    });
 
-    useEffect(() => {
-    }, [paymentInfo])
+    let publicKey = null;
+    for (let profile of summit.payment_profiles) {
+        if (profile.application_type === 'Registration') {
+            publicKey = profile.test_mode_enabled ? profile.test_publishable_key : profile.live_publishable_key;
+            break;
+        }
+    }
+
+    const [stripePromise, setStripePromise] = useState(() => loadStripe(publicKey))
 
     return (
         <div className={`${styles.outerWrapper} step-wrapper`}>
@@ -37,31 +55,13 @@ const PaymentComponent = ({ isActive }) => {
                     <div className={styles.title} >
                         <span>Payment</span>
                     </div>
-                    <div className={styles.form}>
-                        <div>
-                            <input
-                                onChange={e => setPaymentInfo({ ...paymentInfo, cardNumber: e.target.value })}
-                                value={paymentInfo.cardNumber}
-                                placeholder="Card Number *"
-                            />
-                            <i className="fa fa-credit-card"></i>
+                    <animated.div style={{ overflow: 'hidden', ...toggleAnimation }}>
+                        <div ref={ref}>
+                            <Elements stripe={stripePromise}>
+                                <StripeForm reservation={reservation} payTicket={payTicket} />
+                            </Elements>
                         </div>
-                        <input
-                            onChange={e => setPaymentInfo({ ...paymentInfo, expirationDate: e.target.value })}
-                            value={paymentInfo.expirationDate}
-                            placeholder="Expiration Date *"
-                        />
-                        <input
-                            onChange={e => setPaymentInfo({ ...paymentInfo, cvc: e.target.value })}
-                            value={paymentInfo.cvc}
-                            placeholder="CVC *"
-                        />
-                        <input
-                            onChange={e => setPaymentInfo({ ...paymentInfo, zipCode: e.target.value })}
-                            value={paymentInfo.zipCode}
-                            placeholder="Zip Code *"
-                        />
-                    </div>
+                    </animated.div>
                 </div>
             </>
         </div>
@@ -69,5 +69,5 @@ const PaymentComponent = ({ isActive }) => {
 }
 
 
-export default PaymentComponent
+export default PaymentComponent;
 

@@ -1,6 +1,11 @@
 .title {
   font-weight: bold;
   cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  div {
+    font-weight: normal;
+  }
 }
 
 .form {
@@ -8,19 +13,29 @@
   flex-wrap: wrap;
   justify-content: space-between;
   margin: 10px 0;
-  input {
+  div {
     width: 48%;
-    border-radius: 5px;
-    background-color: #e6f3ff;
-    border: 1px solid #3fa2f7;
-    height: 36px;
-    padding: 5px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 5px;
-    &::placeholder {
-      color: #3486cd;
+    input {
+      width: 100%;
+      border-radius: 5px;
+      background-color: #e6f3ff;
+      border: 1px solid #3fa2f7;
+      height: 36px;
+      padding: 5px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      &::placeholder {
+        color: #3486cd;
+      }
+    }
+    span {
+      display: inline-block;      
+      color: #e5424d;
+      font-size: 14px;
+    }
+    &>:last-child{
+      margin-bottom: 5px;
     }
   }
 }
