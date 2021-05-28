@@ -104,7 +104,7 @@ export const reserveTicket = (personalInformation, ticket, getAccessToken) => (d
     return postRequest(
         createAction(CREATE_RESERVATION),
         createAction(CREATE_RESERVATION_SUCCESS),
-        `${apiBaseUrl}/api/public/v1/summits/${summitId}/orders/reserve`,
+        `${apiBaseUrl}/api/v1/summits/${summitId}/orders/reserve`,
         normalizedEntity,
         authErrorHandler,
         // entity
@@ -134,7 +134,7 @@ export const removeReservedTicket = (getAccessToken) => (dispatch, getState) => 
     return deleteRequest(
         createAction(DELETE_RESERVATION),
         createAction(DELETE_RESERVATION_SUCCESS),
-        `${apiBaseUrl}/api/public/v1/summits/${summitId}/orders/${hash}`,
+        `${apiBaseUrl}/api/v1/summits/${summitId}/orders/${hash}`,
         {},
         authErrorHandler,
         // entity
@@ -186,7 +186,7 @@ export const payTicket = (token = null, stripe = null, getAccessToken) => (dispa
                 return putRequest(
                     null,
                     createAction(PAY_RESERVATION),
-                    `${apiBaseUrl}/api/public/v1/summits/${summitId}/orders/${reservation.hash}/checkout`,
+                    `${apiBaseUrl}/api/v1/summits/${summitId}/orders/${reservation.hash}/checkout`,
                     normalizedEntity,
                     authErrorHandler,
                     // entity
@@ -217,7 +217,7 @@ export const payTicket = (token = null, stripe = null, getAccessToken) => (dispa
         return putRequest(
             null,
             createAction(PAY_RESERVATION),
-            `${apiBaseUrl}/api/public/v1/summits/${summitId}/orders/${reservation.hash}/checkout`,
+            `${apiBaseUrl}/api/v1/summits/${summitId}/orders/${reservation.hash}/checkout`,
             normalizedEntity,
             authErrorHandler,
             // entity
