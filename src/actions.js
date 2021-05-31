@@ -20,6 +20,8 @@ import {
 
 import { authErrorHandler } from "openstack-uicore-foundation/lib/methods";
 
+import Swal from 'sweetalert2';
+
 export const START_WIDGET_LOADING = 'START_WIDGET_LOADING';
 export const STOP_WIDGET_LOADING = 'STOP_WIDGET_LOADING';
 export const LOAD_INITIAL_VARS = 'LOAD_INITIAL_VARS';
