@@ -30,7 +30,7 @@ React component for the summit registration lite widget
    
    **goToExtraQuestions**     = method passed that will be called by component to redirect to extra questions page
 
-   **goToEvent**              = method passed taht will be called to redirect the user to the current event
+   **goToEvent**              = method passed that will be called to redirect the user to the current event
 
    
 ## PUBLISH TO NPM:
