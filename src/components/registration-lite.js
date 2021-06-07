@@ -41,7 +41,7 @@ const RegistrationLite = (
         goToEvent,
         profileData,
         summitData,
-        getAccessToken,        
+        getAccessToken,
         widgetLoading,
         ...rest
     }) => {
@@ -87,8 +87,7 @@ const RegistrationLite = (
                                 {!profileData &&
                                     <LoginComponent options={loginOptions} login={(provider) => rest.authUser(provider)} />
                                 }
-                                {profileData &&
-                                    step !== 3 ?
+                                {profileData && step !== 3 &&
                                     <>
                                         <TicketTypeComponent
                                             ticketTypes={summitData.ticket_types}
@@ -108,8 +107,8 @@ const RegistrationLite = (
                                             summit={summitData}
                                         />
                                     </>
-
-                                    :
+                                }
+                                {profileData && step === 3 &&
                                     <PurchaseComplete
                                         reservation={reservation}
                                         payTicket={payTicket}
