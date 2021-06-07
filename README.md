@@ -4,6 +4,7 @@ React component for the summit registration lite widget
 
 ## Registration Lite config
 
+   **apiBaseUrl**             = base url for API
    
    **summitData**             = object with the data from the summit
    
