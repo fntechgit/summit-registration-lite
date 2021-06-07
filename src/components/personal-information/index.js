@@ -46,7 +46,6 @@ const PersonalInfoComponent = ({ isActive, changeForm, reservation }) => {
     }, [])
 
     const onSubmit = data => {
-        console.log('data submit', data);
         setPersonalInfo(data);
         changeForm(data);
     };

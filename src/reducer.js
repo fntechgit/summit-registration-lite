@@ -76,7 +76,6 @@ const WidgetReducer = (state = DEFAULT_STATE, action) => {
         }
         case PAY_RESERVATION: {
             const { settings: { ticketTypes }, reservation } = state;
-            console.log(ticketTypes, reservation);
             return {
                 ...state, checkout: payload.response
             };

@@ -73,9 +73,6 @@ const StripeForm = ({ reservation, payTicket }) => {
             Swal.fire("Payment error", "There's an error generating your payment, please retry.", "warning");
         }
 
-
-        // paymentMethodReq.paymentMethod ? payTicket(paymentMethodReq.paymentMethod, stripe) : console.log(paymentMethodReq.error);
-
     };
 
     return (

@@ -20,8 +20,6 @@ import { epochToMomentTimeZone } from "openstack-uicore-foundation/lib/methods";
 
 const PurchaseComplete = ({ checkout, goToExtraQuestions, goToEvent, summit, supportEmail = "support@fntech.com" }) => {
 
-    console.log(summit);
-
     const date = new Date();
     let now_utc = Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate(),
         date.getUTCHours(), date.getUTCMinutes(), date.getUTCSeconds()) / 1000;

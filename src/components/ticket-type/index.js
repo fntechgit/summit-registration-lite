@@ -38,7 +38,7 @@ const TicketTypeComponent = ({ ticketTypes, isActive, changeForm, reservation })
     });
 
     useEffect(() => {
-        if (reservation.tickets?.length > 0) {
+        if (reservation && reservation.tickets?.length > 0) {
             setTicket(ticketTypes.find(t => t.id === reservation.tickets[0].ticket_type_id))
         }
     }, [])
