@@ -23,6 +23,8 @@ import {
     CardElement
 } from '@stripe/react-stripe-js';
 
+import Swal from 'sweetalert2';
+
 import styles from "./index.module.scss";
 
 const StripeForm = ({ reservation, payTicket }) => {
@@ -68,7 +70,7 @@ const StripeForm = ({ reservation, payTicket }) => {
         if (token) {
             payTicket(token, stripe);
         } else if (error) {
-            console.log('error', error);
+            Swal.fire("Payment error", "There's an error generating your payment, please retry.", "warning");
         }
 
 

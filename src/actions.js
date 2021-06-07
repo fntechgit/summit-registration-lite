@@ -74,7 +74,7 @@ export const setMarketingSettings = () => (dispatch, getState) => {
 /*                               TICKETS                                         */
 /*********************************************************************************/
 
-export const reserveTicket = (personalInformation, ticket, getAccessToken) => (dispatch, getState) => {
+export const reserveTicket = (personalInformation, ticket, getAccessToken) => async (dispatch, getState) => {
 
     const { widgetState: { settings: { summitId, apiBaseUrl } } } = getState();
 
@@ -82,8 +82,10 @@ export const reserveTicket = (personalInformation, ticket, getAccessToken) => (d
 
     dispatch(startWidgetLoading());
 
-    let params = {
-        accessToken: getAccessToken(),
+    const accessToken = await getAccessToken();
+
+    let params = {        
+        accessToken,
         expand: 'tickets,tickets.owner',
     };
 
@@ -123,11 +125,13 @@ export const reserveTicket = (personalInformation, ticket, getAccessToken) => (d
         })
 }
 
-export const removeReservedTicket = (getAccessToken) => (dispatch, getState) => {
+export const removeReservedTicket = (getAccessToken) => async (dispatch, getState) => {
     let { widgetState: { settings: { summitId, apiBaseUrl }, reservation: { hash } } } = getState();
 
-    let params = {
-        accessToken: getAccessToken(),
+    const accessToken = await getAccessToken();
+
+    let params = {        
+        accessToken,
         expand: 'tickets,tickets.owner',
     };
 
@@ -154,14 +158,16 @@ export const removeReservedTicket = (getAccessToken) => (dispatch, getState) => 
         })
 }
 
-export const payTicket = (token = null, stripe = null, getAccessToken) => (dispatch, getState) => {
+export const payTicket = (token = null, stripe = null, getAccessToken) => async (dispatch, getState) => {
 
     let { widgetState: { settings: { summitId, apiBaseUrl, userProfile }, reservation } } = getState();
 
     const { id } = token;
 
-    let params = {
-        accessToken: getAccessToken()
+    const accessToken = await getAccessToken();
+
+    let params = {        
+        accessToken,
     }
 
     dispatch(startWidgetLoading());
@@ -207,10 +213,9 @@ export const payTicket = (token = null, stripe = null, getAccessToken) => (dispa
                 // The payment has succeeded. Display a success message.
             }
         })
-            .catch(e => {
-                console.log('error', e)
-                dispatch(changeStep(1));
+            .catch(e => {                
                 dispatch(removeReservedTicket());
+                dispatch(changeStep(1));
                 dispatch(stopWidgetLoading());
                 return (e);
             });
@@ -231,8 +236,8 @@ export const payTicket = (token = null, stripe = null, getAccessToken) => (dispa
                 return (payload);
             })
             .catch(e => {
-                dispatch(changeStep(1));
                 dispatch(removeReservedTicket());
+                dispatch(changeStep(1));
                 dispatch(stopWidgetLoading());
                 return (e);
             });
