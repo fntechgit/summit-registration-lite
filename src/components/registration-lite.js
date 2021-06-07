@@ -66,6 +66,9 @@ const RegistrationLite = (
         if (step === 1 && registrationForm.ticketType && registrationForm.personalInformation) {
             ticketReservation();
         }
+        if (step > 0 && !registrationForm.ticketType) {
+            changeStep(0);
+        }
     }, [registrationForm])
 
     const ticketReservation = () => {
