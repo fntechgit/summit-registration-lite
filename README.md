@@ -41,9 +41,9 @@ React component for the summit registration lite widget
 
 ## IMPORT:
 
-import RegistrationLiteWidget from 'summit-registration-lite';
+import RegistrationLiteWidget from 'summit-registration-lite/dist';
 
-import 'summit-registration-lite/index.css';
+import 'summit-registration-lite/dist/index.css';
 
 ## DEBUG:
 You can pass this hash on url to override current time, time must be in this format and on summit timezone
