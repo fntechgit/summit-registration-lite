@@ -78,7 +78,7 @@ const StripeForm = ({ reservation, payTicket, getAccessToken }) => {
     return (
         <form className={styles.form} id="payment-form" onSubmit={handleSubmit}>
             <div className={styles.fieldWrapper}>
-                <CardElement options={{ style: stripeStyle }} className="form-control" />
+                <CardElement options={{ style: stripeStyle }} />
             </div>
         </form>
     )
