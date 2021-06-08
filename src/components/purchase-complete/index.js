@@ -39,7 +39,7 @@ const PurchaseComplete = ({ checkout, goToExtraQuestions, goToEvent, summit, sup
             <span className={styles.complete}>
                 Your order is complete
             </span>
-            {!isActive ?
+            {isActive ?
                 <>
                     <button className="button" onClick={() => goToEvent()}>Access event now</button>
                 </>

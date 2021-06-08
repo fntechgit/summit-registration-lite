@@ -14,6 +14,8 @@ React component for the summit registration lite widget
 
    **loginOptions**           = array with the options to show on the login screen
 
+   **supportEmail**           = string with the email address for support
+
    Example
    
    ```

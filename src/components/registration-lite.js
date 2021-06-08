@@ -16,6 +16,8 @@ import PropTypes from 'prop-types';
 import { connect } from "react-redux";
 import { loadSession, setMarketingSettings, changeStep, reserveTicket, removeReservedTicket, payTicket } from "../actions";
 
+import { AjaxLoader } from "openstack-uicore-foundation/lib/components";
+
 import styles from "../styles/general.module.scss";
 import '../styles/styles.scss';
 
@@ -41,6 +43,7 @@ const RegistrationLite = (
         goToEvent,
         profileData,
         summitData,
+        supportEmail,
         getAccessToken,
         widgetLoading,
         ...rest
@@ -77,6 +80,7 @@ const RegistrationLite = (
         <div id="modal" className="modal is-active">
             <div className="modal-background"></div>
             <div className="modal-content">
+            <AjaxLoader relative={true} color={'#ffffff'} show={widgetLoading} size={80} />
                 <div className={`${styles.outerWrapper} summit-registration-lite`}>
                     <>
                         <div className={`${styles.innerWrapper}`}>
@@ -116,6 +120,7 @@ const RegistrationLite = (
                                         reservation={reservation}
                                         payTicket={payTicket}
                                         summit={summitData}
+                                        supportEmail={supportEmail}
                                         goToExtraQuestions={goToExtraQuestions}
                                     />
                                 }
@@ -130,6 +135,7 @@ const RegistrationLite = (
 }
 
 const mapStateToProps = ({ widgetState }) => ({
+    widgetLoading: widgetState.widgetLoading,
     reservation: widgetState.reservation,
     step: widgetState.step
 })

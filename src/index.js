@@ -29,6 +29,7 @@ const filterProps = {
     summitData: SummitData.summit,
     profileData: ProfileData,
     marketingData: MarketingData.colors,
+    supportEmail: 'support@fntech.com',
     loginOptions: [
         { button_color: '#082238', provider_label: 'FNid', provider_param: 'fnid' },
         { button_color: '#0370C5', provider_label: 'Facebook', provider_param: 'facebook' },
