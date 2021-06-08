@@ -101,6 +101,7 @@ const RegistrationLite = (
                                         <PersonalInfoComponent
                                             isActive={step === 1}
                                             reservation={reservation}
+                                            userProfile={profileData}
                                             changeForm={personalForm => setRegistrationForm({ ...registrationForm, personalInformation: personalForm })}
                                         />
                                         <PaymentComponent

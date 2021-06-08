@@ -82,10 +82,10 @@ export const reserveTicket = (personalInformation, ticket, getAccessToken) => as
 
     dispatch(startWidgetLoading());
 
-    const accessToken = await getAccessToken();
+    const access_token = await getAccessToken();
 
     let params = {        
-        accessToken,
+        access_token,
         expand: 'tickets,tickets.owner',
     };
 
@@ -128,10 +128,10 @@ export const reserveTicket = (personalInformation, ticket, getAccessToken) => as
 export const removeReservedTicket = (getAccessToken) => async (dispatch, getState) => {
     let { widgetState: { settings: { summitId, apiBaseUrl }, reservation: { hash } } } = getState();
 
-    const accessToken = await getAccessToken();
+    const access_token = await getAccessToken();
 
     let params = {        
-        accessToken,
+        access_token,
         expand: 'tickets,tickets.owner',
     };
 
@@ -164,10 +164,10 @@ export const payTicket = (token = null, stripe = null, getAccessToken) => async 
 
     const { id } = token;
 
-    const accessToken = await getAccessToken();
+    const access_token = await getAccessToken();
 
     let params = {        
-        accessToken,
+        access_token,
     }
 
     dispatch(startWidgetLoading());

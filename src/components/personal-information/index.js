@@ -20,13 +20,13 @@ import { useMeasure } from "react-use";
 
 import styles from "./index.module.scss";
 
-const PersonalInfoComponent = ({ isActive, changeForm, reservation }) => {
+const PersonalInfoComponent = ({ isActive, changeForm, reservation, userProfile }) => {
 
     const [personalInfo, setPersonalInfo] = useState(
         {
-            firstName: '',
-            lastName: '',
-            email: '',
+            firstName: userProfile.first_name || '',
+            lastName: userProfile.last_name || '',
+            email: userProfile.email || '',
             company: '',
             promoCode: '',
         }
