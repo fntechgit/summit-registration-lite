@@ -24,7 +24,7 @@ import styles from "./index.module.scss";
 import StripeForm from '../stripe-form';
 
 
-const PaymentComponent = ({ isActive, summit, reservation, payTicket }) => {
+const PaymentComponent = ({ isActive, summit, reservation, payTicket, getAccessToken }) => {
 
     const [ref, { height }] = useMeasure();    
 
@@ -58,7 +58,7 @@ const PaymentComponent = ({ isActive, summit, reservation, payTicket }) => {
                     <animated.div style={{ overflow: 'hidden', ...toggleAnimation }}>
                         <div ref={ref}>
                             <Elements stripe={stripePromise}>
-                                <StripeForm reservation={reservation} payTicket={payTicket} />
+                                <StripeForm reservation={reservation} payTicket={payTicket} getAccessToken={getAccessToken} />
                             </Elements>
                         </div>
                     </animated.div>

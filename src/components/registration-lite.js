@@ -105,6 +105,7 @@ const RegistrationLite = (
                                         <PaymentComponent
                                             isActive={step === 2}
                                             reservation={reservation}
+                                            getAccessToken={getAccessToken}
                                             payTicket={payTicket}
                                             summit={summitData}
                                         />

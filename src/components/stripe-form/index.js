@@ -27,7 +27,7 @@ import Swal from 'sweetalert2';
 
 import styles from "./index.module.scss";
 
-const StripeForm = ({ reservation, payTicket }) => {
+const StripeForm = ({ reservation, payTicket, getAccessToken }) => {
 
     const stripe = useStripe();
     const elements = useElements();
@@ -68,7 +68,7 @@ const StripeForm = ({ reservation, payTicket }) => {
         );
 
         if (token) {
-            payTicket(token, stripe);
+            payTicket(token, stripe, getAccessToken);
         } else if (error) {
             Swal.fire("Payment error", "There's an error generating your payment, please retry.", "warning");
         }
