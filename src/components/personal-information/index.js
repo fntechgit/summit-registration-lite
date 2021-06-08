@@ -24,10 +24,10 @@ const PersonalInfoComponent = ({ isActive, changeForm, reservation, userProfile 
 
     const [personalInfo, setPersonalInfo] = useState(
         {
-            firstName: userProfile.first_name || '',
-            lastName: userProfile.last_name || '',
+            firstName: userProfile.given_name || '',
+            lastName: userProfile.family_name || '',
             email: userProfile.email || '',
-            company: '',
+            company: userProfile.company || '',
             promoCode: '',
         }
     )
@@ -37,10 +37,10 @@ const PersonalInfoComponent = ({ isActive, changeForm, reservation, userProfile 
     useEffect(() => {
         if (reservation) {
             setPersonalInfo({
-                firstName: reservation.owner_first_name,
-                lastName: reservation.owner_last_name,
-                email: reservation.owner_email,
-                company: reservation.owner_company,
+                firstName: reservation.owner_first_name ? reservation.owner_first_name : personalInfo.firstName,
+                lastName: reservation.owner_last_name ? reservation.owner_last_name : personalInfo.lastName,
+                email: reservation.owner_email ? reservation.owner_email : personalInfo.email,
+                company: reservation.owner_company ? reservation.owner_company : personalInfo.company,
             });
         }
     }, [])
@@ -84,20 +84,20 @@ const PersonalInfoComponent = ({ isActive, changeForm, reservation, userProfile 
                         <div ref={ref}>
                             <form id="personal-info-form" onSubmit={handleSubmit(onSubmit)} className={styles.form}>
                                 <div>
-                                    <input type="text" placeholder="First name *" {...register("firstName", { required: true, maxLength: 80 })} />
+                                    <input type="text" placeholder="First name *" defaultValue={personalInfo.firstName || ''} {...register("firstName", { required: true, maxLength: 80 })} />
                                     {errors.firstName && <span>This field is required</span>}
                                 </div>
                                 <div>
-                                    <input type="text" placeholder="Last name *" {...register("lastName", { required: true, maxLength: 100 })} />
+                                    <input type="text" placeholder="Last name *" defaultValue={personalInfo.lastName || ''} {...register("lastName", { required: true, maxLength: 100 })} />
                                     {errors.lastName && <span>This field is required</span>}
                                 </div>
                                 <div>
-                                    <input type="text" placeholder="Email *" {...register("email", { required: true, pattern: /^\S+@\S+$/i })} />
+                                    <input type="text" placeholder="Email *" defaultValue={personalInfo.email || ''} {...register("email", { required: true, pattern: /^\S+@\S+$/i })} />
                                     {errors.email?.type === 'required' && <span>This field is required</span>}
                                     {errors.email?.type === 'pattern' && <span>The email is invalid</span>}
                                 </div>
                                 <div>
-                                    <input type="text" placeholder="Company *" {...register("company", { required: true })} />
+                                    <input type="text" placeholder="Company *" defaultValue={personalInfo.company || ''} {...register("company", { required: true })} />
                                     {errors.company && <span>This field is required</span>}
                                 </div>
                                 <div>
