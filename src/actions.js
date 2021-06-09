@@ -170,6 +170,15 @@ export const payTicket = (token = null, stripe = null, getAccessToken) => async 
         access_token,
     }
 
+    let normalizedEntity = {
+        billing_address_1: userProfile.address1 || '',
+        billing_address_2: userProfile.address2 || '',
+        billing_address_zip_code: userProfile.postal_code || '',
+        billing_address_city: userProfile.locality || '',
+        billing_address_state: userProfile.region || '',
+        billing_address_country: userProfile.country || '',
+    };
+
     dispatch(startWidgetLoading());
 
     if (reservation.payment_gateway_client_token) {
@@ -183,14 +192,6 @@ export const payTicket = (token = null, stripe = null, getAccessToken) => async 
                 dispatch(removeReservedTicket());
                 dispatch(stopWidgetLoading());
             } else {
-                let normalizedEntity = {
-                    billing_address_1: userProfile.address1 || '',
-                    billing_address_2: userProfile.address2 || '',
-                    billing_address_zip_code: userProfile.postal_code || '',
-                    billing_address_city: userProfile.locality || '',
-                    billing_address_state: userProfile.region || '',
-                    billing_address_country: userProfile.country || '',
-                };
                 return putRequest(
                     null,
                     createAction(PAY_RESERVATION),
