@@ -61,6 +61,9 @@ const RegistrationLite = (
         loadSession({ ...rest, getAccessToken, summitData, profileData }).then(() => {
             setMarketingSettings();
         });
+        if(!profileData) {
+            changeStep(0);
+        }
     }, [])
 
     useEffect(() => {

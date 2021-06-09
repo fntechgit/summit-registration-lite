@@ -200,7 +200,6 @@ export const payTicket = (token = null, stripe = null, getAccessToken) => async 
                     // entity
                 )(params)(dispatch)
                     .then((payload) => {
-                        console.log('here success');
                         dispatch(stopWidgetLoading());
                         dispatch(createAction(CLEAR_RESERVATION)({}));
                         dispatch(changeStep(3));

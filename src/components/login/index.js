@@ -32,7 +32,7 @@ const LoginComponent = ({ options, login }) => {
                             </div>
                         )
                     })}                    
-                    {/* SOON...                        
+                    {/* SOON...
                     <div className={styles.loginCode}>
                         or get a login code emailed to you
                         <div className={styles.input}>
