@@ -124,6 +124,7 @@ const RegistrationLite = (
                                         payTicket={payTicket}
                                         summit={summitData}
                                         supportEmail={supportEmail}
+                                        goToEvent={goToEvent}
                                         goToExtraQuestions={goToExtraQuestions}
                                     />
                                 }
