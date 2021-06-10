@@ -11,12 +11,14 @@
  * limitations under the License.
  **/
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from "react-redux";
 import { loadSession, setMarketingSettings, changeStep, reserveTicket, removeReservedTicket, payTicket } from "../actions";
 
 import { AjaxLoader } from "openstack-uicore-foundation/lib/components";
+
+import { loadStripe } from '@stripe/stripe-js';
 
 import styles from "../styles/general.module.scss";
 import '../styles/styles.scss';
@@ -57,13 +59,24 @@ const RegistrationLite = (
         }
     );
 
+    let publicKey = null;
+    for (let profile of summitData.payment_profiles) {
+        if (profile.application_type === 'Registration') {
+            publicKey = profile.test_mode_enabled ? profile.test_publishable_key : profile.live_publishable_key;
+            break;
+        }
+    }
+
+    const stripePromise = useMemo(() => loadStripe(publicKey), [publicKey])
+
     useEffect(() => {
         loadSession({ ...rest, getAccessToken, summitData, profileData }).then(() => {
             setMarketingSettings();
         });
-        if(!profileData) {
+        if (!profileData) {
             changeStep(0);
         }
+
     }, [])
 
     useEffect(() => {
@@ -83,7 +96,7 @@ const RegistrationLite = (
         <div id="modal" className="modal is-active">
             <div className="modal-background"></div>
             <div className="modal-content">
-            <AjaxLoader relative={true} color={'#ffffff'} show={widgetLoading} size={80} />
+                <AjaxLoader relative={true} color={'#ffffff'} show={widgetLoading} size={80} />
                 <div className={`${styles.outerWrapper} summit-registration-lite`}>
                     <>
                         <div className={`${styles.innerWrapper}`}>
@@ -114,7 +127,8 @@ const RegistrationLite = (
                                             reservation={reservation}
                                             getAccessToken={getAccessToken}
                                             payTicket={payTicket}
-                                            summit={summitData}
+                                            userProfile={profileData}
+                                            stripeKey={stripePromise}
                                         />
                                     </>
                                 }

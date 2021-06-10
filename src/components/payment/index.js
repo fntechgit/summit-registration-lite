@@ -17,14 +17,13 @@ import PropTypes from 'prop-types';
 import { useSpring, config, animated } from "react-spring";
 import { useMeasure } from "react-use";
 
-import { loadStripe } from '@stripe/stripe-js';
 import { Elements } from '@stripe/react-stripe-js';
 
 import styles from "./index.module.scss";
 import StripeForm from '../stripe-form';
 
 
-const PaymentComponent = ({ isActive, summit, reservation, payTicket, getAccessToken }) => {
+const PaymentComponent = ({ isActive, userProfile, reservation, payTicket, getAccessToken, stripeKey }) => {
 
     const [ref, { height }] = useMeasure();    
 
@@ -38,15 +37,7 @@ const PaymentComponent = ({ isActive, summit, reservation, payTicket, getAccessT
         }
     });
 
-    let publicKey = null;
-    for (let profile of summit.payment_profiles) {
-        if (profile.application_type === 'Registration') {
-            publicKey = profile.test_mode_enabled ? profile.test_publishable_key : profile.live_publishable_key;
-            break;
-        }
-    }
 
-    const [stripePromise, setStripePromise] = useState(() => loadStripe(publicKey))
 
     return (
         <div className={`${styles.outerWrapper} step-wrapper`}>
@@ -57,8 +48,8 @@ const PaymentComponent = ({ isActive, summit, reservation, payTicket, getAccessT
                     </div>
                     <animated.div style={{ overflow: 'hidden', ...toggleAnimation }}>
                         <div ref={ref}>
-                            <Elements stripe={stripePromise}>
-                                <StripeForm reservation={reservation} payTicket={payTicket} getAccessToken={getAccessToken} />
+                            <Elements stripe={stripeKey}>
+                                <StripeForm reservation={reservation} payTicket={payTicket} getAccessToken={getAccessToken} userProfile={userProfile} />
                             </Elements>
                         </div>
                     </animated.div>

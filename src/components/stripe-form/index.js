@@ -26,7 +26,7 @@ import Swal from 'sweetalert2';
 
 import styles from "./index.module.scss";
 
-const StripeForm = ({ reservation, payTicket, getAccessToken }) => {
+const StripeForm = ({ reservation, payTicket, getAccessToken, userProfile }) => {
 
     const stripe = useStripe();
     const elements = useElements();
@@ -82,6 +82,8 @@ const StripeForm = ({ reservation, payTicket, getAccessToken }) => {
         const { error, token } = await stripe.createToken(cardElement,
             {
                 name: `${reservation.owner_first_name} ${reservation.owner_last_name}`,
+                address_zip: zipCode,
+                address_country: userProfile.country || '',
             }
         );
 
