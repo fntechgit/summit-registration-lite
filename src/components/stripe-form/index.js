@@ -22,7 +22,6 @@ import {
     useElements,
     CardElement
 } from '@stripe/react-stripe-js';
-
 import Swal from 'sweetalert2';
 
 import styles from "./index.module.scss";
@@ -31,6 +30,12 @@ const StripeForm = ({ reservation, payTicket, getAccessToken }) => {
 
     const stripe = useStripe();
     const elements = useElements();
+
+    const [zipCode, setZipCode] = useState('');
+    const [zipCodeError, setZipCodeError] = useState({
+        required: false,
+        pattern: false,
+    })
 
     const stripeStyle = {
         base: {
@@ -53,13 +58,26 @@ const StripeForm = ({ reservation, payTicket, getAccessToken }) => {
     const handleSubmit = async (event) => {
         event.preventDefault();
 
+        if (!zipCode) {
+            setZipCodeError({ ...zipCode, required: true });
+            return;
+        } else {
+            const zipCodeRegex = RegExp(/(^\d{5}$)|(^\d{5}-\d{4}$)/, 'g');
+            if (zipCodeRegex.test(zipCode)) {
+                setZipCodeError({ required: false, pattern: false })
+            } else {
+                setZipCodeError({ required: false, pattern: true });
+                return;
+            }
+        }
+
         if (!stripe) {
             // Stripe.js has not loaded yet. Make sure to disable
             // form submission until Stripe.js has loaded.
             return;
         }
 
-        const cardElement = elements.getElement(CardElement);
+        const cardElement = elements.getElement(CardNumberElement);
 
         const { error, token } = await stripe.createToken(cardElement,
             {
@@ -68,17 +86,28 @@ const StripeForm = ({ reservation, payTicket, getAccessToken }) => {
         );
 
         if (token) {
-            payTicket(token, stripe, getAccessToken);
+            payTicket(token, stripe, getAccessToken, zipCode);
         } else if (error) {
             Swal.fire("Payment error", "There's an error generating your payment, please retry.", "warning");
         }
-
     };
 
     return (
         <form className={styles.form} id="payment-form" onSubmit={handleSubmit}>
             <div className={styles.fieldWrapper}>
-                <CardElement options={{ style: stripeStyle }} />
+                <CardNumberElement options={{ style: stripeStyle }} />
+                <i className="fa fa-credit-card" />
+            </div>
+            <div className={styles.fieldWrapper}>
+                <CardExpiryElement options={{ style: stripeStyle }} />
+            </div>
+            <div className={styles.fieldWrapper}>
+                <CardCvcElement options={{ style: stripeStyle }} />
+            </div>
+            <div className={styles.fieldWrapper} style={{ marginBottom: `${zipCodeError.required || zipCodeError.pattern ? '25px' : '0px'}` }}>
+                <input placeholder="ZIP CODE" value={zipCode} onChange={(e) => setZipCode(e.target.value)} />
+                {zipCodeError.required && <span>This field is required</span>}
+                {zipCodeError.pattern && <span>The zip code is invalid</span>}
             </div>
         </form>
     )

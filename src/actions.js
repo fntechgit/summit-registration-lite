@@ -158,7 +158,7 @@ export const removeReservedTicket = (getAccessToken) => async (dispatch, getStat
         })
 }
 
-export const payTicket = (token = null, stripe = null, getAccessToken) => async (dispatch, getState) => {
+export const payTicket = (token = null, stripe = null, getAccessToken, zipCode) => async (dispatch, getState) => {
 
     let { widgetState: { settings: { summitId, apiBaseUrl, userProfile }, reservation } } = getState();
 
@@ -173,7 +173,7 @@ export const payTicket = (token = null, stripe = null, getAccessToken) => async 
     let normalizedEntity = {
         billing_address_1: userProfile.address1 || '',
         billing_address_2: userProfile.address2 || '',
-        billing_address_zip_code: userProfile.postal_code || '',
+        billing_address_zip_code: zipCode,
         billing_address_city: userProfile.locality || '',
         billing_address_state: userProfile.region || '',
         billing_address_country: userProfile.country || '',
