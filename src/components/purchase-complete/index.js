@@ -31,6 +31,10 @@ const PurchaseComplete = ({ checkout, goToExtraQuestions, goToEvent, summit, sup
         time: epochToMomentTimeZone(summit.start_date, summit.time_zone_id).format('HH:mm'),
     };
 
+    const requireExtraQuestions = () => {
+        return summit.order_extra_questions.some(q => q.mandatory === true) ? true : false;
+    }
+
     return (
         <div className={styles.wrapper}>
             <div className={styles.circle}>
@@ -40,9 +44,17 @@ const PurchaseComplete = ({ checkout, goToExtraQuestions, goToEvent, summit, sup
                 Your order is complete
             </span>
             {isActive ?
-                <>
-                    <button className="button" onClick={() => goToEvent()}>Access event now</button>
-                </>
+                requireExtraQuestions() ?
+                    <>
+                        <span>
+                            Before entering the event you need to complete some extra questions <br />
+                        </span>
+                        <button className="button" onClick={() => goToExtraQuestions()}>Anser now</button>
+                    </>
+                    :
+                    <>
+                        <button className="button" onClick={() => goToEvent()}>Access event now</button>
+                    </>
                 :
                 <>
                     <span>
@@ -51,7 +63,6 @@ const PurchaseComplete = ({ checkout, goToExtraQuestions, goToEvent, summit, sup
                     </span>
                     <button className="button" onClick={() => goToExtraQuestions()}>Anser now</button>
                 </>
-
             }
             <span className={styles.footer}>
                 For further assistance, please email <a href={`mailto:${supportEmail}`}>{supportEmail}</a>

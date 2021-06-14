@@ -20,7 +20,9 @@ import {
     CREATE_RESERVATION_SUCCESS,
     DELETE_RESERVATION_SUCCESS,
     CLEAR_RESERVATION,
-    PAY_RESERVATION
+    PAY_RESERVATION,
+    GET_TICKET_TYPES,
+    GET_TAX_TYPES
 } from './actions';
 
 const DEFAULT_STATE = {
@@ -33,6 +35,8 @@ const DEFAULT_STATE = {
         summitId: null,
         marketingData: null,
         getAccessToken: null,
+        ticketTypes: null,
+        taxTypes: null
     }
 };
 
@@ -64,6 +68,14 @@ const WidgetReducer = (state = DEFAULT_STATE, action) => {
             };
         case CHANGE_STEP: {
             return { ...state, step: payload }
+        }
+        case GET_TICKET_TYPES: {
+            const ticketTypes = payload?.response?.data || [];            
+            return { ...state, settings: { ...state.settings, ticketTypes } }
+        }
+        case GET_TAX_TYPES: {
+            const taxTypes = payload?.response?.data || [];
+            return { ...state, settings: { ...state.settings, taxTypes } }
         }
         case CREATE_RESERVATION_SUCCESS: {
             const reservation = payload.response;

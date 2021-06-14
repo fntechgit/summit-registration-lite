@@ -16,7 +16,7 @@ import PropTypes from 'prop-types';
 
 import styles from "./index.module.scss";
 
-const ButtonBarComponent = ({ step, changeStep, registrationForm, removeReservedTicket }) => {
+const ButtonBarComponent = ({ step, changeStep, registrationForm, removeReservedTicket, getAccessToken }) => {
 
     return (
         <div className={`${styles.outerWrapper}`}>
@@ -29,10 +29,11 @@ const ButtonBarComponent = ({ step, changeStep, registrationForm, removeReserved
                         <div className={styles.buttons} >
                             {/* Back Button */}
                             {step !== 0 && step !== 2 && <button className="button" onClick={() => changeStep(step - 1)}>&lt; Back</button>}
-                            {step !== 0 && step === 2 && <button className="button" onClick={() => removeReservedTicket()}>&lt; Back</button>}
+                            {step !== 0 && step === 2 && <button className="button" onClick={() => removeReservedTicket(getAccessToken)}>&lt; Back</button>}
                             {/* Next Button */}
                             {step === 0 && <button disabled={!registrationForm.ticketType} className="button" onClick={() => changeStep(step + 1)}>Save and Continue</button>}
-                            {step === 1 && <button className="button" type="submit" form="personal-info-form">Save and Continue</button>}
+                            {step === 1 && registrationForm.ticketType?.cost === 0 && <button className="button" type="submit" form="personal-info-form">Get Ticket</button>}
+                            {step === 1 && registrationForm.ticketType?.cost > 0 && <button className="button" type="submit" form="personal-info-form">Save and Continue</button>}
                             {step === 2 && <button className="button" type="submit" form="payment-form">Pay Now</button>}
                         </div>
                     </div>

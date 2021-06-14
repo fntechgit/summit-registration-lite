@@ -14,7 +14,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from "react-redux";
-import { loadSession, setMarketingSettings, changeStep, reserveTicket, removeReservedTicket, payTicket } from "../actions";
+import { loadSession, setMarketingSettings, changeStep, reserveTicket, removeReservedTicket, payTicket, getTicketTypes, getTaxesTypes } from "../actions";
 
 import { AjaxLoader } from "openstack-uicore-foundation/lib/components";
 
@@ -38,8 +38,12 @@ const RegistrationLite = (
         removeReservedTicket,
         reserveTicket,
         payTicket,
+        getTicketTypes,
+        getTaxesTypes,
         loginOptions,
         reservation,
+        ticketTypes,
+        taxTypes,
         step,
         goToExtraQuestions,
         goToEvent,
@@ -77,6 +81,9 @@ const RegistrationLite = (
             changeStep(0);
         }
 
+        getTicketTypes(getAccessToken);
+        getTaxesTypes(getAccessToken);
+
     }, [])
 
     useEffect(() => {
@@ -111,7 +118,8 @@ const RegistrationLite = (
                                 {profileData && step !== 3 &&
                                     <>
                                         <TicketTypeComponent
-                                            ticketTypes={summitData.ticket_types}
+                                            ticketTypes={ticketTypes}
+                                            taxTypes={taxTypes}
                                             reservation={reservation}
                                             isActive={step === 0}
                                             changeForm={t => setRegistrationForm({ ...registrationForm, ticketType: t })}
@@ -122,14 +130,16 @@ const RegistrationLite = (
                                             userProfile={profileData}
                                             changeForm={personalForm => setRegistrationForm({ ...registrationForm, personalInformation: personalForm })}
                                         />
-                                        <PaymentComponent
-                                            isActive={step === 2}
-                                            reservation={reservation}
-                                            getAccessToken={getAccessToken}
-                                            payTicket={payTicket}
-                                            userProfile={profileData}
-                                            stripeKey={stripePromise}
-                                        />
+                                        {registrationForm.ticketType?.cost !== 0 &&
+                                            <PaymentComponent
+                                                isActive={step === 2}
+                                                reservation={reservation}
+                                                getAccessToken={getAccessToken}
+                                                payTicket={payTicket}
+                                                userProfile={profileData}
+                                                stripeKey={stripePromise}
+                                            />
+                                        }
                                     </>
                                 }
                                 {profileData && step === 3 &&
@@ -143,7 +153,7 @@ const RegistrationLite = (
                                     />
                                 }
                             </div>
-                            {profileData && step !== 3 && <ButtonBarComponent step={step} registrationForm={registrationForm} removeReservedTicket={removeReservedTicket} changeStep={changeStep} />}
+                            {profileData && step !== 3 && <ButtonBarComponent step={step} registrationForm={registrationForm} removeReservedTicket={removeReservedTicket} changeStep={changeStep} getAccessToken={getAccessToken} />}
                         </div>
                     </>
                 </div>
@@ -155,6 +165,8 @@ const RegistrationLite = (
 const mapStateToProps = ({ widgetState }) => ({
     widgetLoading: widgetState.widgetLoading,
     reservation: widgetState.reservation,
+    ticketTypes: widgetState.settings.ticketTypes,
+    taxTypes: widgetState.settings.taxTypes,
     step: widgetState.step
 })
 
@@ -164,6 +176,8 @@ export default connect(mapStateToProps, {
     changeStep,
     reserveTicket,
     removeReservedTicket,
-    payTicket
+    payTicket,
+    getTicketTypes,
+    getTaxesTypes,
 })(RegistrationLite)
 

@@ -34,7 +34,6 @@ const StripeForm = ({ reservation, payTicket, getAccessToken, userProfile }) => 
     const [zipCode, setZipCode] = useState('');
     const [zipCodeError, setZipCodeError] = useState({
         required: false,
-        pattern: false,
     })
 
     const stripeStyle = {
@@ -59,16 +58,10 @@ const StripeForm = ({ reservation, payTicket, getAccessToken, userProfile }) => 
         event.preventDefault();
 
         if (!zipCode) {
-            setZipCodeError({ ...zipCode, required: true });
+            setZipCodeError({ required: true });
             return;
         } else {
-            const zipCodeRegex = RegExp(/(^\d{5}$)|(^\d{5}-\d{4}$)/, 'g');
-            if (zipCodeRegex.test(zipCode)) {
-                setZipCodeError({ required: false, pattern: false })
-            } else {
-                setZipCodeError({ required: false, pattern: true });
-                return;
-            }
+            setZipCodeError({ required: false })
         }
 
         if (!stripe) {
@@ -106,10 +99,9 @@ const StripeForm = ({ reservation, payTicket, getAccessToken, userProfile }) => 
             <div className={styles.fieldWrapper}>
                 <CardCvcElement options={{ style: stripeStyle }} />
             </div>
-            <div className={styles.fieldWrapper} style={{ marginBottom: `${zipCodeError.required || zipCodeError.pattern ? '25px' : '0px'}` }}>
+            <div className={styles.fieldWrapper} style={{ marginBottom: `${zipCodeError.required ? '25px' : '0px'}` }}>
                 <input placeholder="ZIP CODE" value={zipCode} onChange={(e) => setZipCode(e.target.value)} />
                 {zipCodeError.required && <span>This field is required</span>}
-                {zipCodeError.pattern && <span>The zip code is invalid</span>}
             </div>
         </form>
     )

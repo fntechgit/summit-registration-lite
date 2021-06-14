@@ -5,6 +5,20 @@
   justify-content: space-between;
 }
 
+.crossOut {
+  text-decoration: line-through;
+}
+
+.discount {
+  color: green;
+}
+
+.promo {
+  font-weight: normal;
+  display: flex;
+  justify-content: flex-end;
+}
+
 .dropdown {
   margin-top: 5px;
 }

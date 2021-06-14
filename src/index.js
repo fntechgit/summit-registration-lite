@@ -21,7 +21,7 @@ import ProfileData from './profile.json';
 
 const filterProps = {
     authUser: (provider) => console.log('login with ', provider),
-    getAccessToken: () => 'userAccesToken',
+    getAccessToken: () => 'UZjN7uQB-VQ1WFPjxSNoKR_ZI_xdy6u1kvNAtjpT6AP1y3cHIb7LoKarbDIuY4Hsr1P7gbD7m8asIXI7~S5-cWz-DD~dFmvc8RMxhygROJFSka2SsL~WvrTlQWU60JRP',
     closeWidget: () => console.log('close widget'),
     goToExtraQuestions: () => console.log('extra questions required'),
     goToEvent: () => console.log('go to event'),

@@ -21,7 +21,7 @@ import styles from "./index.module.scss";
 import TicketDropdownComponent from '../ticket-dropdown';
 import { changeStep } from '../../actions';
 
-const TicketTypeComponent = ({ ticketTypes, isActive, changeForm, reservation }) => {
+const TicketTypeComponent = ({ ticketTypes, taxTypes, isActive, changeForm, reservation }) => {
 
     const [ticket, setTicket] = useState(null);
 
@@ -57,7 +57,38 @@ const TicketTypeComponent = ({ ticketTypes, isActive, changeForm, reservation })
                 <div className={`${styles.innerWrapper}`}>
                     <div className={styles.title} >
                         <span>Ticket</span>
-                        {!isActive && <span>{ticket ? `${ticket.name} - $${ticket.cost} ${ticket.currency}` : 'No ticket selected'}</span>}
+                        <div>
+                            {!isActive &&
+                                reservation?.discount_amount > 0 ?
+                                <span>
+                                    {ticket &&
+                                        <>
+                                            {ticket.name} &nbsp;
+                                        <span className={styles.crossOut}>
+                                            ${ticket.cost} &nbsp;
+                                        </span>
+                                            <span className={styles.discount}>
+                                                ${reservation.raw_amount - reservation.discount_amount}
+                                            </span>
+                                            {ticket.currency}
+                                        </>
+                                    }
+                                    <br />
+                                    <span className={styles.promo}>
+                                        Promo code applied
+                                    </span>
+                                </span>
+                                :
+                                <span>{ticket ? `${ticket.name} : $${ticket.cost} ${ticket.currency}` : 'No ticket selected'}</span>
+                            }
+                            {
+                                !isActive && reservation?.taxes_amount &&
+                                <>
+                                    <br />
+                                    <span>Taxes: ${reservation?.taxes_amount} {ticket?.currency}</span>
+                                </>
+                            }
+                        </div>
                     </div>
                     <animated.div style={{ overflow: 'hidden', ...toggleAnimation }}>
                         <div ref={ref} className={styles.dropdown}>
@@ -72,4 +103,3 @@ const TicketTypeComponent = ({ ticketTypes, isActive, changeForm, reservation })
 
 
 export default TicketTypeComponent
-

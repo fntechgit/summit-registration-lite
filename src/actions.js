@@ -13,6 +13,7 @@
 
 import {
     createAction,
+    getRequest,
     postRequest,
     putRequest,
     deleteRequest
@@ -27,6 +28,10 @@ export const STOP_WIDGET_LOADING = 'STOP_WIDGET_LOADING';
 export const LOAD_INITIAL_VARS = 'LOAD_INITIAL_VARS';
 export const RECEIVE_MARKETING_SETTINGS = 'RECEIVE_MARKETING_SETTINGS';
 export const CHANGE_STEP = 'CHANGE_STEP';
+export const GET_TICKET_TYPES = 'GET_TICKET_TYPES';
+export const GET_TICKET_TYPES_SUCCESS = 'GET_TICKET_TYPES_SUCCESS';
+export const GET_TAX_TYPES = 'GET_TAX_TYPES';
+export const GET_TAX_TYPES_SUCCESS = 'GET_TAX_TYPES_SUCCESS';
 export const CREATE_RESERVATION = 'CREATE_RESERVATION';
 export const CREATE_RESERVATION_SUCCESS = 'CREATE_RESERVATION_SUCCESS';
 export const CREATE_RESERVATION_ERROR = 'CREATE_RESERVATION_ERROR';
@@ -74,6 +79,60 @@ export const setMarketingSettings = () => (dispatch, getState) => {
 /*                               TICKETS                                         */
 /*********************************************************************************/
 
+// api/v1/summits/{id}/ticket-types  
+
+// api/v1/summits/{id}/tax-types   
+
+export const getTicketTypes = (getAccessToken) => async (dispatch, getState) => {    
+
+    const { widgetState: { settings: { summitId, apiBaseUrl } } } = getState();
+
+    const access_token = await getAccessToken();
+
+    let params = {
+        access_token
+    };
+
+    return getRequest(
+        dispatch(startWidgetLoading()),
+        createAction(GET_TICKET_TYPES),
+        `${apiBaseUrl}/api/v1/summits/${summitId}/ticket-types`,
+        authErrorHandler
+    )(params)(dispatch).then((ticket_types) => {        
+        dispatch(stopWidgetLoading());
+        return (ticket_types);
+    }
+    ).catch(e => {
+        dispatch(stopWidgetLoading());
+        return (e);
+    });
+}
+
+export const getTaxesTypes = (getAccessToken) => async (dispatch, getState) => {
+
+    const { widgetState: { settings: { summitId, apiBaseUrl } } } = getState();
+
+    const access_token = await getAccessToken();
+
+    let params = {
+        access_token
+    };
+
+    return getRequest(
+        dispatch(startWidgetLoading()),
+        createAction(GET_TAX_TYPES),
+        `${apiBaseUrl}/api/v1/summits/${summitId}/tax-types`,
+        authErrorHandler
+    )(params)(dispatch).then((tax_types) => {
+        dispatch(stopWidgetLoading());                
+        return (tax_types);
+    }
+    ).catch(e => {
+        dispatch(stopWidgetLoading());
+        return (e);
+    });
+}
+
 export const reserveTicket = (personalInformation, ticket, getAccessToken) => async (dispatch, getState) => {
 
     const { widgetState: { settings: { summitId, apiBaseUrl } } } = getState();
@@ -84,9 +143,9 @@ export const reserveTicket = (personalInformation, ticket, getAccessToken) => as
 
     const access_token = await getAccessToken();
 
-    let params = {        
+    let params = {
         access_token,
-        expand: 'tickets,tickets.owner',
+        expand: 'tickets,tickets.owner,tickets.ticket_type,tickets.ticket_type.taxes',
     };
 
     let normalizedEntity = {
@@ -115,8 +174,14 @@ export const reserveTicket = (personalInformation, ticket, getAccessToken) => as
     )(params)(dispatch)
         .then((payload) => {
             dispatch(stopWidgetLoading());
-            dispatch(changeStep(2));
-            return (payload)
+            payload.response.promo_code = promoCode || null;
+            if (!payload.response.payment_gateway_client_token) {                
+                dispatch(payTicket(null, null, getAccessToken));
+                return (payload)
+            } else {
+                dispatch(changeStep(2));
+                return (payload)
+            }
         })
         .catch(e => {
             dispatch(createAction(CREATE_RESERVATION_ERROR)(e));
@@ -130,7 +195,7 @@ export const removeReservedTicket = (getAccessToken) => async (dispatch, getStat
 
     const access_token = await getAccessToken();
 
-    let params = {        
+    let params = {
         access_token,
         expand: 'tickets,tickets.owner',
     };
@@ -158,15 +223,13 @@ export const removeReservedTicket = (getAccessToken) => async (dispatch, getStat
         })
 }
 
-export const payTicket = (token = null, stripe = null, getAccessToken, zipCode) => async (dispatch, getState) => {
+export const payTicket = (token = null, stripe = null, getAccessToken, zipCode = null) => async (dispatch, getState) => {
 
-    let { widgetState: { settings: { summitId, apiBaseUrl, userProfile }, reservation } } = getState();
-
-    const { id } = token;
+    let { widgetState: { settings: { summitId, apiBaseUrl, userProfile }, reservation } } = getState();    
 
     const access_token = await getAccessToken();
 
-    let params = {        
+    let params = {
         access_token,
     }
 
@@ -182,6 +245,7 @@ export const payTicket = (token = null, stripe = null, getAccessToken, zipCode) 
     dispatch(startWidgetLoading());
 
     if (reservation.payment_gateway_client_token) {
+        const { id } = token;
         stripe.confirmCardPayment(
             reservation.payment_gateway_client_token, { payment_method: { card: { token: id } } }
         ).then((result) => {
@@ -213,7 +277,7 @@ export const payTicket = (token = null, stripe = null, getAccessToken, zipCode) 
                 // The payment has succeeded. Display a success message.
             }
         })
-            .catch(e => {                
+            .catch(e => {
                 dispatch(removeReservedTicket());
                 dispatch(changeStep(1));
                 dispatch(stopWidgetLoading());

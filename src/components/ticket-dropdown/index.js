@@ -25,6 +25,10 @@ const TicketDropdownComponent = ({ selectedTicket, ticketTypes, onTicketSelect }
         setActive(!active);
     }
 
+    const date = new Date();
+    let now_utc = Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate(),
+        date.getUTCHours(), date.getUTCMinutes(), date.getUTCSeconds()) / 1000;
+
     return (
         <div className={`${styles.outerWrapper}`}>
             <div className={styles.placeholder} onClick={() => setActive(!active)}>
@@ -45,11 +49,13 @@ const TicketDropdownComponent = ({ selectedTicket, ticketTypes, onTicketSelect }
             {active &&
                 <div className={styles.dropdown}>
                     {ticketTypes.map(t => {
-                        return (
-                            <div key={t.id} onClick={() => ticketSelect(t)}>
-                                {`${t.name} - $${t.cost} ${t.currency}`}
-                            </div>
-                        )
+                        if (t.quantity_2_sell > 0 && t.max_quantity_per_order > 0 && now_utc > t.sales_start_date && now_utc < t.sales_end_date ) {
+                            return (
+                                <div key={t.id} onClick={() => ticketSelect(t)}>
+                                    {`${t.name} - $${t.cost} ${t.currency}`}
+                                </div>
+                            )
+                        }
                     })}
                 </div>
             }
