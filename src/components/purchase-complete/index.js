@@ -18,7 +18,7 @@ import styles from "./index.module.scss";
 
 import { epochToMomentTimeZone } from "openstack-uicore-foundation/lib/methods";
 
-const PurchaseComplete = ({ checkout, goToExtraQuestions, goToEvent, summit, supportEmail = "support@fntech.com" }) => {
+const PurchaseComplete = ({ requireExtraQuestions, goToExtraQuestions, goToEvent, summit, supportEmail = "support@fntech.com" }) => {
 
     const date = new Date();
     let now_utc = Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate(),
@@ -31,7 +31,7 @@ const PurchaseComplete = ({ checkout, goToExtraQuestions, goToEvent, summit, sup
         time: epochToMomentTimeZone(summit.start_date, summit.time_zone_id).format('HH:mm'),
     };
 
-    const requireExtraQuestions = () => {
+    const needExtraQuestions = () => {
         return summit.order_extra_questions.some(q => q.mandatory === true) ? true : false;
     }
 
@@ -44,7 +44,7 @@ const PurchaseComplete = ({ checkout, goToExtraQuestions, goToEvent, summit, sup
                 Your order is complete
             </span>
             {isActive ?
-                requireExtraQuestions() ?
+                needExtraQuestions() || requireExtraQuestions ?
                     <>
                         <span>
                             Before entering the event you need to complete some extra questions <br />

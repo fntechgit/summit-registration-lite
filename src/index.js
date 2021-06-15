@@ -21,10 +21,11 @@ import ProfileData from './profile.json';
 
 const filterProps = {
     authUser: (provider) => console.log('login with ', provider),
-    getAccessToken: () => 'UZjN7uQB-VQ1WFPjxSNoKR_ZI_xdy6u1kvNAtjpT6AP1y3cHIb7LoKarbDIuY4Hsr1P7gbD7m8asIXI7~S5-cWz-DD~dFmvc8RMxhygROJFSka2SsL~WvrTlQWU60JRP',
+    getAccessToken: () => 'vqPcaE.ddh_QoiswWDRAnt~5gLAK~tQWWsK67RRdpjQy0Pdmo~nPAiF79qx3wCo6DIMRtG6TlKImsJ6RXOLuOYGz7FLEX~FEvDuPy5f4Wq0FgAi.MUvXHP6a_AmBgsZH',
     closeWidget: () => console.log('close widget'),
     goToExtraQuestions: () => console.log('extra questions required'),
     goToEvent: () => console.log('go to event'),
+    requireExtraQuestions: false,
     apiBaseUrl: 'https://api.dev.fnopen.com',
     summitData: SummitData.summit,
     profileData: ProfileData,

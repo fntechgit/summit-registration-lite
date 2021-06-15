@@ -44,6 +44,7 @@ const RegistrationLite = (
         reservation,
         ticketTypes,
         taxTypes,
+        requireExtraQuestions,
         step,
         goToExtraQuestions,
         goToEvent,
@@ -81,8 +82,10 @@ const RegistrationLite = (
             changeStep(0);
         }
 
-        getTicketTypes(getAccessToken);
-        getTaxesTypes(getAccessToken);
+        if (!requireExtraQuestions) {
+            getTicketTypes(getAccessToken);
+            getTaxesTypes(getAccessToken);
+        }
 
     }, [])
 
@@ -98,6 +101,8 @@ const RegistrationLite = (
     const ticketReservation = () => {
         reserveTicket(registrationForm.personalInformation, registrationForm.ticketType, getAccessToken)
     }
+
+    console.log('require extra questions?', requireExtraQuestions);
 
     return (
         <div id="modal" className="modal is-active">
@@ -115,7 +120,7 @@ const RegistrationLite = (
                                 {!profileData &&
                                     <LoginComponent options={loginOptions} login={(provider) => rest.authUser(provider)} />
                                 }
-                                {profileData && step !== 3 &&
+                                {profileData && step !== 3 && !requireExtraQuestions &&
                                     <>
                                         <TicketTypeComponent
                                             ticketTypes={ticketTypes}
@@ -142,18 +147,26 @@ const RegistrationLite = (
                                         }
                                     </>
                                 }
-                                {profileData && step === 3 &&
+                                {profileData && (step === 3 || requireExtraQuestions) &&
                                     <PurchaseComplete
                                         reservation={reservation}
                                         payTicket={payTicket}
                                         summit={summitData}
                                         supportEmail={supportEmail}
+                                        requireExtraQuestions={requireExtraQuestions}
                                         goToEvent={goToEvent}
                                         goToExtraQuestions={goToExtraQuestions}
                                     />
                                 }
                             </div>
-                            {profileData && step !== 3 && <ButtonBarComponent step={step} registrationForm={registrationForm} removeReservedTicket={removeReservedTicket} changeStep={changeStep} getAccessToken={getAccessToken} />}
+                            {profileData && step !== 3 &&
+                                <ButtonBarComponent
+                                    step={step}
+                                    requireExtraQuestions={requireExtraQuestions}
+                                    registrationForm={registrationForm}
+                                    removeReservedTicket={removeReservedTicket}
+                                    changeStep={changeStep}
+                                    getAccessToken={getAccessToken} />}
                         </div>
                     </>
                 </div>
