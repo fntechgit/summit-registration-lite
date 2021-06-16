@@ -49,7 +49,13 @@ const TicketDropdownComponent = ({ selectedTicket, ticketTypes, onTicketSelect }
             {active &&
                 <div className={styles.dropdown}>
                     {ticketTypes.map(t => {
-                        if (t.quantity_2_sell > 0 && now_utc > t.sales_start_date && now_utc < t.sales_end_date ) {
+                        if (
+                            (t.quantity_2_sell - t.quantity_sold) > 0 &&
+                            (
+                                (t.sales_start_date === null && t.sales_end_date === null) ||
+                                (now_utc >= t.sales_start_date && now_utc <= t.sales_end_date)
+                            )
+                        ) {
                             return (
                                 <div key={t.id} onClick={() => ticketSelect(t)}>
                                     {`${t.name} - $${t.cost} ${t.currency}`}

@@ -135,7 +135,7 @@ const RegistrationLite = (
                                             userProfile={profileData}
                                             changeForm={personalForm => setRegistrationForm({ ...registrationForm, personalInformation: personalForm })}
                                         />
-                                        {registrationForm.ticketType?.cost !== 0 &&
+                                        {reservation?.amount !== 0 &&
                                             <PaymentComponent
                                                 isActive={step === 2}
                                                 reservation={reservation}
