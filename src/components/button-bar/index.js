@@ -16,11 +16,11 @@ import PropTypes from 'prop-types';
 
 import styles from "./index.module.scss";
 
-const ButtonBarComponent = ({ step, requireExtraQuestions, changeStep, registrationForm, removeReservedTicket, getAccessToken }) => {
+const ButtonBarComponent = ({ step, changeStep, registrationForm, removeReservedTicket, getAccessToken }) => {
 
     return (
         <div className={`${styles.outerWrapper}`}>
-            {step !== 3 && !requireExtraQuestions &&
+            {step !== 3 &&
                 <>
                     <div className={`${styles.innerWrapper}`}>
                         <div className={styles.required} >

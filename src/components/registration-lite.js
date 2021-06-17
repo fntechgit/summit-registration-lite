@@ -44,7 +44,6 @@ const RegistrationLite = (
         reservation,
         ticketTypes,
         taxTypes,
-        requireExtraQuestions,
         step,
         goToExtraQuestions,
         goToEvent,
@@ -80,9 +79,7 @@ const RegistrationLite = (
         });
         if (!profileData) {
             changeStep(0);
-        }
-
-        if (!requireExtraQuestions) {
+        } else {
             getTicketTypes(getAccessToken);
             getTaxesTypes(getAccessToken);
         }
@@ -102,8 +99,6 @@ const RegistrationLite = (
         reserveTicket(registrationForm.personalInformation, registrationForm.ticketType, getAccessToken)
     }
 
-    console.log('require extra questions?', requireExtraQuestions);
-
     return (
         <div id="modal" className="modal is-active">
             <div className="modal-background"></div>
@@ -120,7 +115,7 @@ const RegistrationLite = (
                                 {!profileData &&
                                     <LoginComponent options={loginOptions} login={(provider) => rest.authUser(provider)} />
                                 }
-                                {profileData && step !== 3 && !requireExtraQuestions &&
+                                {profileData && step !== 3 &&
                                     <>
                                         <TicketTypeComponent
                                             ticketTypes={ticketTypes}
@@ -147,13 +142,12 @@ const RegistrationLite = (
                                         }
                                     </>
                                 }
-                                {profileData && (step === 3 || requireExtraQuestions) &&
+                                {profileData && step === 3 &&
                                     <PurchaseComplete
                                         reservation={reservation}
                                         payTicket={payTicket}
                                         summit={summitData}
                                         supportEmail={supportEmail}
-                                        requireExtraQuestions={requireExtraQuestions}
                                         goToEvent={goToEvent}
                                         goToExtraQuestions={goToExtraQuestions}
                                     />
@@ -162,7 +156,6 @@ const RegistrationLite = (
                             {profileData && step !== 3 &&
                                 <ButtonBarComponent
                                     step={step}
-                                    requireExtraQuestions={requireExtraQuestions}
                                     registrationForm={registrationForm}
                                     removeReservedTicket={removeReservedTicket}
                                     changeStep={changeStep}
