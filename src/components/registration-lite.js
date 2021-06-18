@@ -74,9 +74,7 @@ const RegistrationLite = (
     const stripePromise = useMemo(() => loadStripe(publicKey), [publicKey])
 
     useEffect(() => {
-        loadSession({ ...rest, getAccessToken, summitData, profileData }).then(() => {
-            setMarketingSettings();
-        });
+        loadSession({ ...rest, getAccessToken, summitData, profileData });
         if (!profileData) {
             changeStep(0);
         } else {

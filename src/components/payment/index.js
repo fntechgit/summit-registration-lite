@@ -49,7 +49,11 @@ const PaymentComponent = ({ isActive, userProfile, reservation, payTicket, getAc
                     <animated.div style={{ overflow: 'hidden', ...toggleAnimation }}>
                         <div ref={ref}>
                             <Elements stripe={stripeKey}>
-                                <StripeForm reservation={reservation} payTicket={payTicket} getAccessToken={getAccessToken} userProfile={userProfile} />
+                                <StripeForm 
+                                reservation={reservation} 
+                                payTicket={payTicket} 
+                                getAccessToken={getAccessToken} 
+                                userProfile={userProfile}/>
                             </Elements>
                         </div>
                     </animated.div>

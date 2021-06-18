@@ -52,28 +52,7 @@ const stopWidgetLoading = () => (dispatch) => {
 
 export const loadSession = (settings) => (dispatch) => {
     dispatch(createAction(LOAD_INITIAL_VARS)(settings));
-    return Promise.resolve();
 };
-
-export const setMarketingSettings = () => (dispatch, getState) => {
-
-    dispatch(startWidgetLoading());
-
-    let { widgetState: { settings } } = getState();
-    let { marketingData } = settings;
-
-    dispatch(createAction(RECEIVE_MARKETING_SETTINGS)({}));
-
-    Object.keys(marketingData).forEach(setting => {
-        if (getComputedStyle(document.documentElement).getPropertyValue(`--${setting}`)) {
-            document.documentElement.style.setProperty(`--${setting}`, marketingData[setting]);
-            document.documentElement.style.setProperty(`--${setting}50`, `${marketingData[setting]}50`);
-        }
-    });
-
-    dispatch(stopWidgetLoading());
-};
-
 
 /*********************************************************************************/
 /*                               TICKETS                                         */

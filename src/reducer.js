@@ -53,6 +53,13 @@ const WidgetReducer = (state = DEFAULT_STATE, action) => {
 
             const { marketingData, summitData, apiBaseUrl, profileData } = payload;
 
+            Object.keys(marketingData).forEach(setting => {
+                if (getComputedStyle(document.documentElement).getPropertyValue(`--${setting}`)) {
+                    document.documentElement.style.setProperty(`--${setting}`, marketingData[setting]);
+                    document.documentElement.style.setProperty(`--${setting}50`, `${marketingData[setting]}50`);
+                }
+            });
+
             return {
                 ...state,
                 settings: {
@@ -64,11 +71,12 @@ const WidgetReducer = (state = DEFAULT_STATE, action) => {
                     apiBaseUrl: apiBaseUrl
                 }
             };
+
         case CHANGE_STEP: {
             return { ...state, step: payload }
         }
         case GET_TICKET_TYPES: {
-            const ticketTypes = payload?.response?.data || [];            
+            const ticketTypes = payload?.response?.data || [];
             return { ...state, settings: { ...state.settings, ticketTypes } }
         }
         case GET_TAX_TYPES: {
@@ -85,9 +93,7 @@ const WidgetReducer = (state = DEFAULT_STATE, action) => {
             return { ...state, reservation: null }
         }
         case PAY_RESERVATION: {
-            return {
-                ...state, checkout: payload.response, reservation: null
-            };
+            return { ...state, checkout: payload.response, reservation: null };
         }
         default: {
             return state;
