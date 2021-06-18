@@ -44,12 +44,10 @@ const WidgetReducer = (state = DEFAULT_STATE, action) => {
     const { type, payload } = action;
     switch (type) {
         case START_WIDGET_LOADING: {
-            let widgetLoading = state.widgetLoading + 1;
-            return { ...state, widgetLoading };
+            return { ...state, widgetLoading: true };
         }
         case STOP_WIDGET_LOADING: {
-            let widgetLoading = state.widgetLoading < 2 ? 0 : (state.widgetLoading - 1);
-            return { ...state, widgetLoading };
+            return { ...state, widgetLoading: false };
         }
         case LOAD_INITIAL_VARS:
 
