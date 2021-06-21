@@ -73,6 +73,10 @@ const RegistrationLite = (
 
     const stripePromise = useMemo(() => loadStripe(publicKey), [publicKey])
 
+    const ticketReservation = () => {
+        reserveTicket(registrationForm.personalInformation, registrationForm.ticketType, getAccessToken)
+    }
+
     useEffect(() => {
         loadSession({ ...rest, getAccessToken, summitData, profileData });
         if (!profileData) {
@@ -92,10 +96,6 @@ const RegistrationLite = (
             changeStep(0);
         }
     }, [registrationForm])
-
-    const ticketReservation = () => {
-        reserveTicket(registrationForm.personalInformation, registrationForm.ticketType, getAccessToken)
-    }
 
     return (
         <div id="modal" className="modal is-active">
