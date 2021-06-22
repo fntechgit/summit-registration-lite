@@ -19,7 +19,6 @@ import { useMeasure } from "react-use";
 
 import styles from "./index.module.scss";
 import TicketDropdownComponent from '../ticket-dropdown';
-import { changeStep } from '../../actions';
 
 const TicketTypeComponent = ({ ticketTypes, taxTypes, isActive, changeForm, reservation }) => {
 
@@ -82,7 +81,7 @@ const TicketTypeComponent = ({ ticketTypes, taxTypes, isActive, changeForm, rese
                                 <span>{ticket ? `${ticket.name} : $${ticket.cost} ${ticket.currency}` : 'No ticket selected'}</span>
                             }
                             {
-                                !isActive && reservation?.taxes_amount &&
+                                !isActive && reservation?.taxes_amount > 0 &&
                                 <>
                                     <br />
                                     <span>Taxes: ${reservation?.taxes_amount} {ticket?.currency}</span>
