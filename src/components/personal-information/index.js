@@ -69,7 +69,7 @@ const PersonalInfoComponent = ({ isActive, changeForm, reservation, userProfile 
                     <div className={styles.title} >
                         <span>Personal Information</span>
                         {!isActive &&
-                            <div>
+                            <div data-testid="personal-info">
                                 <span>
                                     {`${personalInfo.firstName} ${personalInfo.lastName} ${personalInfo.company ? `- ${personalInfo.company}` : ''}`}
                                 </span>
@@ -82,23 +82,23 @@ const PersonalInfoComponent = ({ isActive, changeForm, reservation, userProfile 
                     </div>
                     <animated.div style={{ overflow: 'hidden', ...toggleAnimation }}>
                         <div ref={ref}>
-                            <form id="personal-info-form" onSubmit={handleSubmit(onSubmit)} className={styles.form}>
+                            <form id="personal-info-form" onSubmit={handleSubmit(onSubmit)} className={styles.form} data-testid="personal-form">
                                 <div>
-                                    <input type="text" placeholder="First name *" defaultValue={personalInfo.firstName || ''} {...register("firstName", { required: true, maxLength: 80 })} />
-                                    {errors.firstName && <span>This field is required</span>}
+                                    <input type="text" placeholder="First name *" defaultValue={personalInfo.firstName || ''} {...register("firstName", { required: true, maxLength: 80 })} data-testid="first-name"/>
+                                    {errors.firstName && <span data-testid="first-name-error">This field is required</span>}
                                 </div>
                                 <div>
-                                    <input type="text" placeholder="Last name *" defaultValue={personalInfo.lastName || ''} {...register("lastName", { required: true, maxLength: 100 })} />
-                                    {errors.lastName && <span>This field is required</span>}
+                                    <input type="text" placeholder="Last name *" defaultValue={personalInfo.lastName || ''} {...register("lastName", { required: true, maxLength: 100 })} data-testid="last-name" />
+                                    {errors.lastName && <span data-testid="last-name-error">This field is required</span>}
                                 </div>
                                 <div>
-                                    <input type="text" placeholder="Email *" defaultValue={personalInfo.email || ''} {...register("email", { required: true, pattern: /^\S+@\S+$/i })} />
-                                    {errors.email?.type === 'required' && <span>This field is required</span>}
-                                    {errors.email?.type === 'pattern' && <span>The email is invalid</span>}
+                                    <input type="text" placeholder="Email *" defaultValue={personalInfo.email || ''} {...register("email", { required: true, pattern: /^\S+@\S+$/i })} data-testid="email" />
+                                    {errors.email?.type === 'required' && <span data-testid="email-error-required">This field is required</span>}
+                                    {errors.email?.type === 'pattern' && <span data-testid="email-error-invalid">The email is invalid</span>}
                                 </div>
                                 <div>
-                                    <input type="text" placeholder="Company *" defaultValue={personalInfo.company || ''} {...register("company", { required: true })} />
-                                    {errors.company && <span>This field is required</span>}
+                                    <input type="text" placeholder="Company *" defaultValue={personalInfo.company || ''} {...register("company", { required: true })} data-testid="company"/>
+                                    {errors.company && <span data-testid="company-error">This field is required</span>}
                                 </div>
                                 <div>
                                     <input type="text" placeholder="Promo Code" {...register("promoCode")} />

@@ -23,9 +23,9 @@ const LoginComponent = ({ options, login }) => {
             <>
                 <div className={`${styles.innerWrapper}`}>
                     <span>Log in with one of the following</span>
-                    {options.map(o => {
+                    {options.map((o, index) => {
                         return (
-                            <div className={styles.button} key={`provider-${o.provider_param ? o.provider_param : 'fnid'}`}
+                            <div className={styles.button} key={`provider-${o.provider_param ? o.provider_param : 'fnid'}`} data-testid="login-button"
                                 style={{ backgroundColor: o.button_color }}
                                 onClick={() => login(o.provider_param)}>
                                 {o.provider_label}

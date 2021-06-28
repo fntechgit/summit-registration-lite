@@ -31,23 +31,23 @@ const TicketDropdownComponent = ({ selectedTicket, ticketTypes, onTicketSelect }
 
     return (
         <div className={`${styles.outerWrapper}`}>
-            <div className={styles.placeholder} onClick={() => setActive(!active)}>
+            <div className={styles.placeholder} onClick={() => setActive(!active)} data-testid="ticket-dropdown">
                 {selectedTicket ?
                     <>
-                        <span>
+                        <span data-testid="selected-ticket">
                             {`${selectedTicket.name} - $${selectedTicket.cost} ${selectedTicket.currency}`}
                         </span>
                         <i className="fa fa-chevron-down"></i>
                     </>
                     :
                     <>
-                        <span>Select a ticket</span>
+                        <span data-testid="no-ticket">Select a ticket</span>
                         <i className="fa fa-chevron-down"></i>
                     </>
                 }
             </div>
             {active &&
-                <div className={styles.dropdown}>
+                <div className={styles.dropdown} data-testid="ticket-list">
                     {ticketTypes.map(t => {
                         if (
                             (t.quantity_2_sell - t.quantity_sold) > 0 &&
