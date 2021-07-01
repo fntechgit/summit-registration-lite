@@ -14,7 +14,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from "react-redux";
-import { loadSession, setMarketingSettings, changeStep, reserveTicket, removeReservedTicket, payTicket, getTicketTypes, getTaxesTypes } from "../actions";
+import { loadSession, changeStep, reserveTicket, removeReservedTicket, payTicket, getTicketTypes, getTaxesTypes, getLoginCode, passwordlessLogin, goToLogin } from "../actions";
 
 import { AjaxLoader } from "openstack-uicore-foundation/lib/components";
 
@@ -29,6 +29,7 @@ import PersonalInfoComponent from './personal-information';
 import TicketTypeComponent from './ticket-type';
 import ButtonBarComponent from './button-bar';
 import PurchaseComplete from './purchase-complete';
+import PasswordlessLoginComponent from './login-passwordless';
 
 const RegistrationLite = (
     {
@@ -40,11 +41,20 @@ const RegistrationLite = (
         payTicket,
         getTicketTypes,
         getTaxesTypes,
+        getLoginCode,
+        passwordlessLogin,
+        goToLogin,
         loginOptions,
         reservation,
         ticketTypes,
         taxTypes,
         step,
+        passwordlessCodeSent,
+        passwordlessEmail,
+        passwordlessCode,
+        getPasswordlessCode,
+        passwordlessCodeError,
+        loginWithCode,
         goToExtraQuestions,
         goToEvent,
         profileData,
@@ -110,8 +120,21 @@ const RegistrationLite = (
                                 <i className="fa fa-close" aria-label="close" onClick={() => rest.closeWidget()}></i>
                             </div>
                             <div className={styles.stepsWrapper}>
-                                {!profileData &&
-                                    <LoginComponent options={loginOptions} login={(provider) => rest.authUser(provider)} />
+                                {!profileData && !passwordlessCodeSent &&
+                                    <LoginComponent
+                                        options={loginOptions}
+                                        login={(provider) => rest.authUser(provider)}
+                                        getLoginCode={getLoginCode}
+                                        getPasswordlessCode={getPasswordlessCode} />
+                                }
+                                {!profileData && passwordlessCodeSent &&
+                                    <PasswordlessLoginComponent
+                                        codeLength={passwordlessCode}
+                                        email={passwordlessEmail}
+                                        passwordlessLogin={passwordlessLogin}
+                                        loginWithCode={loginWithCode}
+                                        codeError={passwordlessCodeError}
+                                        goToLogin={goToLogin} />
                                 }
                                 {profileData && step !== 3 &&
                                     <>
@@ -171,17 +194,23 @@ const mapStateToProps = ({ widgetState }) => ({
     reservation: widgetState.reservation,
     ticketTypes: widgetState.settings.ticketTypes,
     taxTypes: widgetState.settings.taxTypes,
-    step: widgetState.step
+    step: widgetState.step,
+    passwordlessEmail: widgetState.passwordless.email,
+    passwordlessCode: widgetState.passwordless.otp_length,
+    passwordlessCodeSent: widgetState.passwordless.code_sent,
+    passwordlessCodeError: widgetState.passwordless.error
 })
 
 export default connect(mapStateToProps, {
     loadSession,
-    setMarketingSettings,
     changeStep,
     reserveTicket,
     removeReservedTicket,
     payTicket,
     getTicketTypes,
     getTaxesTypes,
+    getLoginCode,
+    passwordlessLogin,
+    goToLogin
 })(RegistrationLite)
 

@@ -21,13 +21,15 @@ import ProfileData from './profile.json';
 
 const filterProps = {
     authUser: (provider) => console.log('login with ', provider),
-    getAccessToken: () => '2SsnqfLTf3v9uL1M-4Xzf0MbUBAVw05sEtm7HYk0Ns83v-8LniLhI4BEjj7jQFA.~bA8q-JgfWhiQTE6OkEc9~M7dmrbveYfqh-_Nx~J6bhpENEp-Sq~NaI6kWHhyT.6',
+    getPasswordlessCode: (email) => console.log('get code', email),
+    loginWithCode: (code) => console.log('login with code', code),
+    getAccessToken: () => '.UbVqMAuLb6PQ7lu~TlKlL-OIRbad6AyAO7fZfoeKr45QT-0R2NsAmrnTA6uXmxzoZa_UHjqRU5EvSyEbtH6xCuMWyX~j~XKxX83we9d47q9uphs6BVjctY2OiuB39lN',
     closeWidget: () => console.log('close widget'),
     goToExtraQuestions: () => console.log('extra questions required'),
     goToEvent: () => console.log('go to event'),
     apiBaseUrl: 'https://api.dev.fnopen.com',
     summitData: SummitData.summit,
-    profileData: ProfileData,
+    profileData: !ProfileData,
     marketingData: MarketingData.colors,
     supportEmail: 'support@fntech.com',
     loginOptions: [

@@ -22,7 +22,11 @@ import {
     CLEAR_RESERVATION,
     PAY_RESERVATION,
     GET_TICKET_TYPES,
-    GET_TAX_TYPES
+    GET_TAX_TYPES,
+    SET_PASSWORDLESS_LOGIN,
+    SET_PASSWORDLESS_LENGTH,
+    SET_PASSWORDLESS_ERROR,
+    GO_TO_LOGIN
 } from './actions';
 
 const DEFAULT_STATE = {
@@ -30,6 +34,12 @@ const DEFAULT_STATE = {
     checkout: null,
     step: 0,
     widgetLoading: false,
+    passwordless: {
+        email: null,
+        otp_length: 0,
+        code_sent: false,
+        error: false
+    },
     settings: {
         apiBaseUrl: null,
         summitId: null,
@@ -61,9 +71,9 @@ const WidgetReducer = (state = DEFAULT_STATE, action) => {
             });
 
             return {
-                ...state,
+                ...DEFAULT_STATE,
                 settings: {
-                    ...state.settings,
+                    ...DEFAULT_STATE.settings,
                     marketingData: marketingData,
                     ticketTypes: summitData.ticket_types,
                     summitId: summitData.id,
@@ -82,6 +92,19 @@ const WidgetReducer = (state = DEFAULT_STATE, action) => {
         case GET_TAX_TYPES: {
             const taxTypes = payload?.response?.data || [];
             return { ...state, settings: { ...state.settings, taxTypes } }
+        }
+        case GO_TO_LOGIN: {
+            return { ...state, passwordless: { ...state.passwordless, code_sent: false, error: false } }
+        }
+        case SET_PASSWORDLESS_LOGIN: {
+            return { ...state, passwordless: { ...state.passwordless, email: payload, error: false } }
+        }
+        case SET_PASSWORDLESS_LENGTH: {
+            const { otp_length } = payload;
+            return { ...state, passwordless: { ...state.passwordless, otp_length, code_sent: true } }
+        }
+        case SET_PASSWORDLESS_ERROR: {
+            return { ...state, passwordless: { ...state.passwordless, error: true } }
         }
         case CREATE_RESERVATION_SUCCESS: {
             const reservation = payload.response;

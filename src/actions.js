@@ -40,7 +40,10 @@ export const DELETE_RESERVATION_SUCCESS = 'DELETE_RESERVATION_SUCCESS';
 export const DELETE_RESERVATION_ERROR = 'DELETE_RESERVATION_ERROR';
 export const PAY_RESERVATION = 'PAY_RESERVATION';
 export const CLEAR_RESERVATION = 'CLEAR_RESERVATION';
-
+export const SET_PASSWORDLESS_LOGIN = 'SET_PASSWORDLESS_LOGIN';
+export const SET_PASSWORDLESS_LENGTH = 'SET_PASSWORDLESS_LENGTH';
+export const SET_PASSWORDLESS_ERROR = 'SET_PASSWORDLESS_ERROR';
+export const GO_TO_LOGIN = 'GO_TO_LOGIN';
 
 const startWidgetLoading = () => (dispatch) => {
     dispatch(createAction(START_WIDGET_LOADING)({}));
@@ -62,7 +65,7 @@ export const loadSession = (settings) => (dispatch) => {
 
 // api/v1/summits/{id}/tax-types   
 
-export const getTicketTypes = (getAccessToken) => async (dispatch, getState) => {    
+export const getTicketTypes = (getAccessToken) => async (dispatch, getState) => {
 
     const { widgetState: { settings: { summitId, apiBaseUrl } } } = getState();
 
@@ -77,7 +80,7 @@ export const getTicketTypes = (getAccessToken) => async (dispatch, getState) => 
         createAction(GET_TICKET_TYPES),
         `${apiBaseUrl}/api/v1/summits/${summitId}/ticket-types`,
         authErrorHandler
-    )(params)(dispatch).then((ticket_types) => {        
+    )(params)(dispatch).then((ticket_types) => {
         dispatch(stopWidgetLoading());
         return (ticket_types);
     }
@@ -103,7 +106,7 @@ export const getTaxesTypes = (getAccessToken) => async (dispatch, getState) => {
         `${apiBaseUrl}/api/v1/summits/${summitId}/tax-types`,
         authErrorHandler
     )(params)(dispatch).then((tax_types) => {
-        dispatch(stopWidgetLoading());                
+        dispatch(stopWidgetLoading());
         return (tax_types);
     }
     ).catch(e => {
@@ -154,7 +157,7 @@ export const reserveTicket = (personalInformation, ticket, getAccessToken) => as
         .then((payload) => {
             dispatch(stopWidgetLoading());
             payload.response.promo_code = promoCode || null;
-            if (!payload.response.payment_gateway_client_token) {                
+            if (!payload.response.payment_gateway_client_token) {
                 dispatch(payTicket(null, null, getAccessToken));
                 return (payload)
             } else {
@@ -204,7 +207,7 @@ export const removeReservedTicket = (getAccessToken) => async (dispatch, getStat
 
 export const payTicket = (token = null, stripe = null, getAccessToken, zipCode = null) => async (dispatch, getState) => {
 
-    let { widgetState: { settings: { summitId, apiBaseUrl, userProfile }, reservation } } = getState();    
+    let { widgetState: { settings: { summitId, apiBaseUrl, userProfile }, reservation } } = getState();
 
     const access_token = await getAccessToken();
 
@@ -292,4 +295,38 @@ export const changeStep = (step) => (dispatch, getState) => {
     dispatch(startWidgetLoading());
     dispatch(createAction(CHANGE_STEP)(step));
     dispatch(stopWidgetLoading());
+}
+
+export const goToLogin = () => (dispatch, getState) => {
+    dispatch(createAction(GO_TO_LOGIN)());
+}
+
+export const getLoginCode = (email, getPasswordlessCode) => async (dispatch, getState) => {
+    dispatch(createAction(SET_PASSWORDLESS_LOGIN)(email));
+
+    return new Promise((resolve, reject) => {
+        getPasswordlessCode(email).then((res) => {            
+            dispatch(createAction(SET_PASSWORDLESS_LENGTH)(res.response))
+            resolve(res);
+        }, (err) => {
+            reject(err);
+        });
+    });
+
+};
+
+export const passwordlessLogin = (code, loginWithCode) => async (dispatch, getState) => {
+
+    const { widgetState: { passwordless: { email } } } = getState();
+
+    return new Promise((resolve, reject) => {
+        loginWithCode(code, email).then((res) => {
+            if(res) {
+                dispatch(createAction(SET_PASSWORDLESS_ERROR)())
+            }
+            resolve(res);
+        }, (err) => {
+            reject(err);
+        });
+    });
 }

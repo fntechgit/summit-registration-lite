@@ -16,7 +16,18 @@ import PropTypes from 'prop-types';
 
 import styles from "./index.module.scss";
 
-const LoginComponent = ({ options, login }) => {
+const LoginComponent = ({ options, login, getLoginCode, getPasswordlessCode }) => {
+
+    const [email, setEmail] = useState('');
+    const [emailError, setEmailError] = useState();
+
+    const loginCode = () => {
+        const emailRegex = /^[^\s@]+@[^\s@]+$/;
+        setEmailError(!emailRegex.test(email));
+        if (!emailError) {
+            getLoginCode(email, getPasswordlessCode)
+        }
+    }
 
     return (
         <div className={`${styles.loginWrapper} step-wrapper`}>
@@ -25,23 +36,24 @@ const LoginComponent = ({ options, login }) => {
                     <span>Log in with one of the following</span>
                     {options.map((o, index) => {
                         return (
-                            <div className={styles.button} key={`provider-${o.provider_param ? o.provider_param : 'fnid'}`} data-testid="login-button"
+                            <div className={`${styles.button}`} key={`provider-${o.provider_param ? o.provider_param : 'fnid'}`} data-testid="login-button"
                                 style={{ backgroundColor: o.button_color }}
                                 onClick={() => login(o.provider_param)}>
                                 {o.provider_label}
                             </div>
                         )
                     })}
-                    {/* SOON...
                     <div className={styles.loginCode}>
                         or get a login code emailed to you
                         <div className={styles.input}>
-                            <input placeholder="youremail@example.com" />
-                            <div>
+                            <input placeholder="youremail@example.com" value={email} onChange={e => setEmail(e.target.value)} />
+                            <div onClick={() => loginCode(email)} >
                                 &gt;
                             </div>
+                            <br />
                         </div>
-                    </div> */}
+                        {emailError && <span>Please enter a valid email adress</span>}
+                    </div>
                 </div>
             </>
         </div>

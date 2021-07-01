@@ -1,9 +1,9 @@
 {
     "colors": {
         "color_primary": "#297fca",
-        "color_primary_contrast": "#ffffff",
+        "color_primary_accent": "#ffffff",
         "color_secondary": "#e6f3ff",
-        "color_secondary_contrast": "#3fa2f7",
+        "color_secondary_accent": "#3fa2f7",
         "color_text_dark": "#212121",
         "color_text_light": "#ffffff"
     }
