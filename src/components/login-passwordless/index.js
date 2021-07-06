@@ -11,35 +11,23 @@
  * limitations under the License.
  **/
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState } from 'react';
 import PropTypes from 'prop-types';
+import OtpInput from 'react-otp-input';
 
 import styles from "./index.module.scss";
 
 const PasswordlessLoginComponent = ({ email, codeLength, passwordlessLogin, loginWithCode, codeError, goToLogin }) => {
 
-    const [code, setCode] = useState(Array(codeLength).fill(''));
-
-    const inputRef = useRef([]);
-
-    useState(() => {
-        console.log('reset code', codeError)
-        setCode(Array(codeLength).fill(''));
-    }, [codeError])
-
-    const changeCode = (ev, index) => {
-        const newCode = [...code];
-        newCode[index] = ev.target.value;
-        setCode(newCode);
-        if (index !== codeLength - 1) {
-            inputRef.current[index + 1].focus();
-        }
-    }
+    const [otpCode, setOtpCode] = useState('');
+    const [otpError, setOtpError] = useState(false)
 
     const tryPasswordlessLogin = (code) => {
         if (code.length === codeLength) {
-            const stringCode = code.join('').toUpperCase();
-            passwordlessLogin(stringCode, loginWithCode)
+            setOtpError(false)
+            passwordlessLogin(otpCode, loginWithCode)
+        } else {
+            setOtpError(true)
         }
     }
 
@@ -52,23 +40,26 @@ const PasswordlessLoginComponent = ({ email, codeLength, passwordlessLogin, logi
                         {email}
                         <br />
                         <span className={styles.digits}>
-                            Add the {code.length} digit code below
+                            Add the {codeLength} digit code below
                         </span>
                     </span>
                     <div className={styles.codeInput}>
-                        {code.map((digit, index) => {
-                            return (
-                                <input ref={el => inputRef.current[index] = el} value={digit} maxLength="1" onChange={e => changeCode(e, index)} key={`digit${index}`} autoComplete="off" />
-                            )
-                        })}
+                        <OtpInput
+                            value={otpCode}
+                            onChange={(code) => setOtpCode(code)}
+                            numInputs={3}
+                            shouldAutoFocus={true}
+                            hasErrored={otpError}
+                            errorStyle={{ border: '1px solid #e5424d' }}
+                        />
                     </div>
                     {codeError && (
                         <span className={styles.error}>
-                            The code you entered it's incorrect. <br/> Please try again.
+                            The code you entered it's incorrect. <br /> Please try again.
                         </span>
                     )}
                     <div className={styles.verify}>
-                        <div className={styles.button} onClick={() => tryPasswordlessLogin(code)}>Verify</div>
+                        <div className={styles.button} onClick={() => tryPasswordlessLogin(otpCode)}>Verify</div>
                         <b>or go back and <span className={styles.link} onClick={() => goToLogin()}>try another way</span></b>
                     </div>
                 </div>
