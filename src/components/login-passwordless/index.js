@@ -47,7 +47,7 @@ const PasswordlessLoginComponent = ({ email, codeLength, passwordlessLogin, logi
                         <OtpInput
                             value={otpCode}
                             onChange={(code) => setOtpCode(code)}
-                            numInputs={3}
+                            numInputs={codeLength}
                             shouldAutoFocus={true}
                             hasErrored={otpError}
                             errorStyle={{ border: '1px solid #e5424d' }}
