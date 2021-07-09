@@ -134,7 +134,9 @@ const RegistrationLite = (
                                         passwordlessLogin={passwordlessLogin}
                                         loginWithCode={loginWithCode}
                                         codeError={passwordlessCodeError}
-                                        goToLogin={goToLogin} />
+                                        goToLogin={goToLogin}
+                                        getLoginCode={getLoginCode}
+                                        getPasswordlessCode={getPasswordlessCode} />
                                 }
                                 {profileData && step !== 3 &&
                                     <>

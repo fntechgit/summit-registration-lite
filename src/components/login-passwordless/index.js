@@ -17,7 +17,7 @@ import OtpInput from 'react-otp-input';
 
 import styles from "./index.module.scss";
 
-const PasswordlessLoginComponent = ({ email, codeLength, passwordlessLogin, loginWithCode, codeError, goToLogin }) => {
+const PasswordlessLoginComponent = ({ email, codeLength, passwordlessLogin, loginWithCode, codeError, goToLogin, getLoginCode, getPasswordlessCode }) => {
 
     const [otpCode, setOtpCode] = useState('');
     const [otpError, setOtpError] = useState(false)
@@ -29,6 +29,10 @@ const PasswordlessLoginComponent = ({ email, codeLength, passwordlessLogin, logi
         } else {
             setOtpError(true)
         }
+    }
+
+    const resendCode = () => {
+        getLoginCode(email, getPasswordlessCode);
     }
 
     return (
@@ -64,7 +68,7 @@ const PasswordlessLoginComponent = ({ email, codeLength, passwordlessLogin, logi
                     </div>
                 </div>
                 <div className={styles.resend}>
-                    Didn't receive it? Check your spam folder or <span className={styles.link}>resend email</span>.
+                    Didn't receive it? Check your spam folder or <span className={styles.link} onClick={() => resendCode()}>resend email</span>.
                 </div>
             </>
         </div>
