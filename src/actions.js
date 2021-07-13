@@ -216,12 +216,12 @@ export const payTicket = (token = null, stripe = null, getAccessToken, zipCode =
     }
 
     let normalizedEntity = {
-        billing_address_1: userProfile.address1 || '',
-        billing_address_2: userProfile.address2 || '',
+        billing_address_1: userProfile?.address1 || '',
+        billing_address_2: userProfile?.address2 || '',
         billing_address_zip_code: zipCode,
-        billing_address_city: userProfile.locality || '',
-        billing_address_state: userProfile.region || '',
-        billing_address_country: userProfile.country || '',
+        billing_address_city: userProfile?.locality || '',
+        billing_address_state: userProfile?.region || '',
+        billing_address_country: userProfile?.country || '',
     };
 
     dispatch(startWidgetLoading());
