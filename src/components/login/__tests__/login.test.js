@@ -1,5 +1,5 @@
 import React from 'react';
-import { cleanup, fireEvent, render as rtlRender, render, waitFor } from '@testing-library/react';
+import { cleanup, fireEvent, render as rtlRender, render, waitFor, getByTestId } from '@testing-library/react';
 import { screen } from '@testing-library/dom'
 import '@testing-library/jest-dom';
 
@@ -23,7 +23,7 @@ it('LoginComponent renders the right quantity of providers', () => {
     const { getAllByTestId } = render(<LoginComponent options={mockOptions} login={mockCallBack} />);
 
     const buttons = getAllByTestId('login-button');
-    expect(buttons.length).toBe(mockOptions.length);        
+    expect(buttons.length).toBe(mockOptions.length);
 });
 
 it('LoginComponent triggers login function on button click', () => {
@@ -33,4 +33,19 @@ it('LoginComponent triggers login function on button click', () => {
     expect(buttons.length).toBeGreaterThan(0);
     fireEvent.click(buttons[0]);
     expect(mockCallBack.mock.calls.length).toEqual(1);
+});
+
+it('LoginComponent should evaluate the email before sending the code', () => {
+    const { getByTestId, getByText } = render(<LoginComponent options={mockOptions} getLoginCode={mockCallBack} />);
+
+    const emailInput = getByTestId('email-input');
+    const button = getByTestId('email-button');
+    fireEvent.click(button);
+    const emailError = getByText('Please enter a valid email adress');
+    expect(emailError).toBeTruthy();
+    fireEvent.change(emailInput, { target: { value: 'test@email.com' } })
+    fireEvent.click(button);    
+    const noEmailError = screen.queryByText('Please enter a valid email adress');
+    expect(noEmailError).toBeFalsy();    
+    expect(mockCallBack.mock.calls.length).toEqual(2);
 });

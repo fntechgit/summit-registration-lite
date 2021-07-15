@@ -46,13 +46,13 @@ const LoginComponent = ({ options, login, getLoginCode, getPasswordlessCode }) =
                     <div className={styles.loginCode}>
                         or get a login code emailed to you
                         <div className={styles.input}>
-                            <input placeholder="youremail@example.com" value={email} onChange={e => setEmail(e.target.value)} onKeyPress={(ev) => ev.key === 'Enter' ? loginCode(email) : null} />
-                            <button onClick={() => loginCode(email)} >
+                            <input placeholder="youremail@example.com" value={email} onChange={e => setEmail(e.target.value)} onKeyPress={(ev) => ev.key === 'Enter' ? loginCode(email) : null} data-testid="email-input" />
+                            <button onClick={() => loginCode(email)} data-testid="email-button">
                                 &gt;
                             </button>
                             <br />
                         </div>
-                        {emailError && <span>Please enter a valid email adress</span>}
+                        {emailError && <span data-testid="email-error">Please enter a valid email adress</span>}
                     </div>
                 </div>
             </>

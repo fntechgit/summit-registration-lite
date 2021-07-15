@@ -41,9 +41,9 @@ const PasswordlessLoginComponent = ({ email, codeLength, passwordlessLogin, logi
                 <div className={`${styles.innerWrapper}`}>
                     <span>
                         We've sent a code to the email <br />
-                        {email}
+                        <span data-testid="email">{email}</span>
                         <br />
-                        <span className={styles.digits}>
+                        <span className={styles.digits} data-testid="code-digits">
                             Add the {codeLength} digit code below
                         </span>
                     </span>
@@ -55,20 +55,21 @@ const PasswordlessLoginComponent = ({ email, codeLength, passwordlessLogin, logi
                             shouldAutoFocus={true}
                             hasErrored={otpError}
                             errorStyle={{ border: '1px solid #e5424d' }}
+                            data-testid="otp-input"
                         />
                     </div>
                     {codeError && (
-                        <span className={styles.error}>
+                        <span className={styles.error} data-testid="error">
                             The code you entered it's incorrect. <br /> Please try again.
                         </span>
                     )}
                     <div className={styles.verify}>
-                        <div className={styles.button} onClick={() => tryPasswordlessLogin(otpCode)}>Verify</div>
-                        <b>or go back and <span className={styles.link} onClick={() => goToLogin()}>try another way</span></b>
+                        <div className={styles.button} onClick={() => tryPasswordlessLogin(otpCode)} data-testid="verify">Verify</div>
+                        <b>or go back and <span className={styles.link} onClick={() => goToLogin()} data-testid="go-back">try another way</span></b>
                     </div>
                 </div>
                 <div className={styles.resend}>
-                    Didn't receive it? Check your spam folder or <span className={styles.link} onClick={() => resendCode()}>resend email</span>.
+                    Didn't receive it? Check your spam folder or <span className={styles.link} onClick={() => resendCode()} data-testid="resend">resend email</span>.
                 </div>
             </>
         </div>

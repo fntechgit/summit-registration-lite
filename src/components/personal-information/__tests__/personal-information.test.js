@@ -1,6 +1,5 @@
 import React from 'react';
 import { cleanup, fireEvent, render as rtlRender, render, waitFor, act } from '@testing-library/react';
-import { renderHook } from "@testing-library/react-hooks";
 import { screen } from '@testing-library/dom'
 import '@testing-library/jest-dom';
 
@@ -21,9 +20,6 @@ const mockProfile = {
 }
 
 const mockSubmit = jest.fn();
-const mockSetPersonalData = jest.fn();
-
-jest.spyOn(React, "useEffect").mockImplementation((f) => f());
 
 // Note: running cleanup fterEach is done automatically for you in @testing-library/react@9.0.0 or higher
 // unmount and cleanup DOM after the test is finished.
@@ -53,40 +49,53 @@ it('PersonalInfoComponent shows the personal data when is not active', async () 
 
 });
 
-it('PersonalInfoComponent set the fields if there is a reservation', async () => {    
+it('PersonalInfoComponent checks the validation of each field', async () => {
+    const { getByTestId } = render(<PersonalInfoComponent userProfile={mockProfile} />);
 
-    const { getByTestId } = render(<PersonalInfoComponent isActive={true} userProfile={mockProfile} reservation={mockReservation} />);
-
-    await waitFor(() => expect(mockSetPersonalData).toBeCalled(), { interval: 100 });
-
-    await waitFor(async() => {
-        expect(mockSetPersonalData).toBeCalled();
-        const firstName = getByTestId('first-name');
-        console.log('first name', firstName.value)
-    })
+    const form = getByTestId('personal-form');
+    const firstName = getByTestId('first-name');
+    fireEvent.change(firstName, { target: { value: '' } });
+    const lastName = getByTestId('last-name');
+    fireEvent.change(lastName, { target: { value: '' } });
+    const email = getByTestId('email');
+    fireEvent.change(email, { target: { value: '' } });
+    const company = getByTestId('company');
+    fireEvent.change(company, { target: { value: '' } });
+    fireEvent.submit(form);
 
     await waitFor(() => {
-        const firstName = getByTestId('first-name');
-        const lastName = getByTestId('last-name');
-        const email = getByTestId('email');
-        const company = getByTestId('company');
-        expect(firstName.value).toBe(mockReservation.owner_first_name);
-    }, {interval: 500})
+        const firstNameError = getByTestId('first-name-error');
+        const lastNameError = getByTestId('last-name-error');
+        const emailErrorRequired = getByTestId('email-error-required');        
+        const companyError = getByTestId('company-error');
+        expect(firstNameError).toBeTruthy();
+        expect(lastNameError).toBeTruthy();
+        expect(emailErrorRequired).toBeTruthy();        
+        expect(companyError).toBeTruthy();
+    });
 
+    fireEvent.change(email, { target: { value: 'no email' } });
+    fireEvent.submit(form);
+
+    await waitFor(() => {        
+        const emailErrorInvalid = getByTestId('email-error-invalid');                
+        expect(emailErrorInvalid).toBeTruthy();        
+    });
 });
 
-// it('PersonalInfoComponent checks the validation of each field', () => {
-//     const { getByTestId } = render(<PersonalInfoComponent ticketTypes={mockTicketTypes} onTicketSelect={mockCallBack} />);
+// it('PersonalInfoComponent set the fields if there is a reservation', async () => {
 
-//     const firstName = getByTestId('first-name');
-//     const firstNameError = getByTestId('first-name-error');
-//     const lastName = getByTestId('last-name');
-//     const lastNameError = getByTestId('last-name-error');
-//     const email = getByTestId('email');
-//     const emailErrorRequired = getByTestId('email-error-required');
-//     const emailErrorInvalid = getByTestId('email-error-invalid');
-//     const company = getByTestId('company');
-//     const companyError = getByTestId('company-error');
+//     const { getByTestId } = render(<PersonalInfoComponent isActive={true} userProfile={mockProfile} reservation={mockReservation} />);
+
+//     //await waitFor(() => expect(mockSetPersonalData).toBeCalled(), { interval: 100 });
+
+//     await waitFor(() => {
+//         const firstName = getByTestId('first-name');
+//         const lastName = getByTestId('last-name');
+//         const email = getByTestId('email');
+//         const company = getByTestId('company');
+//         expect(firstName.value).toBe(mockReservation.owner_first_name);
+//     }, { interval: 500 })
 
 // });
 

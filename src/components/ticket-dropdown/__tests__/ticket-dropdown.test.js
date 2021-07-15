@@ -6,14 +6,14 @@ import '@testing-library/jest-dom';
 import TicketDropdownComponent from "..";
 
 const mockTicketTypes = [
-    { id: 11, created: 1596642618, last_edited: 1596642618, name: "General", description: "nada", external_id: null, summit_id: 17, cost: 100, currency: "USD", quantity_2_sell: 10000000, max_quantity_per_order: 2, sales_start_date: 1596783600, sales_end_date: 1625036400, badge_type_id: 0, quantity_sold: 281 },
-    { id: 16, created: 1604846262, last_edited: 1604846262, name: "Free", description: "", external_id: null, summit_id: 17, cost: 0, currency: "USD", quantity_2_sell: 100000000, max_quantity_per_order: 4, sales_start_date: 1604822400, sales_end_date: 1625036400, badge_type_id: 9, quantity_sold: 10 },
+    { id: 11, created: 1596642618, last_edited: 1596642618, name: "General", description: "nada", external_id: null, summit_id: 17, cost: 100, currency: "USD", quantity_2_sell: 10000000, max_quantity_per_order: 2, sales_start_date: 1596783600, sales_end_date: 2625036400, badge_type_id: 0, quantity_sold: 281 },
+    { id: 16, created: 1604846262, last_edited: 1604846262, name: "Free", description: "", external_id: null, summit_id: 17, cost: 0, currency: "USD", quantity_2_sell: 100000000, max_quantity_per_order: 4, sales_start_date: 1604822400, sales_end_date: 2625036400, badge_type_id: 9, quantity_sold: 10 },
     { id: 18, created: 1623425882, last_edited: 1623425882, name: "VIP", description: "VIP", external_id: null, summit_id: 17, cost: 250, currency: "USD", quantity_2_sell: 1000, max_quantity_per_order: 4, sales_start_date: null, sales_end_date: null, badge_type_id: 16, quantity_sold: 5 }
 ];
 
 const mockTicketsSoldOut = [
-    { id: 11, created: 1596642618, last_edited: 1596642618, name: "General", description: "nada", external_id: null, summit_id: 17, cost: 100, currency: "USD", quantity_2_sell: 10000000, max_quantity_per_order: 2, sales_start_date: 1596783600, sales_end_date: 1625036400, badge_type_id: 0, quantity_sold: 10000000 },
-    { id: 16, created: 1604846262, last_edited: 1604846262, name: "Free", description: "", external_id: null, summit_id: 17, cost: 0, currency: "USD", quantity_2_sell: 100000000, max_quantity_per_order: 4, sales_start_date: 1604822400, sales_end_date: 1625036400, badge_type_id: 9, quantity_sold: 10 },
+    { id: 11, created: 1596642618, last_edited: 1596642618, name: "General", description: "nada", external_id: null, summit_id: 17, cost: 100, currency: "USD", quantity_2_sell: 10000000, max_quantity_per_order: 2, sales_start_date: 1596783600, sales_end_date: 2625036400, badge_type_id: 0, quantity_sold: 10000000 },
+    { id: 16, created: 1604846262, last_edited: 1604846262, name: "Free", description: "", external_id: null, summit_id: 17, cost: 0, currency: "USD", quantity_2_sell: 100000000, max_quantity_per_order: 4, sales_start_date: 1604822400, sales_end_date: 2625036400, badge_type_id: 9, quantity_sold: 10 },
     { id: 18, created: 1623425882, last_edited: 1623425882, name: "VIP", description: "VIP", external_id: null, summit_id: 17, cost: 250, currency: "USD", quantity_2_sell: 1000, max_quantity_per_order: 4, sales_start_date: null, sales_end_date: null, badge_type_id: 16, quantity_sold: 1000 }
 ];
 
