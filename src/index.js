@@ -27,6 +27,7 @@ const filterProps = {
     closeWidget: () => console.log('close widget'),
     goToExtraQuestions: () => console.log('extra questions required'),
     goToEvent: () => console.log('go to event'),
+    loading: false,
     apiBaseUrl: 'https://api.dev.fnopen.com',
     summitData: SummitData.summit,
     profileData: !ProfileData,

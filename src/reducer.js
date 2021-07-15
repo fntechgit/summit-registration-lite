@@ -101,7 +101,7 @@ const WidgetReducer = (state = DEFAULT_STATE, action) => {
         }
         case SET_PASSWORDLESS_LENGTH: {
             const { otp_length } = payload;
-            return { ...state, passwordless: { ...state.passwordless, otp_length, code_sent: true } }
+            return { ...state, passwordless: { ...state.passwordless, otp_length, code_sent: true, error: false } }
         }
         case SET_PASSWORDLESS_ERROR: {
             return { ...state, passwordless: { ...state.passwordless, error: true } }

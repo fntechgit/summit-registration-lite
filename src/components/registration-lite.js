@@ -62,6 +62,7 @@ const RegistrationLite = (
         supportEmail,
         getAccessToken,
         widgetLoading,
+        loading,
         ...rest
     }) => {
 
@@ -95,7 +96,6 @@ const RegistrationLite = (
             getTicketTypes(getAccessToken);
             getTaxesTypes(getAccessToken);
         }
-
     }, [])
 
     useEffect(() => {
@@ -111,7 +111,7 @@ const RegistrationLite = (
         <div id="modal" className="modal is-active">
             <div className="modal-background"></div>
             <div className="modal-content">
-                <AjaxLoader relative={true} color={'#ffffff'} show={widgetLoading} size={80} />
+                <AjaxLoader relative={true} color={'#ffffff'} show={widgetLoading || loading} size={80} />
                 <div className={`${styles.outerWrapper} summit-registration-lite`}>
                     <>
                         <div className={`${styles.innerWrapper}`}>

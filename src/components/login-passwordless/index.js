@@ -53,7 +53,7 @@ const PasswordlessLoginComponent = ({ email, codeLength, passwordlessLogin, logi
                             onChange={(code) => setOtpCode(code)}
                             numInputs={codeLength}
                             shouldAutoFocus={true}
-                            hasErrored={otpError}
+                            hasErrored={otpError || codeError}
                             errorStyle={{ border: '1px solid #e5424d' }}
                             data-testid="otp-input"
                         />
