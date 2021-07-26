@@ -11,8 +11,7 @@
  * limitations under the License.
  **/
 
-import React, { useState, useEffect } from 'react';
-import PropTypes from 'prop-types';
+import React, { useState } from 'react';
 
 import styles from "./index.module.scss";
 
@@ -21,10 +20,15 @@ const LoginComponent = ({ options, login, getLoginCode, getPasswordlessCode }) =
     const [email, setEmail] = useState('');
     const [emailError, setEmailError] = useState();
 
+    const isValidEmail= (email) => {
+        const re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+        return re.test(String(email).toLowerCase());
+    }
+
     const loginCode = () => {
-        const emailRegex = /^[^\s@]+@[^\s@]+$/;
-        setEmailError(!emailRegex.test(email));
-        if (!emailError) {
+        let isValid = isValidEmail(email);
+        setEmailError(!isValid);
+        if (isValid) {
             getLoginCode(email, getPasswordlessCode)
         }
     }
@@ -46,8 +50,8 @@ const LoginComponent = ({ options, login, getLoginCode, getPasswordlessCode }) =
                     <div className={styles.loginCode}>
                         or get a login code emailed to you
                         <div className={styles.input}>
-                            <input placeholder="youremail@example.com" value={email} onChange={e => setEmail(e.target.value)} onKeyPress={(ev) => ev.key === 'Enter' ? loginCode(email) : null} data-testid="email-input" />
-                            <button onClick={() => loginCode(email)} data-testid="email-button">
+                            <input placeholder="youremail@example.com" value={email} onChange={e => setEmail(e.target.value)} onKeyPress={(ev) => ev.key === 'Enter' ? loginCode() : null} data-testid="email-input" />
+                            <button onClick={() => loginCode()} data-testid="email-button">
                                 &gt;
                             </button>
                             <br />
