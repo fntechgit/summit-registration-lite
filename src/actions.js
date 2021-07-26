@@ -213,6 +213,7 @@ export const payTicket = (token = null, stripe = null, getAccessToken, zipCode =
 
     let params = {
         access_token,
+        expand: 'tickets, tickets.owner, tickets.ticket_type, tickets.ticket_type.taxes',
     }
 
     let normalizedEntity = {

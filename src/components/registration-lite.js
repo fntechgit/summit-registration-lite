@@ -39,6 +39,7 @@ const RegistrationLite = (
         removeReservedTicket,
         reserveTicket,
         payTicket,
+        onPurchaseComplete,
         getTicketTypes,
         getTaxesTypes,
         getLoginCode,
@@ -46,6 +47,7 @@ const RegistrationLite = (
         goToLogin,
         loginOptions,
         reservation,
+        checkout,
         ticketTypes,
         taxTypes,
         step,
@@ -167,9 +169,9 @@ const RegistrationLite = (
                                 }
                                 {profileData && step === 3 &&
                                     <PurchaseComplete
-                                        reservation={reservation}
-                                        payTicket={payTicket}
+                                        checkout={checkout}
                                         summit={summitData}
+                                        onPurchaseComplete={onPurchaseComplete}
                                         supportEmail={supportEmail}
                                         goToEvent={goToEvent}
                                         goToExtraQuestions={goToExtraQuestions}
@@ -194,6 +196,7 @@ const RegistrationLite = (
 const mapStateToProps = ({ widgetState }) => ({
     widgetLoading: widgetState.widgetLoading,
     reservation: widgetState.reservation,
+    checkout: widgetState.checkout,
     ticketTypes: widgetState.settings.ticketTypes,
     taxTypes: widgetState.settings.taxTypes,
     step: widgetState.step,

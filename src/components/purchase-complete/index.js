@@ -18,7 +18,11 @@ import styles from "./index.module.scss";
 
 import { epochToMomentTimeZone } from "openstack-uicore-foundation/lib/methods";
 
-const PurchaseComplete = ({ goToExtraQuestions, goToEvent, summit, supportEmail = "support@fntech.com" }) => {
+const PurchaseComplete = ({ checkout, onPurchaseComplete, goToExtraQuestions, goToEvent, summit, supportEmail = "support@fntech.com" }) => {
+
+    useEffect(() => {
+        onPurchaseComplete(checkout)
+    }, []);
 
     const date = new Date();
     let now_utc = Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate(),
