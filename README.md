@@ -12,9 +12,11 @@ React component for the summit registration lite widget
    
    **marketingData**          = object with the settings from the marketing API
 
+   **supportEmail**           = string with the email address for support
+
    **loginOptions**           = array with the options to show on the login screen
 
-   **supportEmail**           = string with the email address for support
+   **loading**                = boolean to show/hide a loader on the widget
 
    Example
    
@@ -34,7 +36,13 @@ React component for the summit registration lite widget
    **goToExtraQuestions**     = method passed that will be called by component to redirect to extra questions page
 
    **goToEvent**              = method passed that will be called to redirect the user to the current event
+   
+   **getPasswordlessCode**    = method passed that will be called when the user generates a code to login without password
 
+   **loginWithCode**          = method passed that will be called when the user tries to login with a code
+
+   **onPurchaseComplete**     = method passed that will be called after the purchase of a ticket it's completed
+   
    
 ## PUBLISH TO NPM:
 
