@@ -10,17 +10,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
-
+import {RawHTML} from 'openstack-uicore-foundation/lib/components'
 import React, { useState, useEffect } from 'react';
-import PropTypes from 'prop-types';
-
 import { useSpring, config, animated } from "react-spring";
 import { useMeasure } from "react-use";
-
 import styles from "./index.module.scss";
 import TicketDropdownComponent from '../ticket-dropdown';
 
-const TicketTypeComponent = ({ ticketTypes, taxTypes, isActive, changeForm, reservation }) => {
+const TicketTypeComponent = ({ ticketTypes, taxTypes, isActive, changeForm, reservation, inPersonDisclaimer }) => {
 
     const [ticket, setTicket] = useState(null);
 
@@ -48,6 +45,15 @@ const TicketTypeComponent = ({ ticketTypes, taxTypes, isActive, changeForm, rese
 
     const ticketSelect = (t) => {
         setTicket(t);
+    }
+
+    const isInPersonTicketType = (ticketType) => {
+        /** check is the current order has or not IN_PERSON tickets types **/
+        if(ticketType.hasOwnProperty("badge_type")){
+            let badgeType = ticketType.badge_type;
+            return badgeType.access_levels.some((al) => { return al.name == 'IN_PERSON'});
+        }
+        return false;
     }
 
     return (
@@ -94,6 +100,15 @@ const TicketTypeComponent = ({ ticketTypes, taxTypes, isActive, changeForm, rese
                             <TicketDropdownComponent selectedTicket={ticket} ticketTypes={ticketTypes} onTicketSelect={(t) => ticketSelect(t)} />
                         </div>
                     </animated.div>
+                    {inPersonDisclaimer && ticket && isInPersonTicketType(ticket) &&
+
+                        <div className={styles.inPersonDisclaimer}>
+                            <RawHTML>
+                                {inPersonDisclaimer}
+                            </RawHTML>
+
+                        </div>
+                    }
                 </div>
             </>
         </div>

@@ -72,7 +72,8 @@ export const getTicketTypes = (getAccessToken) => async (dispatch, getState) => 
     const access_token = await getAccessToken();
 
     let params = {
-        access_token
+        access_token,
+        expand:'badge_type,badge_type.access_levels,badge_type.badge_features'
     };
 
     return getRequest(

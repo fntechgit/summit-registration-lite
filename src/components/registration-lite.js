@@ -64,6 +64,7 @@ const RegistrationLite = (
         getAccessToken,
         widgetLoading,
         loading,
+        inPersonDisclaimer,
         ...rest
     }) => {
 
@@ -143,6 +144,7 @@ const RegistrationLite = (
                                     <>
                                         <TicketTypeComponent
                                             ticketTypes={ticketTypes}
+                                            inPersonDisclaimer={inPersonDisclaimer}
                                             taxTypes={taxTypes}
                                             reservation={reservation}
                                             isActive={step === 0}
