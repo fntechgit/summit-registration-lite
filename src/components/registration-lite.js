@@ -12,7 +12,6 @@
  **/
 
 import React, { useState, useEffect, useMemo } from 'react';
-import PropTypes from 'prop-types';
 import { connect } from "react-redux";
 import { loadSession, changeStep, reserveTicket, removeReservedTicket, payTicket, getTicketTypes, getTaxesTypes, getLoginCode, passwordlessLogin, goToLogin } from "../actions";
 

@@ -24,7 +24,7 @@ import RegistrationLite from "./components/registration-lite";
 const RegistrationLiteWidget = ( props ) => {    
     
     const config = {
-        key: `root_registration_lite`,
+        key: `root_registration_lite_${props.clientId}`,
         storage,
     }
 
