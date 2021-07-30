@@ -11,8 +11,7 @@
  * limitations under the License.
  **/
 
-import React, { useState, useEffect } from 'react';
-import PropTypes from 'prop-types';
+import React, { useState } from 'react';
 
 import {
     CardNumberElement,
@@ -20,8 +19,8 @@ import {
     CardCvcElement,
     useStripe,
     useElements,
-    CardElement
 } from '@stripe/react-stripe-js';
+
 import Swal from 'sweetalert2';
 
 import styles from "./index.module.scss";
@@ -100,7 +99,9 @@ const StripeForm = ({ reservation, payTicket, getAccessToken, userProfile }) => 
                 <CardCvcElement options={{ style: stripeStyle }} />
             </div>
             <div className={styles.fieldWrapper} style={{ marginBottom: `${zipCodeError.required ? '25px' : '0px'}` }}>
-                <input placeholder="ZIP CODE" value={zipCode} onChange={(e) => setZipCode(e.target.value)} />
+                <input
+                    placeholder="ZIP CODE" value={zipCode}
+                    onChange={(e) => setZipCode(e.target.value)} />
                 {zipCodeError.required && <span>This field is required</span>}
             </div>
         </form>

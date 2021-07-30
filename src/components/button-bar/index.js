@@ -31,9 +31,9 @@ const ButtonBarComponent = ({ step, changeStep, registrationForm, removeReserved
                             {step !== 0 && step !== 2 && <button className="button" onClick={() => changeStep(step - 1)}>&lt; Back</button>}
                             {step !== 0 && step === 2 && <button className="button" onClick={() => removeReservedTicket(getAccessToken)}>&lt; Back</button>}
                             {/* Next Button */}
-                            {step === 0 && <button disabled={!registrationForm.ticketType} className="button" onClick={() => changeStep(step + 1)}>Save and Continue</button>}
+                            {step === 0 && <button disabled={!registrationForm.ticketType} className="button" onClick={() => changeStep(step + 1)}>Next</button>}
                             {step === 1 && registrationForm.ticketType?.cost === 0 && <button className="button" type="submit" form="personal-info-form">Get Ticket</button>}
-                            {step === 1 && registrationForm.ticketType?.cost > 0 && <button className="button" type="submit" form="personal-info-form">Save and Continue</button>}
+                            {step === 1 && registrationForm.ticketType?.cost > 0 && <button className="button" type="submit" form="personal-info-form">Next</button>}
                             {step === 2 && <button className="button" type="submit" form="payment-form">Pay Now</button>}
                         </div>
                     </div>
