@@ -96,9 +96,12 @@ const RegistrationLite = (
             changeStep(0);
             return;
         }
+    }, [ profileData ])
+
+    useEffect(() => {
         getTicketTypes(getAccessToken);
         getTaxesTypes(getAccessToken);
-    }, [summitData, profileData])
+    });
 
     useEffect(() => {
         if (step === 1 && registrationForm.ticketType && registrationForm.personalInformation) {
