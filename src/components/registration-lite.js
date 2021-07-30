@@ -94,11 +94,11 @@ const RegistrationLite = (
         loadSession({ ...rest, getAccessToken, summitData, profileData });
         if (!profileData) {
             changeStep(0);
-        } else {
-            getTicketTypes(getAccessToken);
-            getTaxesTypes(getAccessToken);
+            return;
         }
-    }, [])
+        getTicketTypes(getAccessToken);
+        getTaxesTypes(getAccessToken);
+    }, [summitData, profileData])
 
     useEffect(() => {
         if (step === 1 && registrationForm.ticketType && registrationForm.personalInformation) {

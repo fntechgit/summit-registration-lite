@@ -46,7 +46,8 @@ const DEFAULT_STATE = {
         marketingData: null,
         getAccessToken: null,
         ticketTypes: null,
-        taxTypes: null
+        taxTypes: null,
+        userProfile: null,
     }
 };
 
@@ -116,7 +117,7 @@ const WidgetReducer = (state = DEFAULT_STATE, action) => {
             return { ...state, reservation: null }
         }
         case PAY_RESERVATION: {
-            return { ...state, checkout: payload.response, reservation: null };
+            return { ...state, checkout: payload.response, reservation: null , userProfile: null};
         }
         default: {
             return state;
