@@ -40,18 +40,18 @@ const DEFAULT_STATE = {
         code_sent: false,
         error: false
     },
+    ticketTypes: [],
+    taxTypes: [],
     settings: {
         apiBaseUrl: null,
         summitId: null,
         marketingData: null,
         getAccessToken: null,
-        ticketTypes: null,
-        taxTypes: null,
         userProfile: null,
     }
 };
 
-const WidgetReducer = (state = DEFAULT_STATE, action) => {
+const RegistrationLiteReducer = (state = DEFAULT_STATE, action) => {
     const { type, payload } = action;
     switch (type) {
         case START_WIDGET_LOADING: {
@@ -61,7 +61,6 @@ const WidgetReducer = (state = DEFAULT_STATE, action) => {
             return { ...state, widgetLoading: false };
         }
         case LOAD_INITIAL_VARS:
-
             const { marketingData, summitData, apiBaseUrl, profileData } = payload;
 
             Object.keys(marketingData).forEach(setting => {
@@ -72,14 +71,13 @@ const WidgetReducer = (state = DEFAULT_STATE, action) => {
             });
 
             return {
-                ...DEFAULT_STATE,
+                ...state,
                 settings: {
                     ...DEFAULT_STATE.settings,
                     marketingData: marketingData,
-                    ticketTypes: summitData.ticket_types,
                     summitId: summitData.id,
                     userProfile: profileData,
-                    apiBaseUrl: apiBaseUrl
+                    apiBaseUrl: apiBaseUrl,
                 }
             };
 
@@ -87,12 +85,10 @@ const WidgetReducer = (state = DEFAULT_STATE, action) => {
             return { ...state, step: payload }
         }
         case GET_TICKET_TYPES: {
-            const ticketTypes = payload?.response?.data || [];
-            return { ...state, settings: { ...state.settings, ticketTypes } }
+            return { ...state, ticketTypes: [...payload.response.data ] }
         }
         case GET_TAX_TYPES: {
-            const taxTypes = payload?.response?.data || [];
-            return { ...state, settings: { ...state.settings, taxTypes } }
+             return { ...state, taxTypes: [...payload.response.data]  }
         }
         case GO_TO_LOGIN: {
             return { ...state, passwordless: { ...state.passwordless, code_sent: false, error: false } }
@@ -125,4 +121,4 @@ const WidgetReducer = (state = DEFAULT_STATE, action) => {
     }
 }
 
-export default WidgetReducer
+export default RegistrationLiteReducer;

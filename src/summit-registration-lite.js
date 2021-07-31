@@ -18,7 +18,7 @@ import thunk from 'redux-thunk';
 import { persistStore, persistCombineReducers } from 'redux-persist'
 import storage from 'redux-persist/es/storage' // default: localStorage if web, AsyncStorage if react-native
 import { PersistGate } from 'redux-persist/integration/react';
-import WidgetReducer from './reducer'
+import RegistrationLiteReducer from './reducer'
 import RegistrationLite from "./components/registration-lite";
 
 const RegistrationLiteWidget = ( props ) => {    
@@ -28,13 +28,13 @@ const RegistrationLiteWidget = ( props ) => {
         storage,
     }
 
-    const persistedReducers = persistCombineReducers(config, {
-        widgetState: WidgetReducer
+    const reducers = persistCombineReducers(config, {
+        registrationLiteState: RegistrationLiteReducer
     });
 
-    const composeEnhancers = typeof window === 'object' && window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ ? window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ : compose;
+    const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
 
-    const store = createStore(persistedReducers, compose(applyMiddleware(thunk)));
+    const store = createStore(reducers, composeEnhancers(applyMiddleware(thunk)));
 
     const onRehydrateComplete = () => { }
 

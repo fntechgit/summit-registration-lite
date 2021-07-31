@@ -94,14 +94,14 @@ const RegistrationLite = (
         loadSession({ ...rest, getAccessToken, summitData, profileData });
         if (!profileData) {
             changeStep(0);
-            return;
         }
     }, [ profileData ])
 
     useEffect(() => {
-        getTicketTypes(getAccessToken);
-        getTaxesTypes(getAccessToken);
-    });
+        if (profileData) {
+            getTicketTypes(getAccessToken).then(()=> getTaxesTypes(getAccessToken));
+        }
+    }, [profileData]);
 
     useEffect(() => {
         if (step === 1 && registrationForm.ticketType && registrationForm.personalInformation) {
@@ -143,7 +143,7 @@ const RegistrationLite = (
                                         getLoginCode={getLoginCode}
                                         getPasswordlessCode={getPasswordlessCode} />
                                 }
-                                {profileData && step !== 3 &&
+                                { profileData && step !== 3 && ticketTypes.length >0 &&
                                     <>
                                         <TicketTypeComponent
                                             ticketTypes={ticketTypes}
@@ -197,17 +197,17 @@ const RegistrationLite = (
     );
 }
 
-const mapStateToProps = ({ widgetState }) => ({
-    widgetLoading: widgetState.widgetLoading,
-    reservation: widgetState.reservation,
-    checkout: widgetState.checkout,
-    ticketTypes: widgetState.settings.ticketTypes,
-    taxTypes: widgetState.settings.taxTypes,
-    step: widgetState.step,
-    passwordlessEmail: widgetState.passwordless.email,
-    passwordlessCode: widgetState.passwordless.otp_length,
-    passwordlessCodeSent: widgetState.passwordless.code_sent,
-    passwordlessCodeError: widgetState.passwordless.error
+const mapStateToProps = ({ registrationLiteState }) => ({
+    widgetLoading: registrationLiteState.widgetLoading,
+    reservation: registrationLiteState.reservation,
+    checkout: registrationLiteState.checkout,
+    ticketTypes: registrationLiteState.ticketTypes,
+    taxTypes: registrationLiteState.taxTypes,
+    step: registrationLiteState.step,
+    passwordlessEmail: registrationLiteState.passwordless.email,
+    passwordlessCode: registrationLiteState.passwordless.otp_length,
+    passwordlessCodeSent: registrationLiteState.passwordless.code_sent,
+    passwordlessCodeError: registrationLiteState.passwordless.error
 })
 
 export default connect(mapStateToProps, {
