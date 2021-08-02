@@ -72,6 +72,9 @@ const RegistrationLiteReducer = (state = DEFAULT_STATE, action) => {
 
             return {
                 ...state,
+                reservation:null,
+                checkout:null,
+                passwordless: {...DEFAULT_STATE.passwordless},
                 settings: {
                     ...DEFAULT_STATE.settings,
                     marketingData: marketingData,
