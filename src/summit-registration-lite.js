@@ -11,46 +11,30 @@
  * limitations under the License.
  **/
 
-import React from 'react';
-import { Provider } from 'react-redux'
-import { createStore, applyMiddleware, compose } from 'redux';
-import thunk from 'redux-thunk';
-import { persistStore, persistCombineReducers } from 'redux-persist'
-import storage from 'redux-persist/es/storage' // default: localStorage if web, AsyncStorage if react-native
-import { PersistGate } from 'redux-persist/integration/react';
-import RegistrationLiteReducer from './reducer'
-import RegistrationLite from "./components/registration-lite";
+ import React from "react";
+ import { Provider } from "react-redux";
+ import { getStore, getPersistor } from "./store";
+ import { PersistGate } from "redux-persist/integration/react";
+ import RegistrationLite from "./components/registration-lite";
+ 
 
-const RegistrationLiteWidget = ( props ) => {    
-    
-    const config = {
-        key: `root_registration_lite_${props.clientId}`,
-        storage,
+class RegistrationLiteWidget extends React.PureComponent {
+
+    constructor(props) {
+        super(props);
+        this.store = getStore(props.clientId, props.apiBaseUrl, props.getAccessToken);
     }
 
-    const reducers = persistCombineReducers(config, {
-        registrationLiteState: RegistrationLiteReducer
-    });
+    render() {
+        return (
+                <Provider store={this.store}>
+                    <PersistGate persistor={getPersistor()}>
+                        <RegistrationLite {...this.props} />
+                    </PersistGate>
+                </Provider>
 
-    const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
-
-    const store = createStore(reducers, composeEnhancers(applyMiddleware(thunk.withExtraArgument({
-        apiBaseUrl : props.apiBaseUrl,
-        getAccessToken: props.getAccessToken
-    }))));
-
-    const onRehydrateComplete = () => { }
-
-    const persistor = persistStore(store, null, onRehydrateComplete);
-
-
-    return (
-        <Provider store={store}>
-            <PersistGate persistor={persistor}>
-                <RegistrationLite {...props} />
-            </PersistGate>
-        </Provider>
-    );
+        );
+    }
 }
 
 export default RegistrationLiteWidget;
