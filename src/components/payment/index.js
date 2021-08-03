@@ -23,7 +23,7 @@ import styles from "./index.module.scss";
 import StripeForm from '../stripe-form';
 
 
-const PaymentComponent = ({ isActive, userProfile, reservation, payTicket, getAccessToken, stripeKey }) => {
+const PaymentComponent = ({ isActive, userProfile, reservation, payTicket, stripeKey }) => {
 
     const [ref, { height }] = useMeasure();    
 
@@ -36,8 +36,6 @@ const PaymentComponent = ({ isActive, userProfile, reservation, payTicket, getAc
             marginBottom: isActive ? 5 : 0
         }
     });
-
-
 
     return (
         <div className={`${styles.outerWrapper} step-wrapper`}>
@@ -52,7 +50,6 @@ const PaymentComponent = ({ isActive, userProfile, reservation, payTicket, getAc
                                 <StripeForm 
                                 reservation={reservation} 
                                 payTicket={payTicket} 
-                                getAccessToken={getAccessToken} 
                                 userProfile={userProfile}/>
                             </Elements>
                         </div>

@@ -34,7 +34,10 @@ const RegistrationLiteWidget = ( props ) => {
 
     const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
 
-    const store = createStore(reducers, composeEnhancers(applyMiddleware(thunk)));
+    const store = createStore(reducers, composeEnhancers(applyMiddleware(thunk.withExtraArgument({
+        apiBaseUrl : props.apiBaseUrl,
+        getAccessToken: props.getAccessToken
+    }))));
 
     const onRehydrateComplete = () => { }
 

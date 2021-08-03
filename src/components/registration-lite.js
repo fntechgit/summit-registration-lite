@@ -61,10 +61,10 @@ const RegistrationLite = (
         profileData,
         summitData,
         supportEmail,
-        getAccessToken,
         widgetLoading,
         loading,
         inPersonDisclaimer,
+        userProfile,
         ...rest
     }) => {
 
@@ -87,21 +87,21 @@ const RegistrationLite = (
     const stripePromise = useMemo(() => loadStripe(publicKey), [publicKey])
 
     const ticketReservation = () => {
-        reserveTicket(registrationForm.personalInformation, registrationForm.ticketType, getAccessToken)
+        reserveTicket(registrationForm.personalInformation, registrationForm.ticketType)
     }
 
     useEffect(() => {
-        loadSession({ ...rest, getAccessToken, summitData, profileData });
-        if (!profileData) {
+        loadSession({ ...rest, summitData, profileData });
+        if (!profileData){
             changeStep(0);
         }
     }, [ profileData ])
 
-    useEffect(() => {
-        if (profileData) {
-            getTicketTypes(getAccessToken).then(()=> getTaxesTypes(getAccessToken));
+    useEffect( () =>  {
+        if (summitData && profileData && ticketTypes.length == 0) {
+            getTicketTypes(summitData.id).then( () => getTaxesTypes(summitData.id));
         }
-    }, [profileData]);
+    }, [ userProfile, ticketTypes, taxTypes ]);
 
     useEffect(() => {
         if (step === 1 && registrationForm.ticketType && registrationForm.personalInformation) {
@@ -111,6 +111,7 @@ const RegistrationLite = (
             changeStep(0);
         }
     }, [registrationForm])
+
 
     return (
         <div id="modal" className="modal is-active">
@@ -143,7 +144,7 @@ const RegistrationLite = (
                                         getLoginCode={getLoginCode}
                                         getPasswordlessCode={getPasswordlessCode} />
                                 }
-                                { profileData && step !== 3 && ticketTypes.length >0 &&
+                                { profileData && step !== 3 && ticketTypes.length > 0 &&
                                     <>
                                         <TicketTypeComponent
                                             ticketTypes={ticketTypes}
@@ -163,7 +164,6 @@ const RegistrationLite = (
                                             <PaymentComponent
                                                 isActive={step === 2}
                                                 reservation={reservation}
-                                                getAccessToken={getAccessToken}
                                                 payTicket={payTicket}
                                                 userProfile={profileData}
                                                 stripeKey={stripePromise}
@@ -188,7 +188,7 @@ const RegistrationLite = (
                                     registrationForm={registrationForm}
                                     removeReservedTicket={removeReservedTicket}
                                     changeStep={changeStep}
-                                    getAccessToken={getAccessToken} />}
+                                />}
                         </div>
                     </>
                 </div>
@@ -200,6 +200,7 @@ const RegistrationLite = (
 const mapStateToProps = ({ registrationLiteState }) => ({
     widgetLoading: registrationLiteState.widgetLoading,
     reservation: registrationLiteState.reservation,
+    userProfile:registrationLiteState.settings.userProfile,
     checkout: registrationLiteState.checkout,
     ticketTypes: registrationLiteState.ticketTypes,
     taxTypes: registrationLiteState.taxTypes,

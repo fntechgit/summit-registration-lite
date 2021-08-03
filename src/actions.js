@@ -29,9 +29,7 @@ export const LOAD_INITIAL_VARS = 'LOAD_INITIAL_VARS';
 export const RECEIVE_MARKETING_SETTINGS = 'RECEIVE_MARKETING_SETTINGS';
 export const CHANGE_STEP = 'CHANGE_STEP';
 export const GET_TICKET_TYPES = 'GET_TICKET_TYPES';
-export const GET_TICKET_TYPES_SUCCESS = 'GET_TICKET_TYPES_SUCCESS';
 export const GET_TAX_TYPES = 'GET_TAX_TYPES';
-export const GET_TAX_TYPES_SUCCESS = 'GET_TAX_TYPES_SUCCESS';
 export const CREATE_RESERVATION = 'CREATE_RESERVATION';
 export const CREATE_RESERVATION_SUCCESS = 'CREATE_RESERVATION_SUCCESS';
 export const CREATE_RESERVATION_ERROR = 'CREATE_RESERVATION_ERROR';
@@ -45,13 +43,8 @@ export const SET_PASSWORDLESS_LENGTH = 'SET_PASSWORDLESS_LENGTH';
 export const SET_PASSWORDLESS_ERROR = 'SET_PASSWORDLESS_ERROR';
 export const GO_TO_LOGIN = 'GO_TO_LOGIN';
 
-const startWidgetLoading = () => (dispatch) => {
-    dispatch(createAction(START_WIDGET_LOADING)({}));
-};
-
-const stopWidgetLoading = () => (dispatch) => {
-    dispatch(createAction(STOP_WIDGET_LOADING)({}));
-};
+const startWidgetLoading = createAction(START_WIDGET_LOADING);
+const stopWidgetLoading = createAction(STOP_WIDGET_LOADING);
 
 export const loadSession = (settings) => (dispatch) => {
     dispatch(createAction(LOAD_INITIAL_VARS)(settings));
@@ -65,59 +58,58 @@ export const loadSession = (settings) => (dispatch) => {
 
 // api/v1/summits/{id}/tax-types   
 
-export const getTicketTypes = (getAccessToken) => async (dispatch, getState) => {
+export const getTicketTypes =  (summitId) => async (dispatch, getState, { apiBaseUrl, getAccessToken }) => {
 
-    const { registrationLiteState: { settings: { summitId, apiBaseUrl } } } = getState();
+    try {
+        const accessToken = await getAccessToken();
 
-    const access_token = await getAccessToken();
+        let params = {
+            expand: 'badge_type,badge_type.access_levels,badge_type.badge_features',
+            access_token: accessToken
+        };
 
-    let params = {
-        access_token,
-        expand:'badge_type,badge_type.access_levels,badge_type.badge_features'
-    };
-
-    dispatch(startWidgetLoading());
-    return getRequest(
-        null,
-        createAction(GET_TICKET_TYPES),
-        `${apiBaseUrl}/api/v1/summits/${summitId}/ticket-types`,
-        authErrorHandler
-    )(params)(dispatch).then(() => {
-        dispatch(stopWidgetLoading());
+        dispatch(startWidgetLoading());
+        return getRequest(
+            null,
+            createAction(GET_TICKET_TYPES),
+            `${apiBaseUrl}/api/v1/summits/${summitId}/ticket-types`,
+            authErrorHandler
+        )(params)(dispatch).then(() => {
+            dispatch(stopWidgetLoading());
+        })
     }
-    ).catch(e => {
-        dispatch(stopWidgetLoading());
-        return (e);
-    });
+    catch (e){
+        return Promise.reject();
+    }
 }
 
-export const getTaxesTypes = (getAccessToken) => async (dispatch, getState) => {
+export const getTaxesTypes = (summitId) =>  async (dispatch, getState, { apiBaseUrl, getAccessToken }) => {
 
-    const { registrationLiteState: { settings: { summitId, apiBaseUrl } } } = getState();
+    try {
+        const accessToken = await getAccessToken();
+        let params = {
+            access_token: accessToken
+        };
 
-    const access_token = await getAccessToken();
+        dispatch(startWidgetLoading());
 
-    let params = {
-        access_token
-    };
-    dispatch(startWidgetLoading());
-    return getRequest(
-         null,
-        createAction(GET_TAX_TYPES),
-        `${apiBaseUrl}/api/v1/summits/${summitId}/tax-types`,
-        authErrorHandler
-    )(params)(dispatch).then(() => {
-        dispatch(stopWidgetLoading());
+        return getRequest(
+            null,
+            createAction(GET_TAX_TYPES),
+            `${apiBaseUrl}/api/v1/summits/${summitId}/tax-types`,
+            authErrorHandler
+        )(params)(dispatch).then(() => {
+            dispatch(stopWidgetLoading());
+        })
     }
-    ).catch(e => {
-        dispatch(stopWidgetLoading());
-        return (e);
-    });
+    catch (e){
+        return Promise.reject();
+    }
 }
 
-export const reserveTicket = (personalInformation, ticket, getAccessToken) => async (dispatch, getState) => {
+export const reserveTicket = (personalInformation, ticket) => async (dispatch, getState, { apiBaseUrl, getAccessToken }) => {
 
-    const { registrationLiteState: { settings: { summitId, apiBaseUrl } } } = getState();
+    const { registrationLiteState: { settings: { summitId} } } = getState();
 
     let { firstName, lastName, email, company, promoCode } = personalInformation;
 
@@ -172,8 +164,8 @@ export const reserveTicket = (personalInformation, ticket, getAccessToken) => as
         })
 }
 
-export const removeReservedTicket = (getAccessToken) => async (dispatch, getState) => {
-    let { registrationLiteState: { settings: { summitId, apiBaseUrl }, reservation: { hash } } } = getState();
+export const removeReservedTicket = () => async (dispatch, getState, { apiBaseUrl, getAccessToken }) => {
+    let { registrationLiteState: { settings: { summitId }, reservation: { hash } } } = getState();
 
     const access_token = await getAccessToken();
 
@@ -205,9 +197,9 @@ export const removeReservedTicket = (getAccessToken) => async (dispatch, getStat
         })
 }
 
-export const payTicket = (token = null, stripe = null, getAccessToken, zipCode = null) => async (dispatch, getState) => {
+export const payTicket = (token = null, stripe = null, zipCode = null) => async (dispatch, getState, { apiBaseUrl, getAccessToken }) => {
 
-    let { registrationLiteState: { settings: { summitId, apiBaseUrl, userProfile }, reservation } } = getState();
+    let { registrationLiteState: { settings: { summitId, userProfile }, reservation } } = getState();
 
     const access_token = await getAccessToken();
 

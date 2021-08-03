@@ -46,7 +46,6 @@ const DEFAULT_STATE = {
         apiBaseUrl: null,
         summitId: null,
         marketingData: null,
-        getAccessToken: null,
         userProfile: null,
     }
 };
@@ -61,6 +60,7 @@ const RegistrationLiteReducer = (state = DEFAULT_STATE, action) => {
             return { ...state, widgetLoading: false };
         }
         case LOAD_INITIAL_VARS:
+
             const { marketingData, summitData, apiBaseUrl, profileData } = payload;
 
             Object.keys(marketingData).forEach(setting => {
@@ -88,10 +88,10 @@ const RegistrationLiteReducer = (state = DEFAULT_STATE, action) => {
             return { ...state, step: payload }
         }
         case GET_TICKET_TYPES: {
-            return { ...state, ticketTypes: [...payload.response.data ] }
+            return { ...state, ticketTypes: payload.response.data };
         }
         case GET_TAX_TYPES: {
-             return { ...state, taxTypes: [...payload.response.data]  }
+             return { ...state, taxTypes: payload.response.data  }
         }
         case GO_TO_LOGIN: {
             return { ...state, passwordless: { ...state.passwordless, code_sent: false, error: false } }
