@@ -102,7 +102,7 @@ const RegistrationLite = (
         if (summitData && profileData && ticketTypes.length == 0) {
             getTicketTypes(summitData.id).then( () => getTaxesTypes(summitData.id));
         }
-    }, [ profileData, ticketTypes, taxTypes ]);
+    }, [ summitData, ticketTypes, taxTypes, profileData ]);
 
     useEffect(() => {
         if (step === 1 && registrationForm.ticketType && registrationForm.personalInformation) {
@@ -113,7 +113,6 @@ const RegistrationLite = (
         }
     }, [registrationForm])
 
-    console.log(profileData, `RENDER step ${step} ticketTypes.length ${ticketTypes.length }`);
 
     return (
         <div id="modal" className="modal is-active">
