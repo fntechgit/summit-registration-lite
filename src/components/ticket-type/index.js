@@ -16,6 +16,7 @@ import { useSpring, config, animated } from "react-spring";
 import { useMeasure } from "react-use";
 import styles from "./index.module.scss";
 import TicketDropdownComponent from '../ticket-dropdown';
+import {isInPersonTicketType} from "../../actions";
 
 const TicketTypeComponent = ({ ticketTypes, taxTypes, isActive, changeForm, reservation, inPersonDisclaimer }) => {
 
@@ -45,15 +46,6 @@ const TicketTypeComponent = ({ ticketTypes, taxTypes, isActive, changeForm, rese
 
     const ticketSelect = (t) => {
         setTicket(t);
-    }
-
-    const isInPersonTicketType = (ticketType) => {
-        /** check is the current order has or not IN_PERSON tickets types **/
-        if(ticketType.hasOwnProperty("badge_type")){
-            let badgeType = ticketType.badge_type;
-            return badgeType.access_levels.some((al) => { return al.name == 'IN_PERSON'});
-        }
-        return false;
     }
 
     return (

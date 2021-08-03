@@ -323,3 +323,12 @@ export const passwordlessLogin = (code, loginWithCode) => async (dispatch, getSt
         });
     });
 }
+
+export const isInPersonTicketType = (ticketType) => {
+    /** check is the current order has or not IN_PERSON tickets types **/
+    if(ticketType.hasOwnProperty("badge_type")){
+        let badgeType = ticketType.badge_type;
+        return badgeType.access_levels.some((al) => { return al.name == 'IN_PERSON'});
+    }
+    return false;
+}

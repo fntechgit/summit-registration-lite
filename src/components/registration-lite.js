@@ -13,7 +13,8 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import { connect } from "react-redux";
-import { loadSession, changeStep, reserveTicket, removeReservedTicket, payTicket, getTicketTypes, getTaxesTypes, getLoginCode, passwordlessLogin, goToLogin } from "../actions";
+import { loadSession, changeStep, reserveTicket, removeReservedTicket,
+            payTicket, getTicketTypes, getTaxesTypes, getLoginCode, passwordlessLogin, goToLogin } from "../actions";
 
 import { AjaxLoader } from "openstack-uicore-foundation/lib/components";
 
@@ -101,7 +102,7 @@ const RegistrationLite = (
         if (summitData && profileData && ticketTypes.length == 0) {
             getTicketTypes(summitData.id).then( () => getTaxesTypes(summitData.id));
         }
-    }, [ userProfile, ticketTypes, taxTypes ]);
+    }, [ profileData, ticketTypes, taxTypes ]);
 
     useEffect(() => {
         if (step === 1 && registrationForm.ticketType && registrationForm.personalInformation) {
@@ -112,6 +113,7 @@ const RegistrationLite = (
         }
     }, [registrationForm])
 
+    console.log(profileData, `RENDER step ${step} ticketTypes.length ${ticketTypes.length }`);
 
     return (
         <div id="modal" className="modal is-active">
@@ -185,6 +187,7 @@ const RegistrationLite = (
                             {profileData && step !== 3 &&
                                 <ButtonBarComponent
                                     step={step}
+                                    inPersonDisclaimer={inPersonDisclaimer}
                                     registrationForm={registrationForm}
                                     removeReservedTicket={removeReservedTicket}
                                     changeStep={changeStep}
