@@ -1,0 +1,31 @@
+.wrapper {
+    height: 250px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin: 15px 0;
+    padding: 15px 0;
+    border-radius: 5px;
+    border: 1px solid lightgray;
+    text-align: center;
+    .circle {
+      margin-bottom: 30px;
+      background-color: #e6f3ff;
+      border-radius: 50px;
+      border: 1px solid #3fa2f7;
+      padding: 10px;
+      i {
+        font-size: 36px;
+        color: #3fa2f7;
+      }
+    }
+    .complete {
+      font-weight: bold;
+      font-size: 20px;
+    }
+    a {
+        text-decoration: underline;
+    }
+  }
+  

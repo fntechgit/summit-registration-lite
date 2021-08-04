@@ -27,11 +27,13 @@ const filterProps = {
     closeWidget: () => console.log('close widget'),
     goToExtraQuestions: () => console.log('extra questions required'),
     goToEvent: () => console.log('go to event'),
+    goToRegistration: () => console.log('go to registration page'),
     onPurchaseComplete: (order) => console.log('purchase complete', order),
     loading: false,
     apiBaseUrl: 'https://api.dev.fnopen.com',
     summitData: SummitData.summit,
     profileData: ProfileData,
+    ticketOwned: false,
     marketingData: MarketingData.colors,
     supportEmail: 'support@fntech.com',
     loginOptions: [

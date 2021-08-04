@@ -13,8 +13,10 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import { connect } from "react-redux";
-import { loadSession, changeStep, reserveTicket, removeReservedTicket,
-            payTicket, getTicketTypes, getTaxesTypes, getLoginCode, passwordlessLogin, goToLogin } from "../actions";
+import {
+    loadSession, changeStep, reserveTicket, removeReservedTicket,
+    payTicket, getTicketTypes, getTaxesTypes, getLoginCode, passwordlessLogin, goToLogin
+} from "../actions";
 
 import { AjaxLoader } from "openstack-uicore-foundation/lib/components";
 
@@ -30,6 +32,7 @@ import TicketTypeComponent from './ticket-type';
 import ButtonBarComponent from './button-bar';
 import PurchaseComplete from './purchase-complete';
 import PasswordlessLoginComponent from './login-passwordless';
+import TicketOwnedComponent from './ticket-owned';
 
 const RegistrationLite = (
     {
@@ -59,9 +62,11 @@ const RegistrationLite = (
         loginWithCode,
         goToExtraQuestions,
         goToEvent,
+        goToRegistration,
         profileData,
         summitData,
         supportEmail,
+        ticketOwned,
         widgetLoading,
         loading,
         inPersonDisclaimer,
@@ -93,14 +98,14 @@ const RegistrationLite = (
 
     useEffect(() => {
         loadSession({ ...rest, summitData, profileData });
-        if (!profileData){
+        if (!profileData) {
             changeStep(0);
         }
-    }, [ profileData ])
+    }, [profileData])
 
-    useEffect( () =>  {
+    useEffect(() => {
         if (summitData && profileData && ticketTypes.length == 0) {
-            getTicketTypes(summitData.id).then( () => getTaxesTypes(summitData.id));
+            getTicketTypes(summitData.id).then(() => getTaxesTypes(summitData.id));
         }
     }, [ summitData, ticketTypes, taxTypes, profileData ]);
 
@@ -126,68 +131,76 @@ const RegistrationLite = (
                                 <span>{summitData.name}</span>
                                 <i className="fa fa-close" aria-label="close" onClick={() => rest.closeWidget()}></i>
                             </div>
-                            <div className={styles.stepsWrapper}>
-                                {!profileData && !passwordlessCodeSent &&
-                                    <LoginComponent
-                                        options={loginOptions}
-                                        login={(provider) => rest.authUser(provider)}
-                                        getLoginCode={getLoginCode}
-                                        getPasswordlessCode={getPasswordlessCode} />
-                                }
-                                {!profileData && passwordlessCodeSent &&
-                                    <PasswordlessLoginComponent
-                                        codeLength={passwordlessCode}
-                                        email={passwordlessEmail}
-                                        passwordlessLogin={passwordlessLogin}
-                                        loginWithCode={loginWithCode}
-                                        codeError={passwordlessCodeError}
-                                        goToLogin={goToLogin}
-                                        getLoginCode={getLoginCode}
-                                        getPasswordlessCode={getPasswordlessCode} />
-                                }
-                                { profileData && step !== 3 && ticketTypes.length > 0 &&
-                                    <>
-                                        <TicketTypeComponent
-                                            ticketTypes={ticketTypes}
-                                            inPersonDisclaimer={inPersonDisclaimer}
-                                            taxTypes={taxTypes}
-                                            reservation={reservation}
-                                            isActive={step === 0}
-                                            changeForm={t => setRegistrationForm({ ...registrationForm, ticketType: t })}
-                                        />
-                                        <PersonalInfoComponent
-                                            isActive={step === 1}
-                                            reservation={reservation}
-                                            userProfile={profileData}
-                                            changeForm={personalForm => setRegistrationForm({ ...registrationForm, personalInformation: personalForm })}
-                                        />
-                                        {reservation?.amount !== 0 &&
-                                            <PaymentComponent
-                                                isActive={step === 2}
+                            {ticketOwned &&
+                                <div className={styles.stepsWrapper}>
+                                    <TicketOwnedComponent goToRegistration={goToRegistration} />
+                                </div>
+                            }
+                            {!ticketOwned &&
+                                <div className={styles.stepsWrapper}>
+                                    {!profileData && !passwordlessCodeSent &&
+                                        <LoginComponent
+                                            options={loginOptions}
+                                            login={(provider) => rest.authUser(provider)}
+                                            getLoginCode={getLoginCode}
+                                            getPasswordlessCode={getPasswordlessCode} />
+                                    }
+                                    {!profileData && passwordlessCodeSent &&
+                                        <PasswordlessLoginComponent
+                                            codeLength={passwordlessCode}
+                                            email={passwordlessEmail}
+                                            passwordlessLogin={passwordlessLogin}
+                                            loginWithCode={loginWithCode}
+                                            codeError={passwordlessCodeError}
+                                            goToLogin={goToLogin}
+                                            getLoginCode={getLoginCode}
+                                            getPasswordlessCode={getPasswordlessCode} />
+                                    }
+                                    {profileData && step !== 3 && ticketTypes.length > 0 &&
+                                        <>
+                                            <TicketTypeComponent
+                                                ticketTypes={ticketTypes}
+                                                inPersonDisclaimer={inPersonDisclaimer}
+                                                taxTypes={taxTypes}
                                                 reservation={reservation}
-                                                payTicket={payTicket}
-                                                userProfile={profileData}
-                                                stripeKey={stripePromise}
+                                                isActive={step === 0}
+                                                changeForm={t => setRegistrationForm({ ...registrationForm, ticketType: t })}
                                             />
-                                        }
-                                    </>
-                                }
-                                {profileData && step === 3 &&
-                                    <PurchaseComplete
-                                        checkout={checkout}
-                                        summit={summitData}
-                                        onPurchaseComplete={onPurchaseComplete}
-                                        supportEmail={supportEmail}
-                                        goToEvent={goToEvent}
-                                        goToExtraQuestions={goToExtraQuestions}
-                                    />
-                                }
-                            </div>
-                            {profileData && step !== 3 &&
+                                            <PersonalInfoComponent
+                                                isActive={step === 1}
+                                                reservation={reservation}
+                                                userProfile={profileData}
+                                                changeForm={personalForm => setRegistrationForm({ ...registrationForm, personalInformation: personalForm })}
+                                            />
+                                            {reservation?.amount !== 0 &&
+                                                <PaymentComponent
+                                                    isActive={step === 2}
+                                                    reservation={reservation}
+                                                    payTicket={payTicket}
+                                                    userProfile={profileData}
+                                                    stripeKey={stripePromise}
+                                                />
+                                            }
+                                        </>
+                                    }
+                                    {profileData && step === 3 &&
+                                        <PurchaseComplete
+                                            checkout={checkout}
+                                            summit={summitData}
+                                            onPurchaseComplete={onPurchaseComplete}
+                                            supportEmail={supportEmail}
+                                            goToEvent={goToEvent}
+                                            goToExtraQuestions={goToExtraQuestions}
+                                        />
+                                    }
+                                </div>
+                            }
+                            {profileData && !ticketOwned && step !== 3 &&
                                 <ButtonBarComponent
                                     step={step}
                                     inPersonDisclaimer={inPersonDisclaimer}
                                     registrationForm={registrationForm}
+                                    goToRegistration={goToRegistration}
                                     removeReservedTicket={removeReservedTicket}
                                     changeStep={changeStep}
                                 />}
@@ -202,7 +215,7 @@ const RegistrationLite = (
 const mapStateToProps = ({ registrationLiteState }) => ({
     widgetLoading: registrationLiteState.widgetLoading,
     reservation: registrationLiteState.reservation,
-    userProfile:registrationLiteState.settings.userProfile,
+    userProfile: registrationLiteState.settings.userProfile,
     checkout: registrationLiteState.checkout,
     ticketTypes: registrationLiteState.ticketTypes,
     taxTypes: registrationLiteState.taxTypes,
