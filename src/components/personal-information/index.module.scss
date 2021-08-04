@@ -29,6 +29,10 @@
         color: #3486cd;
       }
     }
+    .readOnly {
+      opacity: 0.5;
+      cursor: default;
+    }
     span {
       display: inline-block;      
       color: #e5424d;

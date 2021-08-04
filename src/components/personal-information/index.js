@@ -92,7 +92,7 @@ const PersonalInfoComponent = ({ isActive, changeForm, reservation, userProfile 
                                     {errors.lastName && <span data-testid="last-name-error">This field is required</span>}
                                 </div>
                                 <div>
-                                    <input type="text" placeholder="Email *" readOnly={true} defaultValue={personalInfo.email || ''} {...register("email", { required: true, pattern: /^\S+@\S+$/i })} data-testid="email" />
+                                    <input type="text" placeholder="Email *" className={styles.readOnly} readOnly={true} defaultValue={personalInfo.email || ''} {...register("email", { required: true, pattern: /^\S+@\S+$/i })} data-testid="email" />
                                     {errors.email?.type === 'required' && <span data-testid="email-error-required">This field is required</span>}
                                     {errors.email?.type === 'pattern' && <span data-testid="email-error-invalid">The email is invalid</span>}
                                 </div>
