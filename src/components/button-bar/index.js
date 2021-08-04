@@ -14,11 +14,11 @@
 import React from 'react';
 
 import styles from "./index.module.scss";
-import {isInPersonTicketType} from "../../actions";
+import { isInPersonTicketType } from "../../actions";
 
 const ButtonBarComponent = ({ step, changeStep, registrationForm, removeReservedTicket, inPersonDisclaimer, goToRegistration }) => {
 
-    const nextButtonText = inPersonDisclaimer && registrationForm?.ticketType && isInPersonTicketType(registrationForm.ticketType)  ? 'Accept': 'Next';
+    const nextButtonText = inPersonDisclaimer && registrationForm?.ticketType && isInPersonTicketType(registrationForm.ticketType) ? 'Accept' : 'Next';
 
     return (
         <div className={`${styles.outerWrapper}`}>
@@ -26,7 +26,7 @@ const ButtonBarComponent = ({ step, changeStep, registrationForm, removeReserved
                 <>
                     <div className={`${styles.innerWrapper}`}>
                         <div className={styles.required} >
-                            {step !== 0 && <span>* Required fields</span>}
+                            {step !== 0 && <span>* Required fields <br /> </span>}
                             <span className={styles.registration} onClick={() => goToRegistration()}>Need multiple tickets?</span>
                         </div>
                         <div className={styles.buttons} >
