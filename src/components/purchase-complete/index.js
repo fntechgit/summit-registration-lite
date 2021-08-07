@@ -51,9 +51,9 @@ const PurchaseComplete = ({ checkout, onPurchaseComplete, goToExtraQuestions, go
                 needExtraQuestions() ?
                     <>
                         <span>
-                            Before entering the event you need to complete some extra questions <br />
+                            This ticket requires additional details. <br />
                         </span>
-                        <button className="button" onClick={() => goToExtraQuestions()}>Answer now</button>
+                        <button className="button" onClick={() => goToExtraQuestions()}>Finish now</button>
                     </>
                     :
                     <>
@@ -63,9 +63,12 @@ const PurchaseComplete = ({ checkout, onPurchaseComplete, goToExtraQuestions, go
                 <>
                     <span>
                         The event will start on {startDateFormatted.date} at {startDateFormatted.time} {summit.time_zone_id} <br />
-                        Got time for a few extra questions?
+                        This ticket requires additional details.
                     </span>
-                    <button className="button" onClick={() => goToExtraQuestions()}>Answer Now</button>
+                    <div className={styles.actions}>
+                        <button className="button" onClick={() => goToExtraQuestions()}>Finish Now</button>
+                        <button className="button" onClick={() => goToEvent()}>Do this later</button>
+                    </div>
                 </>
             }
             <span className={styles.footer}>

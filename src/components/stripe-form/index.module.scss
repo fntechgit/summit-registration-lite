@@ -7,8 +7,7 @@
       display: flex;
       width: 48%;
       border-radius: 5px;
-      background-color: #e6f3ff;
-      border: 1px solid #3fa2f7;
+      border: 1px solid var(--color_primary);
       height: 36px;
       padding: 5px;
       display: flex;
@@ -50,8 +49,6 @@
     input {
       width: 48%;
       border-radius: 5px;
-      background-color: #e6f3ff;
-      border: 1px solid #3fa2f7;
       color: #3486cd;
       font-size: 16px;      
       height: 36px;
@@ -61,8 +58,8 @@
       align-items: center;
       margin-bottom: 5px;
       &::placeholder {
-        color: #A4C7E6;        
-        font-size: 16px;        
+        color: var(--color_text_input_hints);
+        font-size: 16px;
       }
     }
   }

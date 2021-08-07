@@ -12,6 +12,7 @@
  **/
 
 import React, { useState } from 'react';
+import { connect } from "react-redux";
 
 import {
     CardNumberElement,
@@ -25,7 +26,7 @@ import Swal from 'sweetalert2';
 
 import styles from "./index.module.scss";
 
-const StripeForm = ({ reservation, payTicket, userProfile }) => {
+const StripeForm = ({ reservation, payTicket, userProfile, marketingData }) => {
 
     const stripe = useStripe();
     const elements = useElements();
@@ -38,11 +39,12 @@ const StripeForm = ({ reservation, payTicket, userProfile }) => {
     const stripeStyle = {
         base: {
             // Add your base input styles here. For example: #d4e5f4
-            color: '#3486cd',
+            color: marketingData.color_text_dark,
             fontSize: '16px',
-            backgroundColor: '#e6f3ff',
+            //fontFamily: 'inherit',
+            backgroundColor: '#ffffff',
             '::placeholder': {
-                color: '#A4C7E6'
+                color: marketingData.color_text_input_hints
             }
         },
         invalid: {
@@ -100,11 +102,16 @@ const StripeForm = ({ reservation, payTicket, userProfile }) => {
             </div>
             <div className={styles.fieldWrapper} style={{ marginBottom: `${zipCodeError.required ? '25px' : '0px'}` }}>
                 <input
-                    placeholder="ZIP CODE" value={zipCode}
+                    placeholder="Zip Code" value={zipCode}
                     onChange={(e) => setZipCode(e.target.value)} />
                 {zipCodeError.required && <span>This field is required</span>}
             </div>
         </form>
     )
 }
-export default StripeForm;
+
+const mapStateToProps = ({ registrationLiteState }) => ({
+    marketingData: registrationLiteState.settings.marketingData
+})
+
+export default connect(mapStateToProps, null)(StripeForm)

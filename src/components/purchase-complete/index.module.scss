@@ -12,26 +12,32 @@
   .circle {
     margin-top: auto;
     margin-bottom: 10px;
-    background-color: #e6f3ff;
+    background-color: var(--color_primary50);
     border-radius: 50px;
-    border: 1px solid #3fa2f7;
+    border: 1px solid var(--color_primary);
     padding: 10px;
     i {
       font-size: 36px;
-      color: #3fa2f7;
+      color: var(--color_primary);
     }
   }
   .complete {
     font-weight: bold;
     font-size: 20px;
   }
+  .actions {
+    display: flex;
+  }
   button {
-      margin-top: 10px;
+      margin: 10px 5px 0 5px;
   }
   span {
       font-size: 14px;
   }
-
+  a {
+    color: var(--color_primary);
+    text-decoration: underline;
+  }
   .footer {
     margin-top: auto;    
     font-size: 14px;

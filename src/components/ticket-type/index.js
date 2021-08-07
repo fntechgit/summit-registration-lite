@@ -53,7 +53,7 @@ const TicketTypeComponent = ({ ticketTypes, taxTypes, isActive, changeForm, rese
             <>
                 <div className={`${styles.innerWrapper}`}>
                     <div className={styles.title} >
-                        <span>Ticket</span>
+                        <span>Ticket </span>
                         <div>
                             {!isActive &&
                                 reservation?.discount_amount > 0 ?
@@ -70,13 +70,12 @@ const TicketTypeComponent = ({ ticketTypes, taxTypes, isActive, changeForm, rese
                                             {ticket.currency}
                                         </>
                                     }
-                                    <br />
                                     <span className={styles.promo}>
                                         Promo code applied
                                     </span>
                                 </span>
                                 :
-                                <span>{ticket ? `${ticket.name} : $${ticket.cost} ${ticket.currency}` : 'No ticket selected'}</span>
+                                <span>{ticket ? `${ticket.name}: $${ticket.cost} ${ticket.currency}` : 'No ticket selected'}</span>
                             }
                             {
                                 !isActive && reservation?.taxes_amount > 0 &&
@@ -93,12 +92,10 @@ const TicketTypeComponent = ({ ticketTypes, taxTypes, isActive, changeForm, rese
                         </div>
                     </animated.div>
                     {inPersonDisclaimer && ticket && isInPersonTicketType(ticket) &&
-
                         <div className={styles.inPersonDisclaimer}>
                             <RawHTML>
                                 {inPersonDisclaimer}
                             </RawHTML>
-
                         </div>
                     }
                 </div>

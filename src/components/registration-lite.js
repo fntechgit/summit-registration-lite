@@ -13,6 +13,10 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import { connect } from "react-redux";
+
+import { useSpring, config, animated } from "react-spring";
+import { useMeasure } from "react-use";
+
 import {
     loadSession, changeStep, reserveTicket, removeReservedTicket,
     payTicket, getTicketTypes, getTaxesTypes, getLoginCode, passwordlessLogin, goToLogin
@@ -118,6 +122,15 @@ const RegistrationLite = (
         }
     }, [registrationForm])
 
+    const [ref, { height }] = useMeasure();
+
+    const toggleAnimation = useSpring({
+        config: { bounce: 0, ...config.stiff },
+        to: {
+            opacity: registrationForm.ticketType?.cost === 0 ? 0 : 1,
+            height: registrationForm.ticketType?.cost === 0 ? 0 : height,
+        }
+    });
 
     return (
         <div id="modal" className="modal is-active">
@@ -172,15 +185,17 @@ const RegistrationLite = (
                                                 userProfile={profileData}
                                                 changeForm={personalForm => setRegistrationForm({ ...registrationForm, personalInformation: personalForm })}
                                             />
-                                            {reservation?.amount !== 0 &&
-                                                <PaymentComponent
-                                                    isActive={step === 2}
-                                                    reservation={reservation}
-                                                    payTicket={payTicket}
-                                                    userProfile={profileData}
-                                                    stripeKey={stripePromise}
-                                                />
-                                            }
+                                            <animated.div style={{ ...toggleAnimation }}>
+                                                <div ref={ref}>
+                                                    <PaymentComponent
+                                                        isActive={step === 2}
+                                                        reservation={reservation}
+                                                        payTicket={payTicket}
+                                                        userProfile={profileData}
+                                                        stripeKey={stripePromise}
+                                                    />
+                                                </div>
+                                            </animated.div>
                                         </>
                                     }
                                     {profileData && step === 3 &&

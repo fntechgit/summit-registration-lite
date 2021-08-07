@@ -11,13 +11,13 @@
     text-align: center;
     .circle {
       margin-bottom: 30px;
-      background-color: #e6f3ff;
+      background-color: var(--color_primary50);
       border-radius: 50px;
-      border: 1px solid #3fa2f7;
+      border: 1px solid var(--color_primary);
       padding: 10px;
       i {
         font-size: 36px;
-        color: #3fa2f7;
+        color: var(--color_primary);
       }
     }
     .complete {
@@ -25,7 +25,8 @@
       font-size: 20px;
     }
     a {
-        text-decoration: underline;
+      color: var(--color_primary);
+      text-decoration: underline;
     }
   }
   

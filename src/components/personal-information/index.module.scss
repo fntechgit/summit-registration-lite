@@ -18,25 +18,24 @@
     input {
       width: 100%;
       border-radius: 5px;
-      background-color: #e6f3ff;
-      border: 1px solid #3fa2f7;
+      border: 1px solid var(--color_primary);
       height: 36px;
       padding: 5px;
       display: flex;
       justify-content: space-between;
       align-items: center;
+      font-size: 15px;
       &::placeholder {
-        color: #3486cd;
+        color: var(--color_text_input_hints);
       }
     }
     .readOnly {
-      opacity: 0.5;
+      opacity: 0.6;
       cursor: default;
     }
     span {
       display: inline-block;      
       color: #e5424d;
-      font-size: 14px;
     }
     &>:last-child{
       margin-bottom: 5px;

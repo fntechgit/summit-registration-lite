@@ -40,7 +40,7 @@ const PasswordlessLoginComponent = ({ email, codeLength, passwordlessLogin, logi
             <>
                 <div className={`${styles.innerWrapper}`}>
                     <span>
-                        We've sent a code to the email <br />
+                        We sent your single-use login code to <br />
                         <span data-testid="email">{email}</span>
                         <br />
                         <span className={styles.digits} data-testid="code-digits">
@@ -69,7 +69,7 @@ const PasswordlessLoginComponent = ({ email, codeLength, passwordlessLogin, logi
                     </div>
                 </div>
                 <div className={styles.resend}>
-                    Didn't receive it? Check your spam folder or <span className={styles.link} onClick={() => resendCode()} data-testid="resend">resend email</span>.
+                    Didn’t receive it? Check your spam/junk folder, or <span className={styles.link} onClick={() => resendCode()} data-testid="resend">resend email</span> now.
                 </div>
             </>
         </div>

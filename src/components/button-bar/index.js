@@ -29,7 +29,7 @@ const ButtonBarComponent = ({ step, changeStep, registrationForm, removeReserved
                             {step !== 0 && <span>* Required fields <br /> </span>}
                             <span className={styles.registration} onClick={() => goToRegistration()}>Need multiple tickets?</span>
                         </div>
-                        <div className={styles.buttons} >
+                        <div className={styles.actions} >
                             {/* Back Button */}
                             {step !== 0 && step !== 2 && <button className="button" onClick={() => changeStep(step - 1)}>&lt; Back</button>}
                             {step !== 0 && step === 2 && <button className="button" onClick={() => removeReservedTicket()}>&lt; Back</button>}
