@@ -53,11 +53,11 @@ const PurchaseComplete = ({ checkout, onPurchaseComplete, goToExtraQuestions, go
                         <span>
                             This ticket requires additional details. <br />
                         </span>
-                        <button className="button" onClick={() => goToExtraQuestions()}>Finish now</button>
+                        <button className={`${styles.button} button`} onClick={() => goToExtraQuestions()}>Finish now</button>
                     </>
                     :
                     <>
-                        <button className="button" onClick={() => goToEvent()}>Access event now</button>
+                        <button className={`${styles.button} button`} onClick={() => goToEvent()}>Access event now</button>
                     </>
                 :
                 <>
@@ -66,8 +66,8 @@ const PurchaseComplete = ({ checkout, onPurchaseComplete, goToExtraQuestions, go
                         This ticket requires additional details.
                     </span>
                     <div className={styles.actions}>
-                        <button className="button" onClick={() => goToExtraQuestions()}>Finish Now</button>
-                        <button className="button" onClick={() => goToEvent()}>Do this later</button>
+                        <button className={`${styles.button} button`} onClick={() => goToExtraQuestions()}>Finish Now</button>
+                        <button className={`${styles.button} button`} onClick={() => goToEvent()}>Do this later</button>
                     </div>
                 </>
             }
