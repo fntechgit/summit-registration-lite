@@ -54,7 +54,7 @@ const TicketTypeComponent = ({ ticketTypes, taxTypes, isActive, changeForm, rese
                 <div className={`${styles.innerWrapper}`}>
                     <div className={styles.title} >
                         <span>Ticket </span>
-                        <div>
+                        <div className={styles.summary} >
                             {!isActive &&
                                 reservation?.discount_amount > 0 ?
                                 <span>
