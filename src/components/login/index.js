@@ -41,7 +41,13 @@ const LoginComponent = ({ options, login, getLoginCode, getPasswordlessCode }) =
                     {options.map((o, index) => {
                         return (
                             <div className={`${styles.button}`} key={`provider-${o.provider_param ? o.provider_param : 'fnid'}`} data-testid="login-button"
-                                style={{ backgroundColor: o.button_color }}
+                                style={{
+                                    color: o.button_border_color ? o.button_border_color : '#ffffff',
+                                    border: `thin solid ${o.button_border_color ? o.button_border_color : o.button_color}`,
+                                    backgroundColor: o.button_color,
+                                    backgroundImage: o.provider_logo ? `url(${o.provider_logo})` : 'none',
+                                    backgroundSize: o.provider_logo_size ? o.provider_logo_size : ''
+                                }}
                                 onClick={() => login(o.provider_param)}>
                                 {o.provider_label}
                             </div>
