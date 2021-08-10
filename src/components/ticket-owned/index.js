@@ -24,7 +24,10 @@ const TicketOwnedComponent = ({ goToRegistration }) => {
                     <i className="fa fa-ticket"></i>
                 </div>
                 <span className={styles.complete}>
-                    Our records show you have a ticket(s) to this event. If you would like to purchase more, <a onClick={() => goToRegistration()}>click here</a>.
+                    Our records show you have a ticket(s) to this event.
+                </span>
+                <span className={styles.complete}>
+                    If you would like to purchase more, <a onClick={() => goToRegistration()}>click here</a>.
                 </span>
             </>
         </div>
