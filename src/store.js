@@ -27,6 +27,10 @@
    const config = {
      key: `root_registration_lite_${clientId}`,
      storage,
+     blacklist:[
+         'ticketTypes',
+         'taxTypes',
+ ] // do not persist these keys
    };
    
    const reducers = persistCombineReducers(config, {
