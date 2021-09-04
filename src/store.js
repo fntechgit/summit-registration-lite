@@ -30,7 +30,7 @@
      blacklist:[
          'ticketTypes',
          'taxTypes',
- ] // do not persist these keys
+     ] // do not persist these keys
    };
    
    const reducers = persistCombineReducers(config, {

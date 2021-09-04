@@ -108,7 +108,7 @@ const RegistrationLite = (
     }, [profileData])
 
     useEffect(() => {
-        if (summitData && profileData && ticketTypes.length == 0) {
+        if (summitData && profileData) {
             getTicketTypes(summitData.id).then(() => getTaxesTypes(summitData.id));
         }
     }, [ summitData, ticketTypes, taxTypes, profileData ]);
