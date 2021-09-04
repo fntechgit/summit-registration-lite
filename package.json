@@ -1,6 +1,6 @@
 {
   "name": "summit-registration-lite",
-  "version": "1.0.72",
+  "version": "1.0.73",
   "description": "Summit Registration Lite",
   "main": "index.js",
   "scripts": {
