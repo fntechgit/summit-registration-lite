@@ -111,7 +111,7 @@ const RegistrationLite = (
         if (summitData && profileData) {
             getTicketTypes(summitData.id).then(() => getTaxesTypes(summitData.id));
         }
-    }, []);
+    }, [summitData, profileData]);
 
     useEffect(() => {
         if (step === 1 && registrationForm.ticketType && registrationForm.personalInformation) {
