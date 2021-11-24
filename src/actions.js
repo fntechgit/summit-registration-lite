@@ -204,7 +204,15 @@ export const payTicket = (token = null, stripe = null, zipCode = null) => async 
 
     let params = {
         access_token,
-        expand: 'tickets, tickets.owner, tickets.ticket_type, tickets.ticket_type.taxes',
+        expand: 'tickets,' +
+            'tickets.owner,' +
+            'tickets.owner.extra_questions,' +
+            'tickets.badge,' +
+            'tickets.badge.type,' +
+            'tickets.badge.type.access_levels,' +
+            'tickets.badge.type.features,' +
+            'tickets.ticket_type,' +
+            'tickets.ticket_type.taxes',
     }
 
     let normalizedEntity = {
