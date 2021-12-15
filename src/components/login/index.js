@@ -15,12 +15,12 @@ import React, { useState } from 'react';
 
 import styles from "./index.module.scss";
 
-const LoginComponent = ({ options, login, getLoginCode, getPasswordlessCode }) => {
+const LoginComponent = ({ options, allowsNativeAuth, allowsOtpAuthlogin, getLoginCode, getPasswordlessCode }) => {
 
     const [email, setEmail] = useState('');
     const [emailError, setEmailError] = useState();
 
-    const isValidEmail= (email) => {
+    const isValidEmail = (email) => {
         const re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
         return re.test(String(email).toLowerCase());
     }
@@ -40,30 +40,50 @@ const LoginComponent = ({ options, login, getLoginCode, getPasswordlessCode }) =
                     <span>Log in with one of the following</span>
                     {options.map((o, index) => {
                         return (
-                            <div className={`${styles.button}`} key={`provider-${o.provider_param ? o.provider_param : 'fnid'}`} data-testid="login-button"
-                                style={{
-                                    color: o.button_border_color ? o.button_border_color : '#ffffff',
-                                    border: `thin solid ${o.button_border_color ? o.button_border_color : o.button_color}`,
-                                    backgroundColor: o.button_color,
-                                    backgroundImage: o.provider_logo ? `url(${o.provider_logo})` : 'none',
-                                    backgroundSize: o.provider_logo_size ? o.provider_logo_size : ''
-                                }}
-                                onClick={() => login(o.provider_param)}>
-                                {o.provider_label}
-                            </div>
+                            o.provider_param ?
+                                <div className={`${styles.button}`} key={`provider-${o.provider_param}`} data-testid="login-button"
+                                    style={{
+                                        color: o.button_border_color ? o.button_border_color : '#ffffff',
+                                        border: `thin solid ${o.button_border_color ? o.button_border_color : o.button_color}`,
+                                        backgroundColor: o.button_color,
+                                        color: o.font_color,
+                                        backgroundImage: o.provider_logo ? `url(${o.provider_logo})` : 'none',
+                                        backgroundSize: o.provider_logo_size ? o.provider_logo_size : ''
+                                    }}
+                                    onClick={() => login(o.provider_param)}>
+                                    {o.provider_label}
+                                </div>
+                                :
+                                allowsNativeAuth ?
+                                    <div className={`${styles.button}`} key={`provider-fnid`} data-testid="login-button"
+                                        style={{
+                                            color: o.button_border_color ? o.button_border_color : '#ffffff',
+                                            border: `thin solid ${o.button_border_color ? o.button_border_color : o.button_color}`,
+                                            backgroundColor: o.button_color,
+                                            color: o.font_color,
+                                            backgroundImage: o.provider_logo ? `url(${o.provider_logo})` : 'none',
+                                            backgroundSize: o.provider_logo_size ? o.provider_logo_size : ''
+                                        }}
+                                        onClick={() => login(o.provider_param)}>
+                                        {o.provider_label}
+                                    </div>
+                                    :
+                                    null
                         )
                     })}
-                    <div className={styles.loginCode}>
-                        or get a login code emailed to you
-                        <div className={styles.input}>
-                            <input placeholder="youremail@example.com" value={email} onChange={e => setEmail(e.target.value)} onKeyPress={(ev) => ev.key === 'Enter' ? loginCode() : null} data-testid="email-input" />
-                            <button onClick={() => loginCode()} data-testid="email-button">
-                                &gt;
-                            </button>
-                            <br />
+                    {allowsOtpAuthlogin &&
+                        <div className={styles.loginCode}>
+                            or get a login code emailed to you
+                            <div className={styles.input}>
+                                <input placeholder="youremail@example.com" value={email} onChange={e => setEmail(e.target.value)} onKeyPress={(ev) => ev.key === 'Enter' ? loginCode() : null} data-testid="email-input" />
+                                <button onClick={() => loginCode()} data-testid="email-button">
+                                    &gt;
+                                </button>
+                                <br />
+                            </div>
+                            {emailError && <span data-testid="email-error">Please enter a valid email adress</span>}
                         </div>
-                        {emailError && <span data-testid="email-error">Please enter a valid email adress</span>}
-                    </div>
+                    }
                 </div>
             </>
         </div>

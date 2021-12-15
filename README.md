@@ -14,6 +14,10 @@ React component for the summit registration lite widget
 
    **supportEmail**           = string with the email address for support
 
+   **allowsNativeAuth**       = boolean to show/hide native auth
+
+   **allowsOtpAuth**          = boolean to show/hide OTP auth
+
    **loginOptions**           = array with the options to show on the login screen
 
    **loading**                = boolean to show/hide a loader on the widget
