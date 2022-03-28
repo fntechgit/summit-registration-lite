@@ -33,7 +33,11 @@
 }
 
 .loginCode {
-  margin-top: 20px;
+  margin-bottom: 10px;
+  font-size: 16px;
+  > div {
+    margin-top: 10px;
+  }
   span {
     display: inline-block;
     font-weight: normal;
@@ -61,7 +65,7 @@
     padding: 0px 15px;
     border: 1px solid var(--color_secondary_contrast);
     color: #fff;
-    box-shadow: none;    
+    box-shadow: none;
     text-align: center;
     white-space: nowrap;
     font-weight: bold;
