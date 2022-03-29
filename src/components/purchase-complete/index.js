@@ -11,12 +11,10 @@
  * limitations under the License.
  **/
 
-import React, { useState, useEffect } from 'react';
-import PropTypes from 'prop-types';
-
+import React, { useEffect } from 'react';
 import styles from "./index.module.scss";
 
-import { epochToMomentTimeZone } from "openstack-uicore-foundation/lib/methods";
+import { epochToMomentTimeZone } from "openstack-uicore-foundation/lib/utils/methods";
 
 const PurchaseComplete = ({ checkout, onPurchaseComplete, goToExtraQuestions, goToEvent, summit, supportEmail = "support@fntech.com" }) => {
 

@@ -17,9 +17,9 @@ import {
     postRequest,
     putRequest,
     deleteRequest
-} from "openstack-uicore-foundation/lib/methods";
+} from "openstack-uicore-foundation/lib/utils/actions";
 
-import { authErrorHandler } from "openstack-uicore-foundation/lib/methods";
+import { authErrorHandler } from "openstack-uicore-foundation/lib/utils/methods";
 
 import Swal from 'sweetalert2';
 

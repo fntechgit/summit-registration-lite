@@ -22,7 +22,7 @@ import {
     payTicket, getTicketTypes, getTaxesTypes, getLoginCode, passwordlessLogin, goToLogin
 } from "../actions";
 
-import { AjaxLoader } from "openstack-uicore-foundation/lib/components";
+import AjaxLoader from "openstack-uicore-foundation/lib/components/ajaxloader";
 
 import { loadStripe } from '@stripe/stripe-js';
 

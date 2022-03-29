@@ -1,8 +1,7 @@
 const MiniCssExtractPlugin      = require("mini-css-extract-plugin");
 
 module.exports = {
-    node: {fs: 'empty'},
-    module: {
+     module: {
         rules: [
             {
                 test: /\.(js|jsx)$/,
@@ -38,7 +37,7 @@ module.exports = {
                         options: {
                             modules: {
                                 localIdentName: "[local]___[hash:base64:5]",
-                                hashPrefix: 'summit-registration-lite',
+                                localIdentHashSalt: 'summit-registration-lite',
                             },
                             sourceMap: false
                         }
