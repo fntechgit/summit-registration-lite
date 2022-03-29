@@ -10,7 +10,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
-import {RawHTML} from 'openstack-uicore-foundation/lib/components'
+import RawHTML from 'openstack-uicore-foundation/lib/components/raw-html'
 import React, { useState, useEffect } from 'react';
 import { useSpring, config, animated } from "react-spring";
 import { useMeasure } from "react-use";
