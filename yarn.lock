@@ -7625,10 +7625,10 @@ onetime@^5.1.0:
   dependencies:
     mimic-fn "^2.1.0"
 
-openstack-uicore-foundation@^3.0.36:
-  version "3.0.36"
-  resolved "https://registry.yarnpkg.com/openstack-uicore-foundation/-/openstack-uicore-foundation-3.0.36.tgz#da8fcd498cb474d07203b5c9429bdde285716d91"
-  integrity sha512-w+j3K6aDNedyISxK+jGfeAuBN/z0v2z53qVPTw+vycRf89v70E2k68gP7s1FNod4S3yviYzZjj2FSXWV6EczXQ==
+openstack-uicore-foundation@^3.0.55:
+  version "3.0.55"
+  resolved "https://registry.yarnpkg.com/openstack-uicore-foundation/-/openstack-uicore-foundation-3.0.55.tgz#d4fabeaf96321d6bf7b50e09aedd869ea3486c3e"
+  integrity sha512-CTdmx1+ufTbBiRLcjhABIo1m4FK3R+N461G1bRvnzlEnHE5C8Yxej2vpGFLTvA2imSUcdbDmg0jnk2WzR/TLrQ==
 
 opn@^5.5.0:
   version "5.5.0"

@@ -57,7 +57,7 @@ export const loadSession = (settings) => (dispatch) => {
 
 // api/v1/summits/{id}/tax-types   
 
-export const getTicketTypes =  (summitId) => async (dispatch, getState, { apiBaseUrl, getAccessToken }) => {
+export const getTicketTypes = (summitId) => async (dispatch, getState, { apiBaseUrl, getAccessToken }) => {
 
     try {
         const accessToken = await getAccessToken();
@@ -77,12 +77,12 @@ export const getTicketTypes =  (summitId) => async (dispatch, getState, { apiBas
             dispatch(stopWidgetLoading());
         })
     }
-    catch (e){
+    catch (e) {
         return Promise.reject();
     }
 }
 
-export const getTaxesTypes = (summitId) =>  async (dispatch, getState, { apiBaseUrl, getAccessToken }) => {
+export const getTaxesTypes = (summitId) => async (dispatch, getState, { apiBaseUrl, getAccessToken }) => {
 
     try {
         const accessToken = await getAccessToken();
@@ -101,14 +101,14 @@ export const getTaxesTypes = (summitId) =>  async (dispatch, getState, { apiBase
             dispatch(stopWidgetLoading());
         })
     }
-    catch (e){
+    catch (e) {
         return Promise.reject();
     }
 }
 
 export const reserveTicket = (personalInformation, ticket) => async (dispatch, getState, { apiBaseUrl, getAccessToken }) => {
 
-    const { registrationLiteState: { settings: { summitId} } } = getState();
+    const { registrationLiteState: { settings: { summitId } } } = getState();
 
     let { firstName, lastName, email, company, promoCode } = personalInformation;
 
@@ -121,7 +121,7 @@ export const reserveTicket = (personalInformation, ticket) => async (dispatch, g
         expand: 'tickets,tickets.owner,tickets.ticket_type,tickets.ticket_type.taxes',
     };
 
-    let normalizedEntity = {
+    let normalizedEntity = normalizeReservation({
         owner_email: email,
         owner_first_name: firstName,
         owner_last_name: lastName,
@@ -135,7 +135,7 @@ export const reserveTicket = (personalInformation, ticket) => async (dispatch, g
                 attendee_email: email
             }
         ]
-    };
+    });
 
     return postRequest(
         createAction(CREATE_RESERVATION),
@@ -305,7 +305,7 @@ export const getLoginCode = (email, getPasswordlessCode) => async (dispatch, get
     dispatch(createAction(SET_PASSWORDLESS_LOGIN)(email));
 
     return new Promise((resolve, reject) => {
-        getPasswordlessCode(email).then((res) => {            
+        getPasswordlessCode(email).then((res) => {
             dispatch(createAction(SET_PASSWORDLESS_LENGTH)(res.response))
             resolve(res);
         }, (err) => {
@@ -321,7 +321,7 @@ export const passwordlessLogin = (code, loginWithCode) => async (dispatch, getSt
 
     return new Promise((resolve, reject) => {
         loginWithCode(code, email).then((res) => {
-            if(res) {
+            if (res) {
                 dispatch(createAction(SET_PASSWORDLESS_ERROR)())
             }
             resolve(res);
@@ -333,9 +333,23 @@ export const passwordlessLogin = (code, loginWithCode) => async (dispatch, getSt
 
 export const isInPersonTicketType = (ticketType) => {
     /** check is the current order has or not IN_PERSON tickets types **/
-    if(ticketType.hasOwnProperty("badge_type")){
+    if (ticketType.hasOwnProperty("badge_type")) {
         let badgeType = ticketType.badge_type;
-        return badgeType.access_levels.some((al) => { return al.name == 'IN_PERSON'});
+        return badgeType.access_levels.some((al) => { return al.name == 'IN_PERSON' });
     }
     return false;
+}
+
+const normalizeReservation = (entity) => {
+    const normalizedEntity = { ...entity };
+
+    if (!entity.owner_company.id) {
+        normalizedEntity['owner_company'] = entity.owner_company.name;
+    } else {
+        delete (normalizedEntity['owner_company']);
+        normalizedEntity['owner_company_id'] = entity.owner_company.id;
+    }
+
+    return normalizedEntity;
+
 }
