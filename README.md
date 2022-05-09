@@ -42,6 +42,8 @@ React component for the summit registration lite widget
    **loginWithCode**          = method passed that will be called when the user tries to login with a code
 
    **onPurchaseComplete**     = method passed that will be called after the purchase of a ticket it's completed
+
+   **handleCompanyError**     = method passed that will be called if the company dropdown can't be fetched
    
 
 ## PUBLISH TO NPM:
