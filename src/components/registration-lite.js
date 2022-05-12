@@ -77,6 +77,7 @@ const RegistrationLite = (
         loading,
         inPersonDisclaimer,
         userProfile,
+        handleCompanyError,
         ...rest
     }) => {
 
@@ -187,7 +188,9 @@ const RegistrationLite = (
                                                 isActive={step === 1}
                                                 reservation={reservation}
                                                 userProfile={profileData}
+                                                summitId={summitData.id}
                                                 changeForm={personalForm => setRegistrationForm({ ...registrationForm, personalInformation: personalForm })}
+                                                handleCompanyError={handleCompanyError}
                                             />
                                             <animated.div style={{ ...toggleAnimation }}>
                                                 <div ref={ref}>

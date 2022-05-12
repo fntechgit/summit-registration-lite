@@ -39,7 +39,11 @@
 }
 
 .loginCode {
-  margin-top: 20px;
+  margin-bottom: 10px;
+  font-size: 16px;
+  > div {
+    margin-top: 10px;
+  }
   span {
     display: inline-block;
     font-weight: normal;

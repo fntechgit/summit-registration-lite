@@ -37,7 +37,18 @@ const LoginComponent = ({ options, allowsNativeAuth, allowsOtpAuthlogin, getLogi
         <div className={`${styles.loginWrapper} step-wrapper`}>
             <>
                 <div className={`${styles.innerWrapper}`}>
-                    <span>Log in with one of the following</span>
+                    <div className={styles.loginCode}>
+                        Enter your email address to login or signup: 
+                        <div className={styles.input}>
+                            <input placeholder="youremail@example.com" value={email} onChange={e => setEmail(e.target.value)} onKeyPress={(ev) => ev.key === 'Enter' ? loginCode() : null} data-testid="email-input" />
+                            <button onClick={() => loginCode()} data-testid="email-button">
+                                &gt;
+                            </button>
+                            <br />
+                        </div>
+                        {emailError && <span data-testid="email-error">Please enter a valid email adress</span>}
+                    </div>
+                    <span>Or you may signup or login with a social provider:</span>
                     {options.map((o, index) => {
                         return (
                             o.provider_param ?
