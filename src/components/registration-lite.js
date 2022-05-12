@@ -53,6 +53,8 @@ const RegistrationLite = (
         passwordlessLogin,
         goToLogin,
         loginOptions,
+        allowsNativeAuth,
+        allowsOtpAuth,
         reservation,
         checkout,
         ticketTypes,
@@ -155,6 +157,8 @@ const RegistrationLite = (
                                     {!profileData && !passwordlessCodeSent &&
                                         <LoginComponent
                                             options={loginOptions}
+                                            allowsNativeAuth={allowsNativeAuth}
+                                            allowsOtpAuth={allowsOtpAuth}
                                             login={(provider) => rest.authUser(provider)}
                                             getLoginCode={getLoginCode}
                                             getPasswordlessCode={getPasswordlessCode} />
