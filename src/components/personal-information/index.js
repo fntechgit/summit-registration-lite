@@ -18,7 +18,6 @@ import { useForm } from 'react-hook-form';
 import { useSpring, config, animated } from "react-spring";
 import { useMeasure } from "react-use";
 import ReactTooltip from 'react-tooltip';
-import { capitalizeFirstLetter } from '../../helpers';
 
 import styles from "./index.module.scss";
 
@@ -123,16 +122,6 @@ const PersonalInfoComponent = ({ isActive, changeForm, reservation, userProfile,
                                     <input type="text" placeholder="Promo Code" {...register("promoCode")} />
                                 </div>
                             </form>
-
-                            {formErrors?.length > 0 && (
-                                <div className={styles.formErrors}>
-                                    {formErrors.map((error, index) => (
-                                        <div key={index} className={`${styles.alert} alert alert-danger`} role="alert">
-                                            {capitalizeFirstLetter(error)}.
-                                        </div>
-                                    ))}
-                                </div>
-                            )}
 
                             <a className={styles.moreInfo} data-tip data-for="promo-code-info">
                                 <i className="glyphicon glyphicon-info-sign" aria-hidden="true" />{` `}
