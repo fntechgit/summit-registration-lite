@@ -14,8 +14,6 @@
 import React from 'react';
 import styles from "./index.module.scss";
 
-
-
 const TicketOwnedComponent = ({ ownedTickets, ticketTypes }) => {
     const ownedTicketsString = ticketTypes.reduce((acc, ticketType) => {
         const matchingTickets = ownedTickets.filter(ticket => ticket.ticket_type_id === ticketType.id);
