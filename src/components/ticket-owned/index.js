@@ -16,7 +16,6 @@ import styles from "./index.module.scss";
 
 
 
-// TODO: Delete this component, since we no longer use it? Or replace it w/ the markup for the new alert component?
 const TicketOwnedComponent = ({ ownedTickets, ticketTypes }) => {
     const ownedTicketsString = ticketTypes.reduce((acc, ticketType) => {
         const matchingTickets = ownedTickets.filter(ticket => ticket.ticket_type_id === ticketType.id);
