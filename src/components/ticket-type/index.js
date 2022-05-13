@@ -11,16 +11,22 @@
  * limitations under the License.
  **/
 import RawHTML from 'openstack-uicore-foundation/lib/components/raw-html'
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useSpring, config, animated } from "react-spring";
 import { useMeasure } from "react-use";
 import styles from "./index.module.scss";
 import TicketDropdownComponent from '../ticket-dropdown';
-import {isInPersonTicketType} from "../../actions";
+import { isInPersonTicketType } from "../../actions";
+import ReactTooltip from 'react-tooltip';
+import { formatCurrency } from '../../helpers';
+import { getTicketMaxQuantity } from '../../helpers';
 
-const TicketTypeComponent = ({ ticketTypes, taxTypes, isActive, changeForm, reservation, inPersonDisclaimer }) => {
-
+const TicketTypeComponent = ({ ticketTypes, isActive, changeForm, reservation, inPersonDisclaimer }) => {
     const [ticket, setTicket] = useState(null);
+    const [quantity, setQuantity] = useState(1);
+
+    const minQuantity = 1;
+    const maxQuantity = getTicketMaxQuantity(ticket);
 
     const [ref, { height }] = useMeasure();
 
@@ -30,7 +36,6 @@ const TicketTypeComponent = ({ ticketTypes, taxTypes, isActive, changeForm, rese
         to: {
             opacity: 1,
             height: isActive ? height + 10 : 0,
-            marginBottom: isActive ? 5 : 0
         }
     });
 
@@ -41,56 +46,107 @@ const TicketTypeComponent = ({ ticketTypes, taxTypes, isActive, changeForm, rese
     }, [])
 
     useEffect(() => {
-        changeForm(ticket);
-    }, [ticket])
+        changeForm({ ticketType: ticket, ticketQuantity: quantity });
+    }, [ticket, quantity])
 
-    const ticketSelect = (t) => {
+    const handleTicketChange = (t) => {
         setTicket(t);
+        setQuantity(minQuantity);
     }
+
+    const incrementQuantity = () => setQuantity(quantity + 1);
+
+    const decrementQuantity = () => setQuantity(quantity - 1);
 
     return (
         <div className={`${styles.outerWrapper} step-wrapper`}>
             <>
-                <div className={`${styles.innerWrapper}`}>
+                <div className={styles.innerWrapper}>
                     <div className={styles.title} >
-                        <span>Ticket </span>
-                        <div className={styles.summary} >
-                            {!isActive &&
-                                reservation?.discount_amount > 0 ?
-                                <span>
-                                    {ticket &&
-                                        <>
-                                            {ticket.name} &nbsp;
-                                        <span className={styles.crossOut}>
-                                            ${ticket.cost} &nbsp;
-                                        </span>
-                                            <span className={styles.discount}>
-                                                ${reservation.raw_amount - reservation.discount_amount}
+                        <span>
+                            Ticket
+                        </span>
+                        <div className={styles.summary}>
+                            <span>
+                                {ticket && (
+                                    <>
+                                        {ticket.name}{` `}
+                                        ({quantity}):{` `}
+
+                                        {!isActive && reservation?.discount_amount > 0 && (
+                                            <>
+                                                <span className={styles.crossOut}>
+                                                    {formatCurrency(ticket.cost * quantity, { currency: ticket.currency })}
+                                                </span>{` `}
+                                                <span className={styles.discount}>
+                                                    {formatCurrency(reservation.raw_amount - reservation.discount_amount, { currency: ticket.currency })}
+                                                </span>{` `}
+                                            </>
+                                        )}
+
+                                        {!reservation?.discount_amount && (
+                                            <>
+                                                {formatCurrency(ticket.cost * quantity, { currency: ticket.currency })}{` `}
+                                            </>
+                                        )}
+
+                                        {ticket.currency}
+
+                                        {!isActive && reservation?.discount_amount > 0 && (
+                                            <span className={styles.promo}>
+                                                Promo code applied
                                             </span>
-                                            {ticket.currency}
-                                        </>
-                                    }
-                                    <span className={styles.promo}>
-                                        Promo code applied
-                                    </span>
-                                </span>
-                                :
-                                <span>{ticket ? `${ticket.name}: $${ticket.cost} ${ticket.currency}` : 'No ticket selected'}</span>
-                            }
-                            {
-                                !isActive && reservation?.taxes_amount > 0 &&
-                                <>
-                                    <br />
-                                    <span>Taxes: ${reservation?.taxes_amount} {ticket?.currency}</span>
-                                </>
-                            }
+                                        )}
+
+                                        {!isActive && reservation?.taxes_amount > 0 && (
+                                            <>
+                                                <br />
+                                                Taxes: ${reservation?.taxes_amount} {ticket?.currency}
+                                            </>
+                                        )}
+                                    </>
+                                )}
+
+                                {!ticket && <>No ticket selected</>}
+                            </span>
                         </div>
                     </div>
+
                     <animated.div style={{ overflow: 'hidden', ...toggleAnimation }}>
-                        <div ref={ref} className={styles.dropdown}>
-                            <TicketDropdownComponent selectedTicket={ticket} ticketTypes={ticketTypes} onTicketSelect={(t) => ticketSelect(t)} />
+                        <div ref={ref}>
+                            <div className={styles.form}>
+                                <div className={styles.dropdown}>
+                                    <TicketDropdownComponent selectedTicket={ticket} ticketTypes={ticketTypes} onTicketSelect={handleTicketChange} />
+                                </div>
+
+                                {ticket && (
+                                    <div className={styles.quantity}>
+                                        <div className="input-group">
+                                            <span className="input-group-btn">
+                                                <button aria-label="remove a ticket" className="btn btn-default" onClick={decrementQuantity} disabled={maxQuantity === 0 || quantity === minQuantity}>
+                                                    <i className="fa fa-minus"></i>
+                                                </button>
+                                            </span>
+                                            <input className="form-control" aria-label="ticket quanity" name="ticket_quantity" type="text" value={quantity} readOnly={true} disabled={maxQuantity === 0} />
+                                            <span className="input-group-btn">
+                                                <button aria-label="add a ticket" className="btn btn-default" onClick={incrementQuantity} disabled={maxQuantity === 0 || quantity >= maxQuantity}>
+                                                    <i className="glyphicon glyphicon-plus" />
+                                                </button>
+                                            </span>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                            <a className={styles.moreInfo} data-tip data-for="ticket-quantity-info">
+                                <i className="glyphicon glyphicon-info-sign" aria-hidden="true" />{` `}
+                                Need multiple ticket types?
+                            </a>
+                            <ReactTooltip id="ticket-quantity-info">
+                                <div className={styles.moreInfoTooltip}>In order to select multiple tickets of a different type, you may place a new registration order after you complete this order.</div>
+                            </ReactTooltip>
                         </div>
                     </animated.div>
+
                     {inPersonDisclaimer && ticket && isInPersonTicketType(ticket) &&
                         <div className={styles.inPersonDisclaimer}>
                             <RawHTML>

@@ -15,24 +15,25 @@ import React from 'react';
 import styles from "./index.module.scss";
 
 
-const TicketOwnedComponent = ({ goToRegistration }) => {
+
+// TODO: Delete this component, since we no longer use it? Or replace it w/ the markup for the new alert component?
+const TicketOwnedComponent = ({ ownedTickets, ticketTypes }) => {
+    const ownedTicketsString = ticketTypes.reduce((acc, ticketType) => {
+        const matchingTickets = ownedTickets.filter(ticket => ticket.ticket_type_id === ticketType.id);
+
+        if (!matchingTickets.length) return acc;
+
+        return `${acc}${acc ? ', ' : ''}${matchingTickets.length} ${ticketType.name}${!ticketType.name.toLowerCase().endsWith('ticket') ? ' ticket' : ''}${matchingTickets.length > 1 ? 's' : ''}`;
+    }, '');
 
     return (
-        <div className={`${styles.wrapper}`}>
-            <>
-                <div className={styles.circle}>
-                    <i className="fa fa-ticket"></i>
-                </div>
-                <span className={styles.complete}>
-                    Our records show you have a ticket(s) to this event.
-                </span>
-                <span className={styles.complete}>
-                    If you would like to purchase more, <a onClick={() => goToRegistration()}>click here</a>.
-                </span>
-            </>
+        <div className={styles.ticketOwnedWrapper}>
+            <div className={`${styles.alert} alert alert-warning`} role="alert">
+                You have already ordered {ownedTicketsString}. If you would like to order more tickets, please do so below.
+            </div>
         </div>
-    );
-}
+    )
+};
 
 
 export default TicketOwnedComponent

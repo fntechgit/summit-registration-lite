@@ -13,15 +13,15 @@
 
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
-
 import { useForm } from 'react-hook-form';
 import { useSpring, config, animated } from "react-spring";
 import { useMeasure } from "react-use";
+import ReactTooltip from 'react-tooltip';
+import { capitalizeFirstLetter } from '../../helpers';
 
 import styles from "./index.module.scss";
 
-const PersonalInfoComponent = ({ isActive, changeForm, reservation, userProfile }) => {
-
+const PersonalInfoComponent = ({ isActive, changeForm, reservation, userProfile, formErrors }) => {
     const [personalInfo, setPersonalInfo] = useState(
         {
             firstName: userProfile.given_name || '',
@@ -58,7 +58,6 @@ const PersonalInfoComponent = ({ isActive, changeForm, reservation, userProfile 
         to: {
             opacity: 1,
             height: isActive ? height + 10 : 0,
-            marginBottom: isActive ? 5 : 0
         }
     });
 
@@ -84,7 +83,7 @@ const PersonalInfoComponent = ({ isActive, changeForm, reservation, userProfile 
                         <div ref={ref}>
                             <form id="personal-info-form" onSubmit={handleSubmit(onSubmit)} className={styles.form} data-testid="personal-form">
                                 <div>
-                                    <input type="text" placeholder="First name *" defaultValue={personalInfo.firstName || ''} {...register("firstName", { required: true, maxLength: 80 })} data-testid="first-name"/>
+                                    <input type="text" placeholder="First name *" defaultValue={personalInfo.firstName || ''} {...register("firstName", { required: true, maxLength: 80 })} data-testid="first-name" />
                                     {errors.firstName && <span data-testid="first-name-error">This field is required</span>}
                                 </div>
                                 <div>
@@ -97,13 +96,31 @@ const PersonalInfoComponent = ({ isActive, changeForm, reservation, userProfile 
                                     {errors.email?.type === 'pattern' && <span data-testid="email-error-invalid">The email is invalid</span>}
                                 </div>
                                 <div>
-                                    <input type="text" placeholder="Company *" defaultValue={personalInfo.company || ''} {...register("company", { required: true })} data-testid="company"/>
+                                    <input type="text" placeholder="Company *" defaultValue={personalInfo.company || ''} {...register("company", { required: true })} data-testid="company" />
                                     {errors.company && <span data-testid="company-error">This field is required</span>}
                                 </div>
                                 <div>
                                     <input type="text" placeholder="Promo Code" {...register("promoCode")} />
                                 </div>
                             </form>
+
+                            {formErrors?.length > 0 && (
+                                <div className={styles.formErrors}>
+                                    {formErrors.map((error, index) => (
+                                        <div key={index} className={`${styles.alert} alert alert-danger`} role="alert">
+                                            {capitalizeFirstLetter(error)}.
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+
+                            <a className={styles.moreInfo} data-tip data-for="promo-code-info">
+                                <i className="glyphicon glyphicon-info-sign" aria-hidden="true" />{` `}
+                                Have multiple promo codes?
+                            </a>
+                            <ReactTooltip id="promo-code-info">
+                                <div className={styles.moreInfoTooltip}>In order to use multiple promo codes, you may place a new registration order with the new promo code after you complete this order. This promo code will be applied to all tickets in this order.</div>
+                            </ReactTooltip>
                         </div>
                     </animated.div>
                 </div>

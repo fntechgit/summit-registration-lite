@@ -12,7 +12,7 @@
   display: flex;
   flex-wrap: wrap;
   justify-content: space-between;
-  margin: 10px 0;
+  margin: 10px 0 0;
   div {
     width: 48%;
     input {
@@ -34,11 +34,28 @@
       cursor: default;
     }
     span {
-      display: inline-block;      
+      display: inline-block;
       color: #e5424d;
     }
-    &>:last-child{
+    & > :last-child {
       margin-bottom: 5px;
     }
   }
+}
+
+.moreInfo {
+  display: inline-block;
+  margin-top: 10px;
+}
+
+.moreInfoTooltip {
+  max-width: 280px;
+}
+
+.formErrors {
+  margin-top: 10px;
+}
+
+.alert {
+  margin: 0 !important;
 }
