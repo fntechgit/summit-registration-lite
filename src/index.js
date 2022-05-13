@@ -36,11 +36,14 @@ const filterProps = {
     ticketOwned: false,
     marketingData: MarketingData.colors,
     supportEmail: 'support@fntech.com',
+    allowsNativeAuth: true,
+    allowsOtpAuth: true,
     loginOptions: [
         { button_color: '#082238', provider_label: 'FNid', provider_param: 'fnid' },
         { button_color: '#1877F2', provider_label: 'Continue with Facebook', provider_param: 'facebook', provider_logo: 'https://facebookbrand.com/wp-content/uploads/2019/10/Copy-of-facebook-app.svg', provider_logo_size: 22 },
         { button_color: '#0A66C2', provider_label: 'Sign in with LinkedIn', provider_param: 'linkedin', provider_logo: 'https://svgur.com/i/ZxJ.svg', provider_logo_size: 21 },
         { button_color: '#000000', provider_label: 'Continue with Apple', provider_param: 'apple_id', provider_logo: 'https://upload.wikimedia.org/wikipedia/commons/3/31/Apple_logo_white.svg', provider_logo_size: 19 },
+        { button_color: '#FFFFFF', font_color: '#00297a', provider_label: 'Continue with Okta', provider_param: 'okta', provider_logo: 'https://cdn.icon-icons.com/icons2/2699/PNG/512/okta_logo_icon_169896.png', provider_logo_size: 19 },
         { button_color: '#2272E7', provider_label: 'Microsoft', provider_param: 'microsoft' },
     ],
 };

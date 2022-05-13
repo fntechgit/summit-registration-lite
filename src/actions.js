@@ -108,7 +108,6 @@ export const getTaxesTypes = (summitId) => async (dispatch, getState, { apiBaseU
 export const reserveTicket = ({ personalInformation, ticket, ticketQuantity }) =>
     async (dispatch, getState, { apiBaseUrl, getAccessToken }) => {
         const { registrationLiteState: { settings: { summitId } } } = getState();
-
         let { firstName, lastName, email, company, promoCode } = personalInformation;
 
         dispatch(startWidgetLoading());
@@ -128,13 +127,13 @@ export const reserveTicket = ({ personalInformation, ticket, ticketQuantity }) =
             expand: 'tickets,tickets.owner,tickets.ticket_type,tickets.ticket_type.taxes',
         };
 
-        let normalizedEntity = {
+        const normalizedEntity = normalizeReservation({
             owner_email: email,
             owner_first_name: firstName,
             owner_last_name: lastName,
             owner_company: company,
             tickets
-        };
+        });
 
         return postRequest(
             createAction(CREATE_RESERVATION),
@@ -338,4 +337,18 @@ export const isInPersonTicketType = (ticketType) => {
         return badgeType.access_levels.some((al) => { return al.name == 'IN_PERSON' });
     }
     return false;
+}
+
+const normalizeReservation = (entity) => {
+    const normalizedEntity = { ...entity };
+
+    if (!entity.owner_company.id) {
+        normalizedEntity['owner_company'] = entity.owner_company.name;
+    } else {
+        delete (normalizedEntity['owner_company']);
+        normalizedEntity['owner_company_id'] = entity.owner_company.id;
+    }
+
+    return normalizedEntity;
+
 }

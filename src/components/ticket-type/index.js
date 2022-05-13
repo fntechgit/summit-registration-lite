@@ -11,7 +11,7 @@
  * limitations under the License.
  **/
 import RawHTML from 'openstack-uicore-foundation/lib/components/raw-html'
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useSpring, config, animated } from "react-spring";
 import { useMeasure } from "react-use";
 import styles from "./index.module.scss";

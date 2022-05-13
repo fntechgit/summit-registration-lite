@@ -14,6 +14,10 @@ React component for the summit registration lite widget
 
    **supportEmail**           = string with the email address for support
 
+   **allowsNativeAuth**       = boolean to show/hide native auth
+
+   **allowsOtpAuth**          = boolean to show/hide OTP auth
+
    **loginOptions**           = array with the options to show on the login screen
 
    **loading**                = boolean to show/hide a loader on the widget
@@ -42,6 +46,8 @@ React component for the summit registration lite widget
    **loginWithCode**          = method passed that will be called when the user tries to login with a code
 
    **onPurchaseComplete**     = method passed that will be called after the purchase of a ticket it's completed
+
+   **handleCompanyError**     = method passed that will be called if the company dropdown can't be fetched
    
 
 ## PUBLISH TO NPM:

@@ -13,6 +13,7 @@
 
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
+import { RegistrationCompanyInput } from 'openstack-uicore-foundation/lib/components'
 import { useForm } from 'react-hook-form';
 import { useSpring, config, animated } from "react-spring";
 import { useMeasure } from "react-use";
@@ -21,16 +22,19 @@ import { capitalizeFirstLetter } from '../../helpers';
 
 import styles from "./index.module.scss";
 
-const PersonalInfoComponent = ({ isActive, changeForm, reservation, userProfile, formErrors }) => {
+const PersonalInfoComponent = ({ isActive, changeForm, reservation, userProfile, summitId, handleCompanyError }) => {
+
     const [personalInfo, setPersonalInfo] = useState(
         {
             firstName: userProfile.given_name || '',
             lastName: userProfile.family_name || '',
             email: userProfile.email || '',
-            company: userProfile.company || '',
+            company: { id: null, name: userProfile.company || '' },
             promoCode: '',
         }
     )
+
+    const [companyError, setCompanyError] = useState(false);
 
     const { register, handleSubmit, formState: { errors } } = useForm();
 
@@ -40,14 +44,24 @@ const PersonalInfoComponent = ({ isActive, changeForm, reservation, userProfile,
                 firstName: reservation.owner_first_name ? reservation.owner_first_name : personalInfo.firstName,
                 lastName: reservation.owner_last_name ? reservation.owner_last_name : personalInfo.lastName,
                 email: reservation.owner_email ? reservation.owner_email : personalInfo.email,
-                company: reservation.owner_company ? reservation.owner_company : personalInfo.company,
+                company: { id: null, name: reservation.owner_company ? reservation.owner_company : personalInfo.company },
             });
         }
     }, [])
 
+    const onCompanyChange = (ev) => {
+        const newCompany = ev.target.value;
+        setCompanyError(false);
+        setPersonalInfo({ ...personalInfo, company: newCompany });
+    }
+
     const onSubmit = data => {
-        setPersonalInfo(data);
-        changeForm(data);
+        if (!personalInfo.company.name) {
+            setCompanyError(true);
+            return;
+        }
+        setPersonalInfo({ ...personalInfo, ...data });
+        changeForm({ ...personalInfo, ...data });
     };
 
     const [ref, { height }] = useMeasure();
@@ -70,7 +84,7 @@ const PersonalInfoComponent = ({ isActive, changeForm, reservation, userProfile,
                         {!isActive &&
                             <div data-testid="personal-info">
                                 <span>
-                                    {`${personalInfo.firstName} ${personalInfo.lastName} ${personalInfo.company ? `- ${personalInfo.company}` : ''}`}
+                                    {`${personalInfo.firstName} ${personalInfo.lastName} ${personalInfo.company.name ? `- ${personalInfo.company.name}` : ''}`}
                                 </span>
                                 <br />
                                 <span>
@@ -95,9 +109,15 @@ const PersonalInfoComponent = ({ isActive, changeForm, reservation, userProfile,
                                     {errors.email?.type === 'required' && <span data-testid="email-error-required">This field is required</span>}
                                     {errors.email?.type === 'pattern' && <span data-testid="email-error-invalid">The email is invalid</span>}
                                 </div>
-                                <div>
-                                    <input type="text" placeholder="Company *" defaultValue={personalInfo.company || ''} {...register("company", { required: true })} data-testid="company" />
-                                    {errors.company && <span data-testid="company-error">This field is required</span>}
+                                <div className={styles.companies}>
+                                    <RegistrationCompanyInput
+                                        id="company"
+                                        summitId={summitId}
+                                        onChange={onCompanyChange}
+                                        onError={handleCompanyError}
+                                        value={personalInfo.company}
+                                    />
+                                    {companyError && <span data-testid="company-error">This field is required</span>}
                                 </div>
                                 <div>
                                     <input type="text" placeholder="Promo Code" {...register("promoCode")} />

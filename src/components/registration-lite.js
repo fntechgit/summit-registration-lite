@@ -53,6 +53,8 @@ const RegistrationLite = (
         passwordlessLogin,
         goToLogin,
         loginOptions,
+        allowsNativeAuth,
+        allowsOtpAuth,
         reservation,
         checkout,
         ticketTypes,
@@ -76,6 +78,7 @@ const RegistrationLite = (
         loading,
         inPersonDisclaimer,
         userProfile,
+        handleCompanyError,
         ...rest
     }) => {
 
@@ -148,23 +151,25 @@ const RegistrationLite = (
                 <AjaxLoader relative={true} color={'#ffffff'} show={widgetLoading || loading} size={80} />
                 <div className={`${styles.outerWrapper} summit-registration-lite`}>
                     <>
-                        <div className={`${styles.innerWrapper}`}>
+                        <div className={styles.innerWrapper}>
                             <div className={styles.title} >
                                 <span>{summitData.name}</span>
                                 <i className="fa fa-close" aria-label="close" onClick={() => rest.closeWidget()}></i>
                             </div>
 
-
                             <div className={styles.stepsWrapper}>
-                                {!profileData && !passwordlessCodeSent &&
+                                {!profileData && !passwordlessCodeSent && (
                                     <LoginComponent
                                         options={loginOptions}
+                                        allowsNativeAuth={allowsNativeAuth}
+                                        allowsOtpAuth={allowsOtpAuth}
                                         login={(provider) => rest.authUser(provider)}
                                         getLoginCode={getLoginCode}
-                                        getPasswordlessCode={getPasswordlessCode} />
-                                }
+                                        getPasswordlessCode={getPasswordlessCode}
+                                    />
+                                )}
 
-                                {!profileData && passwordlessCodeSent &&
+                                {!profileData && passwordlessCodeSent && (
                                     <PasswordlessLoginComponent
                                         codeLength={passwordlessCode}
                                         email={passwordlessEmail}
@@ -173,12 +178,12 @@ const RegistrationLite = (
                                         codeError={passwordlessCodeError}
                                         goToLogin={goToLogin}
                                         getLoginCode={getLoginCode}
-                                        getPasswordlessCode={getPasswordlessCode} />
-                                }
+                                        getPasswordlessCode={getPasswordlessCode}
+                                    />
+                                )}
 
-                                {profileData && step !== 3 && ticketTypes.length > 0 &&
+                                {profileData && step !== 3 && ticketTypes.length > 0 && (
                                     <>
-                                        {/* TODO: Finish out this new alert. */}
                                         {ticketOwned && <TicketOwnedComponent ownedTickets={ownedTickets} ticketTypes={ticketTypes} />}
 
                                         <TicketTypeComponent
@@ -193,7 +198,9 @@ const RegistrationLite = (
                                             isActive={step === 1}
                                             reservation={reservation}
                                             userProfile={profileData}
+                                            summitId={summitData.id}
                                             changeForm={personalForm => setRegistrationForm({ ...registrationForm, personalInformation: personalForm })}
+                                            handleCompanyError={handleCompanyError}
                                         />
                                         <animated.div style={{ ...toggleAnimation }}>
                                             <div ref={ref}>
@@ -207,9 +214,9 @@ const RegistrationLite = (
                                             </div>
                                         </animated.div>
                                     </>
-                                }
+                                )}
 
-                                {profileData && step === 3 &&
+                                {profileData && step === 3 && (
                                     <PurchaseComplete
                                         checkout={checkout}
                                         summit={summitData}
@@ -218,17 +225,18 @@ const RegistrationLite = (
                                         goToEvent={goToEvent}
                                         goToExtraQuestions={goToExtraQuestions}
                                     />
-                                }
+                                )}
                             </div>
 
-                            {profileData && step !== 3 &&
+                            {profileData && step !== 3 && (
                                 <ButtonBarComponent
                                     step={step}
                                     inPersonDisclaimer={inPersonDisclaimer}
                                     registrationForm={registrationForm}
                                     removeReservedTicket={removeReservedTicket}
                                     changeStep={changeStep}
-                                />}
+                                />
+                            )}
                         </div>
                     </>
                 </div>
