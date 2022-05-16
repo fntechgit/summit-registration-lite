@@ -20,7 +20,7 @@ const TicketOwnedComponent = ({ ownedTickets, ticketTypes }) => {
 
         if (!matchingTickets.length) return acc;
 
-        return `${acc}${acc ? ', ' : ''}g${matchingTickets.length} ${ticketType.name}${!ticketType.name.toLowerCase().endsWith('ticket') ? ' ticket' : ''}${matchingTickets.length > 1 ? 's' : ''}`;
+        return `${acc}${acc ? ', ' : ''}${matchingTickets.length} ${ticketType.name}${!ticketType.name.toLowerCase().endsWith('ticket') ? ' ticket' : ''}${matchingTickets.length > 1 ? 's' : ''}`;
     }, '');
 
     return (
