@@ -11,17 +11,17 @@
  * limitations under the License.
  **/
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import styles from "./index.module.scss";
 
 const TicketOwnedComponent = ({ ownedTickets, ticketTypes }) => {
-    const ownedTicketsString = ticketTypes.reduce((acc, ticketType) => {
-        const matchingTickets = ownedTickets.filter(ticket => ticket.ticket_type_id === ticketType.id);
+    const ownedTicketsString = useMemo(() => ownedTickets.reduce((acc, ownedTicket) => {
+        const ticketType = ticketTypes.find(type => type.id === ownedTicket.type_id);
 
-        if (!matchingTickets.length) return acc;
+        if (!ticketType) return acc;
 
-        return `${acc}${acc ? ', ' : ''}${matchingTickets.length} ${ticketType.name}${!ticketType.name.toLowerCase().endsWith('ticket') ? ' ticket' : ''}${matchingTickets.length > 1 ? 's' : ''}`;
-    }, '');
+        return `${acc}${acc ? ', ' : ''}${ownedTicket.qty} ${ticketType.name}${!ticketType.name.toLowerCase().endsWith('ticket') ? ' ticket' : ''}${ownedTicket.qty > 1 ? 's' : ''}`;
+    }, ''), [ownedTickets, ticketTypes]);
 
     return (
         <div className={styles.ticketOwnedWrapper}>

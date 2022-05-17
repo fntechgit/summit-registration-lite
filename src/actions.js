@@ -18,7 +18,7 @@ import {
     putRequest,
     deleteRequest
 } from "openstack-uicore-foundation/lib/utils/actions";
-import { authErrorHandler } from "openstack-uicore-foundation/lib/utils/methods";
+import { authErrorHandler } from "openstack-uicore-foundation/lib/utils/actions";
 import Swal from 'sweetalert2';
 import { formatErrorMessage } from "./helpers";
 
@@ -105,7 +105,7 @@ export const getTaxesTypes = (summitId) => async (dispatch, getState, { apiBaseU
     }
 }
 
-export const reserveTicket = ({ personalInformation, ticket, ticketQuantity }) =>
+export const reserveTicket = ({ personalInformation, ticket, ticketQuantity }, { onError }) =>
     async (dispatch, getState, { apiBaseUrl, getAccessToken }) => {
         const { registrationLiteState: { settings: { summitId } } } = getState();
         let { firstName, lastName, email, company, promoCode } = personalInformation;
@@ -135,12 +135,18 @@ export const reserveTicket = ({ personalInformation, ticket, ticketQuantity }) =
             tickets
         });
 
+        const errorHandler = (err, res) => (dispatch, state) => {
+            if (res && res.statusCode === 412 && onError) return onError(err, res);
+
+            return authErrorHandler(err, res);
+        };
+
         return postRequest(
             createAction(CREATE_RESERVATION),
             createAction(CREATE_RESERVATION_SUCCESS),
             `${apiBaseUrl}/api/v1/summits/${summitId}/orders/reserve`,
             normalizedEntity,
-            authErrorHandler,
+            errorHandler,
             // entity
         )(params)(dispatch)
             .then((payload) => {
@@ -155,7 +161,6 @@ export const reserveTicket = ({ personalInformation, ticket, ticketQuantity }) =
                 }
             })
             .catch(e => {
-                Swal.fire(e.res.body.message, e.res.body.errors?.length > 0 ? formatErrorMessage(e.res.body.errors[0]) : '', "error");
                 dispatch(createAction(CREATE_RESERVATION_ERROR)(e));
                 dispatch(stopWidgetLoading());
                 return (e);

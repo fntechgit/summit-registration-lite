@@ -82,14 +82,21 @@ const RegistrationLite = (
         ...rest
     }) => {
 
-    const [registrationForm, setRegistrationForm] = useState(
-        {
+    const [registrationForm, setRegistrationForm] = useState({
+        values: {
             ticketType: null,
             ticketQuantity: 1,
             personalInformation: null,
             paymentInformation: null,
-        }
-    );
+        },
+        errors: []
+    });
+
+    const { values: formValues, errors: formErrors } = registrationForm;
+
+    const setFormValues = (values) => setRegistrationForm({ ...registrationForm, values });
+
+    const setFormErrors = (errors) => setRegistrationForm({ ...registrationForm, errors });
 
     let publicKey = null;
     for (let profile of summitData.payment_profiles) {
@@ -115,25 +122,32 @@ const RegistrationLite = (
     }, [summitData, profileData]);
 
     useEffect(() => {
-        if (step === 1 && registrationForm.ticketType && registrationForm.personalInformation) {
+        if (step === 1 && formValues?.ticketType && formValues?.personalInformation) {
             reserveTicket({
-                personalInformation: registrationForm.personalInformation,
-                ticket: registrationForm.ticketType,
-                ticketQuantity: registrationForm.ticketQuantity
+                personalInformation: formValues?.personalInformation,
+                ticket: formValues?.ticketType,
+                ticketQuantity: formValues?.ticketQuantity,
+            }, {
+                onError: (err, res) => setFormErrors(res.body.errors)
             });
         }
-        if (step > 0 && !registrationForm.ticketType) {
+
+        if (step > 0 && !formValues?.ticketType) {
             changeStep(0);
         }
-    }, [registrationForm])
+    }, [formValues]);
+
+    useEffect(() => {
+        setFormErrors([]);
+    }, [step])
 
     const [ref, { height }] = useMeasure();
 
     const toggleAnimation = useSpring({
         config: { bounce: 0, ...config.stiff },
         to: {
-            opacity: registrationForm.ticketType?.cost === 0 ? 0 : 1,
-            height: registrationForm.ticketType?.cost === 0 ? 0 : height,
+            opacity: formValues?.ticketType?.cost === 0 ? 0 : 1,
+            height: formValues?.ticketType?.cost === 0 ? 0 : height,
         }
     });
 
@@ -142,7 +156,7 @@ const RegistrationLite = (
         // (i.e., recalling `onPurchaseComplete` after a user completes one order, closes the window, and then reopens the registration widget)
         changeStep(0);
         rest.closeWidget();
-    }
+    };
 
     return (
         <div id="modal" className="modal is-active">
@@ -150,95 +164,94 @@ const RegistrationLite = (
             <div className="modal-content">
                 <AjaxLoader relative={true} color={'#ffffff'} show={widgetLoading || loading} size={80} />
                 <div className={`${styles.outerWrapper} summit-registration-lite`}>
-                    <>
-                        <div className={styles.innerWrapper}>
-                            <div className={styles.title} >
-                                <span>{summitData.name}</span>
-                                <i className="fa fa-close" aria-label="close" onClick={() => rest.closeWidget()}></i>
-                            </div>
+                    <div className={styles.innerWrapper}>
+                        <div className={styles.title} >
+                            <span>{summitData.name}</span>
+                            <i className="fa fa-close" aria-label="close" onClick={handleCloseClick}></i>
+                        </div>
 
-                            <div className={styles.stepsWrapper}>
-                                {!profileData && !passwordlessCodeSent && (
-                                    <LoginComponent
-                                        options={loginOptions}
-                                        allowsNativeAuth={allowsNativeAuth}
-                                        allowsOtpAuth={allowsOtpAuth}
-                                        login={(provider) => rest.authUser(provider)}
-                                        getLoginCode={getLoginCode}
-                                        getPasswordlessCode={getPasswordlessCode}
+                        <div className={styles.stepsWrapper}>
+                            {!profileData && !passwordlessCodeSent && (
+                                <LoginComponent
+                                    options={loginOptions}
+                                    allowsNativeAuth={allowsNativeAuth}
+                                    allowsOtpAuth={allowsOtpAuth}
+                                    login={(provider) => rest.authUser(provider)}
+                                    getLoginCode={getLoginCode}
+                                    getPasswordlessCode={getPasswordlessCode}
+                                />
+                            )}
+
+                            {!profileData && passwordlessCodeSent && (
+                                <PasswordlessLoginComponent
+                                    codeLength={passwordlessCode}
+                                    email={passwordlessEmail}
+                                    passwordlessLogin={passwordlessLogin}
+                                    loginWithCode={loginWithCode}
+                                    codeError={passwordlessCodeError}
+                                    goToLogin={goToLogin}
+                                    getLoginCode={getLoginCode}
+                                    getPasswordlessCode={getPasswordlessCode}
+                                />
+                            )}
+
+                            {profileData && step !== 3 && ticketTypes.length > 0 && (
+                                <>
+                                    {ticketOwned && <TicketOwnedComponent ownedTickets={ownedTickets} ticketTypes={ticketTypes} />}
+
+                                    <TicketTypeComponent
+                                        ticketTypes={ticketTypes}
+                                        inPersonDisclaimer={inPersonDisclaimer}
+                                        taxTypes={taxTypes}
+                                        reservation={reservation}
+                                        isActive={step === 0}
+                                        changeForm={ticketForm => setFormValues({ ...formValues, ...ticketForm })}
                                     />
-                                )}
-
-                                {!profileData && passwordlessCodeSent && (
-                                    <PasswordlessLoginComponent
-                                        codeLength={passwordlessCode}
-                                        email={passwordlessEmail}
-                                        passwordlessLogin={passwordlessLogin}
-                                        loginWithCode={loginWithCode}
-                                        codeError={passwordlessCodeError}
-                                        goToLogin={goToLogin}
-                                        getLoginCode={getLoginCode}
-                                        getPasswordlessCode={getPasswordlessCode}
+                                    <PersonalInfoComponent
+                                        isActive={step === 1}
+                                        reservation={reservation}
+                                        userProfile={profileData}
+                                        summitId={summitData.id}
+                                        changeForm={personalInformation => setFormValues({ ...formValues, personalInformation })}
+                                        handleCompanyError={handleCompanyError}
+                                        formErrors={formErrors}
                                     />
-                                )}
+                                    <animated.div style={{ ...toggleAnimation }}>
+                                        <div ref={ref}>
+                                            <PaymentComponent
+                                                isActive={step === 2}
+                                                reservation={reservation}
+                                                payTicket={payTicket}
+                                                userProfile={profileData}
+                                                stripeKey={stripePromise}
+                                            />
+                                        </div>
+                                    </animated.div>
+                                </>
+                            )}
 
-                                {profileData && step !== 3 && ticketTypes.length > 0 && (
-                                    <>
-                                        {ticketOwned && <TicketOwnedComponent ownedTickets={ownedTickets} ticketTypes={ticketTypes} />}
-
-                                        <TicketTypeComponent
-                                            ticketTypes={ticketTypes}
-                                            inPersonDisclaimer={inPersonDisclaimer}
-                                            taxTypes={taxTypes}
-                                            reservation={reservation}
-                                            isActive={step === 0}
-                                            changeForm={ticketForm => setRegistrationForm({ ...registrationForm, ...ticketForm })}
-                                        />
-                                        <PersonalInfoComponent
-                                            isActive={step === 1}
-                                            reservation={reservation}
-                                            userProfile={profileData}
-                                            summitId={summitData.id}
-                                            changeForm={personalForm => setRegistrationForm({ ...registrationForm, personalInformation: personalForm })}
-                                            handleCompanyError={handleCompanyError}
-                                        />
-                                        <animated.div style={{ ...toggleAnimation }}>
-                                            <div ref={ref}>
-                                                <PaymentComponent
-                                                    isActive={step === 2}
-                                                    reservation={reservation}
-                                                    payTicket={payTicket}
-                                                    userProfile={profileData}
-                                                    stripeKey={stripePromise}
-                                                />
-                                            </div>
-                                        </animated.div>
-                                    </>
-                                )}
-
-                                {profileData && step === 3 && (
-                                    <PurchaseComplete
-                                        checkout={checkout}
-                                        summit={summitData}
-                                        onPurchaseComplete={onPurchaseComplete}
-                                        supportEmail={supportEmail}
-                                        goToEvent={goToEvent}
-                                        goToExtraQuestions={goToExtraQuestions}
-                                    />
-                                )}
-                            </div>
-
-                            {profileData && step !== 3 && (
-                                <ButtonBarComponent
-                                    step={step}
-                                    inPersonDisclaimer={inPersonDisclaimer}
-                                    registrationForm={registrationForm}
-                                    removeReservedTicket={removeReservedTicket}
-                                    changeStep={changeStep}
+                            {profileData && step === 3 && (
+                                <PurchaseComplete
+                                    checkout={checkout}
+                                    summit={summitData}
+                                    onPurchaseComplete={onPurchaseComplete}
+                                    supportEmail={supportEmail}
+                                    goToEvent={goToEvent}
+                                    goToExtraQuestions={goToExtraQuestions}
                                 />
                             )}
                         </div>
-                    </>
+
+                        {profileData && step !== 3 && (
+                            <ButtonBarComponent
+                                step={step}
+                                inPersonDisclaimer={inPersonDisclaimer}
+                                formValues={formValues}
+                                removeReservedTicket={removeReservedTicket}
+                                changeStep={changeStep}
+                            />
+                        )}
+                    </div>
                 </div>
             </div>
         </div>

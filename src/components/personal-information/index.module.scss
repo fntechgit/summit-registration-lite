@@ -87,3 +87,11 @@
 .moreInfoTooltip {
   max-width: 280px;
 }
+
+.formErrors {
+  margin-top: 10px;
+
+  div + div {
+    margin-top: 10px;
+  }
+}
