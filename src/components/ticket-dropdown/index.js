@@ -11,13 +11,12 @@
  * limitations under the License.
  **/
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import PropTypes from 'prop-types';
-
+import { getTicketMaxQuantity } from '../../helpers';
 import styles from "./index.module.scss";
 
 const TicketDropdownComponent = ({ selectedTicket, ticketTypes, onTicketSelect }) => {
-
     const [active, setActive] = useState(false);
 
     const ticketSelect = (ticket) => {
@@ -46,19 +45,27 @@ const TicketDropdownComponent = ({ selectedTicket, ticketTypes, onTicketSelect }
                     </>
                 }
             </div>
+
             {active &&
                 <div className={styles.dropdown} data-testid="ticket-list">
                     {ticketTypes.map(t => {
+                        const maxQuantity = getTicketMaxQuantity(t);
+                        const isTicketSoldOut = maxQuantity < 1;
+
                         if (
-                            (t.quantity_2_sell - t.quantity_sold) > 0 &&
                             (
                                 (t.sales_start_date === null && t.sales_end_date === null) ||
                                 (now_utc >= t.sales_start_date && now_utc <= t.sales_end_date)
                             )
                         ) {
                             return (
-                                <div key={t.id} onClick={() => ticketSelect(t)}>
-                                    {`${t.name} - $${t.cost} ${t.currency}`}
+                                <div key={t.id} className={isTicketSoldOut ? styles.soldOut : ''} onClick={() => {
+                                    if (isTicketSoldOut) return;
+                                    ticketSelect(t);
+                                }}>
+                                    {t.name} -{` `}
+                                    {!isTicketSoldOut && <>${t.cost} {t.currency}</>}
+                                    {isTicketSoldOut && <>Sold Out</>}
                                 </div>
                             )
                         }

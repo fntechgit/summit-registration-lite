@@ -71,9 +71,9 @@ const RegistrationLiteReducer = (state = DEFAULT_STATE, action) => {
 
             return {
                 ...state,
-                reservation:null,
-                checkout:null,
-                passwordless: {...DEFAULT_STATE.passwordless},
+                reservation: null,
+                checkout: null,
+                passwordless: { ...DEFAULT_STATE.passwordless },
                 settings: {
                     ...DEFAULT_STATE.settings,
                     marketingData: marketingData,
@@ -90,7 +90,7 @@ const RegistrationLiteReducer = (state = DEFAULT_STATE, action) => {
             return { ...state, ticketTypes: payload.response.data };
         }
         case GET_TAX_TYPES: {
-             return { ...state, taxTypes: payload.response.data  }
+            return { ...state, taxTypes: payload.response.data }
         }
         case GO_TO_LOGIN: {
             return { ...state, passwordless: { ...state.passwordless, code_sent: false, error: false } }
@@ -115,7 +115,7 @@ const RegistrationLiteReducer = (state = DEFAULT_STATE, action) => {
             return { ...state, reservation: null }
         }
         case PAY_RESERVATION: {
-            return { ...state, checkout: payload.response, reservation: null , userProfile: null};
+            return { ...state, checkout: payload.response, reservation: null, userProfile: null };
         }
         default: {
             return state;

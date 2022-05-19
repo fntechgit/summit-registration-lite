@@ -11,12 +11,12 @@
  * limitations under the License.
  **/
 
- import React from "react";
- import { Provider } from "react-redux";
- import { getStore, getPersistor } from "./store";
- import { PersistGate } from "redux-persist/integration/react";
- import RegistrationLite from "./components/registration-lite";
- 
+import React from "react";
+import { Provider } from "react-redux";
+import { getStore, getPersistor } from "./store";
+import { PersistGate } from "redux-persist/integration/react";
+import RegistrationLite from "./components/registration-lite";
+
 
 class RegistrationLiteWidget extends React.PureComponent {
 
@@ -27,12 +27,11 @@ class RegistrationLiteWidget extends React.PureComponent {
 
     render() {
         return (
-                <Provider store={this.store}>
-                    <PersistGate persistor={getPersistor()}>
-                        <RegistrationLite {...this.props} />
-                    </PersistGate>
-                </Provider>
-
+            <Provider store={this.store}>
+                <PersistGate persistor={getPersistor()}>
+                    <RegistrationLite {...this.props} />
+                </PersistGate>
+            </Provider>
         );
     }
 }

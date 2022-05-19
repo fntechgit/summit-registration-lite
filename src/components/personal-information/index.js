@@ -14,15 +14,15 @@
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { RegistrationCompanyInput } from 'openstack-uicore-foundation/lib/components'
-
 import { useForm } from 'react-hook-form';
 import { useSpring, config, animated } from "react-spring";
 import { useMeasure } from "react-use";
+import ReactTooltip from 'react-tooltip';
+import { formatErrorMessage } from '../../helpers';
 
 import styles from "./index.module.scss";
 
-const PersonalInfoComponent = ({ isActive, changeForm, reservation, userProfile, summitId, handleCompanyError }) => {
-
+const PersonalInfoComponent = ({ isActive, changeForm, reservation, userProfile, summitId, handleCompanyError, formErrors }) => {
     const [personalInfo, setPersonalInfo] = useState(
         {
             firstName: userProfile.given_name || '',
@@ -71,7 +71,6 @@ const PersonalInfoComponent = ({ isActive, changeForm, reservation, userProfile,
         to: {
             opacity: 1,
             height: isActive ? height + 10 : 0,
-            marginBottom: isActive ? 5 : 0
         }
     });
 
@@ -123,6 +122,22 @@ const PersonalInfoComponent = ({ isActive, changeForm, reservation, userProfile,
                                     <input type="text" placeholder="Promo Code" {...register("promoCode")} />
                                 </div>
                             </form>
+
+                            <a className={styles.moreInfo} data-tip data-for="promo-code-info">
+                                <i className="glyphicon glyphicon-info-sign" aria-hidden="true" />{` `}
+                                Have multiple promo codes?
+                            </a>
+                            <ReactTooltip id="promo-code-info">
+                                <div className={styles.moreInfoTooltip}>In order to use multiple promo codes, you may place a new registration order with the new promo code after you complete this order. This promo code will be applied to all tickets in this order.</div>
+                            </ReactTooltip>
+
+                            {formErrors.length > 0 && (
+                                <div className={`${styles.formErrors} alert alert-danger`}>
+                                    {formErrors.map((error, index) => (
+                                        <div key={index}>{formatErrorMessage(error)}</div>
+                                    ))}
+                                </div>
+                            )}
                         </div>
                     </animated.div>
                 </div>

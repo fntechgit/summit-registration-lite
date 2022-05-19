@@ -11,28 +11,26 @@
  * limitations under the License.
  **/
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import styles from "./index.module.scss";
 
+const TicketOwnedComponent = ({ ownedTickets, ticketTypes }) => {
+    const ownedTicketsString = useMemo(() => ownedTickets.reduce((acc, ownedTicket) => {
+        const ticketType = ticketTypes.find(type => type.id === ownedTicket.type_id);
 
-const TicketOwnedComponent = ({ goToRegistration }) => {
+        if (!ticketType) return acc;
+
+        return `${acc}${acc ? ', ' : ''}${ownedTicket.qty} ${ticketType.name}${!ticketType.name.toLowerCase().endsWith('ticket') ? ' ticket' : ''}${ownedTicket.qty > 1 ? 's' : ''}`;
+    }, ''), [ownedTickets, ticketTypes]);
 
     return (
-        <div className={`${styles.wrapper}`}>
-            <>
-                <div className={styles.circle}>
-                    <i className="fa fa-ticket"></i>
-                </div>
-                <span className={styles.complete}>
-                    Our records show you have a ticket(s) to this event.
-                </span>
-                <span className={styles.complete}>
-                    If you would like to purchase more, <a onClick={() => goToRegistration()}>click here</a>.
-                </span>
-            </>
+        <div className={styles.ticketOwnedWrapper}>
+            <div className={`${styles.alert} alert alert-warning`} role="alert">
+                You have already ordered {ownedTicketsString}. If you would like to order more tickets, please do so below.
+            </div>
         </div>
     );
-}
+};
 
 
 export default TicketOwnedComponent
