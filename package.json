@@ -1,9 +1,10 @@
 {
   "name": "summit-registration-lite",
-  "version": "2.0.1",
+  "version": "2.0.4",
   "description": "Summit Registration Lite",
   "main": "index.js",
   "scripts": {
+    "clean": "find . -name \"dist\" -type d -prune -exec rm -rf '{}' + & find . -name \"node_modules\" -type d -prune -exec rm -rf '{}' + && yarn",
     "build-dev": "./node_modules/.bin/webpack --config webpack.dev.js",
     "build": "./node_modules/.bin/webpack --config webpack.prod.js",
     "serve": "webpack-dev-server --open --port=8888 --https --config webpack.dev.js",
