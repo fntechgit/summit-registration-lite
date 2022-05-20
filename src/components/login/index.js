@@ -57,7 +57,6 @@ const LoginComponent = ({ options, login, allowsNativeAuth, allowsOtpAuthlogin, 
                                         color: o.button_border_color ? o.button_border_color : '#ffffff',
                                         border: `thin solid ${o.button_border_color ? o.button_border_color : o.button_color}`,
                                         backgroundColor: o.button_color,
-                                        color: o.font_color,
                                         backgroundImage: o.provider_logo ? `url(${o.provider_logo})` : 'none',
                                         backgroundSize: o.provider_logo_size ? o.provider_logo_size : ''
                                     }}
@@ -71,7 +70,6 @@ const LoginComponent = ({ options, login, allowsNativeAuth, allowsOtpAuthlogin, 
                                             color: o.button_border_color ? o.button_border_color : '#ffffff',
                                             border: `thin solid ${o.button_border_color ? o.button_border_color : o.button_color}`,
                                             backgroundColor: o.button_color,
-                                            color: o.font_color,
                                             backgroundImage: o.provider_logo ? `url(${o.provider_logo})` : 'none',
                                             backgroundSize: o.provider_logo_size ? o.provider_logo_size : ''
                                         }}
