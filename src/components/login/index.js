@@ -15,7 +15,7 @@ import React, { useState } from 'react';
 
 import styles from "./index.module.scss";
 
-const LoginComponent = ({ options, allowsNativeAuth, allowsOtpAuthlogin, getLoginCode, getPasswordlessCode }) => {
+const LoginComponent = ({ options, login, allowsNativeAuth, allowsOtpAuthlogin, getLoginCode, getPasswordlessCode }) => {
 
     const [email, setEmail] = useState('');
     const [emailError, setEmailError] = useState();
@@ -38,7 +38,7 @@ const LoginComponent = ({ options, allowsNativeAuth, allowsOtpAuthlogin, getLogi
             <>
                 <div className={`${styles.innerWrapper}`}>
                     <div className={styles.loginCode}>
-                        Enter your email address to login or signup: 
+                        Enter your email address to login or signup:
                         <div className={styles.input}>
                             <input placeholder="youremail@example.com" value={email} onChange={e => setEmail(e.target.value)} onKeyPress={(ev) => ev.key === 'Enter' ? loginCode() : null} data-testid="email-input" />
                             <button onClick={() => loginCode()} data-testid="email-button">
@@ -46,7 +46,7 @@ const LoginComponent = ({ options, allowsNativeAuth, allowsOtpAuthlogin, getLogi
                             </button>
                             <br />
                         </div>
-                        {emailError && <span data-testid="email-error">Please enter a valid email adress</span>}
+                        {emailError && <span data-testid="email-error">Please enter a valid email address</span>}
                     </div>
                     <span>Or you may signup or login with a social provider:</span>
                     {options.map((o, index) => {
