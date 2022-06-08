@@ -22,7 +22,7 @@ import { formatErrorMessage } from '../../helpers';
 
 import styles from "./index.module.scss";
 
-const PersonalInfoComponent = ({ isActive, changeForm, reservation, userProfile, summitId, handleCompanyError, formErrors }) => {
+const PersonalInfoComponent = ({ isActive, changeForm, reservation, userProfile, summitId, handleCompanyError, formValues, formErrors }) => {
     const [personalInfo, setPersonalInfo] = useState(
         {
             firstName: userProfile.given_name || '',
@@ -31,7 +31,7 @@ const PersonalInfoComponent = ({ isActive, changeForm, reservation, userProfile,
             company: { id: null, name: userProfile.company || '' },
             promoCode: '',
         }
-    )
+    );
 
     const [companyError, setCompanyError] = useState(false);
 
@@ -46,13 +46,13 @@ const PersonalInfoComponent = ({ isActive, changeForm, reservation, userProfile,
                 company: { id: null, name: reservation.owner_company ? reservation.owner_company : personalInfo.company },
             });
         }
-    }, [])
+    }, []);
 
     const onCompanyChange = (ev) => {
         const newCompany = ev.target.value;
         setCompanyError(false);
         setPersonalInfo({ ...personalInfo, company: newCompany });
-    }
+    };
 
     const onSubmit = data => {
         if (!personalInfo.company.name) {
@@ -94,6 +94,12 @@ const PersonalInfoComponent = ({ isActive, changeForm, reservation, userProfile,
                     </div>
                     <animated.div style={{ overflow: 'hidden', ...toggleAnimation }}>
                         <div ref={ref}>
+                            {formValues.ticketQuantity > 1 && (
+                                <div className={`${styles.ticketQuantityNotice} alert alert-info`}>
+                                    Please note that 1 ticket from this order will be automatically assigned to you; the rest will remain unassigned, with the option to re-assign all tickets after purchase.
+                                </div>
+                            )}
+
                             <form id="personal-info-form" onSubmit={handleSubmit(onSubmit)} className={styles.form} data-testid="personal-form">
                                 <div>
                                     <input type="text" placeholder="First name *" defaultValue={personalInfo.firstName || ''} {...register("firstName", { required: true, maxLength: 80 })} data-testid="first-name" />
@@ -144,8 +150,6 @@ const PersonalInfoComponent = ({ isActive, changeForm, reservation, userProfile,
             </>
         </div>
     );
-}
-
+};
 
 export default PersonalInfoComponent
-

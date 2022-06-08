@@ -214,6 +214,7 @@ const RegistrationLite = (
                                         summitId={summitData.id}
                                         changeForm={personalInformation => setFormValues({ ...formValues, personalInformation })}
                                         handleCompanyError={handleCompanyError}
+                                        formValues={formValues}
                                         formErrors={formErrors}
                                     />
                                     <animated.div style={{ ...toggleAnimation }}>
