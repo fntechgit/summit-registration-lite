@@ -73,9 +73,19 @@
           height: 36px;
           padding: 0px;
           border: 1px solid var(--color_primary);
+          box-shadow: 0 0 1px var(--color_primary);
 
           > div {
             height: 36px;
+          }          
+        }
+
+        > span + div + div {
+          height: auto !important;
+          max-height: 120px !important;
+          overflow: auto !important;
+          > div {
+            height: auto !important;
           }
         }
       }
