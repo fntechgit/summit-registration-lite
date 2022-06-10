@@ -6,3 +6,8 @@ webpack.dev.js
 webpack.prod.js
 .idea
 coverage
+.editorconfig
+.babelrc
+.prettierrc
+babel.config.js
+jest-setup.js
