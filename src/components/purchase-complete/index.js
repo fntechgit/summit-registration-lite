@@ -60,7 +60,7 @@ const PurchaseComplete = ({ checkout, onPurchaseComplete, goToExtraQuestions, go
                 :
                 <>
                     <span>
-                        The event will start on {startDateFormatted.date} at {startDateFormatted.time} {summit.time_zone_id} <br />
+                        The event will start on {startDateFormatted.date} at {startDateFormatted.time} {summit.time_zone_label} <br />
                         This ticket requires additional details.
                     </span>
                     <div className={styles.actions}>
