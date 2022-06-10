@@ -92,7 +92,7 @@ const PersonalInfoComponent = ({ isActive, changeForm, reservation, userProfile,
                             </div>
                         }
                     </div>
-                    <animated.div style={{ overflow: 'hidden', ...toggleAnimation }}>
+                    <animated.div style={{ overflow: `${isActive ? '' : 'hidden'}`, ...toggleAnimation }}>
                         <div ref={ref}>
                             {formValues.ticketQuantity > 1 && (
                                 <div className={`${styles.ticketQuantityNotice} alert alert-info`}>
