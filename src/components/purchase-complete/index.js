@@ -16,8 +16,6 @@ import styles from "./index.module.scss";
 
 import { epochToMomentTimeZone } from "openstack-uicore-foundation/lib/utils/methods";
 
-import moment from "moment-timezone";
-
 const PurchaseComplete = ({ checkout, onPurchaseComplete, goToExtraQuestions, goToEvent, summit, supportEmail = "support@fntech.com" }) => {
 
     useEffect(() => {
@@ -34,8 +32,6 @@ const PurchaseComplete = ({ checkout, onPurchaseComplete, goToExtraQuestions, go
         date: epochToMomentTimeZone(summit.start_date, summit.time_zone_id).format('MMMM D'),
         time: epochToMomentTimeZone(summit.start_date, summit.time_zone_id).format('HH:mm'),
     };
-
-    const formattedTimeZone = moment().tz(summit.time_zone_id).format('Z z');
 
     const needExtraQuestions = () => {
         return summit.order_extra_questions.some(q => q.mandatory === true) ? true : false;
@@ -64,7 +60,7 @@ const PurchaseComplete = ({ checkout, onPurchaseComplete, goToExtraQuestions, go
                 :
                 <>
                     <span>
-                        The event will start on {startDateFormatted.date} at {startDateFormatted.time} {formattedTimeZone} <br />
+                        The event will start on {startDateFormatted.date} at {startDateFormatted.time} {summit.time_zone_label} <br />
                         This ticket requires additional details.
                     </span>
                     <div className={styles.actions}>
