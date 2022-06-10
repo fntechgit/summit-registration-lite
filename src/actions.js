@@ -115,11 +115,13 @@ export const reserveTicket = ({ personalInformation, ticket, ticketQuantity }, {
 
         const tickets = [...Array(ticketQuantity)].map(() => ({
             type_id: ticket.id,
-            promo_code: promoCode || null,
-            attendee_first_name: firstName,
-            attendee_last_name: lastName,
-            attendee_email: email
+            promo_code: promoCode || null
         }));
+
+        // Only set the attendee for the first ticket.
+        tickets[0].attendee_first_name = firstName;
+        tickets[0].attendee_last_name = lastName;
+        tickets[0].attendee_email = email;
 
         let params = {
             access_token,
