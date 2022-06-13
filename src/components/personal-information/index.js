@@ -74,6 +74,13 @@ const PersonalInfoComponent = ({ isActive, changeForm, reservation, userProfile,
         }
     });
 
+    const customStyles = {
+        menuList: (provided) => ({
+            ...provided,
+            height: 120,
+        }),
+    }
+
     return (
         <div className={`${styles.outerWrapper} step-wrapper`}>
             <>
@@ -117,6 +124,7 @@ const PersonalInfoComponent = ({ isActive, changeForm, reservation, userProfile,
                                 <div className={styles.companies}>
                                     <RegistrationCompanyInput
                                         id="company"
+                                        styles={customStyles}
                                         summitId={summitId}
                                         onChange={onCompanyChange}
                                         onError={handleCompanyError}
