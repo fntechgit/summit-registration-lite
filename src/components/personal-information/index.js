@@ -77,7 +77,7 @@ const PersonalInfoComponent = ({ isActive, changeForm, reservation, userProfile,
     const customStyles = {
         menuList: (provided) => ({
             ...provided,
-            height: 120,
+            maxHeight: 120,
         }),
     }
 
