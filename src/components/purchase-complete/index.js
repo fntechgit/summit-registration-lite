@@ -65,7 +65,6 @@ const PurchaseComplete = ({ checkout, onPurchaseComplete, goToExtraQuestions, go
                     </span>
                     <div className={styles.actions}>
                         <button className={`${styles.button} button`} onClick={() => goToExtraQuestions()}>Finish Now</button>
-                        <button className={`${styles.button} button`} onClick={() => goToEvent()}>Do this later</button>
                     </div>
                 </>
             }
