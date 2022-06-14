@@ -82,6 +82,7 @@
 
         > span + div + div {
           overflow: auto;
+          height: auto;
           > div {
             height: auto;
           }
