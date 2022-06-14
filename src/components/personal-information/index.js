@@ -74,6 +74,13 @@ const PersonalInfoComponent = ({ isActive, changeForm, reservation, userProfile,
         }
     });
 
+    const customStyles = {
+        menuList: (provided) => ({
+            ...provided,
+            maxHeight: 120,
+        }),
+    }
+
     return (
         <div className={`${styles.outerWrapper} step-wrapper`}>
             <>
@@ -127,14 +134,16 @@ const PersonalInfoComponent = ({ isActive, changeForm, reservation, userProfile,
                                     <div className={styles.companies}>
                                         <RegistrationCompanyInput
                                             id="company"
+                                            styles={customStyles}
                                             summitId={summitId}
                                             onChange={onCompanyChange}
                                             onError={handleCompanyError}
                                             value={personalInfo.company}
                                         />
+                                        {companyError && <span data-testid="company-error">This field is required</span>}
                                     </div>
-                                    {companyError && <div className={styles.fieldError} data-testid="company-error">This field is required.</div>}
                                 </div>
+
                                 <div className={styles.fieldWrapper}>
                                     <div className={styles.inputWrapper}>
                                         <input type="text" placeholder="Promo Code" {...register("promoCode")} />

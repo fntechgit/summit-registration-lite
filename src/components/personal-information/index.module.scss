@@ -99,12 +99,10 @@
         }
 
         > span + div + div {
-          height: auto !important;
-          max-height: 120px !important;
-          overflow: auto !important;
+          overflow: auto;
 
           > div {
-            height: auto !important;
+            height: auto;
           }
         }
       }
