@@ -1,4 +1,4 @@
-@import "./colors.scss";
+@import './colors.scss';
 
 .step-wrapper {
   padding: 10px;
@@ -10,6 +10,12 @@
 .summit-registration-lite {
   color: var(--color_text_dark);
   font-size: 15px;
+
+  // Font smoothing is deprecated, so let's disable it.
+  // This also helps w/ consistent font rendering between our app and the Stripe elements.
+  font-smooth: unset !important;
+  -moz-osx-font-smoothing: none !important;
+  -webkit-font-smoothing: auto !important;
 }
 
 input {

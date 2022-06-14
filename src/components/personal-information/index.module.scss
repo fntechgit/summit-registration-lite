@@ -15,22 +15,37 @@
   justify-content: space-between;
   margin: 10px 0 0;
 
-  > div {
+  div.fieldWrapper {
     width: 48%;
+    margin-bottom: 5px;
+  }
+
+  div.inputWrapper {
+    display: flex;
+    border-radius: 5px;
+    border: 1px solid var(--color_primary);
+    height: 36px;
+    padding: 5px 10px;
+    justify-content: space-between;
+    align-items: center;
 
     input {
       width: 100%;
-      border-radius: 5px;
-      border: 1px solid var(--color_primary);
-      height: 36px;
-      padding: 5px;
+      background-color: transparent;
+      border: none;
+      padding: 0;
+      font-size: 16px;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      font-size: 15px;
 
       &::placeholder {
         color: var(--color_text_input_hints);
+        font-size: 16px;
+      }
+
+      &:focus-visible {
+        outline: none;
       }
     }
 
@@ -38,20 +53,23 @@
       opacity: 0.6;
       cursor: default;
     }
+  }
 
-    span {
-      display: inline-block;
-      color: #e5424d;
-    }
+  div.fieldError {
+    margin-top: 5px;
+    margin-bottom: 5px;
+    color: #e5424d;
+    font-size: 14px;
+    line-height: 1.5;
 
-    & > :last-child {
-      margin-bottom: 5px;
+    &::before {
+      font-family: FontAwesome;
+      content: '\f071';
+      margin-right: 5px;
     }
   }
 
   .companies {
-    width: 48%;
-
     > div {
       position: relative;
       width: 100%;
@@ -77,12 +95,13 @@
 
           > div {
             height: 36px;
-          }          
+          }
         }
 
         > span + div + div {
           overflow: auto;
           height: auto;
+
           > div {
             height: auto;
           }
@@ -90,7 +109,7 @@
       }
 
       input {
-        padding: 5px;
+        padding: 5px 10px;
         border: 1px solid var(--color_primary);
         padding-right: 0px !important;
         background-color: transparent;

@@ -79,6 +79,7 @@ const RegistrationLite = (
         inPersonDisclaimer,
         userProfile,
         handleCompanyError,
+        stripeOptions,
         ...rest
     }) => {
 
@@ -225,6 +226,7 @@ const RegistrationLite = (
                                                 payTicket={payTicket}
                                                 userProfile={profileData}
                                                 stripeKey={stripePromise}
+                                                stripeOptions={stripeOptions}
                                             />
                                         </div>
                                     </animated.div>
