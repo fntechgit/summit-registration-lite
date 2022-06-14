@@ -23,9 +23,9 @@ import styles from "./index.module.scss";
 import StripeForm from '../stripe-form';
 
 
-const PaymentComponent = ({ isActive, userProfile, reservation, payTicket, stripeKey }) => {
+const PaymentComponent = ({ isActive, userProfile, reservation, payTicket, stripeKey, stripeOptions }) => {
 
-    const [ref, { height }] = useMeasure();    
+    const [ref, { height }] = useMeasure();
 
     const toggleAnimation = useSpring({
         config: { bounce: 0, ...config.stiff },
@@ -37,6 +37,10 @@ const PaymentComponent = ({ isActive, userProfile, reservation, payTicket, strip
         }
     });
 
+    const options = {
+        fonts: stripeOptions?.fonts
+    };
+
     return (
         <div className={`${styles.outerWrapper} step-wrapper`}>
             <>
@@ -46,11 +50,13 @@ const PaymentComponent = ({ isActive, userProfile, reservation, payTicket, strip
                     </div>
                     <animated.div style={{ overflow: 'hidden', ...toggleAnimation }}>
                         <div ref={ref}>
-                            <Elements stripe={stripeKey}>
-                                <StripeForm 
-                                reservation={reservation} 
-                                payTicket={payTicket} 
-                                userProfile={userProfile}/>
+                            <Elements options={options} stripe={stripeKey}>
+                                <StripeForm
+                                    reservation={reservation}
+                                    payTicket={payTicket}
+                                    userProfile={userProfile}
+                                    stripeOptions={stripeOptions}
+                                />
                             </Elements>
                         </div>
                     </animated.div>

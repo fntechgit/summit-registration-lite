@@ -103,16 +103,16 @@ const PersonalInfoComponent = ({ isActive, changeForm, reservation, userProfile,
                             <form id="personal-info-form" onSubmit={handleSubmit(onSubmit)} className={styles.form} data-testid="personal-form">
                                 <div>
                                     <input type="text" placeholder="First name *" defaultValue={personalInfo.firstName || ''} {...register("firstName", { required: true, maxLength: 80 })} data-testid="first-name" />
-                                    {errors.firstName && <span data-testid="first-name-error">This field is required</span>}
+                                    {errors.firstName && <span data-testid="first-name-error">This field is required.</span>}
                                 </div>
                                 <div>
                                     <input type="text" placeholder="Last name *" defaultValue={personalInfo.lastName || ''} {...register("lastName", { required: true, maxLength: 100 })} data-testid="last-name" />
-                                    {errors.lastName && <span data-testid="last-name-error">This field is required</span>}
+                                    {errors.lastName && <span data-testid="last-name-error">This field is required.</span>}
                                 </div>
                                 <div>
                                     <input type="text" placeholder="Email *" className={styles.readOnly} readOnly={true} defaultValue={personalInfo.email || ''} {...register("email", { required: true, pattern: /^\S+@\S+$/i })} data-testid="email" />
-                                    {errors.email?.type === 'required' && <span data-testid="email-error-required">This field is required</span>}
-                                    {errors.email?.type === 'pattern' && <span data-testid="email-error-invalid">The email is invalid</span>}
+                                    {errors.email?.type === 'required' && <span data-testid="email-error-required">This field is required.</span>}
+                                    {errors.email?.type === 'pattern' && <span data-testid="email-error-invalid">The email is invalid.</span>}
                                 </div>
                                 <div className={styles.companies}>
                                     <RegistrationCompanyInput
@@ -122,7 +122,7 @@ const PersonalInfoComponent = ({ isActive, changeForm, reservation, userProfile,
                                         onError={handleCompanyError}
                                         value={personalInfo.company}
                                     />
-                                    {companyError && <span data-testid="company-error">This field is required</span>}
+                                    {companyError && <span data-testid="company-error">This field is required.</span>}
                                 </div>
                                 <div>
                                     <input type="text" placeholder="Promo Code" {...register("promoCode")} />
