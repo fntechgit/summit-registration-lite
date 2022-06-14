@@ -61,5 +61,11 @@
     color: #e5424d;
     font-size: 14px;
     line-height: 1.5;
+
+    &::before {
+      font-family: FontAwesome;
+      content: '\f071';
+      margin-right: 5px;
+    }
   }
 }

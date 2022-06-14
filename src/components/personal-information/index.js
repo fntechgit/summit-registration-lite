@@ -101,31 +101,44 @@ const PersonalInfoComponent = ({ isActive, changeForm, reservation, userProfile,
                             )}
 
                             <form id="personal-info-form" onSubmit={handleSubmit(onSubmit)} className={styles.form} data-testid="personal-form">
-                                <div>
-                                    <input type="text" placeholder="First name *" defaultValue={personalInfo.firstName || ''} {...register("firstName", { required: true, maxLength: 80 })} data-testid="first-name" />
-                                    {errors.firstName && <span data-testid="first-name-error">This field is required.</span>}
+                                <div className={styles.fieldWrapper}>
+                                    <div className={styles.inputWrapper}>
+                                        <input type="text" placeholder="First name *" defaultValue={personalInfo.firstName || ''} {...register("firstName", { required: true, maxLength: 80 })} data-testid="first-name" />
+                                    </div>
+                                    {errors.firstName && <div className={styles.fieldError} data-testid="first-name-error">This field is required.</div>}
                                 </div>
-                                <div>
-                                    <input type="text" placeholder="Last name *" defaultValue={personalInfo.lastName || ''} {...register("lastName", { required: true, maxLength: 100 })} data-testid="last-name" />
-                                    {errors.lastName && <span data-testid="last-name-error">This field is required.</span>}
+
+                                <div className={styles.fieldWrapper}>
+                                    <div className={styles.inputWrapper}>
+                                        <input type="text" placeholder="Last name *" defaultValue={personalInfo.lastName || ''} {...register("lastName", { required: true, maxLength: 100 })} data-testid="last-name" />
+                                    </div>
+                                    {errors.lastName && <div className={styles.fieldError} data-testid="last-name-error">This field is required.</div>}
                                 </div>
-                                <div>
-                                    <input type="text" placeholder="Email *" className={styles.readOnly} readOnly={true} defaultValue={personalInfo.email || ''} {...register("email", { required: true, pattern: /^\S+@\S+$/i })} data-testid="email" />
-                                    {errors.email?.type === 'required' && <span data-testid="email-error-required">This field is required.</span>}
-                                    {errors.email?.type === 'pattern' && <span data-testid="email-error-invalid">The email is invalid.</span>}
+
+                                <div className={styles.fieldWrapper}>
+                                    <div className={styles.inputWrapper}>
+                                        <input type="text" placeholder="Email *" className={styles.readOnly} readOnly={true} defaultValue={personalInfo.email || ''} {...register("email", { required: true, pattern: /^\S+@\S+$/i })} data-testid="email" />
+                                    </div>
+                                    {errors.email?.type === 'required' && <div className={styles.fieldError} data-testid="email-error-required">This field is required.</div>}
+                                    {errors.email?.type === 'pattern' && <div className={styles.fieldError} data-testid="email-error-invalid">The email is invalid.</div>}
                                 </div>
-                                <div className={styles.companies}>
-                                    <RegistrationCompanyInput
-                                        id="company"
-                                        summitId={summitId}
-                                        onChange={onCompanyChange}
-                                        onError={handleCompanyError}
-                                        value={personalInfo.company}
-                                    />
-                                    {companyError && <span data-testid="company-error">This field is required.</span>}
+
+                                <div className={styles.fieldWrapper}>
+                                    <div className={styles.companies}>
+                                        <RegistrationCompanyInput
+                                            id="company"
+                                            summitId={summitId}
+                                            onChange={onCompanyChange}
+                                            onError={handleCompanyError}
+                                            value={personalInfo.company}
+                                        />
+                                    </div>
+                                    {companyError && <div className={styles.fieldError} data-testid="company-error">This field is required.</div>}
                                 </div>
-                                <div>
-                                    <input type="text" placeholder="Promo Code" {...register("promoCode")} />
+                                <div className={styles.fieldWrapper}>
+                                    <div className={styles.inputWrapper}>
+                                        <input type="text" placeholder="Promo Code" {...register("promoCode")} />
+                                    </div>
                                 </div>
                             </form>
 
@@ -134,7 +147,9 @@ const PersonalInfoComponent = ({ isActive, changeForm, reservation, userProfile,
                                 Have multiple promo codes?
                             </a>
                             <ReactTooltip id="promo-code-info">
-                                <div className={styles.moreInfoTooltip}>In order to use multiple promo codes, you may place a new registration order with the new promo code after you complete this order. This promo code will be applied to all tickets in this order.</div>
+                                <div className={styles.moreInfoTooltip}>
+                                    In order to use multiple promo codes, you may place a new registration order with the new promo code after you complete this order. This promo code will be applied to all tickets in this order.
+                                </div>
                             </ReactTooltip>
 
                             {formErrors.length > 0 && (
