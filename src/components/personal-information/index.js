@@ -28,7 +28,7 @@ const PersonalInfoComponent = ({ isActive, changeForm, reservation, userProfile,
             firstName: userProfile.given_name || '',
             lastName: userProfile.family_name || '',
             email: userProfile.email || '',
-            company: { id: null, name: userProfile.company || '' },
+            company: { id: null, name: '' },
             promoCode: '',
         }
     );
