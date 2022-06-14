@@ -47,23 +47,10 @@ const filterProps = {
         { button_color: '#2272E7', provider_label: 'Microsoft', provider_param: 'microsoft' },
     ],
     stripeOptions: {
-        fonts: [
-            {
-                cssSrc: 'https://fonts.googleapis.com/css2?family=Nunito+Sans:ital,wght@0,400;0,700;1,400;1,700&display=swap'
-
-            }
-        ],
-        elementStyle: {
-            base: {
-                fontFamily: `'Nunito Sans', sans-serif`
-            }
-        }
-    },
-    stripeElementStyles: {
-
+        fonts: [{ cssSrc: 'https://fonts.googleapis.com/css2?family=Nunito+Sans:ital,wght@0,400;0,700;1,400;1,700&display=swap' }],
+        style: { base: { fontFamily: `'Nunito Sans', sans-serif` } }
     }
 };
-
 
 // width 780px or 230px
 
