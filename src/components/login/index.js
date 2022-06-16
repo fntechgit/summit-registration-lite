@@ -38,7 +38,7 @@ const LoginComponent = ({ options, login, allowsNativeAuth, allowsOtpAuthlogin, 
             <>
                 <div className={`${styles.innerWrapper}`}>
                     <div className={styles.loginCode}>
-                        Enter your email address to login or signup:
+                        Enter your email to begin registration:
                         <div className={styles.input}>
                             <input placeholder="youremail@example.com" value={email} onChange={e => setEmail(e.target.value)} onKeyPress={(ev) => ev.key === 'Enter' ? loginCode() : null} data-testid="email-input" />
                             <button onClick={() => loginCode()} data-testid="email-button">
@@ -48,7 +48,7 @@ const LoginComponent = ({ options, login, allowsNativeAuth, allowsOtpAuthlogin, 
                         </div>
                         {emailError && <span data-testid="email-error">Please enter a valid email address</span>}
                     </div>
-                    <span>Or you may signup or login with a social provider:</span>
+                    <span>Or you may login with one of the following:</span>
                     {options.map((o, index) => {
                         return (
                             o.provider_param ?
