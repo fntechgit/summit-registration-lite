@@ -13,9 +13,14 @@
 
   // Font smoothing is deprecated, so let's disable it.
   // This also helps w/ consistent font rendering between our app and the Stripe elements.
-  font-smooth: unset !important;
-  -moz-osx-font-smoothing: none !important;
+  font-smooth: auto !important;
+  -moz-osx-font-smoothing: auto !important;
   -webkit-font-smoothing: auto !important;
+
+  input:-moz-placeholder,
+  input::-moz-placeholder {
+    opacity: 1;
+  }
 }
 
 input {
