@@ -64,7 +64,7 @@ const PasswordlessLoginComponent = ({ email, codeLength, passwordlessLogin, logi
                         </span>
                     )}
                     <div className={styles.verify}>
-                        <div className={`${styles.button} button`} onClick={() => tryPasswordlessLogin(otpCode)} data-testid="verify">Verify</div>
+                        <div className={`${styles.button} button`} onClick={() => tryPasswordlessLogin(otpCode)} data-testid="verify">Verify Email</div>
                         <b>or go back and <span className={styles.link} onClick={() => goToLogin()} data-testid="go-back">try another way</span></b>
                     </div>
                 </div>
