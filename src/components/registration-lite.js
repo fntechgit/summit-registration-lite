@@ -19,12 +19,10 @@ import { useMeasure } from "react-use";
 
 import {
     loadSession, changeStep, reserveTicket, removeReservedTicket,
-    payTicket, getTicketTypes, getTaxesTypes, getLoginCode, passwordlessLogin, goToLogin
+    payTicket, payTicketWithLawPay, getTicketTypes, getTaxesTypes, getLoginCode, passwordlessLogin, goToLogin
 } from "../actions";
 
 import AjaxLoader from "openstack-uicore-foundation/lib/components/ajaxloader";
-
-import { loadStripe } from '@stripe/stripe-js';
 
 import styles from "../styles/general.module.scss";
 import '../styles/styles.scss';
@@ -46,6 +44,7 @@ const RegistrationLite = (
         removeReservedTicket,
         reserveTicket,
         payTicket,
+        payTicketWithLawPay,
         onPurchaseComplete,
         getTicketTypes,
         getTaxesTypes,
@@ -100,14 +99,16 @@ const RegistrationLite = (
     const setFormErrors = (errors) => setRegistrationForm({ ...registrationForm, errors });
 
     let publicKey = null;
+    let provider = '';
     for (let profile of summitData.payment_profiles) {
         if (profile.application_type === 'Registration') {
             publicKey = profile.test_mode_enabled ? profile.test_publishable_key : profile.live_publishable_key;
+            provider = profile.provider;
             break;
         }
     }
 
-    const stripePromise = useMemo(() => loadStripe(publicKey), [publicKey])
+    // const stripePromise = useMemo(() => loadStripe(publicKey), [publicKey])
 
     useEffect(() => {
         loadSession({ ...rest, summitData, profileData });
@@ -162,7 +163,7 @@ const RegistrationLite = (
     return (
         <div id="modal" className="modal is-active">
             <div className="modal-background"></div>
-            <div className="modal-content">
+            <div className={`${styles.modal} modal-content`}>
                 <AjaxLoader relative={true} color={'#ffffff'} show={widgetLoading || loading} size={80} />
                 <div className={`${styles.outerWrapper} summit-registration-lite`}>
                     <div className={styles.innerWrapper}>
@@ -224,8 +225,11 @@ const RegistrationLite = (
                                                 isActive={step === 2}
                                                 reservation={reservation}
                                                 payTicket={payTicket}
+                                                payTicketWithLawPay={payTicketWithLawPay}
                                                 userProfile={profileData}
-                                                stripeKey={stripePromise}
+                                                timestamp={summitData.timestamp}
+                                                provider={provider}
+                                                providerKey={publicKey}                                                
                                                 stripeOptions={stripeOptions}
                                             />
                                         </div>
@@ -281,6 +285,7 @@ export default connect(mapStateToProps, {
     reserveTicket,
     removeReservedTicket,
     payTicket,
+    payTicketWithLawPay,
     getTicketTypes,
     getTaxesTypes,
     getLoginCode,

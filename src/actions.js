@@ -153,7 +153,7 @@ export const reserveTicket = ({ personalInformation, ticket, ticketQuantity }, {
             .then((payload) => {
                 dispatch(stopWidgetLoading());
                 payload.response.promo_code = promoCode || null;
-                if (!payload.response.payment_gateway_client_token) {
+                if (!payload.response.amount) {
                     dispatch(payTicket(null, null, getAccessToken));
                     return (payload)
                 } else {
@@ -270,6 +270,84 @@ export const payTicket = (token = null, stripe = null, zipCode = null) => async 
                 dispatch(stopWidgetLoading());
                 return (e);
             });
+    } else {
+        // FREE TICKET
+        return putRequest(
+            null,
+            createAction(PAY_RESERVATION),
+            `${apiBaseUrl}/api/v1/summits/${summitId}/orders/${reservation.hash}/checkout`,
+            normalizedEntity,
+            authErrorHandler,
+            // entity
+        )(params)(dispatch)
+            .then((payload) => {
+                dispatch(stopWidgetLoading());
+                dispatch(createAction(CLEAR_RESERVATION)({}));
+                dispatch(changeStep(3));
+                return (payload);
+            })
+            .catch(e => {
+                dispatch(removeReservedTicket());
+                dispatch(changeStep(1));
+                dispatch(stopWidgetLoading());
+                return (e);
+            });
+        // The payment has succeeded. Display a success message.
+    }
+}
+
+
+export const payTicketWithLawPay = (token = null, zipCode) => async (dispatch, getState, { apiBaseUrl, getAccessToken }) => {
+    // Pay using affinity lawpay            
+    let { registrationLiteState: { settings: { summitId, userProfile }, reservation } } = getState();
+
+    const access_token = await getAccessToken();
+
+    let params = {
+        access_token,
+        expand: 'tickets,' +
+            'tickets.owner,' +
+            'tickets.owner.extra_questions,' +
+            'tickets.badge,' +
+            'tickets.badge.type,' +
+            'tickets.badge.type.access_levels,' +
+            'tickets.badge.type.features,' +
+            'tickets.ticket_type,' +
+            'tickets.ticket_type.taxes',
+    }
+
+    let normalizedEntity = {
+        billing_address_1: userProfile?.address1 || '',
+        billing_address_2: userProfile?.address2 || '',
+        billing_address_zip_code: zipCode,
+        billing_address_city: userProfile?.locality || '',
+        billing_address_state: userProfile?.region || '',
+        billing_address_country: userProfile?.country || '',
+        payment_method_id: token,
+    };
+
+    dispatch(startWidgetLoading());
+
+    if (reservation.amount > 0) {
+        return putRequest(
+            null,
+            createAction(PAY_RESERVATION),
+            `${apiBaseUrl}/api/v1/summits/${summitId}/orders/${reservation.hash}/checkout`,
+            normalizedEntity,
+            authErrorHandler,
+            // entity
+        )(params)(dispatch)
+            .then((payload) => {
+                dispatch(stopWidgetLoading());
+                dispatch(createAction(CLEAR_RESERVATION)({}));
+                dispatch(changeStep(3));
+                return (payload);
+            })
+            .catch(e => {
+                dispatch(stopWidgetLoading());
+                return (e);
+            });
+        // The payment has succeeded. Display a success message.            
     } else {
         // FREE TICKET
         return putRequest(
