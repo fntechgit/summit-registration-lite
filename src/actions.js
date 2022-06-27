@@ -297,7 +297,7 @@ export const payTicket = (token = null, stripe = null, zipCode = null) => async 
 }
 
 
-export const payTicketWithLawPay = (token = null, zipCode) => async (dispatch, getState, { apiBaseUrl, getAccessToken }) => {
+export const payTicketWithLawPay = (token = null) => async (dispatch, getState, { apiBaseUrl, getAccessToken }) => {
     // Pay using affinity lawpay            
     let { registrationLiteState: { settings: { summitId, userProfile }, reservation } } = getState();
 
@@ -317,13 +317,13 @@ export const payTicketWithLawPay = (token = null, zipCode) => async (dispatch, g
     }
 
     let normalizedEntity = {
-        billing_address_1: userProfile?.address1 || '',
+        billing_address_1: token.address1 || '',
         billing_address_2: userProfile?.address2 || '',
-        billing_address_zip_code: zipCode,
+        billing_address_zip_code: token.postal_code,
         billing_address_city: userProfile?.locality || '',
         billing_address_state: userProfile?.region || '',
         billing_address_country: userProfile?.country || '',
-        payment_method_id: token,
+        payment_method_id: token.id,
     };
 
     dispatch(startWidgetLoading());

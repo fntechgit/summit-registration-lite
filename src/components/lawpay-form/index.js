@@ -13,7 +13,6 @@
 
 import React, { useEffect, useState } from 'react';
 import { connect } from "react-redux";
-import { useForm } from 'react-hook-form';
 
 import { Dropdown } from 'openstack-uicore-foundation/lib/components'
 
@@ -30,7 +29,8 @@ const LawPayForm = ({ reservation, payTicket, userProfile, marketingData, provid
     const [lawPayFields, setLawPayFields] = useState({
         exp_month: '',
         exp_year: '',
-        postal_code: '',
+        postal_code: userProfile.postal_code || '',
+        address1: userProfile.address1 || '',
     });
 
     const [lawPayErrors, setLawPayErrors] = useState({
@@ -39,6 +39,7 @@ const LawPayForm = ({ reservation, payTicket, userProfile, marketingData, provid
         postal_code: '',
         credit_card_number: '',
         cvv: '',
+        address1: '',
     });
 
     const style = {
@@ -94,20 +95,16 @@ const LawPayForm = ({ reservation, payTicket, userProfile, marketingData, provid
 
     const formHasErrors = () => {
         let errors = {};
-        if (lawPayFields.exp_month === '') {
-            errors = { ...errors, exp_month: 'This field is required.' };
-        }
-        if (lawPayFields.exp_year === '') {
-            errors = { ...errors, exp_year: 'This field is required.' };
-        }
-        if (lawPayFields.postal_code === '') {
-            errors = { ...errors, postal_code: 'This field is required.' };
-        }
+        
+        Object.keys(lawPayFields).map((key) => {
+            if (!lawPayFields[key]) {
+                errors = { ...errors, [key]: 'This field is required.' };
+            }
+        });
+
         setLawPayErrors({ ...lawPayErrors, ...errors });
         return Object.keys(errors).length > 0;
     }
-
-    const { register, handleSubmit, formState: { errors } } = useForm();
 
     const onSubmit = async (event) => {
         event.preventDefault();
@@ -120,8 +117,13 @@ const LawPayForm = ({ reservation, payTicket, userProfile, marketingData, provid
 
         if (!formHasErrors()) {
             try {
-                const token = await hostedFields.getPaymentToken({ "postal_code": lawPayFields.postal_code, "exp_year": lawPayFields.exp_year, "exp_month": lawPayFields.exp_month });
-                payTicket(token.id, lawPayFields.postal_code);
+                const token = await hostedFields.getPaymentToken({
+                    "postal_code": lawPayFields.postal_code,
+                    "address1": lawPayFields.address1,
+                    "exp_year": lawPayFields.exp_year,
+                    "exp_month": lawPayFields.exp_month
+                });
+                payTicket(token);
             } catch (e) {
                 console.log('error: ', e);
             }
@@ -189,6 +191,13 @@ const LawPayForm = ({ reservation, payTicket, userProfile, marketingData, provid
                     {lawPayErrors.cvv && <div className={styles.fieldError}>{lawPayErrors.cvv}</div>}
                     {lawPayErrors.postal_code && <div className={styles.fieldError}>{lawPayErrors.postal_code}</div>}
                 </div>
+            </div>
+            <div className={styles.fieldWrapper}>
+                <div className={styles.inputWrapper}>
+                    <input type="text" name="address1" placeholder="Address *"
+                        onChange={(e) => setLawPayFields({ ...lawPayFields, address1: e.target.value })} />
+                </div>
+                {lawPayErrors.address1 && <div className={styles.fieldError}>{lawPayErrors.address1}</div>}
             </div>
         </form>
     )
