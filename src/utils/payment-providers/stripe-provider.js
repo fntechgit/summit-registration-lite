@@ -1,0 +1,114 @@
+import {
+    createAction,    
+    putRequest,    
+    authErrorHandler
+} from "openstack-uicore-foundation/lib/utils/actions";
+
+import { CLEAR_RESERVATION, PAY_RESERVATION } from "../../actions";
+
+import { changeStep, removeReservedTicket, startWidgetLoading, stopWidgetLoading } from '../../actions'
+
+import Swal from 'sweetalert2';
+
+export class StripeProvider {
+
+    constructor(reservation, summitId, userProfile, access_token, apiBaseUrl, dispatch) {
+        this.reservation = reservation;
+        this.summitId = summitId;
+        this.userProfile = userProfile;
+        this.access_token = access_token;
+        this.apiBaseUrl = apiBaseUrl;
+        this.dispatch = dispatch;
+    }
+
+    payTicket = (token = null, stripe = null, zipCode = null) => async (dispatch) => {        
+
+        let params = {
+            access_token: this.access_token,
+            expand: 'tickets,' +
+                'tickets.owner,' +
+                'tickets.owner.extra_questions,' +
+                'tickets.badge,' +
+                'tickets.badge.type,' +
+                'tickets.badge.type.access_levels,' +
+                'tickets.badge.type.features,' +
+                'tickets.ticket_type,' +
+                'tickets.ticket_type.taxes',
+        }
+
+        let normalizedEntity = {
+            billing_address_1: this.userProfile?.address1 || '',
+            billing_address_2: this.userProfile?.address2 || '',
+            billing_address_zip_code: zipCode,
+            billing_address_city: this.userProfile?.locality || '',
+            billing_address_state: this.userProfile?.region || '',
+            billing_address_country: this.userProfile?.country || '',
+        };
+
+        dispatch(startWidgetLoading());
+
+        if (this.reservation.amount > 0) {
+            const { id } = token;
+            stripe.confirmCardPayment(
+                this.reservation.payment_gateway_client_token, { payment_method: { card: { token: id } } }
+            ).then((result) => {
+                if (result.error) {
+                    // Reserve error.message in your UI.
+                    Swal.fire(result.error.message, "Please retry purchase.", "warning");
+                    this.dispatch(changeStep(1));
+                    this.dispatch(removeReservedTicket());
+                    this.dispatch(stopWidgetLoading());
+                } else {
+                    return putRequest(
+                        null,
+                        createAction(PAY_RESERVATION),
+                        `${this.apiBaseUrl}/api/v1/summits/${this.summitId}/orders/${this.reservation.hash}/checkout`,
+                        normalizedEntity,
+                        authErrorHandler,
+                        // entity
+                    )(params)(this.dispatch)
+                        .then((payload) => {
+                            this.dispatch(stopWidgetLoading());
+                            this.dispatch(createAction(CLEAR_RESERVATION)({}));
+                            this.dispatch(changeStep(3));
+                            return (payload);
+                        })
+                        .catch(e => {
+                            this.dispatch(stopWidgetLoading());
+                            return (e);
+                        });
+                    // The payment has succeeded. Display a success message.
+                }
+            })
+                .catch(e => {
+                    this.dispatch(removeReservedTicket());
+                    this.dispatch(changeStep(1));
+                    this.dispatch(stopWidgetLoading());
+                    return (e);
+                });
+        } else {
+            // FREE TICKET
+            return putRequest(
+                null,
+                createAction(PAY_RESERVATION),
+                `${this.apiBaseUrl}/api/v1/summits/${this.summitId}/orders/${this.reservation.hash}/checkout`,
+                normalizedEntity,
+                authErrorHandler,
+                // entity
+            )(params)(this.dispatch)
+                .then((payload) => {
+                    this.dispatch(stopWidgetLoading());
+                    this.dispatch(createAction(CLEAR_RESERVATION)({}));
+                    this.dispatch(changeStep(3));
+                    return (payload);
+                })
+                .catch(e => {
+                    this.dispatch(removeReservedTicket());
+                    this.dispatch(changeStep(1));
+                    this.dispatch(stopWidgetLoading());
+                    return (e);
+                });
+            // The payment has succeeded. Display a success message.
+        }
+    }
+}

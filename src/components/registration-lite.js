@@ -19,7 +19,7 @@ import { useMeasure } from "react-use";
 
 import {
     loadSession, changeStep, reserveTicket, removeReservedTicket,
-    payTicket, payTicketWithLawPay, getTicketTypes, getTaxesTypes, getLoginCode, passwordlessLogin, goToLogin
+    payTicketWithProvider, getTicketTypes, getTaxesTypes, getLoginCode, passwordlessLogin, goToLogin
 } from "../actions";
 
 import AjaxLoader from "openstack-uicore-foundation/lib/components/ajaxloader";
@@ -43,8 +43,7 @@ const RegistrationLite = (
         changeStep,
         removeReservedTicket,
         reserveTicket,
-        payTicket,
-        payTicketWithLawPay,
+        payTicketWithProvider,
         onPurchaseComplete,
         getTicketTypes,
         getTaxesTypes,
@@ -107,8 +106,6 @@ const RegistrationLite = (
             break;
         }
     }
-
-    // const stripePromise = useMemo(() => loadStripe(publicKey), [publicKey])
 
     useEffect(() => {
         loadSession({ ...rest, summitData, profileData });
@@ -224,8 +221,7 @@ const RegistrationLite = (
                                             <PaymentComponent
                                                 isActive={step === 2}
                                                 reservation={reservation}
-                                                payTicket={payTicket}
-                                                payTicketWithLawPay={payTicketWithLawPay}
+                                                payTicket={payTicketWithProvider}
                                                 userProfile={profileData}
                                                 timestamp={summitData.timestamp}
                                                 provider={provider}
@@ -284,8 +280,7 @@ export default connect(mapStateToProps, {
     changeStep,
     reserveTicket,
     removeReservedTicket,
-    payTicket,
-    payTicketWithLawPay,
+    payTicketWithProvider,
     getTicketTypes,
     getTaxesTypes,
     getLoginCode,

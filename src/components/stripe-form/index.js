@@ -67,7 +67,7 @@ const stripeErrorCodeMap = {
     }
 };
 
-const StripeForm = ({ reservation, payTicket, userProfile, marketingData, stripeOptions }) => {
+const StripeForm = ({ reservation, payTicket, userProfile, marketingData, stripeOptions, provider }) => {
     const stripe = useStripe();
     const elements = useElements();
     const [stripeErrors, setStripeErrors] = useState({});
@@ -110,7 +110,7 @@ const StripeForm = ({ reservation, payTicket, userProfile, marketingData, stripe
         });
 
         if (token) {
-            payTicket(token, stripe, data.zipCode);
+            payTicket(provider, token, stripe, data.zipCode);
         } else if (error) {
             if (stripeErrorCodeMap[error.code]) {
                 setStripeErrors({

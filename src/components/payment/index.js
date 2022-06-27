@@ -17,15 +17,12 @@ import PropTypes from 'prop-types';
 import { useSpring, config, animated } from "react-spring";
 import { useMeasure } from "react-use";
 
-import { Elements } from '@stripe/react-stripe-js';
-
 import styles from "./index.module.scss";
-import StripeForm from '../stripe-form';
 import LawpayForm from '../lawpay-form';
 import StripeProvider from '../stripe-provider';
 
 
-const PaymentComponent = ({ isActive, userProfile, reservation, payTicket, payTicketWithLawPay, providerKey, provider, stripeOptions, timestamp }) => {
+const PaymentComponent = ({ isActive, userProfile, reservation, payTicket, providerKey, provider, stripeOptions, timestamp }) => {
 
     const [ref, { height }] = useMeasure();
 
@@ -50,6 +47,7 @@ const PaymentComponent = ({ isActive, userProfile, reservation, payTicket, payTi
                         <div ref={ref}>
                             {provider === 'Stripe' &&
                                 <StripeProvider
+                                    provider={provider}
                                     providerKey={providerKey}
                                     reservation={reservation}
                                     payTicket={payTicket}
@@ -58,7 +56,13 @@ const PaymentComponent = ({ isActive, userProfile, reservation, payTicket, payTi
                                 />
                             }
                             {provider === 'LawPay' &&
-                                <LawpayForm reservation={reservation} payTicket={payTicketWithLawPay} userProfile={userProfile} providerKey={providerKey} timestamp={timestamp} />
+                                <LawpayForm 
+                                    provider={provider}
+                                    reservation={reservation} 
+                                    payTicket={payTicket} 
+                                    userProfile={userProfile} 
+                                    providerKey={providerKey} 
+                                    timestamp={timestamp} />
                             }
                         </div>
                     </animated.div>

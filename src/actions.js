@@ -20,6 +20,9 @@ import {
 } from "openstack-uicore-foundation/lib/utils/actions";
 import { authErrorHandler } from "openstack-uicore-foundation/lib/utils/actions";
 import Swal from 'sweetalert2';
+import StripeProvider from "./components/stripe-provider";
+import { LawPayProvider } from "./utils/payment-providers/lawpay-provider";
+import { PaymentStrategy } from "./utils/payment-strategy";
 
 export const START_WIDGET_LOADING = 'START_WIDGET_LOADING';
 export const STOP_WIDGET_LOADING = 'STOP_WIDGET_LOADING';
@@ -40,8 +43,8 @@ export const SET_PASSWORDLESS_LENGTH = 'SET_PASSWORDLESS_LENGTH';
 export const SET_PASSWORDLESS_ERROR = 'SET_PASSWORDLESS_ERROR';
 export const GO_TO_LOGIN = 'GO_TO_LOGIN';
 
-const startWidgetLoading = createAction(START_WIDGET_LOADING);
-const stopWidgetLoading = createAction(STOP_WIDGET_LOADING);
+export const startWidgetLoading = createAction(START_WIDGET_LOADING);
+export const stopWidgetLoading = createAction(STOP_WIDGET_LOADING);
 
 export const loadSession = (settings) => (dispatch) => {
     dispatch(createAction(LOAD_INITIAL_VARS)(settings));
@@ -201,177 +204,31 @@ export const removeReservedTicket = () => async (dispatch, getState, { apiBaseUr
         })
 }
 
-export const payTicket = (token = null, stripe = null, zipCode = null) => async (dispatch, getState, { apiBaseUrl, getAccessToken }) => {
+export const payTicketWithProvider = (provider, token, stripe = null, zipCode = null) => async (dispatch, getState, { apiBaseUrl, getAccessToken }) => {
 
     let { registrationLiteState: { settings: { summitId, userProfile }, reservation } } = getState();
 
     const access_token = await getAccessToken();
 
-    let params = {
-        access_token,
-        expand: 'tickets,' +
-            'tickets.owner,' +
-            'tickets.owner.extra_questions,' +
-            'tickets.badge,' +
-            'tickets.badge.type,' +
-            'tickets.badge.type.access_levels,' +
-            'tickets.badge.type.features,' +
-            'tickets.ticket_type,' +
-            'tickets.ticket_type.taxes',
-    }
-
-    let normalizedEntity = {
-        billing_address_1: userProfile?.address1 || '',
-        billing_address_2: userProfile?.address2 || '',
-        billing_address_zip_code: zipCode,
-        billing_address_city: userProfile?.locality || '',
-        billing_address_state: userProfile?.region || '',
-        billing_address_country: userProfile?.country || '',
-    };
-
     dispatch(startWidgetLoading());
 
-    if (reservation.payment_gateway_client_token) {
-        const { id } = token;
-        stripe.confirmCardPayment(
-            reservation.payment_gateway_client_token, { payment_method: { card: { token: id } } }
-        ).then((result) => {
-            if (result.error) {
-                // Reserve error.message in your UI.
-                Swal.fire(result.error.message, "Please retry purchase.", "warning");
-                dispatch(changeStep(1));
-                dispatch(removeReservedTicket());
-                dispatch(stopWidgetLoading());
-            } else {
-                return putRequest(
-                    null,
-                    createAction(PAY_RESERVATION),
-                    `${apiBaseUrl}/api/v1/summits/${summitId}/orders/${reservation.hash}/checkout`,
-                    normalizedEntity,
-                    authErrorHandler,
-                    // entity
-                )(params)(dispatch)
-                    .then((payload) => {
-                        dispatch(stopWidgetLoading());
-                        dispatch(createAction(CLEAR_RESERVATION)({}));
-                        dispatch(changeStep(3));
-                        return (payload);
-                    })
-                    .catch(e => {
-                        dispatch(stopWidgetLoading());
-                        return (e);
-                    });
-                // The payment has succeeded. Display a success message.
-            }
-        })
-            .catch(e => {
-                dispatch(removeReservedTicket());
-                dispatch(changeStep(1));
-                dispatch(stopWidgetLoading());
-                return (e);
-            });
-    } else {
-        // FREE TICKET
-        return putRequest(
-            null,
-            createAction(PAY_RESERVATION),
-            `${apiBaseUrl}/api/v1/summits/${summitId}/orders/${reservation.hash}/checkout`,
-            normalizedEntity,
-            authErrorHandler,
-            // entity
-        )(params)(dispatch)
-            .then((payload) => {
-                dispatch(stopWidgetLoading());
-                dispatch(createAction(CLEAR_RESERVATION)({}));
-                dispatch(changeStep(3));
-                return (payload);
-            })
-            .catch(e => {
-                dispatch(removeReservedTicket());
-                dispatch(changeStep(1));
-                dispatch(stopWidgetLoading());
-                return (e);
-            });
-        // The payment has succeeded. Display a success message.
-    }
-}
+    let currentProvider = null;
 
-
-export const payTicketWithLawPay = (token = null) => async (dispatch, getState, { apiBaseUrl, getAccessToken }) => {
-    // Pay using affinity lawpay            
-    let { registrationLiteState: { settings: { summitId, userProfile }, reservation } } = getState();
-
-    const access_token = await getAccessToken();
-
-    let params = {
-        access_token,
-        expand: 'tickets,' +
-            'tickets.owner,' +
-            'tickets.owner.extra_questions,' +
-            'tickets.badge,' +
-            'tickets.badge.type,' +
-            'tickets.badge.type.access_levels,' +
-            'tickets.badge.type.features,' +
-            'tickets.ticket_type,' +
-            'tickets.ticket_type.taxes',
+    switch (provider) {
+        case 'LawPay': {
+            currentProvider = new LawPayProvider(reservation, summitId, userProfile, access_token, apiBaseUrl, dispatch);
+        }
+        case 'Stripe': {
+            currentProvider = new StripeProvider(reservation, summitId, userProfile, access_token, apiBaseUrl, dispatch);
+        }
+        default:
+            break;
     }
 
-    let normalizedEntity = {
-        billing_address_1: token.address1 || '',
-        billing_address_2: userProfile?.address2 || '',
-        billing_address_zip_code: token.postal_code,
-        billing_address_city: userProfile?.locality || '',
-        billing_address_state: userProfile?.region || '',
-        billing_address_country: userProfile?.country || '',
-        payment_method_id: token.id,
-    };
-
-    dispatch(startWidgetLoading());
-
-    if (reservation.amount > 0) {
-        return putRequest(
-            null,
-            createAction(PAY_RESERVATION),
-            `${apiBaseUrl}/api/v1/summits/${summitId}/orders/${reservation.hash}/checkout`,
-            normalizedEntity,
-            authErrorHandler,
-            // entity
-        )(params)(dispatch)
-            .then((payload) => {
-                dispatch(stopWidgetLoading());
-                dispatch(createAction(CLEAR_RESERVATION)({}));
-                dispatch(changeStep(3));
-                return (payload);
-            })
-            .catch(e => {
-                dispatch(stopWidgetLoading());
-                return (e);
-            });
-        // The payment has succeeded. Display a success message.            
-    } else {
-        // FREE TICKET
-        return putRequest(
-            null,
-            createAction(PAY_RESERVATION),
-            `${apiBaseUrl}/api/v1/summits/${summitId}/orders/${reservation.hash}/checkout`,
-            normalizedEntity,
-            authErrorHandler,
-            // entity
-        )(params)(dispatch)
-            .then((payload) => {
-                dispatch(stopWidgetLoading());
-                dispatch(createAction(CLEAR_RESERVATION)({}));
-                dispatch(changeStep(3));
-                return (payload);
-            })
-            .catch(e => {
-                dispatch(removeReservedTicket());
-                dispatch(changeStep(1));
-                dispatch(stopWidgetLoading());
-                return (e);
-            });
-        // The payment has succeeded. Display a success message.
-    }
+    let paymentProvider = new PaymentStrategy();
+    paymentProvider.setStrategy(currentProvider);
+    
+    return dispatch(paymentProvider.payTicket(token, stripe, zipCode));
 }
 
 export const changeStep = (step) => (dispatch, getState) => {

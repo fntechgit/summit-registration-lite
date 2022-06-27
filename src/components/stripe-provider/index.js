@@ -19,7 +19,7 @@ import { Elements } from '@stripe/react-stripe-js';
 import StripeForm from '../stripe-form';
 
 
-const StripeProvider = ({ userProfile, reservation, payTicket, providerKey, stripeOptions }) => {
+const StripeProvider = ({ userProfile, reservation, payTicket, providerKey, provider, stripeOptions }) => {
 
     const stripePromise = useMemo(() => loadStripe(providerKey), [providerKey])
 
@@ -34,6 +34,7 @@ const StripeProvider = ({ userProfile, reservation, payTicket, providerKey, stri
                 payTicket={payTicket}
                 userProfile={userProfile}
                 stripeOptions={stripeOptions}
+                provider={provider}
             />
         </Elements>
     );
