@@ -124,8 +124,8 @@ const LawPayForm = ({ reservation, payTicket, userProfile, marketingData, provid
                     "exp_month": lawPayFields.exp_month
                 });
                 payTicket(provider, token);
-            } catch (e) {
-                console.log('error: ', e);
+            } catch (error) {
+                Swal.fire("Payment error", error.message, "warning");
             }
         }
 

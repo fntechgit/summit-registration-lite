@@ -10,11 +10,9 @@ export class PaymentStrategy {
 
     setStrategy(strategy) {        
         this._strategy = strategy;
-        console.log('setting strategy...', strategy);
     }
 
     payTicket = (token, stripe = null, zipCode = null) => {
-        console.log('calling from provider?')
         return this._strategy.payTicket(token, stripe, zipCode);
     }
 }

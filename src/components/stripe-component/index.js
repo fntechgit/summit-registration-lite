@@ -11,8 +11,10 @@
  * limitations under the License.
  **/
 
-import React, { useState, useEffect } from 'react';
+import React, { useMemo } from 'react';
 import PropTypes from 'prop-types';
+
+import { loadStripe } from '@stripe/stripe-js';
 
 import { Elements } from '@stripe/react-stripe-js';
 

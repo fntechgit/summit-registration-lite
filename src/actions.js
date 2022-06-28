@@ -20,8 +20,8 @@ import {
 } from "openstack-uicore-foundation/lib/utils/actions";
 import { authErrorHandler } from "openstack-uicore-foundation/lib/utils/actions";
 import Swal from 'sweetalert2';
-import StripeProvider from "./components/stripe-provider";
 import { LawPayProvider } from "./utils/payment-providers/lawpay-provider";
+import { StripeProvider } from "./utils/payment-providers/stripe-provider";
 import { PaymentStrategy } from "./utils/payment-strategy";
 
 export const START_WIDGET_LOADING = 'START_WIDGET_LOADING';

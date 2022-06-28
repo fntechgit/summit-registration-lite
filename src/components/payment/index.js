@@ -19,7 +19,7 @@ import { useMeasure } from "react-use";
 
 import styles from "./index.module.scss";
 import LawpayForm from '../lawpay-form';
-import StripeProvider from '../stripe-provider';
+import StripeProvider from '../stripe-component';
 
 
 const PaymentComponent = ({ isActive, userProfile, reservation, payTicket, providerKey, provider, stripeOptions, timestamp }) => {
