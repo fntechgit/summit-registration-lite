@@ -1,6 +1,6 @@
 import {
-    createAction,    
-    putRequest,    
+    createAction,
+    putRequest,
     authErrorHandler
 } from "openstack-uicore-foundation/lib/utils/actions";
 
@@ -12,7 +12,7 @@ import Swal from 'sweetalert2';
 
 export class StripeProvider {
 
-    constructor(reservation, summitId, userProfile, access_token, apiBaseUrl, dispatch) {
+    constructor({ reservation, summitId, userProfile, access_token, apiBaseUrl, dispatch }) {
         this.reservation = reservation;
         this.summitId = summitId;
         this.userProfile = userProfile;
@@ -21,7 +21,7 @@ export class StripeProvider {
         this.dispatch = dispatch;
     }
 
-    payTicket = (token = null, stripe = null, zipCode = null) => async (dispatch) => {        
+    payTicket = ({ token = null, stripe = null, zipCode = null }) => async (dispatch) => {
 
         let params = {
             access_token: this.access_token,

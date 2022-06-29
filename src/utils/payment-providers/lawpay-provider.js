@@ -1,6 +1,6 @@
 import {
-    createAction,    
-    putRequest,    
+    createAction,
+    putRequest,
     authErrorHandler
 } from "openstack-uicore-foundation/lib/utils/actions";
 
@@ -10,7 +10,7 @@ import { changeStep, removeReservedTicket, startWidgetLoading, stopWidgetLoading
 
 export class LawPayProvider {
 
-    constructor(reservation, summitId, userProfile, access_token, apiBaseUrl, dispatch) {
+    constructor({ reservation, summitId, userProfile, access_token, apiBaseUrl, dispatch }) {
         this.reservation = reservation;
         this.summitId = summitId;
         this.userProfile = userProfile;
@@ -19,7 +19,7 @@ export class LawPayProvider {
         this.dispatch = dispatch;
     }
 
-    payTicket = (token) => async (dispatch) => {
+    payTicket = ({ token }) => async (dispatch) => {
         // Pay using affinity lawpay
 
         let params = {

@@ -19,7 +19,8 @@ import { useMeasure } from "react-use";
 
 import {
     loadSession, changeStep, reserveTicket, removeReservedTicket,
-    payTicketWithProvider, getTicketTypes, getTaxesTypes, getLoginCode, passwordlessLogin, goToLogin
+    payTicketWithProvider, getTicketTypes, getTaxesTypes, getLoginCode,
+    passwordlessLogin, goToLogin
 } from "../actions";
 
 import AjaxLoader from "openstack-uicore-foundation/lib/components/ajaxloader";
@@ -225,7 +226,7 @@ const RegistrationLite = (
                                                 userProfile={profileData}
                                                 timestamp={summitData.timestamp}
                                                 provider={provider}
-                                                providerKey={publicKey}                                                
+                                                providerKey={publicKey}
                                                 stripeOptions={stripeOptions}
                                             />
                                         </div>
