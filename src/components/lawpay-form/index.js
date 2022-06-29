@@ -83,11 +83,13 @@ const LawPayForm = ({ payTicket, userProfile, marketingData, providerKey, provid
     };
 
     useEffect(() => {
-        setHostedFields(window.AffiniPay.HostedFields.initializeFields(
-            hostedFieldsConfiguration,
-            hostedFieldsCallBack
-        ));
-    }, [])
+        if (window.AffiniPay) {
+            setHostedFields(window.AffiniPay.HostedFields.initializeFields(
+                hostedFieldsConfiguration,
+                hostedFieldsCallBack
+            ));
+        }
+    }, [reservation])
 
     const onExpireChange = (ev) => {
         setLawPayFields({ ...lawPayFields, [ev.target.id]: ev.target.value });

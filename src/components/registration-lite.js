@@ -159,7 +159,7 @@ const RegistrationLite = (
     };
 
     return (
-        <div id="modal" className="modal is-active">
+        <div id={`${styles.modal}`} className="modal is-active">
             <div className="modal-background"></div>
             <div className={`${styles.modal} modal-content`}>
                 <AjaxLoader relative={true} color={'#ffffff'} show={widgetLoading || loading} size={80} />
