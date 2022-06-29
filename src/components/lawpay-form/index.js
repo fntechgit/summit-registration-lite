@@ -22,7 +22,7 @@ import { epochToMomentTimeZone } from "openstack-uicore-foundation/lib/utils/met
 
 import styles from "./index.module.scss";
 
-const LawPayForm = ({ payTicket, userProfile, marketingData, providerKey, provider, timestamp }) => {
+const LawPayForm = ({ reservation, payTicket, userProfile, marketingData, providerKey, provider, timestamp }) => {
 
     const [hostedFields, setHostedFields] = useState(null);
 
