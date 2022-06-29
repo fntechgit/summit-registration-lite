@@ -83,11 +83,13 @@ const LawPayForm = ({ reservation, payTicket, userProfile, marketingData, provid
     };
 
     useEffect(() => {
-        setHostedFields(window.AffiniPay.HostedFields.initializeFields(
-            hostedFieldsConfiguration,
-            hostedFieldsCallBack
-        ));
-    }, [])
+        if (window.AffiniPay) {
+            setHostedFields(window.AffiniPay.HostedFields.initializeFields(
+                hostedFieldsConfiguration,
+                hostedFieldsCallBack
+            ));
+        }
+    }, [reservation])
 
     const onExpireChange = (ev) => {
         setLawPayFields({ ...lawPayFields, [ev.target.id]: ev.target.value });
@@ -95,7 +97,7 @@ const LawPayForm = ({ reservation, payTicket, userProfile, marketingData, provid
 
     const formHasErrors = () => {
         let errors = {};
-        
+
         Object.keys(lawPayFields).map((key) => {
             if (!lawPayFields[key]) {
                 errors = { ...errors, [key]: 'This field is required.' };

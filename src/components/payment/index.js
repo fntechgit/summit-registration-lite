@@ -20,6 +20,7 @@ import { useMeasure } from "react-use";
 import styles from "./index.module.scss";
 import LawpayForm from '../lawpay-form';
 import StripeProvider from '../stripe-component';
+import { Helmet } from 'react-helmet';
 
 
 const PaymentComponent = ({ isActive, userProfile, reservation, payTicket, providerKey, provider, stripeOptions, timestamp }) => {
@@ -56,13 +57,18 @@ const PaymentComponent = ({ isActive, userProfile, reservation, payTicket, provi
                                 />
                             }
                             {provider === 'LawPay' &&
-                                <LawpayForm 
-                                    provider={provider}
-                                    reservation={reservation} 
-                                    payTicket={payTicket} 
-                                    userProfile={userProfile} 
-                                    providerKey={providerKey} 
-                                    timestamp={timestamp} />
+                                <>
+                                    <Helmet>
+                                        <script src="https://cdn.affinipay.com/hostedfields/1.1.1/fieldGen_1.1.1.js"></script>
+                                    </Helmet>
+                                    <LawpayForm
+                                        provider={provider}
+                                        reservation={reservation}
+                                        payTicket={payTicket}
+                                        userProfile={userProfile}
+                                        providerKey={providerKey}
+                                        timestamp={timestamp} />
+                                </>
                             }
                         </div>
                     </animated.div>

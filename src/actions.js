@@ -217,9 +217,11 @@ export const payTicketWithProvider = (provider, token, stripe = null, zipCode = 
     switch (provider) {
         case 'LawPay': {
             currentProvider = new LawPayProvider(reservation, summitId, userProfile, access_token, apiBaseUrl, dispatch);
+            break;
         }
         case 'Stripe': {
             currentProvider = new StripeProvider(reservation, summitId, userProfile, access_token, apiBaseUrl, dispatch);
+            break;
         }
         default:
             break;
