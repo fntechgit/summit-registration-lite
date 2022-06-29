@@ -9,9 +9,11 @@ export class PaymentProviderFactory {
         switch (provider) {
             case 'LawPay': {
                 currentProvider = new LawPayProvider({...params});
+                break;
             }
             case 'Stripe': {
                 currentProvider = new StripeProvider({...params});
+                break;
             }
         }
 

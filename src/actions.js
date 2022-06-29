@@ -20,9 +20,6 @@ import {
 } from "openstack-uicore-foundation/lib/utils/actions";
 import { authErrorHandler } from "openstack-uicore-foundation/lib/utils/actions";
 import Swal from 'sweetalert2';
-import { LawPayProvider } from "./utils/payment-providers/lawpay-provider";
-import { StripeProvider } from "./utils/payment-providers/stripe-provider";
-import { PaymentStrategy } from "./utils/payment-strategy";
 import {PaymentProviderFactory} from "./utils/payment-providers/payment-provider-factory";
 
 export const START_WIDGET_LOADING = 'START_WIDGET_LOADING';
@@ -213,7 +210,7 @@ export const payTicketWithProvider = (provider, params = {}) => async (dispatch,
 
     dispatch(startWidgetLoading());
 
-    const currentProvider = PaymentProviderFactory.build(provider, { summitId, userProfile, access_token, apiBaseUrl, dispatch});
+    const currentProvider = PaymentProviderFactory.build(provider, { reservation, summitId, userProfile, access_token, apiBaseUrl, dispatch});
 
     return dispatch(currentProvider.payTicket({...params}));
 }
