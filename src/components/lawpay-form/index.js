@@ -22,7 +22,7 @@ import { epochToMomentTimeZone } from "openstack-uicore-foundation/lib/utils/met
 
 import styles from "./index.module.scss";
 
-const LawPayForm = ({ reservation, payTicket, userProfile, marketingData, providerKey, provider, timestamp }) => {
+const LawPayForm = ({ payTicket, userProfile, marketingData, providerKey, provider, timestamp }) => {
 
     const [hostedFields, setHostedFields] = useState(null);
 
@@ -95,7 +95,7 @@ const LawPayForm = ({ reservation, payTicket, userProfile, marketingData, provid
 
     const formHasErrors = () => {
         let errors = {};
-        
+
         Object.keys(lawPayFields).map((key) => {
             if (!lawPayFields[key]) {
                 errors = { ...errors, [key]: 'This field is required.' };
@@ -123,7 +123,7 @@ const LawPayForm = ({ reservation, payTicket, userProfile, marketingData, provid
                     "exp_year": lawPayFields.exp_year,
                     "exp_month": lawPayFields.exp_month
                 });
-                payTicket(provider, token);
+                payTicket(provider, { token });
             } catch (error) {
                 Swal.fire("Payment error", error.message, "warning");
             }

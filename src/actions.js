@@ -23,6 +23,7 @@ import Swal from 'sweetalert2';
 import { LawPayProvider } from "./utils/payment-providers/lawpay-provider";
 import { StripeProvider } from "./utils/payment-providers/stripe-provider";
 import { PaymentStrategy } from "./utils/payment-strategy";
+import {PaymentProviderFactory} from "./utils/payment-providers/payment-provider-factory";
 
 export const START_WIDGET_LOADING = 'START_WIDGET_LOADING';
 export const STOP_WIDGET_LOADING = 'STOP_WIDGET_LOADING';
@@ -204,7 +205,7 @@ export const removeReservedTicket = () => async (dispatch, getState, { apiBaseUr
         })
 }
 
-export const payTicketWithProvider = (provider, token, stripe = null, zipCode = null) => async (dispatch, getState, { apiBaseUrl, getAccessToken }) => {
+export const payTicketWithProvider = (provider, params = {}) => async (dispatch, getState, { apiBaseUrl, getAccessToken }) => {
 
     let { registrationLiteState: { settings: { summitId, userProfile }, reservation } } = getState();
 
@@ -212,23 +213,9 @@ export const payTicketWithProvider = (provider, token, stripe = null, zipCode = 
 
     dispatch(startWidgetLoading());
 
-    let currentProvider = null;
+    const currentProvider = PaymentProviderFactory.build(provider, { summitId, userProfile, access_token, apiBaseUrl, dispatch});
 
-    switch (provider) {
-        case 'LawPay': {
-            currentProvider = new LawPayProvider(reservation, summitId, userProfile, access_token, apiBaseUrl, dispatch);
-        }
-        case 'Stripe': {
-            currentProvider = new StripeProvider(reservation, summitId, userProfile, access_token, apiBaseUrl, dispatch);
-        }
-        default:
-            break;
-    }
-
-    let paymentProvider = new PaymentStrategy();
-    paymentProvider.setStrategy(currentProvider);
-    
-    return dispatch(paymentProvider.payTicket(token, stripe, zipCode));
+    return dispatch(currentProvider.payTicket({...params}));
 }
 
 export const changeStep = (step) => (dispatch, getState) => {

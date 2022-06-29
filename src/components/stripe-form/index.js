@@ -110,7 +110,7 @@ const StripeForm = ({ reservation, payTicket, userProfile, marketingData, stripe
         });
 
         if (token) {
-            payTicket(provider, token, stripe, data.zipCode);
+            payTicket(provider, { token, stripe, zipCode : data.zipCode });
         } else if (error) {
             if (stripeErrorCodeMap[error.code]) {
                 setStripeErrors({
