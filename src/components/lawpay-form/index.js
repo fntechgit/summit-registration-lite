@@ -83,7 +83,7 @@ const LawPayForm = ({ reservation, payTicket, userProfile, marketingData, provid
     };
 
     useEffect(() => {
-        if (window.AffiniPay) {
+        if (window.AffiniPay && hostedFields === null) {
             setHostedFields(window.AffiniPay.HostedFields.initializeFields(
                 hostedFieldsConfiguration,
                 hostedFieldsCallBack
@@ -159,7 +159,6 @@ const LawPayForm = ({ reservation, payTicket, userProfile, marketingData, provid
         <form className={styles.form} id="payment-form" onSubmit={onSubmit}>
             <div className={styles.fieldWrapper}>
                 <div className={styles.inputWrapper}>
-                    {/* <CardNumberElement options={{ style: stripeStyle, placeholder: '1234 1234 1234 1234 *' }} /> */}
                     <div id="my_credit_card_field_id" className={styles.lawpayWrapper}></div>
                     <i className="fa fa-credit-card" />
                 </div>

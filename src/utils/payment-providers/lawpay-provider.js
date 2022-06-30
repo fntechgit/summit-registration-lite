@@ -63,6 +63,8 @@ export class LawPayProvider {
                     return (payload);
                 })
                 .catch(e => {
+                    this.dispatch(removeReservedTicket());
+                    this.dispatch(changeStep(1));
                     this.dispatch(stopWidgetLoading());
                     return (e);
                 });
