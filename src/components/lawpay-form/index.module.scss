@@ -1,0 +1,103 @@
+.form {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  margin: 10px 0;
+
+  div.fieldWrapper {
+    width: 100%;
+    margin-bottom: 5px;
+    &:first-of-type {
+      div.inputWrapper {
+        width: 100%;
+      }
+    }
+    .fieldRow {
+      justify-content: space-between;
+      display: flex;
+    }
+    div.inputWrapper {
+      width: 48%;
+    }
+  }
+
+  div.lawpayWrapper {
+    height: 36px;
+  }
+
+  div.dateWrapper {
+    display: flex;
+    justify-content: space-between;
+    > div {
+      width: 48%;
+      .dropdown {
+        width: 100%;
+        > div {
+          border: 1px solid var(--color_primary);
+          width: 100%;
+        }
+      }
+    }
+  }
+
+  div.inputWrapper {
+    display: flex;
+    border-radius: 5px;
+    border: 1px solid var(--color_primary);
+    height: 36px;
+    padding: 5px 10px;
+    justify-content: space-between;
+    align-items: center;
+
+    iframe {
+      height: inherit;
+      width: inherit;
+    }
+
+    input {
+      width: 100%;
+      background-color: transparent;
+      border: none;
+      padding: 0;
+      font-size: 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+
+      &::placeholder {
+        color: var(--color_text_input_hints);
+        font-size: 16px;
+      }
+
+      &:focus-visible {
+        outline: none;
+      }
+    }
+
+    i {
+      position: relative;
+    }
+
+    > div {
+      width: 100%;
+
+      &:first-of-type {
+        width: 95%;
+      }
+    }
+  }
+
+  div.fieldError {
+    margin-top: 5px;
+    margin-bottom: 5px;
+    color: #e5424d;
+    font-size: 14px;
+    line-height: 1.5;
+
+    &::before {
+      font-family: FontAwesome;
+      content: '\f071';
+      margin-right: 5px;
+    }
+  }
+}

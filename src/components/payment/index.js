@@ -17,13 +17,13 @@ import PropTypes from 'prop-types';
 import { useSpring, config, animated } from "react-spring";
 import { useMeasure } from "react-use";
 
-import { Elements } from '@stripe/react-stripe-js';
-
 import styles from "./index.module.scss";
-import StripeForm from '../stripe-form';
+import LawpayForm from '../lawpay-form';
+import StripeProvider from '../stripe-component';
+import { Helmet } from 'react-helmet';
 
 
-const PaymentComponent = ({ isActive, userProfile, reservation, payTicket, stripeKey, stripeOptions }) => {
+const PaymentComponent = ({ isActive, userProfile, reservation, payTicket, providerKey, provider, stripeOptions, timestamp }) => {
 
     const [ref, { height }] = useMeasure();
 
@@ -37,10 +37,6 @@ const PaymentComponent = ({ isActive, userProfile, reservation, payTicket, strip
         }
     });
 
-    const options = {
-        fonts: stripeOptions?.fonts
-    };
-
     return (
         <div className={`${styles.outerWrapper} step-wrapper`}>
             <>
@@ -48,16 +44,32 @@ const PaymentComponent = ({ isActive, userProfile, reservation, payTicket, strip
                     <div className={styles.title} >
                         <span>Payment</span>
                     </div>
-                    <animated.div style={{ overflow: 'hidden', ...toggleAnimation }}>
+                    <animated.div style={{ overflow: `${isActive ? '' : 'hidden'}`, ...toggleAnimation }}>
                         <div ref={ref}>
-                            <Elements options={options} stripe={stripeKey}>
-                                <StripeForm
+                            {provider === 'Stripe' &&
+                                <StripeProvider
+                                    provider={provider}
+                                    providerKey={providerKey}
                                     reservation={reservation}
                                     payTicket={payTicket}
                                     userProfile={userProfile}
                                     stripeOptions={stripeOptions}
                                 />
-                            </Elements>
+                            }
+                            {provider === 'LawPay' &&
+                                <>
+                                    <Helmet>
+                                        <script src="https://cdn.affinipay.com/hostedfields/1.1.1/fieldGen_1.1.1.js"></script>
+                                    </Helmet>
+                                    <LawpayForm
+                                        provider={provider}
+                                        reservation={reservation}
+                                        payTicket={payTicket}
+                                        userProfile={userProfile}
+                                        providerKey={providerKey}
+                                        timestamp={timestamp} />
+                                </>
+                            }
                         </div>
                     </animated.div>
                 </div>
