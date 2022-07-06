@@ -7,6 +7,7 @@ import {
 import { CLEAR_RESERVATION, PAY_RESERVATION } from "../../actions";
 
 import { changeStep, removeReservedTicket, startWidgetLoading, stopWidgetLoading } from '../../actions'
+import Swal from "sweetalert2";
 
 export class LawPayProvider {
 
@@ -21,6 +22,20 @@ export class LawPayProvider {
 
     payTicket = ({ token }) => async (dispatch) => {
         // Pay using affinity lawpay
+
+        const errorHandler = (err, res) => (dispatch, state) => {
+            if (res && res.statusCode === 404){
+                const msg = res.body.message;
+                Swal.fire("Validation Error", msg, "warning");
+                return;
+            }
+            if (res && res.statusCode === 500){
+                const msg = res.body.message;
+                Swal.fire("Server Error", msg, "error");
+                return;
+            }
+            return authErrorHandler(err, res);
+        };
 
         let params = {
             access_token: this.access_token,
@@ -47,13 +62,14 @@ export class LawPayProvider {
 
         this.dispatch(startWidgetLoading());
 
+
         if (this.reservation.amount > 0) {
             return putRequest(
                 null,
                 createAction(PAY_RESERVATION),
                 `${this.apiBaseUrl}/api/v1/summits/${this.summitId}/orders/${this.reservation.hash}/checkout`,
                 normalizedEntity,
-                authErrorHandler,
+                errorHandler,
                 // entity
             )(params)(this.dispatch)
                 .then((payload) => {
@@ -68,7 +84,7 @@ export class LawPayProvider {
                     this.dispatch(stopWidgetLoading());
                     return (e);
                 });
-            // The payment has succeeded. Display a success message.            
+            // The payment has succeeded. Display a success message.
         } else {
             // FREE TICKET
             return putRequest(
@@ -76,7 +92,7 @@ export class LawPayProvider {
                 createAction(PAY_RESERVATION),
                 `${this.apiBaseUrl}/api/v1/summits/${this.summitId}/orders/${this.reservation.hash}/checkout`,
                 normalizedEntity,
-                authErrorHandler,
+                errorHandler,
                 // entity
             )(params)(this.dispatch)
                 .then((payload) => {

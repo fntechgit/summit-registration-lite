@@ -15,7 +15,6 @@ import {
     createAction,
     getRequest,
     postRequest,
-    putRequest,
     deleteRequest
 } from "openstack-uicore-foundation/lib/utils/actions";
 import { authErrorHandler } from "openstack-uicore-foundation/lib/utils/actions";
@@ -139,7 +138,16 @@ export const reserveTicket = ({ personalInformation, ticket, ticketQuantity }, {
 
         const errorHandler = (err, res) => (dispatch, state) => {
             if (res && res.statusCode === 412 && onError) return onError(err, res);
-
+            if (res && res.statusCode === 404){
+                const msg = res.body.message;
+                Swal.fire("Validation Error", msg, "warning");
+                return;
+            }
+            if (res && res.statusCode === 500){
+                const msg = res.body.message;
+                Swal.fire("Server Error", msg, "error");
+                return;
+            }
             return authErrorHandler(err, res);
         };
 

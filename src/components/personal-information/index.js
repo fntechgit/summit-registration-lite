@@ -140,7 +140,7 @@ const PersonalInfoComponent = ({ isActive, changeForm, reservation, userProfile,
                                             onError={handleCompanyError}
                                             value={personalInfo.company}
                                         />
-                                        {companyError && <span data-testid="company-error">This field is required</span>}
+                                        {companyError && <div className={styles.fieldError} data-testid="company-error">This field is required.</div>}
                                     </div>
                                 </div>
 

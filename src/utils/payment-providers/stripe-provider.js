@@ -23,6 +23,20 @@ export class StripeProvider {
 
     payTicket = ({ token = null, stripe = null, zipCode = null }) => async (dispatch) => {
 
+        const errorHandler = (err, res) => (dispatch, state) => {
+            if (res && res.statusCode === 404){
+                const msg = res.body.message;
+                Swal.fire("Validation Error", msg, "warning");
+                return;
+            }
+            if (res && res.statusCode === 500){
+                const msg = res.body.message;
+                Swal.fire("Server Error", msg, "error");
+                return;
+            }
+            return authErrorHandler(err, res);
+        };
+
         let params = {
             access_token: this.access_token,
             expand: 'tickets,' +
@@ -64,7 +78,7 @@ export class StripeProvider {
                         createAction(PAY_RESERVATION),
                         `${this.apiBaseUrl}/api/v1/summits/${this.summitId}/orders/${this.reservation.hash}/checkout`,
                         normalizedEntity,
-                        authErrorHandler,
+                        errorHandler,
                         // entity
                     )(params)(this.dispatch)
                         .then((payload) => {
@@ -93,7 +107,7 @@ export class StripeProvider {
                 createAction(PAY_RESERVATION),
                 `${this.apiBaseUrl}/api/v1/summits/${this.summitId}/orders/${this.reservation.hash}/checkout`,
                 normalizedEntity,
-                authErrorHandler,
+                errorHandler,
                 // entity
             )(params)(this.dispatch)
                 .then((payload) => {
