@@ -12,7 +12,6 @@
  **/
 
 import React, { useState, useEffect } from 'react';
-import PropTypes from 'prop-types';
 import { RegistrationCompanyInput } from 'openstack-uicore-foundation/lib/components'
 import { useForm } from 'react-hook-form';
 import { useSpring, config, animated } from "react-spring";

@@ -1,5 +1,5 @@
 /**
- * Copyright 2020 OpenStack Foundation
+ * Copyright 2022 OpenStack Foundation
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -31,6 +31,8 @@ const LawPayForm = ({ reservation, payTicket, userProfile, marketingData, provid
         exp_year: '',
         postal_code: userProfile.postal_code || '',
         address1: userProfile.address1 || '',
+        email: userProfile.email,
+        name: `${userProfile.given_name} ${userProfile.family_name}`,
     });
 
     const [lawPayErrors, setLawPayErrors] = useState({
@@ -123,7 +125,10 @@ const LawPayForm = ({ reservation, payTicket, userProfile, marketingData, provid
                     "postal_code": lawPayFields.postal_code,
                     "address1": lawPayFields.address1,
                     "exp_year": lawPayFields.exp_year,
-                    "exp_month": lawPayFields.exp_month
+                    "exp_month": lawPayFields.exp_month,
+                    "email": lawPayFields.email,
+                    "name": lawPayFields.name,
+                    "reference": `summit_${reservation.summit_id}_order_${reservation.id}`,
                 });
                 payTicket(provider, { token });
             } catch (error) {
@@ -164,7 +169,6 @@ const LawPayForm = ({ reservation, payTicket, userProfile, marketingData, provid
                 </div>
                 {lawPayErrors.credit_card_number && <div className={styles.fieldError}>{lawPayErrors.credit_card_number}</div>}
             </div>
-
             <div className={styles.fieldWrapper}>
                 <div className={styles.dateWrapper}>
                     <div>
@@ -177,7 +181,6 @@ const LawPayForm = ({ reservation, payTicket, userProfile, marketingData, provid
                     </div>
                 </div>
             </div>
-
             <div className={styles.fieldWrapper}>
                 <div className={styles.fieldRow}>
                     <div className={styles.inputWrapper}>
