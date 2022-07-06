@@ -24,17 +24,22 @@ export class StripeProvider {
     payTicket = ({ token = null, stripe = null, zipCode = null }) => async (dispatch) => {
 
         const errorHandler = (err, res) => (dispatch, state) => {
-            if (res && res.statusCode === 404){
-                const msg = res.body.message;
-                Swal.fire("Validation Error", msg, "warning");
-                return;
+            let code = err.status;
+            switch (code) {
+                case 404: {
+                    let msg = res.body.message;
+                    Swal.fire("Validation Error", msg, "warning");
+                }
+                    break;
+                case 500: {
+                    let msg = res.body.message;
+                    Swal.fire("Validation Error", msg, "warning");
+                }
+                    break;
+                default:
+                    authErrorHandler(err, res)(dispatch, state);
+                    break;
             }
-            if (res && res.statusCode === 500){
-                const msg = res.body.message;
-                Swal.fire("Server Error", msg, "error");
-                return;
-            }
-            return authErrorHandler(err, res);
         };
 
         let params = {

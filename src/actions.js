@@ -148,7 +148,7 @@ export const reserveTicket = ({ personalInformation, ticket, ticketQuantity }, {
                 Swal.fire("Server Error", msg, "error");
                 return;
             }
-            return authErrorHandler(err, res);
+            return authErrorHandler(err, res)(dispatch, state);
         };
 
         return postRequest(
