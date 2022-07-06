@@ -142,7 +142,7 @@ const TicketTypeComponent = ({ ticketTypes, isActive, changeForm, reservation, i
                                 Need multiple ticket types?
                             </a>
                             <ReactTooltip id="ticket-quantity-info">
-                                <div className={styles.moreInfoTooltip}>In order to select multiple tickets of a different type, you may place a new registration order after you complete this order.</div>
+                                <div className={styles.moreInfoTooltip}>To purchase more than one ticket type, simply place another order after this registration order is complete. Only one ticket type can be chosen per order.</div>
                             </ReactTooltip>
                         </div>
                     </animated.div>

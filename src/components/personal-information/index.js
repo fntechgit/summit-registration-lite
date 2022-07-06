@@ -156,7 +156,7 @@ const PersonalInfoComponent = ({ isActive, changeForm, reservation, userProfile,
                             </a>
                             <ReactTooltip id="promo-code-info">
                                 <div className={styles.moreInfoTooltip}>
-                                    In order to use multiple promo codes, you may place a new registration order with the new promo code after you complete this order. This promo code will be applied to all tickets in this order.
+                                    Promo code will be applied to all tickets in this order.  If you wish to utilize more than one promo code, simply place another order after you complete this registration order. Only one promo code can be applied per order.
                                 </div>
                             </ReactTooltip>
 
