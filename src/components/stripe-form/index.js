@@ -102,11 +102,16 @@ const StripeForm = ({ reservation, payTicket, userProfile, marketingData, stripe
         }
 
         const cardElement = elements.getElement(CardNumberElement);
-
+        // @see https://stripe.com/docs/js/tokens_sources/create_token?type=cardElement
         const { error, token } = await stripe.createToken(cardElement, {
             name: `${reservation.owner_first_name} ${reservation.owner_last_name}`,
+            address_line1: userProfile.address1 || '',
+            address_line2: userProfile.address2 || '',
+            address_city: userProfile.locality || '',
+            address_state: userProfile.region || '',
             address_zip: data.zipCode,
             address_country: userProfile.country || '',
+            email: userProfile.email,
         });
 
         if (token) {

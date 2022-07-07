@@ -30,9 +30,7 @@ const LawPayForm = ({ reservation, payTicket, userProfile, marketingData, provid
         exp_month: '',
         exp_year: '',
         postal_code: userProfile.postal_code || '',
-        address1: userProfile.address1 || '',
-        email: userProfile.email,
-        name: `${userProfile.given_name} ${userProfile.family_name}`,
+        address1: userProfile.address1 || ''
     });
 
     const [lawPayErrors, setLawPayErrors] = useState({
@@ -46,9 +44,8 @@ const LawPayForm = ({ reservation, payTicket, userProfile, marketingData, provid
 
     const style = {
         color: marketingData.color_text_dark,
-        fontSize: '16px',
-        fontFamily: 'inherit',
-        backgroundColor: '#ffffff',
+        "font-size": '16px',
+        "font-weight": 'inherit',
         '::placeholder': {
             color: marketingData.color_text_input_hints
         }
@@ -79,13 +76,14 @@ const LawPayForm = ({ reservation, payTicket, userProfile, marketingData, provid
     const hostedFieldsCallBack = (state) => {
         let fieldErrors = {};
         state.fields.map(f => {
-            fieldErrors = { ...fieldErrors, [f.type]: f.error };
+            if(f.focus && f.error !== 'Input field is empty')
+                fieldErrors = { ...fieldErrors, [f.type]: f.error };
         });
         setLawPayErrors({ ...lawPayErrors, ...fieldErrors });
     };
 
     useEffect(() => {
-        if (window.AffiniPay && hostedFields === null) {
+        if (window.AffiniPay && !hostedFields) {
             setHostedFields(window.AffiniPay.HostedFields.initializeFields(
                 hostedFieldsConfiguration,
                 hostedFieldsCallBack
@@ -101,7 +99,7 @@ const LawPayForm = ({ reservation, payTicket, userProfile, marketingData, provid
         let errors = {};
 
         Object.keys(lawPayFields).map((key) => {
-            if (!lawPayFields[key]) {
+            if (!lawPayFields[key] || lawPayFields[key] === '') {
                 errors = { ...errors, [key]: 'This field is required.' };
             }
         });
@@ -126,8 +124,8 @@ const LawPayForm = ({ reservation, payTicket, userProfile, marketingData, provid
                     "address1": lawPayFields.address1,
                     "exp_year": lawPayFields.exp_year,
                     "exp_month": lawPayFields.exp_month,
-                    "email": lawPayFields.email,
-                    "name": lawPayFields.name,
+                    "email": userProfile.email,
+                    "name": `${reservation.owner_first_name} ${reservation.owner_last_name}`,
                     "reference": `summit_${reservation.summit_id}_order_${reservation.id}`,
                 });
                 payTicket(provider, { token });
@@ -135,8 +133,6 @@ const LawPayForm = ({ reservation, payTicket, userProfile, marketingData, provid
                 Swal.fire("Payment error", error.message, "warning");
             }
         }
-
-
     };
 
     const ddl_month = [
@@ -187,8 +183,11 @@ const LawPayForm = ({ reservation, payTicket, userProfile, marketingData, provid
                         <div id="my_cvv_field_id" className={styles.lawpayWrapper}></div>
                     </div>
                     <div className={styles.inputWrapper}>
-                        <input type="text" name="postal_code" placeholder="ZIP Code *"
-                            onChange={(e) => setLawPayFields({ ...lawPayFields, postal_code: e.target.value })} />
+                        <input type="text"
+                               name="postal_code"
+                               placeholder="ZIP Code *"
+                               value={lawPayFields.postal_code}
+                               onChange={(e) => setLawPayFields({ ...lawPayFields, postal_code: e.target.value })} />
                     </div>
                 </div>
                 <div className={styles.fieldRow}>
@@ -198,8 +197,11 @@ const LawPayForm = ({ reservation, payTicket, userProfile, marketingData, provid
             </div>
             <div className={styles.fieldWrapper}>
                 <div className={styles.inputWrapper}>
-                    <input type="text" name="address1" placeholder="Address *"
-                        onChange={(e) => setLawPayFields({ ...lawPayFields, address1: e.target.value })} />
+                    <input type="text"
+                           name="address1"
+                           placeholder="Address *"
+                           value={lawPayFields.address1}
+                           onChange={(e) => setLawPayFields({ ...lawPayFields, address1: e.target.value })} />
                 </div>
                 {lawPayErrors.address1 && <div className={styles.fieldError}>{lawPayErrors.address1}</div>}
             </div>
