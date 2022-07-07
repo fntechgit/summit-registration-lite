@@ -104,11 +104,11 @@ export const getTaxesTypes = (summitId) => async (dispatch, getState, { apiBaseU
     }
 }
 
-export const reserveTicket = ({ personalInformation, ticket, ticketQuantity }, { onError }) =>
+export const reserveTicket = ({ provider, personalInformation, ticket, ticketQuantity }, { onError }) =>
     async (dispatch, getState, { apiBaseUrl, getAccessToken }) => {
+
         const { registrationLiteState: { settings: { summitId } } } = getState();
         let { firstName, lastName, email, company, promoCode } = personalInformation;
-
         dispatch(startWidgetLoading());
 
         const access_token = await getAccessToken();
@@ -163,7 +163,7 @@ export const reserveTicket = ({ personalInformation, ticket, ticketQuantity }, {
                 dispatch(stopWidgetLoading());
                 payload.response.promo_code = promoCode || null;
                 if (!payload.response.amount) {
-                    dispatch(payTicket(null, null, getAccessToken));
+                    dispatch(payTicketWithProvider(provider));
                     return (payload)
                 } else {
                     dispatch(changeStep(2));

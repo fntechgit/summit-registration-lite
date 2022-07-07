@@ -36,6 +36,7 @@ import ButtonBarComponent from './button-bar';
 import PurchaseComplete from './purchase-complete';
 import PasswordlessLoginComponent from './login-passwordless';
 import TicketOwnedComponent from './ticket-owned';
+import { getCurrentProvider } from "../utils/utils";
 
 const RegistrationLite = (
     {
@@ -98,15 +99,7 @@ const RegistrationLite = (
 
     const setFormErrors = (errors) => setRegistrationForm({ ...registrationForm, errors });
 
-    let publicKey = null;
-    let provider = '';
-    for (let profile of summitData.payment_profiles) {
-        if (profile.application_type === 'Registration') {
-            publicKey = profile.test_mode_enabled ? profile.test_publishable_key : profile.live_publishable_key;
-            provider = profile.provider;
-            break;
-        }
-    }
+    const { publicKey, provider } = getCurrentProvider(summitData);
 
     useEffect(() => {
         loadSession({ ...rest, summitData, profileData });
@@ -124,6 +117,7 @@ const RegistrationLite = (
     useEffect(() => {
         if (step === 1 && formValues?.ticketType && formValues?.personalInformation) {
             reserveTicket({
+                provider,
                 personalInformation: formValues?.personalInformation,
                 ticket: formValues?.ticketType,
                 ticketQuantity: formValues?.ticketQuantity,
