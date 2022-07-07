@@ -51,7 +51,7 @@ export const loadSession = (settings) => (dispatch) => {
 /*                               TICKETS                                         */
 /*********************************************************************************/
 
-// api/v1/summits/{id}/ticket-types
+// api/v1/summits/{id}/ticket-types/allowed
 
 // api/v1/summits/{id}/tax-types
 
@@ -69,7 +69,7 @@ export const getTicketTypes = (summitId) => async (dispatch, getState, { apiBase
         return getRequest(
             null,
             createAction(GET_TICKET_TYPES),
-            `${apiBaseUrl}/api/v1/summits/${summitId}/ticket-types`,
+            `${apiBaseUrl}/api/v1/summits/${summitId}/ticket-types/allowed`,
             authErrorHandler
         )(params)(dispatch).then(() => {
             dispatch(stopWidgetLoading());
