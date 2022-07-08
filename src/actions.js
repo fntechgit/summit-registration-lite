@@ -40,7 +40,7 @@ export const SET_PASSWORDLESS_LENGTH = 'SET_PASSWORDLESS_LENGTH';
 export const SET_PASSWORDLESS_ERROR = 'SET_PASSWORDLESS_ERROR';
 export const GO_TO_LOGIN = 'GO_TO_LOGIN';
 export const GET_MY_INVITATION = 'GET_MY_INVITATION';
-
+export const CLEAR_MY_INVITATION = 'CLEAR_MY_INVITATION';
 export const startWidgetLoading = createAction(START_WIDGET_LOADING);
 export const stopWidgetLoading = createAction(STOP_WIDGET_LOADING);
 
@@ -316,7 +316,7 @@ export const getMyInvitation = (summitId) => async (dispatch, getState, { apiBas
         dispatch(startWidgetLoading());
 
         return getRequest(
-            null,
+            createAction(CLEAR_MY_INVITATION),
             createAction(GET_MY_INVITATION),
             `${apiBaseUrl}/api/v1/summits/${summitId}/registration-invitations/me`,
             errorHandler

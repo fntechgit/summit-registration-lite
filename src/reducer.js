@@ -28,6 +28,7 @@ import {
     SET_PASSWORDLESS_ERROR,
     GO_TO_LOGIN,
     GET_MY_INVITATION,
+    CLEAR_MY_INVITATION,
 } from './actions';
 
 const DEFAULT_STATE = {
@@ -75,6 +76,7 @@ const RegistrationLiteReducer = (state = DEFAULT_STATE, action) => {
                 ...state,
                 reservation: null,
                 checkout: null,
+                invitation: null,
                 passwordless: { ...DEFAULT_STATE.passwordless },
                 settings: {
                     ...DEFAULT_STATE.settings,
@@ -121,6 +123,9 @@ const RegistrationLiteReducer = (state = DEFAULT_STATE, action) => {
         }
         case GET_MY_INVITATION:{
             return {...state, invitation: payload.response};
+        }
+        case CLEAR_MY_INVITATION:{
+            return {...state, invitation: null};
         }
         default: {
             return state;
