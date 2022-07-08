@@ -26,7 +26,8 @@ import {
     SET_PASSWORDLESS_LOGIN,
     SET_PASSWORDLESS_LENGTH,
     SET_PASSWORDLESS_ERROR,
-    GO_TO_LOGIN
+    GO_TO_LOGIN,
+    GET_MY_INVITATION,
 } from './actions';
 
 const DEFAULT_STATE = {
@@ -42,6 +43,7 @@ const DEFAULT_STATE = {
     },
     ticketTypes: [],
     taxTypes: [],
+    invitation: null,
     settings: {
         apiBaseUrl: null,
         summitId: null,
@@ -115,7 +117,10 @@ const RegistrationLiteReducer = (state = DEFAULT_STATE, action) => {
             return { ...state, reservation: null }
         }
         case PAY_RESERVATION: {
-            return { ...state, checkout: payload.response, reservation: null, userProfile: null };
+            return { ...state, checkout: payload.response, reservation: null, userProfile: null, invitation: null };
+        }
+        case GET_MY_INVITATION:{
+            return {...state, invitation: payload.response};
         }
         default: {
             return state;

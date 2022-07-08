@@ -21,11 +21,11 @@ import { formatErrorMessage } from '../../helpers';
 
 import styles from "./index.module.scss";
 
-const PersonalInfoComponent = ({ isActive, changeForm, reservation, userProfile, summitId, handleCompanyError, formValues, formErrors }) => {
+const PersonalInfoComponent = ({ isActive, changeForm, reservation, userProfile, summitId, handleCompanyError, formValues, formErrors, invitation }) => {
     const [personalInfo, setPersonalInfo] = useState(
         {
-            firstName: userProfile.given_name || '',
-            lastName: userProfile.family_name || '',
+            firstName: userProfile.given_name || (invitation ? invitation.first_name : ''),
+            lastName: userProfile.family_name || (invitation ? invitation.last_name : ''),
             email: userProfile.email || '',
             company: { id: null, name: '' },
             promoCode: '',

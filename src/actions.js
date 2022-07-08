@@ -39,6 +39,7 @@ export const SET_PASSWORDLESS_LOGIN = 'SET_PASSWORDLESS_LOGIN';
 export const SET_PASSWORDLESS_LENGTH = 'SET_PASSWORDLESS_LENGTH';
 export const SET_PASSWORDLESS_ERROR = 'SET_PASSWORDLESS_ERROR';
 export const GO_TO_LOGIN = 'GO_TO_LOGIN';
+export const GET_MY_INVITATION = 'GET_MY_INVITATION';
 
 export const startWidgetLoading = createAction(START_WIDGET_LOADING);
 export const stopWidgetLoading = createAction(STOP_WIDGET_LOADING);
@@ -284,4 +285,46 @@ const normalizeReservation = (entity) => {
 
     return normalizedEntity;
 
+}
+
+/**
+ *
+ * @param summitId
+ * @returns {(function(*=, *, {apiBaseUrl: *, getAccessToken: *}): Promise<*|undefined>)|*}
+ */
+export const getMyInvitation = (summitId) => async (dispatch, getState, { apiBaseUrl, getAccessToken }) => {
+
+    const errorHandler = (err, res) => (dispatch, state) => {
+        if (res && res.statusCode === 404){
+            // bypass
+            return;
+        }
+        if (res && res.statusCode === 500){
+            const msg = res.body.message;
+            Swal.fire("Server Error", msg, "error");
+            return;
+        }
+        return authErrorHandler(err, res)(dispatch, state);
+    };
+
+    try {
+        const accessToken = await getAccessToken();
+        let params = {
+            access_token: accessToken
+        };
+
+        dispatch(startWidgetLoading());
+
+        return getRequest(
+            null,
+            createAction(GET_MY_INVITATION),
+            `${apiBaseUrl}/api/v1/summits/${summitId}/registration-invitations/me`,
+            errorHandler
+        )(params)(dispatch).then(() => {
+            dispatch(stopWidgetLoading());
+        })
+    }
+    catch (e) {
+        return Promise.reject();
+    }
 }

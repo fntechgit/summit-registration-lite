@@ -15,9 +15,9 @@ import React, { useState } from 'react';
 
 import styles from "./index.module.scss";
 
-const LoginComponent = ({ options, login, allowsNativeAuth, allowsOtpAuthlogin, getLoginCode, getPasswordlessCode }) => {
+const LoginComponent = ({ options, login, allowsNativeAuth, allowsOtpAuthlogin, getLoginCode, getPasswordlessCode, initialEmailValue = '' }) => {
 
-    const [email, setEmail] = useState('');
+    const [email, setEmail] = useState(initialEmailValue);
     const [emailError, setEmailError] = useState();
 
     const isValidEmail = (email) => {
