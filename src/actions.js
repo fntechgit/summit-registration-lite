@@ -163,13 +163,14 @@ export const reserveTicket = ({ provider, personalInformation, ticket, ticketQua
             .then((payload) => {
                 dispatch(stopWidgetLoading());
                 payload.response.promo_code = promoCode || null;
+
                 if (!payload.response.amount) {
                     dispatch(payTicketWithProvider(provider));
                     return (payload)
-                } else {
-                    dispatch(changeStep(2));
-                    return (payload)
                 }
+
+                dispatch(changeStep(2));
+                return (payload)
             })
             .catch(e => {
                 dispatch(createAction(CREATE_RESERVATION_ERROR)(e));
