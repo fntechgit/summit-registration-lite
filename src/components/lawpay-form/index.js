@@ -76,7 +76,7 @@ const LawPayForm = ({ reservation, payTicket, userProfile, marketingData, provid
     const hostedFieldsCallBack = (state) => {
         let fieldErrors = {};
         state.fields.map(f => {
-            if(f.focus && f.error !== 'Input field is empty')
+            if (f.focus && f.error !== 'Input field is empty')
                 fieldErrors = { ...fieldErrors, [f.type]: f.error };
         });
         setLawPayErrors({ ...lawPayErrors, ...fieldErrors });
@@ -156,6 +156,40 @@ const LawPayForm = ({ reservation, payTicket, userProfile, marketingData, provid
         return { label: `${current_year + i}`, value: `${current_year + i}` }
     });
 
+    const customStyles = {
+        option: (provided, { isFocused, isSelected }) => {
+            console.log('is focused', isFocused);
+            console.log('is selected', isSelected);
+            return {
+                ...provided,
+                backgroundColor: isFocused ?
+                    'var(--color-primary)'
+                    : isSelected ?
+                        'var(--color-primary)'
+                        : undefined,
+                color: 'var(--color_text_dark)',
+                ':active': {
+                    ...provided[':active'],
+                    backgroundColor: isSelected
+                        ? 'var(--color-primary)'
+                        : undefined,
+                },
+            }
+        },
+        menu: (provided, state) => ({
+            ...provided,
+            color: 'var(--color_text_dark)',
+            zIndex: '100',
+        }),
+        singleValue: (provided, state) => {
+            const opacity = state.isDisabled ? 0.5 : 1;
+            const transition = 'opacity 300ms';
+            const color = 'var(--color_text_dark)';
+
+            return { ...provided, opacity, transition, color };
+        }
+    }
+
     return (
         <form className={styles.form} id="payment-form" onSubmit={onSubmit}>
             <div className={styles.fieldWrapper}>
@@ -168,11 +202,11 @@ const LawPayForm = ({ reservation, payTicket, userProfile, marketingData, provid
             <div className={styles.fieldWrapper}>
                 <div className={styles.dateWrapper}>
                     <div>
-                        <Dropdown className={styles.dropdown} placeholder="Month" onChange={onExpireChange} id="exp_month" options={ddl_month} />
+                        <Dropdown styles={customStyles} className={styles.dropdown} placeholder="Month" onChange={onExpireChange} id="exp_month" options={ddl_month} />
                         {lawPayErrors.exp_month && <div className={styles.fieldError}>{lawPayErrors.exp_month}</div>}
                     </div>
                     <div>
-                        <Dropdown className={styles.dropdown} placeholder="Year" onChange={onExpireChange} id="exp_year" options={year_ddl} />
+                        <Dropdown styles={customStyles} className={styles.dropdown} placeholder="Year" onChange={onExpireChange} id="exp_year" options={year_ddl} />
                         {lawPayErrors.exp_year && <div className={styles.fieldError}>{lawPayErrors.exp_year}</div>}
                     </div>
                 </div>
@@ -184,10 +218,10 @@ const LawPayForm = ({ reservation, payTicket, userProfile, marketingData, provid
                     </div>
                     <div className={styles.inputWrapper}>
                         <input type="text"
-                               name="postal_code"
-                               placeholder="ZIP Code *"
-                               value={lawPayFields.postal_code}
-                               onChange={(e) => setLawPayFields({ ...lawPayFields, postal_code: e.target.value })} />
+                            name="postal_code"
+                            placeholder="ZIP Code *"
+                            value={lawPayFields.postal_code}
+                            onChange={(e) => setLawPayFields({ ...lawPayFields, postal_code: e.target.value })} />
                     </div>
                 </div>
                 <div className={styles.fieldRow}>
@@ -196,12 +230,12 @@ const LawPayForm = ({ reservation, payTicket, userProfile, marketingData, provid
                 </div>
             </div>
             <div className={styles.fieldWrapper}>
-                <div className={styles.inputWrapper}>
+                <div className={`${styles.inputWrapper} ${styles.addressField}`}>
                     <input type="text"
-                           name="address1"
-                           placeholder="Address *"
-                           value={lawPayFields.address1}
-                           onChange={(e) => setLawPayFields({ ...lawPayFields, address1: e.target.value })} />
+                        name="address1"
+                        placeholder="Address *"
+                        value={lawPayFields.address1}
+                        onChange={(e) => setLawPayFields({ ...lawPayFields, address1: e.target.value })} />
                 </div>
                 {lawPayErrors.address1 && <div className={styles.fieldError}>{lawPayErrors.address1}</div>}
             </div>
