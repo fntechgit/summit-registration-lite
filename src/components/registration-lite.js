@@ -155,7 +155,7 @@ const RegistrationLite = (
     return (
         <div id={`${styles.modal}`} className="modal is-active">
             <div className="modal-background"></div>
-            <div className={`${styles.modal} modal-content`}>
+            <div className={`${styles.modalContent} modal-content`}>
                 <AjaxLoader relative={true} color={'#ffffff'} show={widgetLoading || loading} size={80} />
                 <div className={`${styles.outerWrapper} summit-registration-lite`}>
                     <div className={styles.innerWrapper}>
