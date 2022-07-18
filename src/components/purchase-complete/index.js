@@ -30,7 +30,7 @@ const PurchaseComplete = ({ checkout, onPurchaseComplete, goToExtraQuestions, go
 
     const startDateFormatted = {
         date: epochToMomentTimeZone(summit.start_date, summit.time_zone_id).format('MMMM D'),
-        time: epochToMomentTimeZone(summit.start_date, summit.time_zone_id).format('HH:mm'),
+        time: epochToMomentTimeZone(summit.start_date, summit.time_zone_id).format('hh:mm A'),
     };
 
     const needExtraQuestions = () => {
