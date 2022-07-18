@@ -183,6 +183,10 @@ const LawPayForm = ({ reservation, payTicket, userProfile, marketingData, provid
             color: 'var(--color_text_dark)',
             zIndex: '100',
         }),
+        menuList: (provided) => ({
+            ...provided,
+            maxHeight: 160,
+        }),
         singleValue: (provided, state) => {
             const opacity = state.isDisabled ? 0.5 : 1;
             const transition = 'opacity 300ms';
