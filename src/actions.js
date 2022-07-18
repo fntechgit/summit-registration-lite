@@ -297,7 +297,11 @@ export const getMyInvitation = (summitId) => async (dispatch, getState, { apiBas
 
     const errorHandler = (err, res) => (dispatch, state) => {
         if (res && res.statusCode === 404){
-            // bypass
+            // bypass in case that does not exists invitation , fail silently
+            return;
+        }
+        if (res && res.statusCode === 403){
+            // bypass in case that we dont have the proper scope
             return;
         }
         if (res && res.statusCode === 500){
