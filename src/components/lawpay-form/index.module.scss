@@ -18,6 +18,9 @@
     }
     div.inputWrapper {
       width: 48%;
+      &.addressField {
+        width: 100%;
+      }
     }
   }
 
