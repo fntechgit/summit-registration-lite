@@ -158,8 +158,6 @@ const LawPayForm = ({ reservation, payTicket, userProfile, marketingData, provid
 
     const customStyles = {
         option: (provided, { isFocused, isSelected }) => {
-            console.log('is focused', isFocused);
-            console.log('is selected', isSelected);
             return {
                 ...provided,
                 backgroundColor: isFocused ?
