@@ -174,6 +174,10 @@ const LawPayForm = ({ reservation, payTicket, userProfile, marketingData, provid
                 },
             }
         },
+        placeholder: (provided, state) => ({ 
+            ...provided,
+            color: 'var(--color_text_input_hints)',
+        }),
         menu: (provided, state) => ({
             ...provided,
             color: 'var(--color_text_dark)',
