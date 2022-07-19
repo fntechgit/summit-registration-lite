@@ -33,7 +33,7 @@ const TicketDropdownComponent = ({ selectedTicket, ticketTypes, onTicketSelect }
             <div className={styles.placeholder} onClick={() => setActive(!active)} data-testid="ticket-dropdown">
                 {selectedTicket ?
                     <>
-                        <span data-testid="selected-ticket">
+                        <span className={styles.selectedTicket} data-testid="selected-ticket">
                             {`${selectedTicket.name} - $${selectedTicket.cost} ${selectedTicket.currency}`}
                         </span>
                         <i className="fa fa-chevron-down"></i>
