@@ -22,6 +22,8 @@ React component for the summit registration lite widget
 
    **loading**                = boolean to show/hide a loader on the widget
 
+   **showMultipleTicketTexts**= boolean to show/hide the text for multiple tickets
+
    Example
    
    ```

@@ -21,7 +21,7 @@ import { formatErrorMessage } from '../../helpers';
 
 import styles from "./index.module.scss";
 
-const PersonalInfoComponent = ({ isActive, changeForm, reservation, userProfile, summitId, handleCompanyError, formValues, formErrors, invitation }) => {
+const PersonalInfoComponent = ({ isActive, changeForm, reservation, userProfile, summitId, handleCompanyError, formValues, formErrors, invitation, showMultipleTicketTexts }) => {
     const [personalInfo, setPersonalInfo] = useState(
         {
             firstName: userProfile.given_name || (invitation ? invitation.first_name : ''),
@@ -150,10 +150,12 @@ const PersonalInfoComponent = ({ isActive, changeForm, reservation, userProfile,
                                 </div>
                             </form>
 
-                            <a className={styles.moreInfo} data-tip data-for="promo-code-info">
-                                <i className="glyphicon glyphicon-info-sign" aria-hidden="true" />{` `}
-                                Have multiple promo codes?
-                            </a>
+                            {showMultipleTicketTexts &&
+                                <a className={styles.moreInfo} data-tip data-for="promo-code-info">
+                                    <i className="glyphicon glyphicon-info-sign" aria-hidden="true" />{` `}
+                                    Have multiple promo codes?
+                                </a>
+                            }
                             <ReactTooltip id="promo-code-info">
                                 <div className={styles.moreInfoTooltip}>
                                     Promo code will be applied to all tickets in this order.  If you wish to utilize more than one promo code, simply place another order after you complete this registration order. Only one promo code can be applied per order.

@@ -91,6 +91,7 @@ const RegistrationLite = (
         invitation,
         loginInitialEmailInputValue,
         getMyInvitation,
+        showMultipleTicketTexts,
         ...rest
     }) => {
 
@@ -198,7 +199,7 @@ const RegistrationLite = (
                                 />
                             )}
 
-                            {!profileData && passwordlessCodeSent && (
+                            {!profileData && !passwordlessCodeSent && (
                                 <PasswordlessLoginComponent
                                     codeLength={passwordlessCode}
                                     email={passwordlessEmail}
@@ -222,7 +223,8 @@ const RegistrationLite = (
                                         taxTypes={taxTypes}
                                         reservation={reservation}
                                         isActive={step === 0}
-                                        changeForm={ticketForm => setFormValues({...formValues, ...ticketForm})}
+                                        changeForm={ticketForm => setFormValues({ ...formValues, ...ticketForm })}
+                                        showMultipleTicketTexts={showMultipleTicketTexts}
                                     />
 
                                     <PersonalInfoComponent
@@ -238,6 +240,7 @@ const RegistrationLite = (
                                         handleCompanyError={handleCompanyError}
                                         formValues={formValues}
                                         formErrors={formErrors}
+                                        showMultipleTicketTexts={showMultipleTicketTexts}
                                     />
 
                                     <animated.div style={{...toggleAnimation}}>
@@ -302,10 +305,12 @@ const mapStateToProps = ({registrationLiteState}) => ({
 
 RegistrationLite.defaultProps = {
     loginInitialEmailInputValue : '',
+    showMultipleTicketTexts: true,
 };
 
 RegistrationLite.propTypes = {
     loginInitialEmailInputValue: PropTypes.string,
+    showMultipleTicketTexts: PropTypes.bool,
 };
 
 export default connect(mapStateToProps, {
