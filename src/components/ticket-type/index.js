@@ -21,7 +21,7 @@ import ReactTooltip from 'react-tooltip';
 import { formatCurrency } from '../../helpers';
 import { getTicketMaxQuantity } from '../../helpers';
 
-const TicketTypeComponent = ({ ticketTypes, isActive, changeForm, reservation, inPersonDisclaimer }) => {
+const TicketTypeComponent = ({ ticketTypes, isActive, changeForm, reservation, inPersonDisclaimer, showMultipleTicketTexts }) => {
     const [ticket, setTicket] = useState(null);
     const [quantity, setQuantity] = useState(1);
 
@@ -137,10 +137,12 @@ const TicketTypeComponent = ({ ticketTypes, isActive, changeForm, reservation, i
                                     </div>
                                 )}
                             </div>
-                            <a className={styles.moreInfo} data-tip data-for="ticket-quantity-info">
-                                <i className="glyphicon glyphicon-info-sign" aria-hidden="true" />{` `}
-                                Need multiple ticket types?
-                            </a>
+                            {showMultipleTicketTexts &&
+                                <a className={styles.moreInfo} data-tip data-for="ticket-quantity-info">
+                                    <i className="glyphicon glyphicon-info-sign" aria-hidden="true" />{` `}
+                                    Need multiple ticket types?
+                                </a>
+                            }
                             <ReactTooltip id="ticket-quantity-info">
                                 <div className={styles.moreInfoTooltip}>To purchase more than one ticket type, simply place another order after this registration order is complete. Only one ticket type can be chosen per order.</div>
                             </ReactTooltip>
