@@ -17,6 +17,8 @@ import OtpInput from 'react-otp-input';
 
 import styles from "./index.module.scss";
 
+import FNidLogo from '../../assets/FNid_WHT_logo_rgb.svg';
+
 const PasswordlessLoginComponent = ({ email, codeLength, passwordlessLogin, loginWithCode, codeError, goToLogin, getLoginCode, getPasswordlessCode }) => {
 
     const [otpCode, setOtpCode] = useState('');
@@ -39,6 +41,7 @@ const PasswordlessLoginComponent = ({ email, codeLength, passwordlessLogin, logi
         <div className={`${styles.passwordlessWrapper} step-wrapper`}>
             <>
                 <div className={`${styles.innerWrapper}`}>
+                    <img src={FNidLogo} alt="FNid" className={styles.logo} />
                     <span>
                         We sent your single-use login code to <br />
                         <span data-testid="email">{email}</span>

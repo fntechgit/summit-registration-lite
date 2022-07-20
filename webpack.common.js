@@ -4,6 +4,12 @@ module.exports = {
      module: {
         rules: [
             {
+                test: /\.m?js/,
+                resolve: {
+                  fullySpecified: false
+                }
+            },
+            {
                 test: /\.(js|jsx)$/,
                 exclude: /node_modules/,
                 use: {
@@ -64,8 +70,15 @@ module.exports = {
                 use: "url-loader?limit=10000&minetype=application/font-woff&name=fonts/[name].[ext]"
             },
             {
-                test: /\.svg/,
-                use: "file-loader?name=svg/[name].[ext]!svgo-loader"
+                test: /\.svg$/,
+                use: [
+                    {
+                        loader: 'svg-url-loader',
+                        options: {
+                            limit: 10000,
+                        },
+                    },
+                ],
             },
             {
               test: /\.jpg|\.png|\.gif$/,
