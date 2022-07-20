@@ -199,7 +199,7 @@ const RegistrationLite = (
                                 />
                             )}
 
-                            {!profileData && !passwordlessCodeSent && (
+                            {!profileData && passwordlessCodeSent && (
                                 <PasswordlessLoginComponent
                                     codeLength={passwordlessCode}
                                     email={passwordlessEmail}
