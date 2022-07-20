@@ -80,6 +80,7 @@ const RegistrationLite = (
         userProfile,
         handleCompanyError,
         stripeOptions,
+        showMultipleTicketTexts,
         ...rest
     }) => {
 
@@ -176,7 +177,7 @@ const RegistrationLite = (
                                 />
                             )}
 
-                            {!profileData && passwordlessCodeSent && (
+                            {!profileData && !passwordlessCodeSent && (
                                 <PasswordlessLoginComponent
                                     codeLength={passwordlessCode}
                                     email={passwordlessEmail}
@@ -200,6 +201,7 @@ const RegistrationLite = (
                                         reservation={reservation}
                                         isActive={step === 0}
                                         changeForm={ticketForm => setFormValues({ ...formValues, ...ticketForm })}
+                                        showMultipleTicketTexts={showMultipleTicketTexts}
                                     />
                                     <PersonalInfoComponent
                                         isActive={step === 1}
@@ -210,6 +212,7 @@ const RegistrationLite = (
                                         handleCompanyError={handleCompanyError}
                                         formValues={formValues}
                                         formErrors={formErrors}
+                                        showMultipleTicketTexts={showMultipleTicketTexts}
                                     />
                                     <animated.div style={{ ...toggleAnimation }}>
                                         <div ref={ref}>
@@ -269,6 +272,10 @@ const mapStateToProps = ({ registrationLiteState }) => ({
     passwordlessCodeSent: registrationLiteState.passwordless.code_sent,
     passwordlessCodeError: registrationLiteState.passwordless.error
 })
+
+RegistrationLite.defaultProps = {
+    showMultipleTicketTexts: true,
+}
 
 export default connect(mapStateToProps, {
     loadSession,
