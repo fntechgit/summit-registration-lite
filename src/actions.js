@@ -19,7 +19,7 @@ import {
 } from "openstack-uicore-foundation/lib/utils/actions";
 import { authErrorHandler } from "openstack-uicore-foundation/lib/utils/actions";
 import Swal from 'sweetalert2';
-import {PaymentProviderFactory} from "./utils/payment-providers/payment-provider-factory";
+import { PaymentProviderFactory } from "./utils/payment-providers/payment-provider-factory";
 
 export const START_WIDGET_LOADING = 'START_WIDGET_LOADING';
 export const STOP_WIDGET_LOADING = 'STOP_WIDGET_LOADING';
@@ -48,6 +48,16 @@ export const loadSession = (settings) => (dispatch) => {
     dispatch(createAction(LOAD_INITIAL_VARS)(settings));
 };
 
+const customErrorHandler = (err, res) => (dispatch, state) => {
+    if (err.timeout) {
+        return res;
+    }    
+    if (res && res.statusCode === 500) {
+        return res;
+    }
+    return authErrorHandler(err, res)(dispatch, state);
+};
+
 /*********************************************************************************/
 /*                               TICKETS                                         */
 /*********************************************************************************/
@@ -71,13 +81,17 @@ export const getTicketTypes = (summitId) => async (dispatch, getState, { apiBase
             null,
             createAction(GET_TICKET_TYPES),
             `${apiBaseUrl}/api/v1/summits/${summitId}/ticket-types/allowed`,
-            authErrorHandler
+            customErrorHandler
         )(params)(dispatch).then(() => {
             dispatch(stopWidgetLoading());
+        }).catch((error) => {
+            dispatch(stopWidgetLoading());
+            return Promise.reject(error);
         })
     }
     catch (e) {
-        return Promise.reject();
+        dispatch(stopWidgetLoading());
+        return Promise.reject(e);
     }
 }
 
@@ -95,13 +109,17 @@ export const getTaxesTypes = (summitId) => async (dispatch, getState, { apiBaseU
             null,
             createAction(GET_TAX_TYPES),
             `${apiBaseUrl}/api/v1/summits/${summitId}/tax-types`,
-            authErrorHandler
+            customErrorHandler
         )(params)(dispatch).then(() => {
             dispatch(stopWidgetLoading());
-        })
+        }).catch((error) => {
+            dispatch(stopWidgetLoading());
+            return Promise.reject(error);
+        });
     }
     catch (e) {
-        return Promise.reject();
+        dispatch(stopWidgetLoading());
+        return Promise.reject(e);
     }
 }
 
@@ -139,12 +157,12 @@ export const reserveTicket = ({ provider, personalInformation, ticket, ticketQua
 
         const errorHandler = (err, res) => (dispatch, state) => {
             if (res && res.statusCode === 412 && onError) return onError(err, res);
-            if (res && res.statusCode === 404){
+            if (res && res.statusCode === 404) {
                 const msg = res.body.message;
                 Swal.fire("Validation Error", msg, "warning");
                 return;
             }
-            if (res && res.statusCode === 500){
+            if (res && res.statusCode === 500) {
                 const msg = res.body.message;
                 Swal.fire("Server Error", msg, "error");
                 return;
@@ -220,9 +238,9 @@ export const payTicketWithProvider = (provider, params = {}) => async (dispatch,
 
     dispatch(startWidgetLoading());
 
-    const currentProvider = PaymentProviderFactory.build(provider, { reservation, summitId, userProfile, access_token, apiBaseUrl, dispatch});
+    const currentProvider = PaymentProviderFactory.build(provider, { reservation, summitId, userProfile, access_token, apiBaseUrl, dispatch });
 
-    return dispatch(currentProvider.payTicket({...params}));
+    return dispatch(currentProvider.payTicket({ ...params }));
 }
 
 export const changeStep = (step) => (dispatch, getState) => {
@@ -296,15 +314,15 @@ const normalizeReservation = (entity) => {
 export const getMyInvitation = (summitId) => async (dispatch, getState, { apiBaseUrl, getAccessToken }) => {
 
     const errorHandler = (err, res) => (dispatch, state) => {
-        if (res && res.statusCode === 404){
+        if (res && res.statusCode === 404) {
             // bypass in case that does not exists invitation , fail silently
             return;
         }
-        if (res && res.statusCode === 403){
+        if (res && res.statusCode === 403) {
             // bypass in case that we dont have the proper scope
             return;
         }
-        if (res && res.statusCode === 500){
+        if (res && res.statusCode === 500) {
             const msg = res.body.message;
             Swal.fire("Server Error", msg, "error");
             return;

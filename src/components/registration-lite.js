@@ -11,11 +11,11 @@
  * limitations under the License.
  **/
 
-import React, {useEffect, useState} from 'react';
-import {connect} from "react-redux";
+import React, { useEffect, useState } from 'react';
+import { connect } from "react-redux";
 import PropTypes from 'prop-types';
-import {animated, config, useSpring} from "react-spring";
-import {useMeasure} from "react-use";
+import { animated, config, useSpring } from "react-spring";
+import { useMeasure } from "react-use";
 
 import {
     changeStep,
@@ -44,7 +44,9 @@ import ButtonBarComponent from './button-bar';
 import PurchaseComplete from './purchase-complete';
 import PasswordlessLoginComponent from './login-passwordless';
 import TicketOwnedComponent from './ticket-owned';
-import {getCurrentProvider} from "../utils/utils";
+import { getCurrentProvider } from "../utils/utils";
+import NoAllowedTickets from './no-allowed-tickets';
+import TicketTaxesError from './ticket-taxes-error';
 
 const RegistrationLite = (
     {
@@ -92,6 +94,8 @@ const RegistrationLite = (
         loginInitialEmailInputValue,
         getMyInvitation,
         showMultipleTicketTexts,
+        noAllowedTicketsMessage,
+        ticketTaxesErrorMessage,
         ...rest
     }) => {
 
@@ -105,16 +109,18 @@ const RegistrationLite = (
         errors: []
     });
 
-    const {values: formValues, errors: formErrors} = registrationForm;
+    const [ticketTaxesError, setTicketTaxesError] = useState(false);
 
-    const setFormValues = (values) => setRegistrationForm({...registrationForm, values});
+    const { values: formValues, errors: formErrors } = registrationForm;
 
-    const setFormErrors = (errors) => setRegistrationForm({...registrationForm, errors});
+    const setFormValues = (values) => setRegistrationForm({ ...registrationForm, values });
 
-    const {publicKey, provider} = getCurrentProvider(summitData);
+    const setFormErrors = (errors) => setRegistrationForm({ ...registrationForm, errors });
+
+    const { publicKey, provider } = getCurrentProvider(summitData);
 
     useEffect(() => {
-        loadSession({...rest, summitData, profileData});
+        loadSession({ ...rest, summitData, profileData });
         if (!profileData) {
             changeStep(0);
         }
@@ -122,12 +128,9 @@ const RegistrationLite = (
 
     useEffect(() => {
         if (summitData && profileData) {
-            getTicketTypes(summitData.id)
-                .then(
-                    () => getTaxesTypes(summitData.id)
-                );
+            getTicketsAndTaxes();
         }
-    }, [summitData, profileData]);
+    }, []);
 
 
     useEffect(() => {
@@ -157,10 +160,10 @@ const RegistrationLite = (
         setFormErrors([]);
     }, [step])
 
-    const [ref, {height}] = useMeasure();
+    const [ref, { height }] = useMeasure();
 
     const toggleAnimation = useSpring({
-        config: {bounce: 0, ...config.stiff},
+        config: { bounce: 0, ...config.stiff },
         to: {
             opacity: formValues?.ticketType?.cost === 0 ? 0 : 1,
             height: formValues?.ticketType?.cost === 0 ? 0 : height,
@@ -174,6 +177,15 @@ const RegistrationLite = (
         rest.closeWidget();
     };
 
+    const getTicketsAndTaxes = async () => {
+        try {
+            await getTicketTypes(summitData.id);
+            await getTaxesTypes(summitData.id);
+        } catch (e) {
+            setTicketTaxesError(true);
+        }
+    }
+
     return (
         <div id={`${styles.modal}`} className="modal is-active">
             <div className="modal-background"></div>
@@ -185,6 +197,10 @@ const RegistrationLite = (
                             <span>{summitData.name}</span>
                             <i className="fa fa-close" aria-label="close" onClick={handleCloseClick}></i>
                         </div>
+
+                        {ticketTaxesError && profileData && <TicketTaxesError ticketTaxesErrorMessage={ticketTaxesErrorMessage} retryTicketTaxes={getTicketsAndTaxes}/>}
+
+                        {!ticketTaxesError && profileData && ticketTypes.length === 0 && !loading && <NoAllowedTickets noAllowedTicketsMessage={noAllowedTicketsMessage} />}
 
                         <div className={styles.stepsWrapper}>
                             {!profileData && !passwordlessCodeSent && (
@@ -215,7 +231,7 @@ const RegistrationLite = (
                             {profileData && step !== 3 && ticketTypes.length > 0 && (
                                 <>
                                     {ticketOwned &&
-                                    <TicketOwnedComponent ownedTickets={ownedTickets} ticketTypes={ticketTypes}/>}
+                                        <TicketOwnedComponent ownedTickets={ownedTickets} ticketTypes={ticketTypes} />}
 
                                     <TicketTypeComponent
                                         ticketTypes={ticketTypes}
@@ -243,7 +259,7 @@ const RegistrationLite = (
                                         showMultipleTicketTexts={showMultipleTicketTexts}
                                     />
 
-                                    <animated.div style={{...toggleAnimation}}>
+                                    <animated.div style={{ ...toggleAnimation }}>
                                         <div ref={ref}>
                                             <PaymentComponent
                                                 isActive={step === 2}
@@ -272,7 +288,7 @@ const RegistrationLite = (
                             )}
                         </div>
 
-                        {profileData && step !== 3 && (
+                        {!ticketTaxesError && profileData && step !== 3 && ticketTypes.length > 0 && (
                             <ButtonBarComponent
                                 step={step}
                                 inPersonDisclaimer={inPersonDisclaimer}
@@ -288,7 +304,7 @@ const RegistrationLite = (
     );
 }
 
-const mapStateToProps = ({registrationLiteState}) => ({
+const mapStateToProps = ({ registrationLiteState }) => ({
     widgetLoading: registrationLiteState.widgetLoading,
     reservation: registrationLiteState.reservation,
     invitation: registrationLiteState.invitation,
@@ -304,7 +320,7 @@ const mapStateToProps = ({registrationLiteState}) => ({
 })
 
 RegistrationLite.defaultProps = {
-    loginInitialEmailInputValue : '',
+    loginInitialEmailInputValue: '',
     showMultipleTicketTexts: true,
 };
 

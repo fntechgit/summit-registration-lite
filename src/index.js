@@ -23,7 +23,7 @@ const filterProps = {
     authUser: (provider) => console.log('login with ', provider),
     getPasswordlessCode: (email) => console.log('get code', email),
     loginWithCode: (code) => console.log('login with code', code),
-    getAccessToken: () => '4sblb~TCB4.X8Yzk713kztvjAY2N2RRnX0VgnVK3PSYhwEZqRCwyDbXE3gxaLz53cEbFptfR4C1rm0jWsuAMtzCyLxOktJ4I1DvV7i3GYmNP4B_k2BuYzWs-JMkXncDh',
+    getAccessToken: () => 'FaG25iTsU-ZfkjFHzf~_KcYTFJCjj3YzBAZznpQ6UBn..ovXw54BIP5LgJ1GjYClQaICmIO2Q3oFBWiCGuUPwZfvwBxgItPN4CiY_egxJMvAzk2kBQTXsSrXfIfTn_2R',
     closeWidget: () => console.log('close widget'),
     goToExtraQuestions: () => console.log('extra questions required'),
     goToEvent: () => console.log('go to event'),
@@ -32,7 +32,7 @@ const filterProps = {
     loading: false,
     apiBaseUrl: 'https://api.dev.fnopen.com',
     summitData: SummitData.summit,
-    //profileData: ProfileData,
+    // profileData: ProfileData,
     ticketOwned: false,
     marketingData: MarketingData.colors,
     supportEmail: 'support@fntech.com',
@@ -49,7 +49,9 @@ const filterProps = {
     stripeOptions: {
         fonts: [{ cssSrc: 'https://fonts.googleapis.com/css2?family=Nunito+Sans:ital,wght@0,400;0,700;1,400;1,700&display=swap' }],
         style: { base: { fontFamily: `'Nunito Sans', sans-serif` } }
-    }
+    },
+    noAllowedTicketsMessage: '<span>You already have purchased all available tickets for this event and there are no tickets available for you to purchase.</span><br/><span>Visit the my orders / my tickets page to review your existing tickets.</span>',
+    ticketTaxesErrorMessage: '<span>There was an error getting the information for tickets. Please try again.</span>',
 };
 
 // width 780px or 230px

@@ -1,0 +1,17 @@
+.ticketTaxesErrorWrapper {
+  margin: 10px;
+  min-height: 150px;
+  display: flex;
+  flex-direction: column;
+  button {
+    width: 100px;
+    align-self: center;
+    margin: 10px 5px 0 5px;
+  }
+}
+
+.alert {
+  margin: 0 !important;
+  text-align: center;
+  padding: 30px;
+}
