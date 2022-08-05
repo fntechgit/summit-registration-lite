@@ -21,8 +21,7 @@ import {
     changeStep,
     getLoginCode,
     getMyInvitation,
-    getTaxesTypes,
-    getTicketTypes,
+    getTicketTypesAndTaxes,
     goToLogin,
     loadSession,
     passwordlessLogin,
@@ -57,8 +56,7 @@ const RegistrationLite = (
         reserveTicket,
         payTicketWithProvider,
         onPurchaseComplete,
-        getTicketTypes,
-        getTaxesTypes,
+        getTicketTypesAndTaxes,
         getLoginCode,
         passwordlessLogin,
         goToLogin,
@@ -128,7 +126,7 @@ const RegistrationLite = (
 
     useEffect(() => {
         if (summitData && profileData) {
-            getTicketsAndTaxes();
+            handleGetTicketTypesAndTaxes(summitData.id);
         }
     }, []);
 
@@ -177,13 +175,11 @@ const RegistrationLite = (
         rest.closeWidget();
     };
 
-    const getTicketsAndTaxes = async () => {
-        try {
-            await getTicketTypes(summitData.id);
-            await getTaxesTypes(summitData.id);
-        } catch (e) {
-            setTicketTaxesError(true);
-        }
+    const handleGetTicketTypesAndTaxes = (summitId) => {
+        getTicketTypesAndTaxes(summitId)
+            .catch((error) => {
+                setTicketTaxesError(true);
+            });
     }
 
     return (
@@ -198,7 +194,7 @@ const RegistrationLite = (
                             <i className="fa fa-close" aria-label="close" onClick={handleCloseClick}></i>
                         </div>
 
-                        {ticketTaxesError && profileData && <TicketTaxesError ticketTaxesErrorMessage={ticketTaxesErrorMessage} retryTicketTaxes={getTicketsAndTaxes}/>}
+                        {ticketTaxesError && profileData && <TicketTaxesError ticketTaxesErrorMessage={ticketTaxesErrorMessage} retryTicketTaxes={handleGetTicketTypesAndTaxes} />}
 
                         {!ticketTaxesError && profileData && ticketTypes.length === 0 && !loading && <NoAllowedTickets noAllowedTicketsMessage={noAllowedTicketsMessage} />}
 
@@ -322,6 +318,7 @@ const mapStateToProps = ({ registrationLiteState }) => ({
 RegistrationLite.defaultProps = {
     loginInitialEmailInputValue: '',
     showMultipleTicketTexts: true,
+    noAllowedTicketsMessage: '<span>You already have purchased all available tickets for this event and/or there are no tickets available for you to purchase.</span><br/><span>Visit the my orders / my tickets page to review your existing tickets.</span>',
 };
 
 RegistrationLite.propTypes = {
@@ -335,8 +332,7 @@ export default connect(mapStateToProps, {
     reserveTicket,
     removeReservedTicket,
     payTicketWithProvider,
-    getTicketTypes,
-    getTaxesTypes,
+    getTicketTypesAndTaxes,
     getLoginCode,
     passwordlessLogin,
     goToLogin,

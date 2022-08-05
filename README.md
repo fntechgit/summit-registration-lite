@@ -24,6 +24,11 @@ React component for the summit registration lite widget
 
    **showMultipleTicketTexts**= boolean to show/hide the text for multiple tickets
 
+   **noAllowedTicketsMessage**= string with the message for the 'No Allowed Tickets' error
+
+   **ticketTaxesErrorMessage**= string with the message for the 'TicketAndTaxesError' component
+
+
    Example
    
    ```
