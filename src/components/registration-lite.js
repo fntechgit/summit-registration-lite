@@ -318,7 +318,7 @@ const mapStateToProps = ({ registrationLiteState }) => ({
 RegistrationLite.defaultProps = {
     loginInitialEmailInputValue: '',
     showMultipleTicketTexts: true,
-    noAllowedTicketsMessage: '<span>You already have purchased all available tickets for this event and/or there are no tickets available for you to purchase.</span><br/><span>Visit the my orders / my tickets page to review your existing tickets.</span>',
+    noAllowedTicketsMessage: '<span>You already have purchased all available tickets for this event and/or there are no tickets available for you to purchase.</span><br/><span><a href="/a/my-tickets">Visit the my orders / my tickets page</a> to review your existing tickets.</span>',
 };
 
 RegistrationLite.propTypes = {
