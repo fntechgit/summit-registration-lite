@@ -51,7 +51,7 @@ export const loadSession = (settings) => (dispatch) => {
 const customErrorHandler = (err, res) => (dispatch, state) => {
     if (err.timeout) {
         return err;
-    }    
+    }
     if (res && res.statusCode === 404) {
         return err;
     }
@@ -69,18 +69,16 @@ const customErrorHandler = (err, res) => (dispatch, state) => {
 
 // api/v1/summits/{id}/tax-types
 
-export const getTicketTypesAndTaxes = (summitId) => async (dispatch) => {    
-
+export const getTicketTypesAndTaxes = (summitId) => async (dispatch) => {
     return Promise.all([
         dispatch(getTicketTypes(summitId)),
         dispatch(getTaxesTypes(summitId))
-    ]).catch((err) => {        
+    ]).catch((err) => {
         return Promise.reject(err);
     })
 }
 
 const getTicketTypes = (summitId) => async (dispatch, getState, { apiBaseUrl, getAccessToken }) => {
-
     try {
         const accessToken = await getAccessToken();
 
@@ -109,7 +107,6 @@ const getTicketTypes = (summitId) => async (dispatch, getState, { apiBaseUrl, ge
 }
 
 const getTaxesTypes = (summitId) => async (dispatch, getState, { apiBaseUrl, getAccessToken }) => {
-
     try {
         const accessToken = await getAccessToken();
         let params = {
