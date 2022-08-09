@@ -11,7 +11,7 @@
  * limitations under the License.
  **/
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import styles from "./index.module.scss";
 
 const NoAllowedTickets = ({ noAllowedTicketsMessage }) => {
