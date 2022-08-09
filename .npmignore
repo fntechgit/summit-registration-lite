@@ -11,3 +11,4 @@ coverage
 .prettierrc
 babel.config.js
 jest-setup.js
+.nvmrc
