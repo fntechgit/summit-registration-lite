@@ -23,7 +23,7 @@ module.exports = merge(common, {
         globalObject: 'this'
     },
     mode: 'production',
-    // devtool: 'source-map',
+    //devtool: 'source-map',
     optimization: {
     //     minimizer: [
     //         new TerserJSPlugin({sourceMap: true, parallel: true}),

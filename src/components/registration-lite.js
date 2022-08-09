@@ -130,12 +130,11 @@ const RegistrationLite = (
         }
     }, []);
 
-
     useEffect(() => {
         if (summitData && profileData) {
             getMyInvitation(summitData.id).catch(e => console.log(e));
         }
-    }, [summitData, profileData]);
+    }, []);
 
     useEffect(() => {
         if (step === 1 && formValues?.ticketType && formValues?.personalInformation) {
@@ -176,7 +175,9 @@ const RegistrationLite = (
     };
 
     const handleGetTicketTypesAndTaxes = (summitId) => {
-        getTicketTypesAndTaxes(summitId)
+        setTicketTaxesError(false);
+        getTicketTypesAndTaxes(summitId).
+            then()
             .catch((error) => {
                 setTicketTaxesError(true);
             });
@@ -194,95 +195,98 @@ const RegistrationLite = (
                             <i className="fa fa-close" aria-label="close" onClick={handleCloseClick}></i>
                         </div>
 
-                        {ticketTaxesError && profileData && <TicketTaxesError ticketTaxesErrorMessage={ticketTaxesErrorMessage} retryTicketTaxes={handleGetTicketTypesAndTaxes} />}
+                        {ticketTaxesError && profileData && <TicketTaxesError ticketTaxesErrorMessage={ticketTaxesErrorMessage} retryTicketTaxes={() => handleGetTicketTypesAndTaxes(summitData?.id)} />}
 
                         {!ticketTaxesError && profileData && ticketTypes.length === 0 && !loading && <NoAllowedTickets noAllowedTicketsMessage={noAllowedTicketsMessage} />}
 
-                        <div className={styles.stepsWrapper}>
-                            {!profileData && !passwordlessCodeSent && (
-                                <LoginComponent
-                                    options={loginOptions}
-                                    allowsNativeAuth={allowsNativeAuth}
-                                    allowsOtpAuth={allowsOtpAuth}
-                                    login={(provider) => rest.authUser(provider)}
-                                    getLoginCode={getLoginCode}
-                                    getPasswordlessCode={getPasswordlessCode}
-                                    initialEmailValue={loginInitialEmailInputValue}
-                                />
-                            )}
-
-                            {!profileData && passwordlessCodeSent && (
-                                <PasswordlessLoginComponent
-                                    codeLength={passwordlessCode}
-                                    email={passwordlessEmail}
-                                    passwordlessLogin={passwordlessLogin}
-                                    loginWithCode={loginWithCode}
-                                    codeError={passwordlessCodeError}
-                                    goToLogin={goToLogin}
-                                    getLoginCode={getLoginCode}
-                                    getPasswordlessCode={getPasswordlessCode}
-                                />
-                            )}
-
-                            {profileData && step !== 3 && ticketTypes.length > 0 && (
-                                <>
-                                    {ticketOwned &&
-                                        <TicketOwnedComponent ownedTickets={ownedTickets} ticketTypes={ticketTypes} />}
-
-                                    <TicketTypeComponent
-                                        ticketTypes={ticketTypes}
-                                        inPersonDisclaimer={inPersonDisclaimer}
-                                        taxTypes={taxTypes}
-                                        reservation={reservation}
-                                        isActive={step === 0}
-                                        changeForm={ticketForm => setFormValues({ ...formValues, ...ticketForm })}
-                                        showMultipleTicketTexts={showMultipleTicketTexts}
+                        {!ticketTaxesError &&
+                            <div className={styles.stepsWrapper}>
+                                {!profileData && !passwordlessCodeSent && (
+                                    <LoginComponent
+                                        options={loginOptions}
+                                        allowsNativeAuth={allowsNativeAuth}
+                                        allowsOtpAuth={allowsOtpAuth}
+                                        login={(provider) => rest.authUser(provider)}
+                                        getLoginCode={getLoginCode}
+                                        getPasswordlessCode={getPasswordlessCode}
+                                        initialEmailValue={loginInitialEmailInputValue}
                                     />
+                                )}
 
-                                    <PersonalInfoComponent
-                                        isActive={step === 1}
-                                        reservation={reservation}
-                                        userProfile={profileData}
-                                        invitation={invitation}
-                                        summitId={summitData.id}
-                                        changeForm={personalInformation => setFormValues({
-                                            ...formValues,
-                                            personalInformation
-                                        })}
-                                        handleCompanyError={handleCompanyError}
-                                        formValues={formValues}
-                                        formErrors={formErrors}
-                                        showMultipleTicketTexts={showMultipleTicketTexts}
+                                {!profileData && passwordlessCodeSent && (
+                                    <PasswordlessLoginComponent
+                                        codeLength={passwordlessCode}
+                                        email={passwordlessEmail}
+                                        passwordlessLogin={passwordlessLogin}
+                                        loginWithCode={loginWithCode}
+                                        codeError={passwordlessCodeError}
+                                        goToLogin={goToLogin}
+                                        getLoginCode={getLoginCode}
+                                        getPasswordlessCode={getPasswordlessCode}
                                     />
+                                )}
 
-                                    <animated.div style={{ ...toggleAnimation }}>
-                                        <div ref={ref}>
-                                            <PaymentComponent
-                                                isActive={step === 2}
-                                                reservation={reservation}
-                                                payTicket={payTicketWithProvider}
-                                                userProfile={profileData}
-                                                timestamp={summitData.timestamp}
-                                                provider={provider}
-                                                providerKey={publicKey}
-                                                stripeOptions={stripeOptions}
-                                            />
-                                        </div>
-                                    </animated.div>
-                                </>
-                            )}
+                                {profileData && step !== 3 && ticketTypes.length > 0 && (
+                                    <>
+                                        {ticketOwned &&
+                                            <TicketOwnedComponent ownedTickets={ownedTickets}
+                                                                  ticketTypes={ticketTypes} />}
 
-                            {profileData && step === 3 && (
-                                <PurchaseComplete
-                                    checkout={checkout}
-                                    summit={summitData}
-                                    onPurchaseComplete={onPurchaseComplete}
-                                    supportEmail={supportEmail}
-                                    goToEvent={goToEvent}
-                                    goToExtraQuestions={goToExtraQuestions}
-                                />
-                            )}
-                        </div>
+                                        <TicketTypeComponent
+                                            ticketTypes={ticketTypes}
+                                            inPersonDisclaimer={inPersonDisclaimer}
+                                            taxTypes={taxTypes}
+                                            reservation={reservation}
+                                            isActive={step === 0}
+                                            changeForm={ticketForm => setFormValues({ ...formValues, ...ticketForm })}
+                                            showMultipleTicketTexts={showMultipleTicketTexts}
+                                        />
+
+                                        <PersonalInfoComponent
+                                            isActive={step === 1}
+                                            reservation={reservation}
+                                            userProfile={profileData}
+                                            invitation={invitation}
+                                            summitId={summitData.id}
+                                            changeForm={personalInformation => setFormValues({
+                                                ...formValues,
+                                                personalInformation
+                                            })}
+                                            handleCompanyError={handleCompanyError}
+                                            formValues={formValues}
+                                            formErrors={formErrors}
+                                            showMultipleTicketTexts={showMultipleTicketTexts}
+                                        />
+
+                                        <animated.div style={{ ...toggleAnimation }}>
+                                            <div ref={ref}>
+                                                <PaymentComponent
+                                                    isActive={step === 2}
+                                                    reservation={reservation}
+                                                    payTicket={payTicketWithProvider}
+                                                    userProfile={profileData}
+                                                    timestamp={summitData.timestamp}
+                                                    provider={provider}
+                                                    providerKey={publicKey}
+                                                    stripeOptions={stripeOptions}
+                                                />
+                                            </div>
+                                        </animated.div>
+                                    </>
+                                )}
+
+                                {profileData && step === 3 && (
+                                    <PurchaseComplete
+                                        checkout={checkout}
+                                        summit={summitData}
+                                        onPurchaseComplete={onPurchaseComplete}
+                                        supportEmail={supportEmail}
+                                        goToEvent={goToEvent}
+                                        goToExtraQuestions={goToExtraQuestions}
+                                    />
+                                )}
+                            </div>
+                        }
 
                         {!ticketTaxesError && profileData && step !== 3 && ticketTypes.length > 0 && (
                             <ButtonBarComponent
@@ -319,6 +323,7 @@ RegistrationLite.defaultProps = {
     loginInitialEmailInputValue: '',
     showMultipleTicketTexts: true,
     noAllowedTicketsMessage: '<span>You already have purchased all available tickets for this event and/or there are no tickets available for you to purchase.</span><br/><span><a href="/a/my-tickets">Visit the my orders / my tickets page</a> to review your existing tickets.</span>',
+    ticketTaxesErrorMessage: '<span>There was an error getting the information for the tickets. Please try it again.</span>',
 };
 
 RegistrationLite.propTypes = {
