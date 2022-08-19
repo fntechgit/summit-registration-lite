@@ -1,10 +1,10 @@
 .ticketOwnedWrapper {
   margin: 10px;
+  span {
+    display: block;
+  }
 }
 
-span {
-  display: block;
-}
 
 .alert {
   margin: 0 !important;
