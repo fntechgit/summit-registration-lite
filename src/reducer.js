@@ -29,7 +29,11 @@ import {
     GO_TO_LOGIN,
     GET_MY_INVITATION,
     CLEAR_MY_INVITATION,
+    CLEAR_WIDGET_STATE,
+    REQUESTED_TICKET_TYPES,
 } from './actions';
+
+import { LOGOUT_USER } from 'openstack-uicore-foundation/lib/security/actions';
 
 const DEFAULT_STATE = {
     reservation: null,
@@ -43,6 +47,9 @@ const DEFAULT_STATE = {
         error: false
     },
     ticketTypes: [],
+    // added this flag to really know if we requested or not the ticket types collection
+    // ( empty bc initial value or empty bc api empty response)
+    requestedTicketTypes: false,
     taxTypes: [],
     invitation: null,
     settings: {
@@ -56,6 +63,13 @@ const DEFAULT_STATE = {
 const RegistrationLiteReducer = (state = DEFAULT_STATE, action) => {
     const { type, payload } = action;
     switch (type) {
+        case CLEAR_WIDGET_STATE:
+        case LOGOUT_USER: {
+            return DEFAULT_STATE;
+        }
+        case REQUESTED_TICKET_TYPES:{
+            return {...state, requestedTicketTypes: false}
+        }
         case START_WIDGET_LOADING: {
             return { ...state, widgetLoading: true };
         }
@@ -91,7 +105,7 @@ const RegistrationLiteReducer = (state = DEFAULT_STATE, action) => {
             return { ...state, step: payload }
         }
         case GET_TICKET_TYPES: {
-            return { ...state, ticketTypes: payload.response.data };
+            return { ...state, ticketTypes: payload.response.data, requestedTicketTypes: true };
         }
         case GET_TAX_TYPES: {
             return { ...state, taxTypes: payload.response.data }

@@ -16,6 +16,7 @@ import { connect } from "react-redux";
 import PropTypes from 'prop-types';
 import { animated, config, useSpring } from "react-spring";
 import { useMeasure } from "react-use";
+import { AUTH_ERROR_MESSAGE, AUTH_ERROR_MISSING_REFRESH_TOKEN , AUTH_ERROR_REQUEST_FAILED } from '../utils/constants';
 
 import {
     changeStep,
@@ -28,7 +29,8 @@ import {
     payTicketWithProvider,
     removeReservedTicket,
     reserveTicket,
-} from "../actions";
+    clearWidgetState,
+} from '../actions';
 
 import AjaxLoader from "openstack-uicore-foundation/lib/components/ajaxloader";
 
@@ -94,6 +96,9 @@ const RegistrationLite = (
         showMultipleTicketTexts,
         noAllowedTicketsMessage,
         ticketTaxesErrorMessage,
+        authErrorCallback,
+        clearWidgetState,
+        requestedTicketTypes,
         ...rest
     }) => {
 
@@ -128,13 +133,13 @@ const RegistrationLite = (
         if (summitData && profileData) {
             handleGetTicketTypesAndTaxes(summitData.id);
         }
-    }, []);
+    }, [summitData, profileData]);
 
     useEffect(() => {
         if (summitData && profileData) {
             getMyInvitation(summitData.id).catch(e => console.log(e));
         }
-    }, []);
+    }, [summitData, profileData]);
 
     useEffect(() => {
         if (step === 1 && formValues?.ticketType && formValues?.personalInformation) {
@@ -145,6 +150,15 @@ const RegistrationLite = (
                 ticketQuantity: formValues?.ticketQuantity,
             }, {
                 onError: (err, res) => setFormErrors(res.body.errors)
+            }).catch((error) => {
+                let { message } = error;
+                if(message.includes(AUTH_ERROR_MESSAGE) ||
+                    message.includes(AUTH_ERROR_MISSING_REFRESH_TOKEN) ||
+                    message.includes(AUTH_ERROR_REQUEST_FAILED)){
+                    // we dont have an access token, init log out process
+                    clearWidgetState();
+                    return authErrorCallback(error);
+                }
             });
         }
 
@@ -179,6 +193,14 @@ const RegistrationLite = (
         getTicketTypesAndTaxes(summitId).
             then()
             .catch((error) => {
+                let { message } = error;
+                if(message.includes(AUTH_ERROR_MESSAGE) ||
+                    message.includes(AUTH_ERROR_MISSING_REFRESH_TOKEN) ||
+                    message.includes(AUTH_ERROR_REQUEST_FAILED)){
+                   // we dont have an access token, init log out process
+                    clearWidgetState();
+                    return authErrorCallback(error);
+                }
                 setTicketTaxesError(true);
             });
     }
@@ -197,7 +219,7 @@ const RegistrationLite = (
 
                         {ticketTaxesError && profileData && <TicketTaxesError ticketTaxesErrorMessage={ticketTaxesErrorMessage} retryTicketTaxes={() => handleGetTicketTypesAndTaxes(summitData?.id)} />}
 
-                        {!ticketTaxesError && profileData && ticketTypes.length === 0 && !loading && <NoAllowedTickets noAllowedTicketsMessage={noAllowedTicketsMessage} />}
+                        {!ticketTaxesError && profileData && ticketTypes.length === 0 && requestedTicketTypes && <NoAllowedTickets noAllowedTicketsMessage={noAllowedTicketsMessage} />}
 
                         {!ticketTaxesError &&
                             <div className={styles.stepsWrapper}>
@@ -311,6 +333,7 @@ const mapStateToProps = ({ registrationLiteState }) => ({
     userProfile: registrationLiteState.settings.userProfile,
     checkout: registrationLiteState.checkout,
     ticketTypes: registrationLiteState.ticketTypes,
+    requestedTicketTypes: registrationLiteState.requestedTicketTypes,
     taxTypes: registrationLiteState.taxTypes,
     step: registrationLiteState.step,
     passwordlessEmail: registrationLiteState.passwordless.email,
@@ -324,11 +347,13 @@ RegistrationLite.defaultProps = {
     showMultipleTicketTexts: true,
     noAllowedTicketsMessage: '<span>You already have purchased all available tickets for this event and/or there are no tickets available for you to purchase.</span><br/><span><a href="/a/my-tickets">Visit the my orders / my tickets page</a> to review your existing tickets.</span>',
     ticketTaxesErrorMessage: '<span>There was an error getting the information for the tickets. Please try it again.</span>',
+    authErrorCallback: (error) => { console.log(error) }
 };
 
 RegistrationLite.propTypes = {
     loginInitialEmailInputValue: PropTypes.string,
     showMultipleTicketTexts: PropTypes.bool,
+    authErrorCallback : PropTypes.func,
 };
 
 export default connect(mapStateToProps, {
@@ -342,5 +367,6 @@ export default connect(mapStateToProps, {
     passwordlessLogin,
     goToLogin,
     getMyInvitation,
+    clearWidgetState,
 })(RegistrationLite)
 
