@@ -41,12 +41,19 @@ export const SET_PASSWORDLESS_ERROR = 'SET_PASSWORDLESS_ERROR';
 export const GO_TO_LOGIN = 'GO_TO_LOGIN';
 export const GET_MY_INVITATION = 'GET_MY_INVITATION';
 export const CLEAR_MY_INVITATION = 'CLEAR_MY_INVITATION';
+export const CLEAR_WIDGET_STATE = 'CLEAR_WIDGET_STATE';
+
 export const startWidgetLoading = createAction(START_WIDGET_LOADING);
 export const stopWidgetLoading = createAction(STOP_WIDGET_LOADING);
 
 export const loadSession = (settings) => (dispatch) => {
     dispatch(createAction(LOAD_INITIAL_VARS)(settings));
 };
+
+export const clearWidgetState = () => (dispatch) => {
+    debugger;
+    dispatch(createAction(CLEAR_WIDGET_STATE)({}));
+}
 
 const customErrorHandler = (err, res) => (dispatch, state) => {
     if (err.timeout) {
@@ -135,122 +142,151 @@ const getTaxesTypes = (summitId) => async (dispatch, getState, { apiBaseUrl, get
 
 export const reserveTicket = ({ provider, personalInformation, ticket, ticketQuantity }, { onError }) =>
     async (dispatch, getState, { apiBaseUrl, getAccessToken }) => {
+        try {
+            const { registrationLiteState: { settings: { summitId } } } = getState();
+            let { firstName, lastName, email, company, promoCode } = personalInformation;
+            dispatch(startWidgetLoading());
 
-        const { registrationLiteState: { settings: { summitId } } } = getState();
-        let { firstName, lastName, email, company, promoCode } = personalInformation;
-        dispatch(startWidgetLoading());
+            const access_token = await getAccessToken();
+
+            const tickets = [...Array(ticketQuantity)].map(() => ({
+                type_id: ticket.id,
+                promo_code: promoCode || null
+            }));
+
+            // Only set the attendee for the first ticket.
+            tickets[0].attendee_first_name = firstName;
+            tickets[0].attendee_last_name = lastName;
+            tickets[0].attendee_email = email;
+
+            let params = {
+                access_token,
+                expand: 'tickets,tickets.owner,tickets.ticket_type,tickets.ticket_type.taxes',
+            };
+
+            const normalizedEntity = normalizeReservation({
+                owner_email: email,
+                owner_first_name: firstName,
+                owner_last_name: lastName,
+                owner_company: company,
+                tickets
+            });
+
+            const errorHandler = (err, res) => (dispatch, state) => {
+                if (res && res.statusCode === 412 && onError) return onError(err, res);
+                if (res && res.statusCode === 404) {
+                    const msg = res.body.message;
+                    Swal.fire("Validation Error", msg, "warning");
+                    return;
+                }
+                if (res && res.statusCode === 500) {
+                    const msg = res.body.message;
+                    Swal.fire("Server Error", msg, "error");
+                    return;
+                }
+                return authErrorHandler(err, res)(dispatch, state);
+            };
+
+            return postRequest(
+                createAction(CREATE_RESERVATION),
+                createAction(CREATE_RESERVATION_SUCCESS),
+                `${apiBaseUrl}/api/v1/summits/${summitId}/orders/reserve`,
+                normalizedEntity,
+                errorHandler,
+                // entity
+            )(params)(dispatch)
+                .then((payload) => {
+                    dispatch(stopWidgetLoading());
+                    payload.response.promo_code = promoCode || null;
+
+                    if (!payload.response.amount) {
+                        dispatch(payTicketWithProvider(provider));
+                        return (payload)
+                    }
+
+                    dispatch(changeStep(2));
+                    return (payload)
+                })
+                .catch(e => {
+                    dispatch(createAction(CREATE_RESERVATION_ERROR)(e));
+                    dispatch(stopWidgetLoading());
+                    return Promise.reject(e);
+                })
+        }
+        catch (e) {
+            dispatch(createAction(CREATE_RESERVATION_ERROR)(e));
+            dispatch(stopWidgetLoading());
+            return Promise.reject(e);
+        }
+    }
+
+export const removeReservedTicket = () => async (dispatch, getState, { apiBaseUrl, getAccessToken }) => {
+    try {
+        let { registrationLiteState: { settings: { summitId }, reservation: { hash } } } = getState();
 
         const access_token = await getAccessToken();
 
-        const tickets = [...Array(ticketQuantity)].map(() => ({
-            type_id: ticket.id,
-            promo_code: promoCode || null
-        }));
-
-        // Only set the attendee for the first ticket.
-        tickets[0].attendee_first_name = firstName;
-        tickets[0].attendee_last_name = lastName;
-        tickets[0].attendee_email = email;
-
         let params = {
             access_token,
-            expand: 'tickets,tickets.owner,tickets.ticket_type,tickets.ticket_type.taxes',
+            expand: 'tickets,tickets.owner',
         };
 
-        const normalizedEntity = normalizeReservation({
-            owner_email: email,
-            owner_first_name: firstName,
-            owner_last_name: lastName,
-            owner_company: company,
-            tickets
-        });
+        dispatch(startWidgetLoading());
 
-        const errorHandler = (err, res) => (dispatch, state) => {
-            if (res && res.statusCode === 412 && onError) return onError(err, res);
-            if (res && res.statusCode === 404) {
-                const msg = res.body.message;
-                Swal.fire("Validation Error", msg, "warning");
-                return;
-            }
-            if (res && res.statusCode === 500) {
-                const msg = res.body.message;
-                Swal.fire("Server Error", msg, "error");
-                return;
-            }
-            return authErrorHandler(err, res)(dispatch, state);
-        };
-
-        return postRequest(
-            createAction(CREATE_RESERVATION),
-            createAction(CREATE_RESERVATION_SUCCESS),
-            `${apiBaseUrl}/api/v1/summits/${summitId}/orders/reserve`,
-            normalizedEntity,
-            errorHandler,
+        return deleteRequest(
+            createAction(DELETE_RESERVATION),
+            createAction(DELETE_RESERVATION_SUCCESS),
+            `${apiBaseUrl}/api/v1/summits/${summitId}/orders/${hash}`,
+            {},
+            authErrorHandler,
             // entity
         )(params)(dispatch)
             .then((payload) => {
                 dispatch(stopWidgetLoading());
-                payload.response.promo_code = promoCode || null;
-
-                if (!payload.response.amount) {
-                    dispatch(payTicketWithProvider(provider));
-                    return (payload)
-                }
-
-                dispatch(changeStep(2));
+                dispatch(changeStep(1));
                 return (payload)
             })
             .catch(e => {
-                dispatch(createAction(CREATE_RESERVATION_ERROR)(e));
+                dispatch(createAction(DELETE_RESERVATION_ERROR)(e));
+                dispatch(changeStep(1));
                 dispatch(stopWidgetLoading());
-                return (e);
+                return Promise.reject(e);
             })
     }
+    catch (e) {
+        dispatch(createAction(DELETE_RESERVATION_ERROR)(e));
+        dispatch(changeStep(1));
+        dispatch(stopWidgetLoading());
+        return Promise.reject(e);
+    }
 
-export const removeReservedTicket = () => async (dispatch, getState, { apiBaseUrl, getAccessToken }) => {
-    let { registrationLiteState: { settings: { summitId }, reservation: { hash } } } = getState();
-
-    const access_token = await getAccessToken();
-
-    let params = {
-        access_token,
-        expand: 'tickets,tickets.owner',
-    };
-
-    dispatch(startWidgetLoading());
-
-    return deleteRequest(
-        createAction(DELETE_RESERVATION),
-        createAction(DELETE_RESERVATION_SUCCESS),
-        `${apiBaseUrl}/api/v1/summits/${summitId}/orders/${hash}`,
-        {},
-        authErrorHandler,
-        // entity
-    )(params)(dispatch)
-        .then((payload) => {
-            dispatch(stopWidgetLoading());
-            dispatch(changeStep(1));
-            return (payload)
-        })
-        .catch(e => {
-            dispatch(createAction(DELETE_RESERVATION_ERROR)(e));
-            dispatch(changeStep(1));
-            dispatch(stopWidgetLoading());
-            return (e);
-        })
 }
 
 export const payTicketWithProvider = (provider, params = {}) => async (dispatch, getState, { apiBaseUrl, getAccessToken }) => {
 
-    let { registrationLiteState: { settings: { summitId, userProfile }, reservation } } = getState();
+    try {
+        let { registrationLiteState: { settings: { summitId, userProfile }, reservation } } = getState();
 
-    const access_token = await getAccessToken();
+        const access_token = await getAccessToken();
 
-    dispatch(startWidgetLoading());
+        dispatch(startWidgetLoading());
 
-    const currentProvider = PaymentProviderFactory.build(provider, { reservation, summitId, userProfile, access_token, apiBaseUrl, dispatch });
+        const currentProvider = PaymentProviderFactory.build(provider, {
+            reservation,
+            summitId,
+            userProfile,
+            access_token,
+            apiBaseUrl,
+            dispatch
+        });
 
-    return dispatch(currentProvider.payTicket({ ...params }));
+        return dispatch(currentProvider.payTicket({ ...params }));
+    }
+    catch (e) {
+        dispatch(stopWidgetLoading());
+        return Promise.reject(e);
+    }
+
 }
 
 export const changeStep = (step) => (dispatch, getState) => {
@@ -358,6 +394,6 @@ export const getMyInvitation = (summitId) => async (dispatch, getState, { apiBas
         })
     }
     catch (e) {
-        return Promise.reject();
+        return Promise.reject(e);
     }
 }

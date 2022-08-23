@@ -5,11 +5,11 @@ React component for the summit registration lite widget
 ## Registration Lite config
 
    **apiBaseUrl**             = base url for API
-   
+
    **summitData**             = object with the data from the summit
-   
+
    **profileData**            = object with the profile data from the user
-   
+
    **marketingData**          = object with the settings from the marketing API
 
    **supportEmail**           = string with the email address for support
@@ -30,7 +30,7 @@ React component for the summit registration lite widget
 
 
    Example
-   
+
    ```
    [
       { button_color: '#082238', provider_label: 'FNid', provider_param: 'fnid' },
@@ -39,15 +39,15 @@ React component for the summit registration lite widget
    ```
 
    **authUser**               = method passed that will be called on user login. param -> (provider) => console.log('login with', provider)
-   
+
    **getAccessToken**         = method passed that will be called to request the access token
-   
+
    **closeWidget**            = method passed that will be called if the user tries to close the widget
-   
+
    **goToExtraQuestions**     = method passed that will be called by component to redirect to extra questions page
 
    **goToEvent**              = method passed that will be called to redirect the user to the current event
-   
+
    **getPasswordlessCode**    = method passed that will be called when the user generates a code to login without password
 
    **loginWithCode**          = method passed that will be called when the user tries to login with a code
@@ -55,7 +55,8 @@ React component for the summit registration lite widget
    **onPurchaseComplete**     = method passed that will be called after the purchase of a ticket it's completed
 
    **handleCompanyError**     = method passed that will be called if the company dropdown can't be fetched
-   
+
+   **authErrorCallback**      = method passed that will handle on client any auth error
 
 ## PUBLISH TO NPM:
 

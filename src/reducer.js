@@ -29,7 +29,10 @@ import {
     GO_TO_LOGIN,
     GET_MY_INVITATION,
     CLEAR_MY_INVITATION,
+    CLEAR_WIDGET_STATE,
 } from './actions';
+
+import { LOGOUT_USER } from 'openstack-uicore-foundation/lib/security/actions';
 
 const DEFAULT_STATE = {
     reservation: null,
@@ -56,6 +59,11 @@ const DEFAULT_STATE = {
 const RegistrationLiteReducer = (state = DEFAULT_STATE, action) => {
     const { type, payload } = action;
     switch (type) {
+        case CLEAR_WIDGET_STATE:
+        case LOGOUT_USER: {
+            debugger;
+            return DEFAULT_STATE;
+        }
         case START_WIDGET_LOADING: {
             return { ...state, widgetLoading: true };
         }
