@@ -25,6 +25,7 @@ export const START_WIDGET_LOADING = 'START_WIDGET_LOADING';
 export const STOP_WIDGET_LOADING = 'STOP_WIDGET_LOADING';
 export const LOAD_INITIAL_VARS = 'LOAD_INITIAL_VARS';
 export const CHANGE_STEP = 'CHANGE_STEP';
+export const REQUESTED_TICKET_TYPES = 'REQUESTED_TICKET_TYPES';
 export const GET_TICKET_TYPES = 'GET_TICKET_TYPES';
 export const GET_TAX_TYPES = 'GET_TAX_TYPES';
 export const CREATE_RESERVATION = 'CREATE_RESERVATION';
@@ -51,7 +52,6 @@ export const loadSession = (settings) => (dispatch) => {
 };
 
 export const clearWidgetState = () => (dispatch) => {
-    debugger;
     dispatch(createAction(CLEAR_WIDGET_STATE)({}));
 }
 
@@ -96,7 +96,7 @@ const getTicketTypes = (summitId) => async (dispatch, getState, { apiBaseUrl, ge
 
         dispatch(startWidgetLoading());
         return getRequest(
-            null,
+            createAction(REQUESTED_TICKET_TYPES),
             createAction(GET_TICKET_TYPES),
             `${apiBaseUrl}/api/v1/summits/${summitId}/ticket-types/allowed`,
             customErrorHandler

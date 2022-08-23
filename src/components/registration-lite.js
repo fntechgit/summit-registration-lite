@@ -98,6 +98,7 @@ const RegistrationLite = (
         ticketTaxesErrorMessage,
         authErrorCallback,
         clearWidgetState,
+        requestedTicketTypes,
         ...rest
     }) => {
 
@@ -132,13 +133,13 @@ const RegistrationLite = (
         if (summitData && profileData) {
             handleGetTicketTypesAndTaxes(summitData.id);
         }
-    }, []);
+    }, [summitData, profileData]);
 
     useEffect(() => {
         if (summitData && profileData) {
             getMyInvitation(summitData.id).catch(e => console.log(e));
         }
-    }, []);
+    }, [summitData, profileData]);
 
     useEffect(() => {
         if (step === 1 && formValues?.ticketType && formValues?.personalInformation) {
@@ -218,7 +219,7 @@ const RegistrationLite = (
 
                         {ticketTaxesError && profileData && <TicketTaxesError ticketTaxesErrorMessage={ticketTaxesErrorMessage} retryTicketTaxes={() => handleGetTicketTypesAndTaxes(summitData?.id)} />}
 
-                        {!ticketTaxesError && profileData && ticketTypes.length === 0 && !loading && <NoAllowedTickets noAllowedTicketsMessage={noAllowedTicketsMessage} />}
+                        {!ticketTaxesError && profileData && ticketTypes.length === 0 && requestedTicketTypes && <NoAllowedTickets noAllowedTicketsMessage={noAllowedTicketsMessage} />}
 
                         {!ticketTaxesError &&
                             <div className={styles.stepsWrapper}>
@@ -332,6 +333,7 @@ const mapStateToProps = ({ registrationLiteState }) => ({
     userProfile: registrationLiteState.settings.userProfile,
     checkout: registrationLiteState.checkout,
     ticketTypes: registrationLiteState.ticketTypes,
+    requestedTicketTypes: registrationLiteState.requestedTicketTypes,
     taxTypes: registrationLiteState.taxTypes,
     step: registrationLiteState.step,
     passwordlessEmail: registrationLiteState.passwordless.email,
