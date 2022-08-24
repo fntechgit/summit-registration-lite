@@ -90,6 +90,9 @@ const RegistrationLiteReducer = (state = DEFAULT_STATE, action) => {
                 ...state,
                 reservation: null,
                 checkout: null,
+                ticketTypes: [],
+                requestedTicketTypes: false,
+                taxTypes: [],
                 invitation: null,
                 passwordless: { ...DEFAULT_STATE.passwordless },
                 settings: {

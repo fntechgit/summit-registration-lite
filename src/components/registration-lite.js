@@ -16,7 +16,11 @@ import { connect } from "react-redux";
 import PropTypes from 'prop-types';
 import { animated, config, useSpring } from "react-spring";
 import { useMeasure } from "react-use";
-import { AUTH_ERROR_MESSAGE, AUTH_ERROR_MISSING_REFRESH_TOKEN , AUTH_ERROR_REQUEST_FAILED } from '../utils/constants';
+import {
+    AUTH_ERROR_MISSING_AUTH_INFO,
+    AUTH_ERROR_MISSING_REFRESH_TOKEN ,
+    AUTH_ERROR_REFRESH_TOKEN_REQUEST_ERROR
+} from 'openstack-uicore-foundation/lib/security/constants';
 
 import {
     changeStep,
@@ -152,9 +156,9 @@ const RegistrationLite = (
                 onError: (err, res) => setFormErrors(res.body.errors)
             }).catch((error) => {
                 let { message } = error;
-                if(message.includes(AUTH_ERROR_MESSAGE) ||
+                if(message && (message.includes(AUTH_ERROR_MISSING_AUTH_INFO) ||
                     message.includes(AUTH_ERROR_MISSING_REFRESH_TOKEN) ||
-                    message.includes(AUTH_ERROR_REQUEST_FAILED)){
+                    message.includes(AUTH_ERROR_REFRESH_TOKEN_REQUEST_ERROR))){
                     // we dont have an access token, init log out process
                     clearWidgetState();
                     return authErrorCallback(error);
@@ -194,9 +198,9 @@ const RegistrationLite = (
             then()
             .catch((error) => {
                 let { message } = error;
-                if(message.includes(AUTH_ERROR_MESSAGE) ||
+                if(message && (message.includes(AUTH_ERROR_MISSING_AUTH_INFO) ||
                     message.includes(AUTH_ERROR_MISSING_REFRESH_TOKEN) ||
-                    message.includes(AUTH_ERROR_REQUEST_FAILED)){
+                    message.includes(AUTH_ERROR_REFRESH_TOKEN_REQUEST_ERROR))){
                    // we dont have an access token, init log out process
                     clearWidgetState();
                     return authErrorCallback(error);
