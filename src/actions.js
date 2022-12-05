@@ -154,11 +154,6 @@ export const reserveTicket = ({ provider, personalInformation, ticket, ticketQua
                 promo_code: promoCode || null
             }));
 
-            // Only set the attendee for the first ticket.
-            tickets[0].attendee_first_name = firstName;
-            tickets[0].attendee_last_name = lastName;
-            tickets[0].attendee_email = email;
-
             let params = {
                 access_token,
                 expand: 'tickets,tickets.owner,tickets.ticket_type,tickets.ticket_type.taxes',
