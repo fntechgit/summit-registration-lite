@@ -101,7 +101,7 @@ const TicketTypeComponent = ({ ticketTypes, isActive, changeForm, reservation, i
                                         {!isActive && reservation?.taxes_amount > 0 && (
                                             <>
                                                 <br />
-                                                Taxes: ${reservation?.taxes_amount} {ticket?.currency}
+                                                Taxes: {ticket?.currency_symbol}{reservation?.taxes_amount} {ticket?.currency}
                                             </>
                                         )}
                                     </>
