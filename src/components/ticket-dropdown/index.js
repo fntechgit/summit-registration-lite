@@ -34,7 +34,7 @@ const TicketDropdownComponent = ({ selectedTicket, ticketTypes, onTicketSelect }
                 {selectedTicket ?
                     <>
                         <span className={styles.selectedTicket} data-testid="selected-ticket">
-                            {`${selectedTicket.name} - $${selectedTicket.cost} ${selectedTicket.currency}`}
+                            {`${selectedTicket.name} - ${selectedTicket.currency_symbol}${selectedTicket.cost} ${selectedTicket.currency}`}
                         </span>
                         <i className="fa fa-chevron-down"></i>
                     </>
@@ -64,7 +64,7 @@ const TicketDropdownComponent = ({ selectedTicket, ticketTypes, onTicketSelect }
                                     ticketSelect(t);
                                 }}>
                                     {t.name} -{` `}
-                                    {!isTicketSoldOut && <>${t.cost} {t.currency}</>}
+                                    {!isTicketSoldOut && <>{t.currency_symbol}{t.cost} {t.currency}</>}
                                     {isTicketSoldOut && <>Sold Out</>}
                                 </div>
                             )
