@@ -102,7 +102,7 @@ const PersonalInfoComponent = ({ isActive, changeForm, reservation, userProfile,
                         <div ref={ref}>
                             {formValues.ticketQuantity > 1 && (
                                 <div className={`${styles.ticketQuantityNotice} alert alert-info`}>
-                                    Please note that 1 ticket from this order will be automatically assigned to you; the rest will remain unassigned, with the option to re-assign all tickets after purchase.
+                                    If this is your first order please note that 1 ticket from this order will be automatically assigned to you; the rest will remain unassigned, with the option to re-assign all tickets after purchase.
                                 </div>
                             )}
 
