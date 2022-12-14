@@ -1,8 +1,8 @@
 export const formatCurrency = (value, { locale = 'en-US', ...options }) => {
     const defaultOptions = {
         currency: 'USD',
-        minimumFractionDigits: 0,
-        maximumFractionDigits: 0
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
     };
 
     const formatter = new Intl.NumberFormat(locale, {
