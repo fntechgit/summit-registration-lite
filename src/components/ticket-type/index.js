@@ -97,12 +97,15 @@ const TicketTypeComponent = ({ ticketTypes, isActive, changeForm, reservation, i
                                                 <br />
                                                 {reservation?.applied_taxes.map((tax) => {
                                                     return (
+                                                        <>
                                                         <span className={styles.taxes}>
                                                             <abbr title={tax.name}>
                                                                 {tax.name} 
                                                             </abbr>
-                                                            {` : ${ticket?.currency_symbol} ${tax.amount} ${ticket?.currency}`} <br />
+                                                            {` : ${ticket?.currency_symbol} ${tax.amount} ${ticket?.currency}`}
                                                         </span>
+                                                        <br />
+                                                        </>
                                                     )
                                                 })}
                                             </>
