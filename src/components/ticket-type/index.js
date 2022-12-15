@@ -70,38 +70,47 @@ const TicketTypeComponent = ({ ticketTypes, isActive, changeForm, reservation, i
                             <span>
                                 {ticket && (
                                     <>
-                                        {ticket.name}{` `}
-                                        ({quantity}):{` `}
+                                        {`${ticket.name} (${quantity}): ${formatCurrency(ticket.cost * quantity, { currency: ticket.currency })} ${ticket.currency}`}                                        
 
                                         {!isActive && reservation?.discount_amount > 0 && (
                                             <>
-                                                <span className={styles.crossOut}>
-                                                    {formatCurrency(ticket.cost * quantity, { currency: ticket.currency })}
-                                                </span>{` `}
+                                                <br />
+                                                <span className={styles.promoCode}>
+                                                    Promo code&nbsp;<abbr title={reservation.promo_code}>{reservation.promo_code}</abbr>&nbsp;applied:
+                                                </span>
                                                 <span className={styles.discount}>
-                                                    {formatCurrency(reservation.raw_amount - reservation.discount_amount, { currency: ticket.currency })}
-                                                </span>{` `}
+                                                    {` - ${ticket?.currency_symbol} ${reservation.discount_amount} ${ticket?.currency}`}
+                                                </span>
                                             </>
                                         )}
 
-                                        {!reservation?.discount_amount && (
-                                            <>
-                                                {formatCurrency(ticket.cost * quantity, { currency: ticket.currency })}{` `}
-                                            </>
-                                        )}
-
-                                        {ticket.currency}
-
-                                        {!isActive && reservation?.discount_amount > 0 && (
+                                        {!isActive && reservation &&(
                                             <span className={styles.promo}>
-                                                Promo code applied
+                                                Subtotal: {`${ticket?.currency_symbol} ${((reservation?.raw_amount_in_cents - reservation?.discount_amount_in_cents)/100).toFixed(2)} ${ticket?.currency}`}
                                             </span>
                                         )}
 
                                         {!isActive && reservation?.taxes_amount > 0 && (
                                             <>
                                                 <br />
-                                                Taxes: {ticket?.currency_symbol}{reservation?.taxes_amount} {ticket?.currency}
+                                                Taxes: 
+                                                <br />
+                                                {reservation?.applied_taxes.map((tax) => {
+                                                    return (
+                                                        <span className={styles.taxes}>
+                                                            <abbr title={tax.name}>
+                                                                {tax.name} 
+                                                            </abbr>
+                                                            {` : ${ticket?.currency_symbol} ${tax.amount} ${ticket?.currency}`} <br />
+                                                        </span>
+                                                    )
+                                                })}
+                                            </>
+                                        )}
+                                        {!isActive && reservation && (
+                                            <>
+                                                <br />
+                                                Total: {`${ticket?.currency_symbol} ${reservation?.amount} ${ticket?.currency}`}
                                             </>
                                         )}
                                     </>

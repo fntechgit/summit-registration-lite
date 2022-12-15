@@ -6,7 +6,17 @@
 }
 
 .summary {
-  text-align: right;
+  text-align: right;  
+}
+
+.promoCode {
+  display: inline-flex;
+  abbr {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    max-width: 10ch;
+  }
 }
 
 .crossOut {
@@ -14,7 +24,17 @@
 }
 
 .discount {
-  color: green;
+  color: red;
+}
+
+.taxes {  
+  display: inline-flex;
+  abbr {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    max-width: 15ch;
+  }
 }
 
 .promo {
