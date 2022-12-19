@@ -92,9 +92,6 @@ const TicketTypeComponent = ({ ticketTypes, isActive, changeForm, reservation, i
 
                                         {!isActive && reservation?.taxes_amount > 0 && (
                                             <>
-                                                <br />
-                                                Taxes: 
-                                                <br />
                                                 {reservation?.applied_taxes.map((tax) => {
                                                     return (
                                                         <>
