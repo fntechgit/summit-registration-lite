@@ -70,7 +70,7 @@ const TicketTypeComponent = ({ ticketTypes, isActive, changeForm, reservation, i
                             <span>
                                 {ticket && (
                                     <>
-                                        {`${ticket.name} (${quantity}): ${formatCurrency(ticket.cost * quantity, { currency: ticket.currency })} ${ticket.currency}`}                                        
+                                        {`${ticket.name} (${quantity}): ${formatCurrency(ticket.cost * quantity, { currency: ticket.currency })} ${ticket.currency}`}
 
                                         {!isActive && reservation?.discount_amount > 0 && (
                                             <>
@@ -79,7 +79,7 @@ const TicketTypeComponent = ({ ticketTypes, isActive, changeForm, reservation, i
                                                     Promo code&nbsp;<abbr title={reservation.promo_code}>{reservation.promo_code}</abbr>&nbsp;applied:
                                                 </span>
                                                 <span className={styles.discount}>
-                                                    {` - ${ticket?.currency_symbol} ${reservation.discount_amount} ${ticket?.currency}`}
+                                                    {` - ${formatCurrency(reservation.discount_amount, { currency: ticket.currency })} ${ticket.currency}`}
                                                 </span>
                                             </>
                                         )}
@@ -99,7 +99,7 @@ const TicketTypeComponent = ({ ticketTypes, isActive, changeForm, reservation, i
                                                             <abbr title={tax.name}>
                                                                 {tax.name} 
                                                             </abbr>
-                                                            {` : ${ticket?.currency_symbol} ${tax.amount} ${ticket?.currency}`}
+                                                            {` : ${formatCurrency(tax.amount, { currency: ticket.currency })} ${ticket.currency}`}
                                                         </span>
                                                         <br />
                                                         </>
@@ -110,7 +110,7 @@ const TicketTypeComponent = ({ ticketTypes, isActive, changeForm, reservation, i
                                         {!isActive && reservation && (
                                             <>
                                                 <br />
-                                                Total: {`${ticket?.currency_symbol} ${reservation?.amount} ${ticket?.currency}`}
+                                                Total: {`${formatCurrency(reservation.amount, { currency: ticket.currency })} ${ticket.currency}`}
                                             </>
                                         )}
                                     </>
