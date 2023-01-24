@@ -21,7 +21,20 @@ import { formatErrorMessage } from '../../helpers';
 
 import styles from "./index.module.scss";
 
-const PersonalInfoComponent = ({ isActive, changeForm, reservation, userProfile, summitId, handleCompanyError, formValues, formErrors, invitation, showMultipleTicketTexts }) => {
+const PersonalInfoComponent = ({ 
+    isActive, 
+    changeForm, 
+    reservation, 
+    userProfile, 
+    summitId, 
+    handleCompanyError, 
+    formValues, 
+    formErrors, 
+    invitation, 
+    showMultipleTicketTexts,
+    allowPromoCodes,
+    companyInputPlaceholder,
+    companyDDLPlaceholder }) => {
     const [personalInfo, setPersonalInfo] = useState(
         {
             firstName: userProfile.given_name || (invitation ? invitation.first_name : ''),
@@ -138,16 +151,21 @@ const PersonalInfoComponent = ({ isActive, changeForm, reservation, userProfile,
                                             onChange={onCompanyChange}
                                             onError={handleCompanyError}
                                             value={personalInfo.company}
+                                            inputPlaceholder={companyInputPlaceholder}
+                                            DDLPlaceholder={companyDDLPlaceholder}
                                         />
                                         {companyError && <div className={styles.fieldError} data-testid="company-error">This field is required.</div>}
                                     </div>
                                 </div>
 
-                                <div className={styles.fieldWrapper}>
-                                    <div className={styles.inputWrapper}>
-                                        <input type="text" placeholder="Promo Code" {...register("promoCode")} />
+                                {allowPromoCodes &&
+                                    <div className={styles.fieldWrapper}>
+                                        <div className={styles.inputWrapper}>
+                                            <input type="text" placeholder="Promo Code" {...register("promoCode")} />
+                                        </div>
                                     </div>
-                                </div>
+                                }
+
                             </form>
 
                             {showMultipleTicketTexts &&

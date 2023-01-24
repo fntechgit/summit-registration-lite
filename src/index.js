@@ -23,7 +23,7 @@ const filterProps = {
     authUser: (provider) => console.log('login with ', provider),
     getPasswordlessCode: (email) => console.log('get code', email),
     loginWithCode: (code) => console.log('login with code', code),
-    getAccessToken: () => '.jARXpQCYIk1ch99cow56mJwiKoOco6wgBGhfpKC5kxaGZw1yZ2P8bnCrMyBUF_4NmPCO7WOIo_pq2QR.lhRA3bN3hN9UgUiWjATg-XEy9Y01TxCCCgPZQfUP9~H8VBr',
+    getAccessToken: () => 'wG4x2-cX.LwlxJQQkeZ6Bfb_wsVL550K5exCfg.XcpQvrAHI2~ezcYa_Xe_koNgg~S8cyy.b78.vCCJH1nH_2Dsrbk_mTW_6GloPJ_iaHy8INMuF77ekjkfmQ7RASIi9',
     closeWidget: () => console.log('close widget'),
     goToExtraQuestions: () => console.log('extra questions required'),
     goToEvent: () => console.log('go to event'),
@@ -52,6 +52,9 @@ const filterProps = {
     },
     noAllowedTicketsMessage: '<span>You already have purchased all available tickets for this event and/or there are no tickets available for you to purchase.</span><br/><span>Visit the my orders / my tickets page to review your existing tickets.</span>',
     ticketTaxesErrorMessage: '<span>There was an error getting the information for tickets. Please try again.</span>',
+    allowPromoCodes: true,
+    companyInputPlaceholder: 'Enter your company',
+    companyDDLPlaceholder: 'Select a company'
 };
 
 // width 780px or 230px
