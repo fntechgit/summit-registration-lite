@@ -168,7 +168,7 @@ const PersonalInfoComponent = ({
 
                             </form>
 
-                            {showMultipleTicketTexts &&
+                            {allowPromoCodes && showMultipleTicketTexts &&
                                 <a className={styles.moreInfo} data-tip data-for="promo-code-info">
                                     <i className="glyphicon glyphicon-info-sign" aria-hidden="true" />{` `}
                                     Have multiple promo codes?
