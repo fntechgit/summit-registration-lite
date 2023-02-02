@@ -81,6 +81,7 @@ const RegistrationLite = (
         passwordlessCodeError,
         loginWithCode,
         goToExtraQuestions,
+        goToMyOrders,
         goToEvent,
         goToRegistration,
         profileData,
@@ -314,7 +315,9 @@ const RegistrationLite = (
                                         onPurchaseComplete={onPurchaseComplete}
                                         supportEmail={supportEmail}
                                         goToEvent={goToEvent}
+                                        goToMyOrders={goToMyOrders}
                                         goToExtraQuestions={goToExtraQuestions}
+                                        ownedTickets={ownedTickets}                                        
                                     />
                                 )}
                             </div>

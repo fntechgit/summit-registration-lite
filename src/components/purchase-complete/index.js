@@ -16,7 +16,15 @@ import styles from "./index.module.scss";
 
 import { epochToMomentTimeZone } from "openstack-uicore-foundation/lib/utils/methods";
 
-const PurchaseComplete = ({ checkout, onPurchaseComplete, goToExtraQuestions, goToEvent, summit, supportEmail = "support@fntech.com" }) => {
+const PurchaseComplete = ({
+    checkout,
+    onPurchaseComplete,
+    goToExtraQuestions,
+    goToEvent,
+    goToMyOrders,
+    summit,
+    ownedTickets,
+    supportEmail = "support@fntech.com" }) => {
 
     useEffect(() => {
         onPurchaseComplete(checkout)
@@ -45,7 +53,7 @@ const PurchaseComplete = ({ checkout, onPurchaseComplete, goToExtraQuestions, go
             <span className={styles.complete}>
                 Your order is complete
             </span>
-            {isActive ?
+            {!isActive ?
                 needExtraQuestions() ?
                     <>
                         <span>
@@ -60,16 +68,34 @@ const PurchaseComplete = ({ checkout, onPurchaseComplete, goToExtraQuestions, go
                 :
                 <>
                     <span>
-                        The event will start on {startDateFormatted.date} at {startDateFormatted.time} {summit.time_zone_label} <br />
-                        This ticket requires additional details.
+                        The event will start on {startDateFormatted.date} at {startDateFormatted.time} {summit.time_zone_label} <br /><br />
+                        {ownedTickets ?
+                            `You may visit the My Orders/Tickets tab in the top right-hand corner of the navigation bar to
+                            assign/reassign tickets or to complete any required ticket details.`
+                            :
+                            `A ticket has been assigned to you. To complete your additional ticket details, please click the "Finish Now" button.`
+                        }
                     </span>
                     <div className={styles.actions}>
-                        <button className={`${styles.button} button`} onClick={() => goToExtraQuestions()}>Finish Now</button>
+                        {ownedTickets ?
+                            <button className={`${styles.button} button`} onClick={() => goToMyOrders()}>View My Orders/Tickets</button>
+                            :
+                            <button className={`${styles.button} button`} onClick={() => goToExtraQuestions()}>Finish Now</button>
+                        }
                     </div>
                 </>
             }
             <span className={styles.footer}>
-                For further assistance, please email <a href={`mailto:${supportEmail}`}>{supportEmail}</a>
+                {ownedTickets ?
+                    <>
+                        For further assistance, please email <a href={`mailto:${supportEmail}`}>{supportEmail}</a>
+                    </>
+                    :
+                    <>
+                        If you wish to transfer your assigned ticket, close this window and visit the "My Orders/Tickets" tab 
+                        in the top navigation bar. For further assistance, please email <a href={`mailto:${supportEmail}`}>{supportEmail}</a>
+                    </>}
+
             </span>
         </div>
     )
