@@ -48,6 +48,8 @@ React component for the summit registration lite widget
 
    **goToEvent**              = method passed that will be called to redirect the user to the current event
 
+   **goToMyOrders**           = method passed that will be called to redirect the user to the my orders page
+
    **getPasswordlessCode**    = method passed that will be called when the user generates a code to login without password
 
    **loginWithCode**          = method passed that will be called when the user tries to login with a code
