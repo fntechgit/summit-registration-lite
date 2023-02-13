@@ -77,14 +77,24 @@ const customErrorHandler = (err, res) => (dispatch, state) => {
 // api/v1/summits/{id}/tax-types
 
 export const getTicketTypesAndTaxes = (summitId) => async (dispatch) => {
+    dispatch(startWidgetLoading());
     return Promise.all([
         dispatch(getTicketTypes(summitId)),
         dispatch(getTaxesTypes(summitId))
-    ]).catch((err) => {
+    ]).then((values) => {
+        dispatch(stopWidgetLoading());
+        return values;
+    }).catch((err) => {
+        dispatch(stopWidgetLoading());
+        console.log(err);
         return Promise.reject(err);
     })
 }
 
+/**
+ * @param summitId
+ * @returns {(function(*, *, {apiBaseUrl: *, getAccessToken: *}): Promise<*|undefined>)|*}
+ */
 const getTicketTypes = (summitId) => async (dispatch, getState, { apiBaseUrl, getAccessToken }) => {
     try {
         const accessToken = await getAccessToken();
@@ -94,48 +104,47 @@ const getTicketTypes = (summitId) => async (dispatch, getState, { apiBaseUrl, ge
             access_token: accessToken
         };
 
-        dispatch(startWidgetLoading());
         return getRequest(
             createAction(REQUESTED_TICKET_TYPES),
             createAction(GET_TICKET_TYPES),
             `${apiBaseUrl}/api/v1/summits/${summitId}/ticket-types/allowed`,
             customErrorHandler
-        )(params)(dispatch).then(() => {
-            dispatch(stopWidgetLoading());
+        )(params)(dispatch).then((res) => {
+            return res;
         }).catch((error) => {
-            dispatch(stopWidgetLoading());
             return Promise.reject(error);
         })
     }
     catch (e) {
-        dispatch(stopWidgetLoading());
+        console.log(e);
         return Promise.reject(e);
     }
 }
 
+/**
+ * @param summitId
+ * @returns {(function(*, *, {apiBaseUrl: *, getAccessToken: *}): Promise<*|undefined>)|*}
+ */
 const getTaxesTypes = (summitId) => async (dispatch, getState, { apiBaseUrl, getAccessToken }) => {
     try {
+
         const accessToken = await getAccessToken();
         let params = {
             access_token: accessToken
         };
-
-        dispatch(startWidgetLoading());
-
         return getRequest(
             null,
             createAction(GET_TAX_TYPES),
             `${apiBaseUrl}/api/v1/summits/${summitId}/tax-types`,
             customErrorHandler
-        )(params)(dispatch).then(() => {
-            dispatch(stopWidgetLoading());
+        )(params)(dispatch).then((res) => {
+          return res;
         }).catch((error) => {
-            dispatch(stopWidgetLoading());
             return Promise.reject(error);
-        });
+        })
     }
     catch (e) {
-        dispatch(stopWidgetLoading());
+        console.log(e);
         return Promise.reject(e);
     }
 }
@@ -355,6 +364,7 @@ const normalizeReservation = (entity) => {
 export const getMyInvitation = (summitId) => async (dispatch, getState, { apiBaseUrl, getAccessToken }) => {
 
     const errorHandler = (err, res) => (dispatch, state) => {
+
         if (res && res.statusCode === 404) {
             // bypass in case that does not exists invitation , fail silently
             return;
@@ -377,16 +387,14 @@ export const getMyInvitation = (summitId) => async (dispatch, getState, { apiBas
             access_token: accessToken
         };
 
-        dispatch(startWidgetLoading());
-
         return getRequest(
             createAction(CLEAR_MY_INVITATION),
             createAction(GET_MY_INVITATION),
             `${apiBaseUrl}/api/v1/summits/${summitId}/registration-invitations/me`,
             errorHandler
-        )(params)(dispatch).then(() => {
-            dispatch(stopWidgetLoading());
-        })
+        )(params)(dispatch).catch((e) => {
+            console.log(e);
+        });
     }
     catch (e) {
         return Promise.reject(e);
