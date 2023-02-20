@@ -16,17 +16,13 @@ import PropTypes from 'prop-types';
 import { getTicketMaxQuantity } from '../../helpers';
 import styles from "./index.module.scss";
 
-const TicketDropdownComponent = ({ selectedTicket, ticketTypes, onTicketSelect }) => {
+const TicketDropdownComponent = ({ selectedTicket, ticketTypes, onTicketSelect, nowUtc }) => {
     const [active, setActive] = useState(false);
 
     const ticketSelect = (ticket) => {
         onTicketSelect(ticket);
         setActive(!active);
     }
-
-    const date = new Date();
-    let now_utc = Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate(),
-        date.getUTCHours(), date.getUTCMinutes(), date.getUTCSeconds()) / 1000;
 
     return (
         <div className={`${styles.outerWrapper}`}>
@@ -55,7 +51,7 @@ const TicketDropdownComponent = ({ selectedTicket, ticketTypes, onTicketSelect }
                         if (
                             (
                                 (t.sales_start_date === null && t.sales_end_date === null) ||
-                                (now_utc >= t.sales_start_date && now_utc <= t.sales_end_date)
+                                (nowUtc >= t.sales_start_date && nowUtc <= t.sales_end_date)
                             )
                         ) {
                             return (

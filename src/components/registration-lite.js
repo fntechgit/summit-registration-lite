@@ -34,9 +34,11 @@ import {
     removeReservedTicket,
     reserveTicket,
     clearWidgetState,
+    updateClock,
 } from '../actions';
 
 import AjaxLoader from "openstack-uicore-foundation/lib/components/ajaxloader";
+import Clock  from "openstack-uicore-foundation/lib/components/clock";
 
 import styles from "../styles/general.module.scss";
 import '../styles/styles.scss';
@@ -106,6 +108,7 @@ const RegistrationLite = (
         allowPromoCodes,
         companyInputPlaceholder,
         companyDDLPlaceholder,
+        nowUtc,
         ...rest
     }) => {
 
@@ -217,6 +220,7 @@ const RegistrationLite = (
             <div className="modal-background"></div>
             <div className={`${styles.modalContent} modal-content`}>
                 <AjaxLoader relative={true} color={'#ffffff'} show={widgetLoading || loading} size={80} />
+                <Clock onTick={(timestamp) => updateClock(timestamp)} timezone={summitData.time_zone_id} />
                 <div className={`${styles.outerWrapper} summit-registration-lite`}>
                     <div className={styles.innerWrapper}>
                         <div className={styles.title}>
@@ -269,6 +273,7 @@ const RegistrationLite = (
                                             isActive={step === 0}
                                             changeForm={ticketForm => setFormValues({ ...formValues, ...ticketForm })}
                                             showMultipleTicketTexts={showMultipleTicketTexts}
+                                            nowUtc={nowUtc}
                                         />
 
                                         <PersonalInfoComponent
@@ -316,7 +321,8 @@ const RegistrationLite = (
                                         goToEvent={goToEvent}
                                         goToMyOrders={goToMyOrders}
                                         goToExtraQuestions={goToExtraQuestions}
-                                        ownedTickets={ownedTickets}                                        
+                                        ownedTickets={ownedTickets}
+                                        nowUtc={nowUtc}
                                     />
                                 )}
                             </div>
@@ -351,7 +357,8 @@ const mapStateToProps = ({ registrationLiteState }) => ({
     passwordlessEmail: registrationLiteState.passwordless.email,
     passwordlessCode: registrationLiteState.passwordless.otp_length,
     passwordlessCodeSent: registrationLiteState.passwordless.code_sent,
-    passwordlessCodeError: registrationLiteState.passwordless.error
+    passwordlessCodeError: registrationLiteState.passwordless.error,
+    nowUtc: registrationLiteState.nowUtc,
 })
 
 RegistrationLite.defaultProps = {
@@ -385,5 +392,6 @@ export default connect(mapStateToProps, {
     goToLogin,
     getMyInvitation,
     clearWidgetState,
+    updateClock,
 })(RegistrationLite)
 

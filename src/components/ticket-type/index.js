@@ -21,7 +21,7 @@ import ReactTooltip from 'react-tooltip';
 import { formatCurrency } from '../../helpers';
 import { getTicketMaxQuantity } from '../../helpers';
 
-const TicketTypeComponent = ({ ticketTypes, isActive, changeForm, reservation, inPersonDisclaimer, showMultipleTicketTexts }) => {
+const TicketTypeComponent = ({ ticketTypes, isActive, changeForm, reservation, inPersonDisclaimer, showMultipleTicketTexts, nowUtc }) => {
     const [ticket, setTicket] = useState(null);
     const [quantity, setQuantity] = useState(1);
 
@@ -97,7 +97,7 @@ const TicketTypeComponent = ({ ticketTypes, isActive, changeForm, reservation, i
                                                         <>
                                                         <span className={styles.taxes}>
                                                             <abbr title={tax.name}>
-                                                                {tax.name} 
+                                                                {tax.name}
                                                             </abbr>
                                                             {` : ${formatCurrency(tax.amount, { currency: ticket.currency })} ${ticket.currency}`}
                                                         </span>
@@ -125,7 +125,11 @@ const TicketTypeComponent = ({ ticketTypes, isActive, changeForm, reservation, i
                         <div ref={ref}>
                             <div className={styles.form}>
                                 <div className={styles.dropdown}>
-                                    <TicketDropdownComponent selectedTicket={ticket} ticketTypes={ticketTypes} onTicketSelect={handleTicketChange} />
+                                    <TicketDropdownComponent selectedTicket={ticket}
+                                                             ticketTypes={ticketTypes}
+                                                             onTicketSelect={handleTicketChange}
+                                                             nowUtc={nowUtc}
+                                    />
                                 </div>
 
                                 {ticket && (
