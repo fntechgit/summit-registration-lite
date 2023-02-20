@@ -83,7 +83,6 @@ const RegistrationLite = (
         goToExtraQuestions,
         goToMyOrders,
         goToEvent,
-        goToRegistration,
         profileData,
         summitData,
         supportEmail,
@@ -370,6 +369,8 @@ RegistrationLite.propTypes = {
     loginInitialEmailInputValue: PropTypes.string,
     showMultipleTicketTexts: PropTypes.bool,
     authErrorCallback : PropTypes.func,
+    goToMyOrders: PropTypes.func.isRequired,
+    goToExtraQuestions: PropTypes.func.isRequired,
 };
 
 export default connect(mapStateToProps, {
