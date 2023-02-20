@@ -21,7 +21,7 @@ import ReactTooltip from 'react-tooltip';
 import { formatCurrency } from '../../helpers';
 import { getTicketMaxQuantity } from '../../helpers';
 
-const TicketTypeComponent = ({ ticketTypes, isActive, changeForm, reservation, inPersonDisclaimer, showMultipleTicketTexts, nowUtc }) => {
+const TicketTypeComponent = ({ ticketTypes, isActive, changeForm, reservation, inPersonDisclaimer, showMultipleTicketTexts }) => {
     const [ticket, setTicket] = useState(null);
     const [quantity, setQuantity] = useState(1);
 
@@ -128,7 +128,6 @@ const TicketTypeComponent = ({ ticketTypes, isActive, changeForm, reservation, i
                                     <TicketDropdownComponent selectedTicket={ticket}
                                                              ticketTypes={ticketTypes}
                                                              onTicketSelect={handleTicketChange}
-                                                             nowUtc={nowUtc}
                                     />
                                 </div>
 

@@ -109,6 +109,7 @@ const RegistrationLite = (
         companyInputPlaceholder,
         companyDDLPlaceholder,
         nowUtc,
+        updateClock,
         ...rest
     }) => {
 
@@ -215,6 +216,9 @@ const RegistrationLite = (
             });
     }
 
+    const allowedTicketTypes  = ticketTypes.filter((tt) => (tt.sales_start_date === null && tt.sales_end_date === null) ||
+        (nowUtc >= tt.sales_start_date && nowUtc <= tt.sales_end_date));
+
     return (
         <div id={`${styles.modal}`} className="modal is-active">
             <div className="modal-background"></div>
@@ -230,7 +234,7 @@ const RegistrationLite = (
 
                         {ticketTaxesError && profileData && <TicketTaxesError ticketTaxesErrorMessage={ticketTaxesErrorMessage} retryTicketTaxes={() => handleGetTicketTypesAndTaxes(summitData?.id)} />}
 
-                        {!ticketTaxesError && profileData && ticketTypes.length === 0 && requestedTicketTypes && <NoAllowedTickets noAllowedTicketsMessage={noAllowedTicketsMessage} />}
+                        {!ticketTaxesError && profileData && allowedTicketTypes.length === 0 && requestedTicketTypes && <NoAllowedTickets noAllowedTicketsMessage={noAllowedTicketsMessage} />}
 
                         {!ticketTaxesError &&
                             <div className={styles.stepsWrapper}>
@@ -259,21 +263,20 @@ const RegistrationLite = (
                                     />
                                 )}
 
-                                {profileData && step !== 3 && ticketTypes.length > 0 && (
+                                {profileData && step !== 3 && allowedTicketTypes.length > 0 && (
                                     <>
                                         {ticketOwned &&
                                             <TicketOwnedComponent ownedTickets={ownedTickets}
-                                                                  ticketTypes={ticketTypes} />}
+                                                                  ticketTypes={allowedTicketTypes} />}
 
                                         <TicketTypeComponent
-                                            ticketTypes={ticketTypes}
+                                            ticketTypes={allowedTicketTypes}
                                             inPersonDisclaimer={inPersonDisclaimer}
                                             taxTypes={taxTypes}
                                             reservation={reservation}
                                             isActive={step === 0}
                                             changeForm={ticketForm => setFormValues({ ...formValues, ...ticketForm })}
                                             showMultipleTicketTexts={showMultipleTicketTexts}
-                                            nowUtc={nowUtc}
                                         />
 
                                         <PersonalInfoComponent
@@ -328,7 +331,7 @@ const RegistrationLite = (
                             </div>
                         }
 
-                        {!ticketTaxesError && profileData && step !== 3 && ticketTypes.length > 0 && (
+                        {!ticketTaxesError && profileData && step !== 3 && allowedTicketTypes.length > 0 && (
                             <ButtonBarComponent
                                 step={step}
                                 inPersonDisclaimer={inPersonDisclaimer}
