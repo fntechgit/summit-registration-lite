@@ -22,6 +22,7 @@ const PurchaseComplete = ({
     goToExtraQuestions,
     goToEvent,
     goToMyOrders,
+    completedExtraQuestions,
     summit,
     ownedTickets,
     nowUtc,
@@ -39,10 +40,6 @@ const PurchaseComplete = ({
         time: epochToMomentTimeZone(summit.start_date, summit.time_zone_id).format('hh:mm A'),
     };
 
-    const needExtraQuestions = () => {
-        return summit.order_extra_questions.some(q => q.mandatory === true) ? true : false;
-    }
-
     return (
         <div className={styles.wrapper}>
             <div className={styles.circle}>
@@ -52,16 +49,25 @@ const PurchaseComplete = ({
                 Your order is complete
             </span>
             {isActive ?
-                needExtraQuestions() ?
+                completedExtraQuestions() ?
                     <>
-                        <span>
-                            This ticket requires additional details. <br />
-                        </span>
-                        <button className={`${styles.button} button`} onClick={() => goToExtraQuestions()}>Finish now</button>
+                        <button className={`${styles.button} button`} onClick={() => goToEvent()}>Access event now</button>
                     </>
                     :
                     <>
-                        <button className={`${styles.button} button`} onClick={() => goToEvent()}>Access event now</button>
+                        <span>
+                            {ownedTickets ?
+                                `You may visit the My Orders/Tickets tab in the top right-hand corner of the navigation bar to
+                                assign/reassign tickets or to complete any required ticket details.`
+                                :
+                                `A ticket has been assigned to you. To complete your additional ticket details, please click the "Finish Now" button.`
+                            }
+                        </span>
+                        {ownedTickets ?
+                            <button className={`${styles.button} button`} onClick={() => goToMyOrders()}>View My Orders/Tickets</button>
+                            :
+                            <button className={`${styles.button} button`} onClick={() => goToExtraQuestions()}>Finish Now</button>
+                        }
                     </>
                 :
                 <>
