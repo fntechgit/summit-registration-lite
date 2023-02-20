@@ -12,7 +12,6 @@
  **/
 
 import React, { useState } from 'react';
-import PropTypes from 'prop-types';
 import { getTicketMaxQuantity } from '../../helpers';
 import styles from "./index.module.scss";
 
@@ -23,10 +22,6 @@ const TicketDropdownComponent = ({ selectedTicket, ticketTypes, onTicketSelect }
         onTicketSelect(ticket);
         setActive(!active);
     }
-
-    const date = new Date();
-    let now_utc = Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate(),
-        date.getUTCHours(), date.getUTCMinutes(), date.getUTCSeconds()) / 1000;
 
     return (
         <div className={`${styles.outerWrapper}`}>
@@ -49,15 +44,10 @@ const TicketDropdownComponent = ({ selectedTicket, ticketTypes, onTicketSelect }
             {active &&
                 <div className={styles.dropdown} data-testid="ticket-list">
                     {ticketTypes.map(t => {
+                        console.log('TicketDropdownComponent::render');
                         const maxQuantity = getTicketMaxQuantity(t);
                         const isTicketSoldOut = maxQuantity < 1;
 
-                        if (
-                            (
-                                (t.sales_start_date === null && t.sales_end_date === null) ||
-                                (now_utc >= t.sales_start_date && now_utc <= t.sales_end_date)
-                            )
-                        ) {
                             return (
                                 <div key={t.id} className={isTicketSoldOut ? styles.soldOut : ''} onClick={() => {
                                     if (isTicketSoldOut) return;
@@ -68,7 +58,7 @@ const TicketDropdownComponent = ({ selectedTicket, ticketTypes, onTicketSelect }
                                     {isTicketSoldOut && <>Sold Out</>}
                                 </div>
                             )
-                        }
+
                     })}
                 </div>
             }

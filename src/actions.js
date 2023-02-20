@@ -43,6 +43,7 @@ export const GO_TO_LOGIN = 'GO_TO_LOGIN';
 export const GET_MY_INVITATION = 'GET_MY_INVITATION';
 export const CLEAR_MY_INVITATION = 'CLEAR_MY_INVITATION';
 export const CLEAR_WIDGET_STATE = 'CLEAR_WIDGET_STATE';
+export const UPDATE_CLOCK = 'UPDATE_CLOCK';
 
 export const startWidgetLoading = createAction(START_WIDGET_LOADING);
 export const stopWidgetLoading = createAction(STOP_WIDGET_LOADING);
@@ -400,3 +401,7 @@ export const getMyInvitation = (summitId) => async (dispatch, getState, { apiBas
         return Promise.reject(e);
     }
 }
+
+export const updateClock = (timestamp) => (dispatch) => {
+    dispatch(createAction(UPDATE_CLOCK)({ timestamp }));
+};
