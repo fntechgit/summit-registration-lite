@@ -110,6 +110,7 @@ const RegistrationLite = (
         companyDDLPlaceholder,
         nowUtc,
         updateClock,
+        completedExtraQuestions,
         ...rest
     }) => {
 
@@ -324,6 +325,7 @@ const RegistrationLite = (
                                         goToEvent={goToEvent}
                                         goToMyOrders={goToMyOrders}
                                         goToExtraQuestions={goToExtraQuestions}
+                                        completedExtraQuestions={completedExtraQuestions}
                                         ownedTickets={ownedTickets}
                                         nowUtc={nowUtc}
                                     />
@@ -381,6 +383,7 @@ RegistrationLite.propTypes = {
     authErrorCallback : PropTypes.func,
     goToMyOrders: PropTypes.func.isRequired,
     goToExtraQuestions: PropTypes.func.isRequired,
+    completedExtraQuestions: PropTypes.func.isRequired
 };
 
 export default connect(mapStateToProps, {

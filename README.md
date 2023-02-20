@@ -40,6 +40,8 @@ React component for the summit registration lite widget
 
    **authUser**               = method passed that will be called on user login. param -> (provider) => console.log('login with', provider)
 
+   **completedExtraQuestions**= method passed that will be called to evaluate if the user extra questions are completed
+
    **getAccessToken**         = method passed that will be called to request the access token
 
    **closeWidget**            = method passed that will be called if the user tries to close the widget
