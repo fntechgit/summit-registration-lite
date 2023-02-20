@@ -24,17 +24,15 @@ const PurchaseComplete = ({
     goToMyOrders,
     summit,
     ownedTickets,
+    nowUtc,
     supportEmail = "support@fntech.com" }) => {
 
     useEffect(() => {
         onPurchaseComplete(checkout)
     }, []);
 
-    const date = new Date();
-    let now_utc = Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate(),
-        date.getUTCHours(), date.getUTCMinutes(), date.getUTCSeconds()) / 1000;
 
-    const isActive = summit.start_date < now_utc && summit.end_date > now_utc;
+    const isActive = summit.start_date <= nowUtc && summit.end_date >= nowUtc;
 
     const startDateFormatted = {
         date: epochToMomentTimeZone(summit.start_date, summit.time_zone_id).format('MMMM D'),
@@ -53,7 +51,7 @@ const PurchaseComplete = ({
             <span className={styles.complete}>
                 Your order is complete
             </span>
-            {!isActive ?
+            {isActive ?
                 needExtraQuestions() ?
                     <>
                         <span>
@@ -92,7 +90,7 @@ const PurchaseComplete = ({
                     </>
                     :
                     <>
-                        If you wish to transfer your assigned ticket, close this window and visit the "My Orders/Tickets" tab 
+                        If you wish to transfer your assigned ticket, close this window and visit the "My Orders/Tickets" tab
                         in the top navigation bar. For further assistance, please email <a href={`mailto:${supportEmail}`}>{supportEmail}</a>
                     </>}
 

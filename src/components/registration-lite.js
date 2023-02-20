@@ -34,9 +34,11 @@ import {
     removeReservedTicket,
     reserveTicket,
     clearWidgetState,
+    updateClock,
 } from '../actions';
 
 import AjaxLoader from "openstack-uicore-foundation/lib/components/ajaxloader";
+import Clock  from "openstack-uicore-foundation/lib/components/clock";
 
 import styles from "../styles/general.module.scss";
 import '../styles/styles.scss';
@@ -106,6 +108,8 @@ const RegistrationLite = (
         allowPromoCodes,
         companyInputPlaceholder,
         companyDDLPlaceholder,
+        nowUtc,
+        updateClock,
         ...rest
     }) => {
 
@@ -212,11 +216,15 @@ const RegistrationLite = (
             });
     }
 
+    const allowedTicketTypes  = ticketTypes.filter((tt) => (tt.sales_start_date === null && tt.sales_end_date === null) ||
+        (nowUtc >= tt.sales_start_date && nowUtc <= tt.sales_end_date));
+
     return (
         <div id={`${styles.modal}`} className="modal is-active">
             <div className="modal-background"></div>
             <div className={`${styles.modalContent} modal-content`}>
                 <AjaxLoader relative={true} color={'#ffffff'} show={widgetLoading || loading} size={80} />
+                <Clock onTick={(timestamp) => updateClock(timestamp)} timezone={summitData.time_zone_id} />
                 <div className={`${styles.outerWrapper} summit-registration-lite`}>
                     <div className={styles.innerWrapper}>
                         <div className={styles.title}>
@@ -226,7 +234,7 @@ const RegistrationLite = (
 
                         {ticketTaxesError && profileData && <TicketTaxesError ticketTaxesErrorMessage={ticketTaxesErrorMessage} retryTicketTaxes={() => handleGetTicketTypesAndTaxes(summitData?.id)} />}
 
-                        {!ticketTaxesError && profileData && ticketTypes.length === 0 && requestedTicketTypes && <NoAllowedTickets noAllowedTicketsMessage={noAllowedTicketsMessage} />}
+                        {!ticketTaxesError && profileData && allowedTicketTypes.length === 0 && requestedTicketTypes && <NoAllowedTickets noAllowedTicketsMessage={noAllowedTicketsMessage} />}
 
                         {!ticketTaxesError &&
                             <div className={styles.stepsWrapper}>
@@ -255,14 +263,14 @@ const RegistrationLite = (
                                     />
                                 )}
 
-                                {profileData && step !== 3 && ticketTypes.length > 0 && (
+                                {profileData && step !== 3 && allowedTicketTypes.length > 0 && (
                                     <>
                                         {ticketOwned &&
                                             <TicketOwnedComponent ownedTickets={ownedTickets}
-                                                                  ticketTypes={ticketTypes} />}
+                                                                  ticketTypes={allowedTicketTypes} />}
 
                                         <TicketTypeComponent
-                                            ticketTypes={ticketTypes}
+                                            ticketTypes={allowedTicketTypes}
                                             inPersonDisclaimer={inPersonDisclaimer}
                                             taxTypes={taxTypes}
                                             reservation={reservation}
@@ -316,13 +324,14 @@ const RegistrationLite = (
                                         goToEvent={goToEvent}
                                         goToMyOrders={goToMyOrders}
                                         goToExtraQuestions={goToExtraQuestions}
-                                        ownedTickets={ownedTickets}                                        
+                                        ownedTickets={ownedTickets}
+                                        nowUtc={nowUtc}
                                     />
                                 )}
                             </div>
                         }
 
-                        {!ticketTaxesError && profileData && step !== 3 && ticketTypes.length > 0 && (
+                        {!ticketTaxesError && profileData && step !== 3 && allowedTicketTypes.length > 0 && (
                             <ButtonBarComponent
                                 step={step}
                                 inPersonDisclaimer={inPersonDisclaimer}
@@ -351,7 +360,8 @@ const mapStateToProps = ({ registrationLiteState }) => ({
     passwordlessEmail: registrationLiteState.passwordless.email,
     passwordlessCode: registrationLiteState.passwordless.otp_length,
     passwordlessCodeSent: registrationLiteState.passwordless.code_sent,
-    passwordlessCodeError: registrationLiteState.passwordless.error
+    passwordlessCodeError: registrationLiteState.passwordless.error,
+    nowUtc: registrationLiteState.nowUtc,
 })
 
 RegistrationLite.defaultProps = {
@@ -385,5 +395,6 @@ export default connect(mapStateToProps, {
     goToLogin,
     getMyInvitation,
     clearWidgetState,
+    updateClock,
 })(RegistrationLite)
 
