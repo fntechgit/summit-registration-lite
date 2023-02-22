@@ -319,14 +319,14 @@ const RegistrationLite = (
                                 {profileData && step === 3 && (
                                     <PurchaseComplete
                                         checkout={checkout}
+                                        currentUserEmail={profileData.email}
                                         summit={summitData}
                                         onPurchaseComplete={onPurchaseComplete}
                                         supportEmail={supportEmail}
                                         goToEvent={goToEvent}
                                         goToMyOrders={goToMyOrders}
                                         goToExtraQuestions={goToExtraQuestions}
-                                        completedExtraQuestions={completedExtraQuestions}
-                                        ownedTickets={ownedTickets}
+                                        completedExtraQuestions={completedExtraQuestions}                                        
                                         nowUtc={nowUtc}
                                     />
                                 )}
