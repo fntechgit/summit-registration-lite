@@ -83,12 +83,11 @@ PasswordlessLoginComponent.propTypes = {
     email: PropTypes.string.isRequired, 
     codeLength: PropTypes.number.isRequired, 
     passwordlessLogin: PropTypes.func.isRequired, 
-    loginWithCode: PropTypes.func.isRequired,
+    loginWithCode: PropTypes.func,
     codeError: PropTypes.bool, 
     goToLogin: PropTypes.func.isRequired, 
     getLoginCode: PropTypes.func.isRequired, 
-    getPasswordlessCode: PropTypes.func.isRequired
+    getPasswordlessCode: PropTypes.func
 }
 
 export default PasswordlessLoginComponent;
-

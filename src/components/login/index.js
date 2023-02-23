@@ -112,7 +112,7 @@ LoginComponent.propTypes = {
     login: PropTypes.func.isRequired,
     allowsNativeAuth: PropTypes.bool,
     allowsOtpAuthlogin: PropTypes.bool,
-    getLoginCode: PropTypes.func,
+    getLoginCode: PropTypes.func.isRequired,
     getPasswordlessCode: PropTypes.func,
     initialEmailValue: PropTypes.string
 }
