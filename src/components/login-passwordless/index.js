@@ -79,6 +79,16 @@ const PasswordlessLoginComponent = ({ email, codeLength, passwordlessLogin, logi
     );
 }
 
+PasswordlessLoginComponent.propTypes = {
+    email: PropTypes.string.isRequired, 
+    codeLength: PropTypes.number.isRequired, 
+    passwordlessLogin: PropTypes.func.isRequired, 
+    loginWithCode: PropTypes.func.isRequired,
+    codeError: PropTypes.bool, 
+    goToLogin: PropTypes.func.isRequired, 
+    getLoginCode: PropTypes.func.isRequired, 
+    getPasswordlessCode: PropTypes.func.isRequired
+}
 
-export default PasswordlessLoginComponent
+export default PasswordlessLoginComponent;
 

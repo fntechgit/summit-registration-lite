@@ -12,10 +12,18 @@
  **/
 
 import React, { useState } from 'react';
+import PropTypes from 'prop-types';
 
 import styles from "./index.module.scss";
 
-const LoginComponent = ({ options, login, allowsNativeAuth, allowsOtpAuthlogin, getLoginCode, getPasswordlessCode, initialEmailValue = '' }) => {
+const LoginComponent = ({ 
+    loginOptions, 
+    login, 
+    allowsNativeAuth, 
+    allowsOtpAuthlogin, 
+    getLoginCode,
+    getPasswordlessCode,
+    initialEmailValue }) => {
 
     const [email, setEmail] = useState(initialEmailValue);
     const [emailError, setEmailError] = useState();
@@ -29,7 +37,7 @@ const LoginComponent = ({ options, login, allowsNativeAuth, allowsOtpAuthlogin, 
         let isValid = isValidEmail(email);
         setEmailError(!isValid);
         if (isValid) {
-            getLoginCode(email, getPasswordlessCode)
+            getLoginCode(email, getPasswordlessCode);
         }
     }
 
@@ -49,7 +57,7 @@ const LoginComponent = ({ options, login, allowsNativeAuth, allowsOtpAuthlogin, 
                         {emailError && <span data-testid="email-error">Please enter a valid email address</span>}
                     </div>
                     <span>Or you may login with one of the following:</span>
-                    {options.map((o, index) => {
+                    {loginOptions.map((o, index) => {
                         return (
                             o.provider_param ?
                                 <div className={`${styles.button}`} key={`provider-${o.provider_param}`} data-testid="login-button"
@@ -97,6 +105,22 @@ const LoginComponent = ({ options, login, allowsNativeAuth, allowsOtpAuthlogin, 
             </>
         </div>
     );
+}
+
+LoginComponent.propTypes = {
+    loginOptions: PropTypes.array.isRequired,
+    login: PropTypes.func.isRequired,
+    allowsNativeAuth: PropTypes.bool,
+    allowsOtpAuthlogin: PropTypes.bool,
+    getLoginCode: PropTypes.func,
+    getPasswordlessCode: PropTypes.func,
+    initialEmailValue: PropTypes.string
+}
+
+LoginComponent.defaultProps = {
+    allowsNativeAuth: true,
+    allowsOtpAuthlogin: false,
+    initialEmailValue: ''
 }
 
 
