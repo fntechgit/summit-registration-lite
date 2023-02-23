@@ -16,8 +16,6 @@ import { Provider } from "react-redux";
 import { getStore, getPersistor } from "./store";
 import { PersistGate } from "redux-persist/integration/react";
 import RegistrationLite from "./components/registration-lite";
-import LoginComponent from './components/login';
-import PasswordlessLoginComponent from './components/login-passwordless';
 
 class RegistrationLiteWidget extends React.PureComponent {
 
@@ -37,6 +35,7 @@ class RegistrationLiteWidget extends React.PureComponent {
     }
 }
 
-export { LoginComponent, PasswordlessLoginComponent };
+export {default as LoginComponent} from './components/login';
+export {default as PasswordlessLoginComponent} from './components/login-passwordless';
 
 export default RegistrationLiteWidget;
