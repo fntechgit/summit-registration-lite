@@ -34,9 +34,12 @@ import {
     removeReservedTicket,
     reserveTicket,
     clearWidgetState,
+    updateClock,
+    loadProfileData,
 } from '../actions';
 
 import AjaxLoader from "openstack-uicore-foundation/lib/components/ajaxloader";
+import Clock  from "openstack-uicore-foundation/lib/components/clock";
 
 import styles from "../styles/general.module.scss";
 import '../styles/styles.scss';
@@ -81,8 +84,8 @@ const RegistrationLite = (
         passwordlessCodeError,
         loginWithCode,
         goToExtraQuestions,
+        goToMyOrders,
         goToEvent,
-        goToRegistration,
         profileData,
         summitData,
         supportEmail,
@@ -106,6 +109,10 @@ const RegistrationLite = (
         allowPromoCodes,
         companyInputPlaceholder,
         companyDDLPlaceholder,
+        nowUtc,
+        updateClock,
+        completedExtraQuestions,
+        loadProfileData,
         ...rest
     }) => {
 
@@ -130,11 +137,17 @@ const RegistrationLite = (
     const { publicKey, provider } = getCurrentProvider(summitData);
 
     useEffect(() => {
+        if(profileData)
+            loadProfileData(profileData);
+    }, [profileData])
+
+    // just initial load ( once )
+    useEffect(() => {
         loadSession({ ...rest, summitData, profileData });
         if (!profileData) {
             changeStep(0);
         }
-    }, [profileData])
+    }, [])
 
     useEffect(() => {
         if (summitData && profileData) {
@@ -192,7 +205,9 @@ const RegistrationLite = (
         // Reset the step when closed to avoid unexpected behavior from `useEffect`s w/in other steps.
         // (i.e., recalling `onPurchaseComplete` after a user completes one order, closes the window, and then reopens the registration widget)
         changeStep(0);
-        rest.closeWidget();
+        clearWidgetState();
+        if(rest.closeWidget)
+            rest.closeWidget();
     };
 
     const handleGetTicketTypesAndTaxes = (summitId) => {
@@ -212,11 +227,15 @@ const RegistrationLite = (
             });
     }
 
+    const allowedTicketTypes  = ticketTypes.filter((tt) => (tt.sales_start_date === null && tt.sales_end_date === null) ||
+        (nowUtc >= tt.sales_start_date && nowUtc <= tt.sales_end_date));
+
     return (
         <div id={`${styles.modal}`} className="modal is-active">
             <div className="modal-background"></div>
             <div className={`${styles.modalContent} modal-content`}>
                 <AjaxLoader relative={true} color={'#ffffff'} show={widgetLoading || loading} size={80} />
+                <Clock onTick={(timestamp) => updateClock(timestamp)} timezone={summitData.time_zone_id} />
                 <div className={`${styles.outerWrapper} summit-registration-lite`}>
                     <div className={styles.innerWrapper}>
                         <div className={styles.title}>
@@ -226,7 +245,7 @@ const RegistrationLite = (
 
                         {ticketTaxesError && profileData && <TicketTaxesError ticketTaxesErrorMessage={ticketTaxesErrorMessage} retryTicketTaxes={() => handleGetTicketTypesAndTaxes(summitData?.id)} />}
 
-                        {!ticketTaxesError && profileData && ticketTypes.length === 0 && requestedTicketTypes && <NoAllowedTickets noAllowedTicketsMessage={noAllowedTicketsMessage} />}
+                        {!ticketTaxesError && profileData && allowedTicketTypes.length === 0 && requestedTicketTypes && <NoAllowedTickets noAllowedTicketsMessage={noAllowedTicketsMessage} />}
 
                         {!ticketTaxesError &&
                             <div className={styles.stepsWrapper}>
@@ -255,14 +274,14 @@ const RegistrationLite = (
                                     />
                                 )}
 
-                                {profileData && step !== 3 && ticketTypes.length > 0 && (
+                                {profileData && step !== 3 && allowedTicketTypes.length > 0 && (
                                     <>
                                         {ticketOwned &&
                                             <TicketOwnedComponent ownedTickets={ownedTickets}
-                                                                  ticketTypes={ticketTypes} />}
+                                                                  ticketTypes={allowedTicketTypes} />}
 
                                         <TicketTypeComponent
-                                            ticketTypes={ticketTypes}
+                                            ticketTypes={allowedTicketTypes}
                                             inPersonDisclaimer={inPersonDisclaimer}
                                             taxTypes={taxTypes}
                                             reservation={reservation}
@@ -310,17 +329,22 @@ const RegistrationLite = (
                                 {profileData && step === 3 && (
                                     <PurchaseComplete
                                         checkout={checkout}
+                                        user={profileData}
                                         summit={summitData}
                                         onPurchaseComplete={onPurchaseComplete}
                                         supportEmail={supportEmail}
                                         goToEvent={goToEvent}
+                                        goToMyOrders={goToMyOrders}
                                         goToExtraQuestions={goToExtraQuestions}
+                                        completedExtraQuestions={completedExtraQuestions}
+                                        nowUtc={nowUtc}
+                                        clearWidgetState={clearWidgetState}
                                     />
                                 )}
                             </div>
                         }
 
-                        {!ticketTaxesError && profileData && step !== 3 && ticketTypes.length > 0 && (
+                        {!ticketTaxesError && profileData && step !== 3 && allowedTicketTypes.length > 0 && (
                             <ButtonBarComponent
                                 step={step}
                                 inPersonDisclaimer={inPersonDisclaimer}
@@ -349,7 +373,8 @@ const mapStateToProps = ({ registrationLiteState }) => ({
     passwordlessEmail: registrationLiteState.passwordless.email,
     passwordlessCode: registrationLiteState.passwordless.otp_length,
     passwordlessCodeSent: registrationLiteState.passwordless.code_sent,
-    passwordlessCodeError: registrationLiteState.passwordless.error
+    passwordlessCodeError: registrationLiteState.passwordless.error,
+    nowUtc: registrationLiteState.nowUtc,
 })
 
 RegistrationLite.defaultProps = {
@@ -367,6 +392,9 @@ RegistrationLite.propTypes = {
     loginInitialEmailInputValue: PropTypes.string,
     showMultipleTicketTexts: PropTypes.bool,
     authErrorCallback : PropTypes.func,
+    goToMyOrders: PropTypes.func.isRequired,
+    goToExtraQuestions: PropTypes.func.isRequired,
+    completedExtraQuestions: PropTypes.func.isRequired
 };
 
 export default connect(mapStateToProps, {
@@ -381,4 +409,6 @@ export default connect(mapStateToProps, {
     goToLogin,
     getMyInvitation,
     clearWidgetState,
+    updateClock,
+    loadProfileData,
 })(RegistrationLite)

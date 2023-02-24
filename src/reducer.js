@@ -31,9 +31,12 @@ import {
     CLEAR_MY_INVITATION,
     CLEAR_WIDGET_STATE,
     REQUESTED_TICKET_TYPES,
+    UPDATE_CLOCK,
+    LOAD_PROFILE_DATA,
 } from './actions';
 
 import { LOGOUT_USER } from 'openstack-uicore-foundation/lib/security/actions';
+const localNowUtc = Date.now();
 
 const DEFAULT_STATE = {
     reservation: null,
@@ -57,7 +60,8 @@ const DEFAULT_STATE = {
         summitId: null,
         marketingData: null,
         userProfile: null,
-    }
+    },
+    nowUtc: localNowUtc,
 };
 
 const RegistrationLiteReducer = (state = DEFAULT_STATE, action) => {
@@ -103,7 +107,15 @@ const RegistrationLiteReducer = (state = DEFAULT_STATE, action) => {
                     apiBaseUrl: apiBaseUrl,
                 }
             };
-
+        case LOAD_PROFILE_DATA:{
+            return {
+                ...state,
+                settings: {
+                    ...state.settings,
+                    userProfile: payload,
+                }
+            };
+        }
         case CHANGE_STEP: {
             return { ...state, step: payload }
         }
@@ -143,6 +155,10 @@ const RegistrationLiteReducer = (state = DEFAULT_STATE, action) => {
         }
         case CLEAR_MY_INVITATION:{
             return {...state, invitation: null};
+        }
+        case UPDATE_CLOCK: {
+            const { timestamp } = payload;
+            return { ...state, nowUtc: timestamp };
         }
         default: {
             return state;

@@ -23,21 +23,21 @@ const filterProps = {
     authUser: (provider) => console.log('login with ', provider),
     getPasswordlessCode: (email) => console.log('get code', email),
     loginWithCode: (code) => console.log('login with code', code),
-    getAccessToken: () => 'mrslu7P.UX7yzXptbBYCXcMcLAKkJ0DU~GFE-s3IgPoAks0kkij-gW4jQZFIH_rjTcvL3tO-~QZoJP~o65XjoXrhgOaVRyX9duwSNaID.oGVhZUzFOyT-.yY2j69A0K-',
+    getAccessToken: () => 'IrL~OGqyjat9GD4Sx54lBVL.M6bM6pwv1No.daLasWXaxicaYO-9F6gkaErS5RsVEgRnqKYCXDr_9TbjzYTrgSmYgCGU4_nvTP06PfSLVtAsh.mX~p0.Q.DgVd3mfWVV',
     closeWidget: () => console.log('close widget'),
     goToExtraQuestions: () => console.log('extra questions required'),
-    goToEvent: () => console.log('go to event'),
-    goToRegistration: () => console.log('go to registration page'),
+    goToMyOrders: () => console.log('go to my orders'),
+    goToEvent: () => console.log('go to event'),    
     onPurchaseComplete: (order) => console.log('purchase complete', order),
     loading: false,
     apiBaseUrl: 'https://api.dev.fnopen.com',
     summitData: SummitData.summit,
     profileData: ProfileData,
-    ticketOwned: true,
-    ownedTickets: [
-        {type_id: 77, qty: 7},
-        {type_id: 78, qty: 61},
-    ],
+    ticketOwned: false,
+    // ownedTickets: [
+    //     {type_id: 77, qty: 7},
+    //     {type_id: 78, qty: 61},
+    // ],
     marketingData: MarketingData.colors,
     supportEmail: 'support@fntech.com',
     allowsNativeAuth: true,
@@ -58,7 +58,8 @@ const filterProps = {
     ticketTaxesErrorMessage: '<span>There was an error getting the information for tickets. Please try again.</span>',
     allowPromoCodes: true,
     companyInputPlaceholder: 'Enter your company',
-    companyDDLPlaceholder: 'Select a company'
+    companyDDLPlaceholder: 'Select a company',
+    completedExtraQuestions: () => console.log('evalulate user extra questions...')
 };
 
 // width 780px or 230px

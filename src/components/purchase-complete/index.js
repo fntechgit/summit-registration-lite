@@ -11,67 +11,128 @@
  * limitations under the License.
  **/
 
-import React, { useEffect } from 'react';
-import styles from "./index.module.scss";
+import React, { useEffect, useMemo } from 'react';
+import styles from './index.module.scss';
 
-import { epochToMomentTimeZone } from "openstack-uicore-foundation/lib/utils/methods";
+import { epochToMomentTimeZone } from 'openstack-uicore-foundation/lib/utils/methods';
+import { clearWidgetState } from '../../actions';
 
-const PurchaseComplete = ({ checkout, onPurchaseComplete, goToExtraQuestions, goToEvent, summit, supportEmail = "support@fntech.com" }) => {
+const PurchaseComplete = ({
+                              checkout,
+                              user,
+                              onPurchaseComplete,
+                              goToExtraQuestions,
+                              goToEvent,
+                              goToMyOrders,
+                              completedExtraQuestions,
+                              summit,
+                              nowUtc,
+                              clearWidgetState,
+                              supportEmail = 'support@fntech.com'
+                          }) => {
 
     useEffect(() => {
-        onPurchaseComplete(checkout)
+        onPurchaseComplete(checkout);
     }, []);
 
-    const date = new Date();
-    let now_utc = Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate(),
-        date.getUTCHours(), date.getUTCMinutes(), date.getUTCSeconds()) / 1000;
-
-    const isActive = summit.start_date < now_utc && summit.end_date > now_utc;
+    const isActive = useMemo(() => summit.start_date <= nowUtc && summit.end_date >= nowUtc, [summit]);
+    const userFirstTicket = useMemo(() => checkout?.tickets.some(t => t?.owner?.email == user?.email), [user]);
+    const requireExtraQuestions = useMemo(() => completedExtraQuestions(checkout), [user]);
 
     const startDateFormatted = {
         date: epochToMomentTimeZone(summit.start_date, summit.time_zone_id).format('MMMM D'),
-        time: epochToMomentTimeZone(summit.start_date, summit.time_zone_id).format('hh:mm A'),
+        time: epochToMomentTimeZone(summit.start_date, summit.time_zone_id).format('hh:mm A')
     };
 
-    const needExtraQuestions = () => {
-        return summit.order_extra_questions.some(q => q.mandatory === true) ? true : false;
-    }
+    if (!checkout) return null;
 
     return (
         <div className={styles.wrapper}>
             <div className={styles.circle}>
-                <i className="fa fa-ticket"></i>
+                <i className='fa fa-ticket'></i>
             </div>
             <span className={styles.complete}>
                 Your order is complete
             </span>
             {isActive ?
-                needExtraQuestions() ?
-                    <>
-                        <span>
-                            This ticket requires additional details. <br />
-                        </span>
-                        <button className={`${styles.button} button`} onClick={() => goToExtraQuestions()}>Finish now</button>
-                    </>
+                userFirstTicket ?
+                    requireExtraQuestions ?
+                        <>
+                            <span>
+                                A ticket has been assigned to you. To complete your additional ticket details, please click the "Finish Now" button.
+                            </span>
+                            <button className={`${styles.button} button`} onClick={() => {
+                                clearWidgetState();
+                                goToExtraQuestions();
+                            }}>Finish
+                                Now
+                            </button>
+                        </>
+                        :
+                        <>
+                            <button className={`${styles.button} button`} onClick={() => {
+                                clearWidgetState();
+                                goToEvent();
+                            }}>Access event now
+                            </button>
+                        </>
                     :
                     <>
-                        <button className={`${styles.button} button`} onClick={() => goToEvent()}>Access event now</button>
+                        <span>
+                            You may visit the My Orders/Tickets tab in the top right-hand corner of the navigation
+                            bar to assign/reassign tickets or to complete any required ticket details.
+                        </span>
+                        <button className={`${styles.button} button`} onClick={() => {
+                            clearWidgetState();
+                            goToMyOrders();
+                        }}>View My
+                            Orders/Tickets
+                        </button>
                     </>
                 :
                 <>
                     <span>
-                        The event will start on {startDateFormatted.date} at {startDateFormatted.time} {summit.time_zone_label} <br />
-                        This ticket requires additional details.
+                        The event will start on {startDateFormatted.date} at {startDateFormatted.time} {summit.time_zone_label}
+                        <br /><br />
+                        {userFirstTicket ?
+                            `A ticket has been assigned to you. To complete your additional ticket details, please click the "Finish Now" button.`
+                            :
+                            `You may visit the My Orders/Tickets tab in the top right-hand corner of the navigation bar to
+                            assign/reassign tickets or to complete any required ticket details.`
+                        }
                     </span>
                     <div className={styles.actions}>
-                        <button className={`${styles.button} button`} onClick={() => goToExtraQuestions()}>Finish Now</button>
+                        {userFirstTicket ?
+                            <button className={`${styles.button} button`} onClick={() => {
+                                clearWidgetState();
+                                goToExtraQuestions();
+                            }}>Finish
+                                Now</button>
+                            :
+                            <button className={`${styles.button} button`} onClick={() => {
+                                clearWidgetState();
+                                goToMyOrders();
+                            }}>View My
+                                Orders/Tickets</button>
+                        }
                     </div>
                 </>
             }
             <span className={styles.footer}>
-                For further assistance, please email <a href={`mailto:${supportEmail}`}>{supportEmail}</a>
+                {userFirstTicket ?
+                    <>
+                        If you wish to transfer your assigned ticket, close this window and visit the "My
+                        Orders/Tickets" tab
+                        in the top navigation bar. For further assistance, please email <a
+                        href={`mailto:${supportEmail}`}>{supportEmail}</a>
+                    </>
+                    :
+                    <>
+                        For further assistance, please email <a href={`mailto:${supportEmail}`}>{supportEmail}</a>
+                    </>
+                }
             </span>
         </div>
-    )
-}
+    );
+};
 export default PurchaseComplete;
