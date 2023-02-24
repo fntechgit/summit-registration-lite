@@ -6,15 +6,19 @@ const { CleanWebpackPlugin }    = require('clean-webpack-plugin');
 const MiniCssExtractPlugin      = require("mini-css-extract-plugin");
 
 module.exports = merge(common, {
-    entry: './src/summit-registration-lite.js',
+    entry: {
+        'components/login' : './src/components/login',
+        'components/login-passwordless' : './src/components/login-passwordless',
+        'index': './src/summit-registration-lite.js',
+    },
     plugins: [
         new CleanWebpackPlugin(),
         new MiniCssExtractPlugin({
-            filename: './index.css',
+            filename: './[name].css',
         }),
     ],
     output: {
-        filename: 'index.js',
+        filename: '[name].js',
         path: path.resolve(__dirname, 'dist'),
         library: 'summit-registration-lite',
         libraryTarget: 'umd',
@@ -23,7 +27,7 @@ module.exports = merge(common, {
         globalObject: 'this'
     },
     mode: 'production',
-    //devtool: 'source-map',
+    // devtool: 'source-map',
     optimization: {
     //     minimizer: [
     //         new TerserJSPlugin({sourceMap: true, parallel: true}),

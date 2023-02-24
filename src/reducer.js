@@ -32,6 +32,7 @@ import {
     CLEAR_WIDGET_STATE,
     REQUESTED_TICKET_TYPES,
     UPDATE_CLOCK,
+    LOAD_PROFILE_DATA,
 } from './actions';
 
 import { LOGOUT_USER } from 'openstack-uicore-foundation/lib/security/actions';
@@ -106,7 +107,15 @@ const RegistrationLiteReducer = (state = DEFAULT_STATE, action) => {
                     apiBaseUrl: apiBaseUrl,
                 }
             };
-
+        case LOAD_PROFILE_DATA:{
+            return {
+                ...state,
+                settings: {
+                    ...state.settings,
+                    userProfile: payload,
+                }
+            };
+        }
         case CHANGE_STEP: {
             return { ...state, step: payload }
         }

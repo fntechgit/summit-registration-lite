@@ -44,6 +44,7 @@ export const GET_MY_INVITATION = 'GET_MY_INVITATION';
 export const CLEAR_MY_INVITATION = 'CLEAR_MY_INVITATION';
 export const CLEAR_WIDGET_STATE = 'CLEAR_WIDGET_STATE';
 export const UPDATE_CLOCK = 'UPDATE_CLOCK';
+export const LOAD_PROFILE_DATA = 'LOAD_PROFILE_DATA';
 
 export const startWidgetLoading = createAction(START_WIDGET_LOADING);
 export const stopWidgetLoading = createAction(STOP_WIDGET_LOADING);
@@ -51,6 +52,10 @@ export const stopWidgetLoading = createAction(STOP_WIDGET_LOADING);
 export const loadSession = (settings) => (dispatch) => {
     dispatch(createAction(LOAD_INITIAL_VARS)(settings));
 };
+
+export const loadProfileData = (profileData) => (dispatch) => {
+    dispatch(createAction(LOAD_PROFILE_DATA)(profileData))
+}
 
 export const clearWidgetState = () => (dispatch) => {
     dispatch(createAction(CLEAR_WIDGET_STATE)({}));
