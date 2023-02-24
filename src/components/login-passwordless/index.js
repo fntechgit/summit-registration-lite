@@ -37,6 +37,11 @@ const PasswordlessLoginComponent = ({ email, codeLength, passwordlessLogin, logi
         getLoginCode(email, getPasswordlessCode);
     }
 
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        tryPasswordlessLogin(otpCode);
+    };
+
     return (
         <div className={`${styles.passwordlessWrapper} step-wrapper`}>
             <>
@@ -51,15 +56,22 @@ const PasswordlessLoginComponent = ({ email, codeLength, passwordlessLogin, logi
                         </span>
                     </span>
                     <div className={styles.codeInput}>
-                        <OtpInput
-                            value={otpCode}
-                            onChange={(code) => setOtpCode(code)}
-                            numInputs={codeLength}
-                            shouldAutoFocus={true}
-                            hasErrored={otpError || codeError}
-                            errorStyle={{ border: '1px solid #e5424d' }}
-                            data-testid="otp-input"
-                        />
+                        <form onSubmit={handleSubmit}>
+                            <OtpInput
+                                value={otpCode}
+                                onChange={(code) => setOtpCode(code)}
+                                numInputs={codeLength}
+                                shouldAutoFocus={true}
+                                hasErrored={otpError || codeError}
+                                errorStyle={{ border: '1px solid #e5424d' }}
+                                data-testid="otp-input"
+                            />
+                            {/*
+                                this is to simulate the on key press submit (enter)
+                                @see https://github.com/devfolioco/react-otp-input/issues/98
+                            */}
+                            <button style={{display:'none'}} type='submit' />
+                        </form>
                     </div>
                     {codeError && (
                         <span className={styles.error} data-testid="error">
@@ -80,13 +92,13 @@ const PasswordlessLoginComponent = ({ email, codeLength, passwordlessLogin, logi
 }
 
 PasswordlessLoginComponent.propTypes = {
-    email: PropTypes.string.isRequired, 
-    codeLength: PropTypes.number.isRequired, 
-    passwordlessLogin: PropTypes.func.isRequired, 
+    email: PropTypes.string.isRequired,
+    codeLength: PropTypes.number.isRequired,
+    passwordlessLogin: PropTypes.func.isRequired,
     loginWithCode: PropTypes.func,
-    codeError: PropTypes.bool, 
-    goToLogin: PropTypes.func.isRequired, 
-    getLoginCode: PropTypes.func.isRequired, 
+    codeError: PropTypes.bool,
+    goToLogin: PropTypes.func.isRequired,
+    getLoginCode: PropTypes.func.isRequired,
     getPasswordlessCode: PropTypes.func
 }
 

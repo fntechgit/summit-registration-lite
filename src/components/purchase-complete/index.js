@@ -15,7 +15,6 @@ import React, { useEffect, useMemo } from 'react';
 import styles from './index.module.scss';
 
 import { epochToMomentTimeZone } from 'openstack-uicore-foundation/lib/utils/methods';
-import { clearWidgetState } from '../../actions';
 
 const PurchaseComplete = ({
                               checkout,
@@ -28,6 +27,7 @@ const PurchaseComplete = ({
                               summit,
                               nowUtc,
                               clearWidgetState,
+                              closeWidget,
                               supportEmail = 'support@fntech.com'
                           }) => {
 
@@ -63,6 +63,8 @@ const PurchaseComplete = ({
                             </span>
                             <button className={`${styles.button} button`} onClick={() => {
                                 clearWidgetState();
+                                if(closeWidget)
+                                    closeWidget();
                                 goToExtraQuestions();
                             }}>Finish
                                 Now
@@ -72,6 +74,8 @@ const PurchaseComplete = ({
                         <>
                             <button className={`${styles.button} button`} onClick={() => {
                                 clearWidgetState();
+                                if(closeWidget)
+                                    closeWidget();
                                 goToEvent();
                             }}>Access event now
                             </button>
@@ -84,6 +88,8 @@ const PurchaseComplete = ({
                         </span>
                         <button className={`${styles.button} button`} onClick={() => {
                             clearWidgetState();
+                            if(closeWidget)
+                                closeWidget();
                             goToMyOrders();
                         }}>View My
                             Orders/Tickets
@@ -105,12 +111,16 @@ const PurchaseComplete = ({
                         {userFirstTicket ?
                             <button className={`${styles.button} button`} onClick={() => {
                                 clearWidgetState();
+                                if(closeWidget)
+                                    closeWidget();
                                 goToExtraQuestions();
                             }}>Finish
                                 Now</button>
                             :
                             <button className={`${styles.button} button`} onClick={() => {
                                 clearWidgetState();
+                                if(closeWidget)
+                                    closeWidget();
                                 goToMyOrders();
                             }}>View My
                                 Orders/Tickets</button>

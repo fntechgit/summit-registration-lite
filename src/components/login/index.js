@@ -23,7 +23,8 @@ const LoginComponent = ({
     allowsOtpAuthlogin,
     getLoginCode,
     getPasswordlessCode,
-    initialEmailValue }) => {
+    initialEmailValue,
+    title }) => {
 
     const [email, setEmail] = useState(initialEmailValue);
     const [emailError, setEmailError] = useState();
@@ -46,7 +47,7 @@ const LoginComponent = ({
             <>
                 <div className={`${styles.innerWrapper}`}>
                     <div className={styles.loginCode}>
-                        Enter your email to begin registration:
+                        {title}
                         <div className={styles.input}>
                             <input placeholder="youremail@example.com" value={email} onChange={e => setEmail(e.target.value)}
                                    onKeyPress={(ev) => ev.key === 'Enter' ? loginCode() : null} data-testid="email-input" />
@@ -115,13 +116,15 @@ LoginComponent.propTypes = {
     allowsOtpAuthlogin: PropTypes.bool,
     getLoginCode: PropTypes.func.isRequired,
     getPasswordlessCode: PropTypes.func,
-    initialEmailValue: PropTypes.string
+    initialEmailValue: PropTypes.string,
+    title: PropTypes.string,
 }
 
 LoginComponent.defaultProps = {
     allowsNativeAuth: true,
     allowsOtpAuthlogin: false,
-    initialEmailValue: ''
+    initialEmailValue: '',
+    title: 'Enter your email to begin registration:',
 }
 
 

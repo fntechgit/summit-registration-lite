@@ -113,6 +113,7 @@ const RegistrationLite = (
         updateClock,
         completedExtraQuestions,
         loadProfileData,
+        closeWidget,
         ...rest
     }) => {
 
@@ -206,8 +207,8 @@ const RegistrationLite = (
         // (i.e., recalling `onPurchaseComplete` after a user completes one order, closes the window, and then reopens the registration widget)
         changeStep(0);
         clearWidgetState();
-        if(rest.closeWidget)
-            rest.closeWidget();
+        if(closeWidget)
+            closeWidget();
     };
 
     const handleGetTicketTypesAndTaxes = (summitId) => {
@@ -339,6 +340,7 @@ const RegistrationLite = (
                                         completedExtraQuestions={completedExtraQuestions}
                                         nowUtc={nowUtc}
                                         clearWidgetState={clearWidgetState}
+                                        closeWidget={closeWidget}
                                     />
                                 )}
                             </div>
@@ -394,7 +396,8 @@ RegistrationLite.propTypes = {
     authErrorCallback : PropTypes.func,
     goToMyOrders: PropTypes.func.isRequired,
     goToExtraQuestions: PropTypes.func.isRequired,
-    completedExtraQuestions: PropTypes.func.isRequired
+    completedExtraQuestions: PropTypes.func.isRequired,
+    closeWidget:PropTypes.func,
 };
 
 export default connect(mapStateToProps, {
