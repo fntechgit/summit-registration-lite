@@ -35,6 +35,7 @@ import {
     reserveTicket,
     clearWidgetState,
     updateClock,
+    loadProfileData,
 } from '../actions';
 
 import AjaxLoader from "openstack-uicore-foundation/lib/components/ajaxloader";
@@ -111,6 +112,7 @@ const RegistrationLite = (
         nowUtc,
         updateClock,
         completedExtraQuestions,
+        loadProfileData,
         ...rest
     }) => {
 
@@ -135,11 +137,17 @@ const RegistrationLite = (
     const { publicKey, provider } = getCurrentProvider(summitData);
 
     useEffect(() => {
+        if(profileData)
+            loadProfileData(profileData);
+    }, [profileData])
+
+    // just initial load ( once )
+    useEffect(() => {
         loadSession({ ...rest, summitData, profileData });
         if (!profileData) {
             changeStep(0);
         }
-    }, [profileData])
+    }, [])
 
     useEffect(() => {
         if (summitData && profileData) {
@@ -197,7 +205,9 @@ const RegistrationLite = (
         // Reset the step when closed to avoid unexpected behavior from `useEffect`s w/in other steps.
         // (i.e., recalling `onPurchaseComplete` after a user completes one order, closes the window, and then reopens the registration widget)
         changeStep(0);
-        rest.closeWidget();
+        clearWidgetState();
+        if(rest.closeWidget)
+            rest.closeWidget();
     };
 
     const handleGetTicketTypesAndTaxes = (summitId) => {
@@ -319,15 +329,16 @@ const RegistrationLite = (
                                 {profileData && step === 3 && (
                                     <PurchaseComplete
                                         checkout={checkout}
-                                        currentUserEmail={profileData.email}
+                                        user={profileData}
                                         summit={summitData}
                                         onPurchaseComplete={onPurchaseComplete}
                                         supportEmail={supportEmail}
                                         goToEvent={goToEvent}
                                         goToMyOrders={goToMyOrders}
                                         goToExtraQuestions={goToExtraQuestions}
-                                        completedExtraQuestions={completedExtraQuestions}                                        
+                                        completedExtraQuestions={completedExtraQuestions}
                                         nowUtc={nowUtc}
+                                        clearWidgetState={clearWidgetState}
                                     />
                                 )}
                             </div>
@@ -399,4 +410,5 @@ export default connect(mapStateToProps, {
     getMyInvitation,
     clearWidgetState,
     updateClock,
+    loadProfileData,
 })(RegistrationLite)

@@ -16,11 +16,11 @@ import PropTypes from 'prop-types';
 
 import styles from "./index.module.scss";
 
-const LoginComponent = ({ 
-    loginOptions, 
-    login, 
-    allowsNativeAuth, 
-    allowsOtpAuthlogin, 
+const LoginComponent = ({
+    loginOptions,
+    login,
+    allowsNativeAuth,
+    allowsOtpAuthlogin,
     getLoginCode,
     getPasswordlessCode,
     initialEmailValue }) => {
@@ -48,7 +48,8 @@ const LoginComponent = ({
                     <div className={styles.loginCode}>
                         Enter your email to begin registration:
                         <div className={styles.input}>
-                            <input placeholder="youremail@example.com" value={email} onChange={e => setEmail(e.target.value)} onKeyPress={(ev) => ev.key === 'Enter' ? loginCode() : null} data-testid="email-input" />
+                            <input placeholder="youremail@example.com" value={email} onChange={e => setEmail(e.target.value)}
+                                   onKeyPress={(ev) => ev.key === 'Enter' ? loginCode() : null} data-testid="email-input" />
                             <button onClick={() => loginCode()} data-testid="email-button">
                                 &gt;
                             </button>

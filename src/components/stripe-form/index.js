@@ -73,6 +73,8 @@ const StripeForm = ({ reservation, payTicket, userProfile, marketingData, stripe
     const [stripeErrors, setStripeErrors] = useState({});
     const { register, handleSubmit, formState: { errors } } = useForm();
 
+    if(!marketingData) return null;
+
     const stripeStyle = merge({}, {
         base: {
             // Add your base input styles here. For example: #d4e5f4
