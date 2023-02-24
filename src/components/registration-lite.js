@@ -232,7 +232,7 @@ const RegistrationLite = (
                             <div className={styles.stepsWrapper}>
                                 {!profileData && !passwordlessCodeSent && (
                                     <LoginComponent
-                                        options={loginOptions}
+                                        loginOptions={loginOptions}
                                         allowsNativeAuth={allowsNativeAuth}
                                         allowsOtpAuth={allowsOtpAuth}
                                         login={(provider) => rest.authUser(provider)}
@@ -382,4 +382,3 @@ export default connect(mapStateToProps, {
     getMyInvitation,
     clearWidgetState,
 })(RegistrationLite)
-
