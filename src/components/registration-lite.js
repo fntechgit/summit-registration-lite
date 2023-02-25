@@ -228,7 +228,11 @@ const RegistrationLite = (
             });
     }
 
-    const allowedTicketTypes  = ticketTypes.filter((tt) => (tt.sales_start_date === null && tt.sales_end_date === null) ||
+    // if we dont have yet ticket types and we didnt requested so far for them but we are already logged in
+    // just dont render
+    if(ticketTypes.length === 0 && !requestedTicketTypes && profileData) return null;
+
+    const allowedTicketTypes = ticketTypes.filter((tt) => (tt.sales_start_date === null && tt.sales_end_date === null) ||
         (nowUtc >= tt.sales_start_date && nowUtc <= tt.sales_end_date));
 
     return (
