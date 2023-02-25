@@ -324,18 +324,12 @@ export const getLoginCode = (email, getPasswordlessCode) => async (dispatch, get
 };
 
 export const passwordlessLogin = (code, loginWithCode) => async (dispatch, getState) => {
-
     const { registrationLiteState: { passwordless: { email } } } = getState();
-
-    return new Promise((resolve, reject) => {
-        loginWithCode(code, email).then((res) => {
-            if (res) {
-                dispatch(createAction(SET_PASSWORDLESS_ERROR)())
-            }
-            resolve(res);
-        }, (err) => {
-            reject(err);
-        });
+    return loginWithCode(code, email).then((res) => {
+       return res;
+    }).catch((e) => {
+        console.log(e);
+        dispatch(createAction(SET_PASSWORDLESS_ERROR)())
     });
 }
 
