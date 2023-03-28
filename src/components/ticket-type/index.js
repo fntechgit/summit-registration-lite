@@ -95,7 +95,7 @@ const TicketTypeComponent = ({ ticketTypes, isActive, changeForm, reservation, i
                                                 {reservation?.applied_taxes.map((tax) => {
                                                     return (
                                                         <>
-                                                        <span className={styles.taxes}>
+                                                        <span key={tax.id} className={styles.taxes}>
                                                             <abbr title={tax.name}>
                                                                 {tax.name}
                                                             </abbr>

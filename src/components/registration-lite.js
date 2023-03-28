@@ -55,6 +55,26 @@ import TicketOwnedComponent from './ticket-owned';
 import { getCurrentProvider } from "../utils/utils";
 import NoAllowedTickets from './no-allowed-tickets';
 import TicketTaxesError from './ticket-taxes-error';
+import T from 'i18n-react';
+import { getCurrentUserLanguage } from '../utils/utils';
+
+let language = getCurrentUserLanguage();
+
+// language would be something like es-ES or es_ES
+// However we store our files with format es.json or en.json
+// therefore retrieve only the first 2 digits
+
+if (language.length > 2) {
+    language = language.split("-")[0];
+    language = language.split("_")[0];
+}
+
+try {
+    T.setTexts(require(`../i18n/${language}.json`));
+} catch (e) {
+    T.setTexts(require(`../i18n/en.json`));
+}
+
 
 const RegistrationLite = (
     {
@@ -114,6 +134,7 @@ const RegistrationLite = (
         completedExtraQuestions,
         loadProfileData,
         closeWidget,
+        hasVirtualAccessLevel,
         ...rest
     }) => {
 
@@ -345,6 +366,7 @@ const RegistrationLite = (
                                         nowUtc={nowUtc}
                                         clearWidgetState={clearWidgetState}
                                         closeWidget={closeWidget}
+                                        hasVirtualAccessLevel={hasVirtualAccessLevel}
                                     />
                                 )}
                             </div>
@@ -391,7 +413,8 @@ RegistrationLite.defaultProps = {
     allowPromoCodes: true,
     companyInputPlaceholder: 'Enter your company',
     companyDDLPlaceholder: 'Select a company',
-    authErrorCallback: (error) => { console.log(error) }
+    authErrorCallback: (error) => { console.log(error) },
+    hasVirtualAccessLevel: false,
 };
 
 RegistrationLite.propTypes = {
@@ -402,6 +425,7 @@ RegistrationLite.propTypes = {
     goToExtraQuestions: PropTypes.func.isRequired,
     completedExtraQuestions: PropTypes.func.isRequired,
     closeWidget:PropTypes.func,
+    hasVirtualAccessLevel:PropTypes.bool,
 };
 
 export default connect(mapStateToProps, {

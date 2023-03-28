@@ -52,7 +52,6 @@
     "font-awesome": "4.7.0",
     "history": "^4.7.2",
     "html-webpack-plugin": "^5.5.0",
-    "i18n-react": "^0.6.4",
     "identity-obj-proxy": "^3.0.0",
     "idtoken-verifier": "^1.2.0",
     "immutability-helper": "^2.7.1",
@@ -97,7 +96,8 @@
     "webpack-cli": "^4.9.2",
     "webpack-dev-server": "^4.7.4",
     "webpack-merge": "^5.8.0",
-    "webpack-node-externals": "^3.0.0"
+    "webpack-node-externals": "^3.0.0",
+    "i18n-react": "^0.6.4"
   },
   "peerDependencies": {
     "awesome-bootstrap-checkbox": "^1.0.1",
@@ -105,7 +105,6 @@
     "crypto-js": "^4.1.1",
     "font-awesome": "^4.7.0",
     "history": "^4.7.2",
-    "i18n-react": "^0.6.4",
     "idtoken-verifier": "^2.2.2",
     "immutability-helper": "^2.7.1",
     "lodash": "^4.17.14",
@@ -125,7 +124,8 @@
     "superagent": "^3.8.1",
     "sweetalert2": "^8.15.2",
     "urijs": "^1.19.1",
-    "validator": "^9.4.1"
+    "validator": "^9.4.1",
+    "i18n-react": "^0.6.4"
   },
   "dependencies": {
     "@stripe/react-stripe-js": "^1.4.1",
@@ -137,6 +137,7 @@
     "react-use": "^17.2.4",
     "resize-observer-polyfill": "^1.5.1",
     "svg-url-loader": "^7.1.1",
-    "use-debounce": "^6.0.1"
+    "use-debounce": "^6.0.1",
+    "i18n-react": "^0.6.4"
   }
 }

@@ -14,3 +14,4 @@
 export const AUTH_ERROR_MESSAGE = 'Missing Auth info';
 export const AUTH_ERROR_MISSING_REFRESH_TOKEN = "missing Refresh Token";
 export const AUTH_ERROR_REQUEST_FAILED = 'Request failed';
+export const VirtualAccessLevel = 'VIRTUAL';

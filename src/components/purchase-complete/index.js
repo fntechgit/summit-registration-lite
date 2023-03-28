@@ -13,8 +13,21 @@
 
 import React, { useEffect, useMemo } from 'react';
 import styles from './index.module.scss';
-
 import { epochToMomentTimeZone } from 'openstack-uicore-foundation/lib/utils/methods';
+import { ticketHasAccessLevel } from '../../utils/utils';
+import { VirtualAccessLevel } from '../../utils/constants';
+import T from 'i18n-react';
+import RawHTML from 'openstack-uicore-foundation/lib/components/raw-html';
+
+const CTAButton = ({ cta, clear, close, ...rest }) => {
+    return (
+        <button className={`${styles.button} button`} onClick={() => {
+            clear();
+            if (close)
+                close();
+            cta();
+        }}>{rest.children}</button>);
+};
 
 const PurchaseComplete = ({
                               checkout,
@@ -28,16 +41,18 @@ const PurchaseComplete = ({
                               nowUtc,
                               clearWidgetState,
                               closeWidget,
-                              supportEmail = 'support@fntech.com'
+                              supportEmail = 'support@fntech.com',
+                              hasVirtualAccessLevel = false
                           }) => {
 
     useEffect(() => {
         onPurchaseComplete(checkout);
     }, []);
 
-    const isActive = useMemo(() => summit.start_date <= nowUtc && summit.end_date >= nowUtc, [summit]);
-    const userFirstTicket = useMemo(() => checkout?.tickets.some(t => t?.owner?.email == user?.email), [user]);
+    const isActive = useMemo(() => summit.start_date <= nowUtc && summit.end_date >= nowUtc, [summit, nowUtc]);
+    const currentUserTicket = useMemo(() => checkout?.tickets.find(t => t?.owner?.email == user?.email), [user]);
     const requireExtraQuestions = useMemo(() => completedExtraQuestions(checkout), [user]);
+    const _hasVirtualAccessLevel = hasVirtualAccessLevel || (currentUserTicket && ticketHasAccessLevel(currentUserTicket, VirtualAccessLevel));
 
     const startDateFormatted = {
         date: epochToMomentTimeZone(summit.start_date, summit.time_zone_id).format('MMMM D'),
@@ -52,97 +67,63 @@ const PurchaseComplete = ({
                 <i className='fa fa-ticket'></i>
             </div>
             <span className={styles.complete}>
-                Your order is complete
+               {T.translate('purchase_complete_step.title')}
             </span>
-            {isActive ?
-                userFirstTicket ?
-                    requireExtraQuestions ?
-                        <>
-                            <span>
-                                A ticket has been assigned to you. To complete your additional ticket details, please click the "Finish Now" button.
-                            </span>
-                            <button className={`${styles.button} button`} onClick={() => {
-                                clearWidgetState();
-                                if(closeWidget)
-                                    closeWidget();
-                                goToExtraQuestions();
-                            }}>Finish
-                                Now
-                            </button>
-                        </>
+            {
+                isActive ?
+                (currentUserTicket && requireExtraQuestions) ?
+                    <>
+                        <span>{T.translate('purchase_complete_step.finish_now_label')}</span>
+                        <CTAButton cta={goToExtraQuestions} clear={clearWidgetState}
+                                   close={closeWidget}>{T.translate('purchase_complete_step.finish_now_button')}</CTAButton>
+                    </>
+                    :
+                    (_hasVirtualAccessLevel) ?
+                        <CTAButton cta={goToEvent} clear={clearWidgetState}
+                                   close={closeWidget}>{T.translate('purchase_complete_step.access_event_button')}</CTAButton>
                         :
                         <>
-                            <button className={`${styles.button} button`} onClick={() => {
-                                clearWidgetState();
-                                if(closeWidget)
-                                    closeWidget();
-                                goToEvent();
-                            }}>Access event now
-                            </button>
+                            <span>{T.translate('purchase_complete_step.my_orders_label')}</span>
+                            <CTAButton cta={goToMyOrders} clear={clearWidgetState}
+                                       close={closeWidget}>{T.translate('purchase_complete_step.my_orders_button')}</CTAButton>
                         </>
-                    :
-                    <>
-                        <span>
-                            You may visit the My Orders/Tickets tab in the top right-hand corner of the navigation
-                            bar to assign/reassign tickets or to complete any required ticket details.
-                        </span>
-                        <button className={`${styles.button} button`} onClick={() => {
-                            clearWidgetState();
-                            if(closeWidget)
-                                closeWidget();
-                            goToMyOrders();
-                        }}>View My
-                            Orders/Tickets
-                        </button>
-                    </>
                 :
                 <>
                     <span>
-                        The event will start on {startDateFormatted.date} at {startDateFormatted.time} {summit.time_zone_label}
-                        <br /><br />
-                        {userFirstTicket ?
-                            `A ticket has been assigned to you. To complete your additional ticket details, please click the "Finish Now" button.`
-                            :
-                            `You may visit the My Orders/Tickets tab in the top right-hand corner of the navigation bar to
-                            assign/reassign tickets or to complete any required ticket details.`
+                        {
+                            T.translate("purchase_complete_step.event_will_start_text", {data: `${startDateFormatted.date}`, time: `${startDateFormatted.time}`, time_zone_label: `${summit.time_zone_label}`})
+                        }
+                        <br/><br/>
+                        {
+                            currentUserTicket && requireExtraQuestions ?
+                            T.translate('purchase_complete_step.finish_now_label') : T.translate('purchase_complete_step.my_orders_label')
                         }
                     </span>
                     <div className={styles.actions}>
-                        {userFirstTicket ?
-                            <button className={`${styles.button} button`} onClick={() => {
-                                clearWidgetState();
-                                if(closeWidget)
-                                    closeWidget();
-                                goToExtraQuestions();
-                            }}>Finish
-                                Now</button>
+                        {
+                            currentUserTicket && requireExtraQuestions ?
+                            <CTAButton cta={goToExtraQuestions} clear={clearWidgetState}
+                                       close={closeWidget}>{T.translate('purchase_complete_step.finish_now_button')}</CTAButton>
                             :
-                            <button className={`${styles.button} button`} onClick={() => {
-                                clearWidgetState();
-                                if(closeWidget)
-                                    closeWidget();
-                                goToMyOrders();
-                            }}>View My
-                                Orders/Tickets</button>
+                            <CTAButton cta={goToMyOrders} clear={clearWidgetState}
+                                       close={closeWidget}>{T.translate('purchase_complete_step.my_orders_button')}</CTAButton>
                         }
                     </div>
                 </>
             }
             <span className={styles.footer}>
-                {userFirstTicket ?
-                    <>
-                        If you wish to transfer your assigned ticket, close this window and visit the "My
-                        Orders/Tickets" tab
-                        in the top navigation bar. For further assistance, please email <a
-                        href={`mailto:${supportEmail}`}>{supportEmail}</a>
-                    </>
+                {currentUserTicket ?
+                    <RawHTML>
+                        {T.translate('purchase_complete_step.footer_has_ticket_text', { supportEmail: `${supportEmail}` })}
+                    </RawHTML>
                     :
-                    <>
-                        For further assistance, please email <a href={`mailto:${supportEmail}`}>{supportEmail}</a>
-                    </>
+                    <RawHTML>
+                        {T.translate('purchase_complete_step.footer_no_ticket_text', { supportEmail: `${supportEmail}` })}
+                    </RawHTML>
                 }
             </span>
         </div>
     );
 };
+
 export default PurchaseComplete;

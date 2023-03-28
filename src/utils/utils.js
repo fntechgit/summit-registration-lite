@@ -25,3 +25,16 @@ export const getCurrentProvider = (summit) => {
         provider : ''
     }
 }
+
+export const ticketHasAccessLevel = (ticket, accessLevel) => {
+    if(!ticket) return false;
+    return ticket.badge?.type?.access_levels.map(al => al.name).includes(accessLevel);
+};
+
+export const getCurrentUserLanguage = () => {
+    let language = 'en';
+    if(typeof navigator !== 'undefined') {
+        language = (navigator.languages && navigator.languages[0]) || navigator.language || navigator.userLanguage;
+    }
+    return language;
+};
