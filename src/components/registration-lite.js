@@ -358,7 +358,6 @@ const RegistrationLite = (
                                         user={profileData}
                                         summit={summitData}
                                         onPurchaseComplete={onPurchaseComplete}
-                                        supportEmail={supportEmail}
                                         goToEvent={goToEvent}
                                         goToMyOrders={goToMyOrders}
                                         goToExtraQuestions={goToExtraQuestions}
@@ -367,6 +366,8 @@ const RegistrationLite = (
                                         clearWidgetState={clearWidgetState}
                                         closeWidget={closeWidget}
                                         hasVirtualAccessLevel={hasVirtualAccessLevel}
+                                        supportEmail={supportEmail}
+                                        footerHasTicketText={rest.footerHasTicketText}
                                     />
                                 )}
                             </div>
@@ -415,6 +416,7 @@ RegistrationLite.defaultProps = {
     companyDDLPlaceholder: 'Select a company',
     authErrorCallback: (error) => { console.log(error) },
     hasVirtualAccessLevel: false,
+    supportEmail : 'support@fntech.com',
 };
 
 RegistrationLite.propTypes = {
@@ -426,6 +428,8 @@ RegistrationLite.propTypes = {
     completedExtraQuestions: PropTypes.func.isRequired,
     closeWidget:PropTypes.func,
     hasVirtualAccessLevel:PropTypes.bool,
+    supportEmail: PropTypes.string,
+    footerHasTicketText: PropTypes.string,
 };
 
 export default connect(mapStateToProps, {

@@ -41,8 +41,9 @@ const PurchaseComplete = ({
                               nowUtc,
                               clearWidgetState,
                               closeWidget,
-                              supportEmail = 'support@fntech.com',
-                              hasVirtualAccessLevel = false
+                              supportEmail,
+                              hasVirtualAccessLevel,
+                              ...rest
                           }) => {
 
     useEffect(() => {
@@ -61,6 +62,13 @@ const PurchaseComplete = ({
 
     if (!checkout) return null;
 
+    let footerHasTicketText = (rest.hasOwnProperty('footerHasTicketText') && typeof rest.footerHasTicketText !== 'undefined' ?
+        rest.footerHasTicketText : T.translate('purchase_complete_step.footer_has_ticket_text'));
+
+    footerHasTicketText = currentUserTicket ?
+        footerHasTicketText + T.translate('purchase_complete_step.footer_assistance_text', { supportEmail: `${supportEmail}` }) :
+        T.translate('purchase_complete_step.footer_assistance_text', { supportEmail: `${supportEmail}` });
+
     return (
         <div className={styles.wrapper}>
             <div className={styles.circle}>
@@ -71,56 +79,54 @@ const PurchaseComplete = ({
             </span>
             {
                 isActive ?
-                (currentUserTicket && requireExtraQuestions) ?
-                    <>
-                        <span>{T.translate('purchase_complete_step.finish_now_label')}</span>
-                        <CTAButton cta={goToExtraQuestions} clear={clearWidgetState}
-                                   close={closeWidget}>{T.translate('purchase_complete_step.finish_now_button')}</CTAButton>
-                    </>
-                    :
-                    (_hasVirtualAccessLevel) ?
-                        <CTAButton cta={goToEvent} clear={clearWidgetState}
-                                   close={closeWidget}>{T.translate('purchase_complete_step.access_event_button')}</CTAButton>
-                        :
+                    (currentUserTicket && requireExtraQuestions) ?
                         <>
-                            <span>{T.translate('purchase_complete_step.my_orders_label')}</span>
-                            <CTAButton cta={goToMyOrders} clear={clearWidgetState}
-                                       close={closeWidget}>{T.translate('purchase_complete_step.my_orders_button')}</CTAButton>
-                        </>
-                :
-                <>
-                    <span>
-                        {
-                            T.translate("purchase_complete_step.event_will_start_text", {data: `${startDateFormatted.date}`, time: `${startDateFormatted.time}`, time_zone_label: `${summit.time_zone_label}`})
-                        }
-                        <br/><br/>
-                        {
-                            currentUserTicket && requireExtraQuestions ?
-                            T.translate('purchase_complete_step.finish_now_label') : T.translate('purchase_complete_step.my_orders_label')
-                        }
-                    </span>
-                    <div className={styles.actions}>
-                        {
-                            currentUserTicket && requireExtraQuestions ?
+                            <span>{T.translate('purchase_complete_step.finish_now_label')}</span>
                             <CTAButton cta={goToExtraQuestions} clear={clearWidgetState}
                                        close={closeWidget}>{T.translate('purchase_complete_step.finish_now_button')}</CTAButton>
+                        </>
+                        :
+                        (_hasVirtualAccessLevel) ?
+                            <CTAButton cta={goToEvent} clear={clearWidgetState}
+                                       close={closeWidget}>{T.translate('purchase_complete_step.access_event_button')}</CTAButton>
                             :
-                            <CTAButton cta={goToMyOrders} clear={clearWidgetState}
-                                       close={closeWidget}>{T.translate('purchase_complete_step.my_orders_button')}</CTAButton>
+                            <>
+                                <span>{T.translate('purchase_complete_step.my_orders_label')}</span>
+                                <CTAButton cta={goToMyOrders} clear={clearWidgetState}
+                                           close={closeWidget}>{T.translate('purchase_complete_step.my_orders_button')}</CTAButton>
+                            </>
+                    :
+                    <>
+                    <span>
+                        {
+                            T.translate('purchase_complete_step.event_will_start_text', {
+                                data: `${startDateFormatted.date}`,
+                                time: `${startDateFormatted.time}`,
+                                time_zone_label: `${summit.time_zone_label}`
+                            })
                         }
-                    </div>
-                </>
+                        <br /><br />
+                        {
+                            currentUserTicket && requireExtraQuestions ?
+                                T.translate('purchase_complete_step.finish_now_label') : T.translate('purchase_complete_step.my_orders_label')
+                        }
+                    </span>
+                        <div className={styles.actions}>
+                            {
+                                currentUserTicket && requireExtraQuestions ?
+                                    <CTAButton cta={goToExtraQuestions} clear={clearWidgetState}
+                                               close={closeWidget}>{T.translate('purchase_complete_step.finish_now_button')}</CTAButton>
+                                    :
+                                    <CTAButton cta={goToMyOrders} clear={clearWidgetState}
+                                               close={closeWidget}>{T.translate('purchase_complete_step.my_orders_button')}</CTAButton>
+                            }
+                        </div>
+                    </>
             }
             <span className={styles.footer}>
-                {currentUserTicket ?
                     <RawHTML>
-                        {T.translate('purchase_complete_step.footer_has_ticket_text', { supportEmail: `${supportEmail}` })}
+                        {footerHasTicketText}
                     </RawHTML>
-                    :
-                    <RawHTML>
-                        {T.translate('purchase_complete_step.footer_no_ticket_text', { supportEmail: `${supportEmail}` })}
-                    </RawHTML>
-                }
             </span>
         </div>
     );
