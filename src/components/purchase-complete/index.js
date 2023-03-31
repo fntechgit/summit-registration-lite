@@ -100,7 +100,7 @@ const PurchaseComplete = ({
                     <span>
                         {
                             T.translate('purchase_complete_step.event_will_start_text', {
-                                data: `${startDateFormatted.date}`,
+                                date: `${startDateFormatted.date}`,
                                 time: `${startDateFormatted.time}`,
                                 time_zone_label: `${summit.time_zone_label}`
                             })
