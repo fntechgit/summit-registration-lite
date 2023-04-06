@@ -30,7 +30,7 @@ const filterProps = {
     goToEvent: () => console.log('go to event'),    
     onPurchaseComplete: (order) => console.log('purchase complete', order),
     loading: false,
-    apiBaseUrl: 'https://api.dev.fnopen.com',
+    apiBaseUrl: process.env.API_BASE_URL,
     summitData: SummitData,
     profileData: ProfileData,
     ticketOwned: false,
