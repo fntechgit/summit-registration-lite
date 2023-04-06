@@ -31,7 +31,7 @@ const filterProps = {
     onPurchaseComplete: (order) => console.log('purchase complete', order),
     loading: false,
     apiBaseUrl: 'https://api.dev.fnopen.com',
-    summitData: SummitData.summit,
+    summitData: SummitData,
     profileData: ProfileData,
     ticketOwned: false,
     // ownedTickets: [
@@ -66,6 +66,7 @@ const filterProps = {
 
 ReactDOM.render(
     <div style={{ width: '1080px', margin: '0 auto' }}>
+        {window.TIMEINTERVALSINCE1970_API_URL=process.env.TIMEINTERVALSINCE1970_API_URL}
         <RegistrationLiteWidget {...filterProps} />
     </div>,
     document.querySelector('#root')
