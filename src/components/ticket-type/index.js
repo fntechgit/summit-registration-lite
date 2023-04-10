@@ -94,15 +94,15 @@ const TicketTypeComponent = ({ ticketTypes, isActive, changeForm, reservation, i
                                             <>
                                                 {reservation?.applied_taxes.map((tax) => {
                                                     return (
-                                                        <>
-                                                        <span key={tax.id} className={styles.taxes}>
-                                                            <abbr title={tax.name}>
-                                                                {tax.name}
-                                                            </abbr>
-                                                            {` : ${formatCurrency(tax.amount, { currency: ticket.currency })} ${ticket.currency}`}
-                                                        </span>
-                                                        <br />
-                                                        </>
+                                                        <React.Fragment key={tax.id}>
+                                                            <span className={styles.taxes}>
+                                                                <abbr title={tax.name}>
+                                                                    {tax.name}
+                                                                </abbr>
+                                                                {` : ${formatCurrency(tax.amount, { currency: ticket.currency })} ${ticket.currency}`}
+                                                            </span>
+                                                            <br />
+                                                        </React.Fragment>
                                                     )
                                                 })}
                                             </>
