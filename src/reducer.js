@@ -66,6 +66,7 @@ const DEFAULT_STATE = {
 
 const RegistrationLiteReducer = (state = DEFAULT_STATE, action) => {
     const { type, payload } = action;
+    console.log(action);
     switch (type) {
         case CLEAR_WIDGET_STATE:
         case LOGOUT_USER: {

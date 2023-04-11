@@ -127,6 +127,7 @@ const RegistrationLite = (
         clearWidgetState,
         requestedTicketTypes,
         allowPromoCodes,
+        showCompanyInput,
         companyInputPlaceholder,
         companyDDLPlaceholder,
         nowUtc,
@@ -331,6 +332,7 @@ const RegistrationLite = (
                                             formErrors={formErrors}
                                             showMultipleTicketTexts={showMultipleTicketTexts}
                                             allowPromoCodes={allowPromoCodes}
+                                            showCompanyInput={showCompanyInput}
                                             companyInputPlaceholder={companyInputPlaceholder}
                                             companyDDLPlaceholder={companyDDLPlaceholder}
                                         />
@@ -409,6 +411,7 @@ const mapStateToProps = ({ registrationLiteState }) => ({
 RegistrationLite.defaultProps = {
     loginInitialEmailInputValue: '',
     showMultipleTicketTexts: true,
+    showCompanyInput: true,
     noAllowedTicketsMessage: '<span>You already have purchased all available tickets for this event and/or there are no tickets available for you to purchase.</span><br/><span><a href="/a/my-tickets">Visit the my orders / my tickets page</a> to review your existing tickets.</span>',
     ticketTaxesErrorMessage: '<span>There was an error getting the information for the tickets. Please try it again.</span>',
     allowPromoCodes: true,
@@ -422,6 +425,7 @@ RegistrationLite.defaultProps = {
 RegistrationLite.propTypes = {
     loginInitialEmailInputValue: PropTypes.string,
     showMultipleTicketTexts: PropTypes.bool,
+    showCompanyInput: PropTypes.bool,
     authErrorCallback : PropTypes.func,
     goToMyOrders: PropTypes.func.isRequired,
     goToExtraQuestions: PropTypes.func.isRequired,

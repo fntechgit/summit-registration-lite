@@ -62,7 +62,9 @@ React component for the summit registration lite widget
 
    **authErrorCallback**      = method passed that will handle on client any auth error
 
-   **allowPromoCodes**        = boolean to show/hide promo code field. Default at true
+   **allowPromoCodes**        = boolean to show/hide promo code field. Defaults to true
+
+   **showCompanyInput**       = booleaen to show/hide the "Company" field. Defaults to true.
 
    **companyInputPlaceholder**= string for the set the placeholder of the free text company input
 

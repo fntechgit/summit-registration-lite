@@ -23,7 +23,7 @@ const filterProps = {
     authUser: (provider) => console.log('login with ', provider),
     getPasswordlessCode: (email) => console.log('get code', email),
     loginWithCode: (code) => console.log('login with code', code),
-    getAccessToken: () => 'IrL~OGqyjat9GD4Sx54lBVL.M6bM6pwv1No.daLasWXaxicaYO-9F6gkaErS5RsVEgRnqKYCXDr_9TbjzYTrgSmYgCGU4_nvTP06PfSLVtAsh.mX~p0.Q.DgVd3mfWVV',
+    getAccessToken: () => 'IPojz~XCin7pOgu7v_THLLheZh6J2yILgbuAZ6FUnArI.vXAKtngyYBSmT~rDObZ19ypD6hpThi.ZnTdlGBRZKw4u2YvBW2Y_R8FTXaxlmdpJqF3Y5qN1eJ0_vMIklJ1',
     closeWidget: () => console.log('close widget'),
     goToExtraQuestions: () => console.log('extra questions required'),
     goToMyOrders: () => console.log('go to my orders'),
@@ -57,7 +57,8 @@ const filterProps = {
     noAllowedTicketsMessage: '<span>You already have purchased all available tickets for this event and/or there are no tickets available for you to purchase.</span><br/><span>Visit the my orders / my tickets page to review your existing tickets.</span>',
     ticketTaxesErrorMessage: '<span>There was an error getting the information for tickets. Please try again.</span>',
     allowPromoCodes: true,
-    companyInputPlaceholder: 'Enter your company',
+    showCompanyInput: true,
+    companyInputPlaceholder: 'Enter your company!',
     companyDDLPlaceholder: 'Select a company',
     completedExtraQuestions: () => console.log('evalulate user extra questions...')
 };

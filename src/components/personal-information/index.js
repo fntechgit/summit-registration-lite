@@ -29,10 +29,11 @@ const PersonalInfoComponent = ({
     summitId, 
     handleCompanyError, 
     formValues, 
-    formErrors, 
+    formErrors = {}, 
     invitation, 
     showMultipleTicketTexts,
     allowPromoCodes,
+    showCompanyInput = true,
     companyInputPlaceholder,
     companyDDLPlaceholder }) => {
     const [personalInfo, setPersonalInfo] = useState(
@@ -67,7 +68,7 @@ const PersonalInfoComponent = ({
     };
 
     const onSubmit = data => {
-        if (!personalInfo.company.name) {
+        if (!personalInfo.company.name && showCompanyInput) {
             setCompanyError(true);
             return;
         }
@@ -142,26 +143,28 @@ const PersonalInfoComponent = ({
                                     {errors.email?.type === 'pattern' && <div className={styles.fieldError} data-testid="email-error-invalid">The email is invalid.</div>}
                                 </div>
 
-                                <div className={styles.fieldWrapper}>
-                                    <div className={styles.companies}>
-                                        <RegistrationCompanyInput
-                                            id="company"
-                                            styles={customStyles}
-                                            summitId={summitId}
-                                            onChange={onCompanyChange}
-                                            onError={handleCompanyError}
-                                            value={personalInfo.company}
-                                            inputPlaceholder={companyInputPlaceholder}
-                                            DDLPlaceholder={companyDDLPlaceholder}
-                                        />
-                                        {companyError && <div className={styles.fieldError} data-testid="company-error">This field is required.</div>}
+                                {showCompanyInput && 
+                                    <div className={styles.fieldWrapper}>
+                                        <div className={styles.companies}>
+                                            <RegistrationCompanyInput
+                                                id="company"
+                                                styles={customStyles}
+                                                summitId={summitId}
+                                                onChange={onCompanyChange}
+                                                onError={handleCompanyError}
+                                                value={personalInfo.company}
+                                                inputPlaceholder={companyInputPlaceholder}
+                                                DDLPlaceholder={companyDDLPlaceholder}
+                                            />
+                                            {companyError && <div className={styles.fieldError} data-testid="company-error">This field is required.</div>}
+                                        </div>
                                     </div>
-                                </div>
+                                }
 
                                 {allowPromoCodes &&
                                     <div className={styles.fieldWrapper}>
                                         <div className={styles.inputWrapper}>
-                                            <input type="text" placeholder="Promo Code" {...register("promoCode")} />
+                                            <input type="text" placeholder="Promo code" {...register("promoCode")} />
                                         </div>
                                     </div>
                                 }
