@@ -24,6 +24,9 @@
     },
     "setupFilesAfterEnv": [
       "<rootDir>/jest-setup.js"
+    ],
+    "transformIgnorePatterns": [
+      "<rootDir>/node_modules/(?!react-dnd|dnd-core|@react-dnd)"
     ]
   },
   "devDependencies": {
