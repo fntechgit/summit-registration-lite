@@ -103,7 +103,7 @@ const PersonalInfoComponent = ({
                         {!isActive &&
                             <div data-testid="personal-info">
                                 <span>
-                                    {`${personalInfo.firstName} ${personalInfo.lastName} ${personalInfo.company.name ? `- ${personalInfo.company.name}` : ''}`}
+                                    {`${personalInfo.firstName} ${personalInfo.lastName}${personalInfo.company.name ? ` - ${personalInfo.company.name}` : ''}`}
                                 </span>
                                 <br />
                                 <span>
@@ -148,6 +148,9 @@ const PersonalInfoComponent = ({
                                         <div className={styles.companies}>
                                             <RegistrationCompanyInput
                                                 id="company"
+                                                aria-labelledby="company-select"
+                                                name="company"
+                                                data-testid="company"
                                                 styles={customStyles}
                                                 summitId={summitId}
                                                 onChange={onCompanyChange}

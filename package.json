@@ -26,7 +26,8 @@
       "<rootDir>/jest-setup.js"
     ],
     "transformIgnorePatterns": [
-      "<rootDir>/node_modules/(?!react-dnd|dnd-core|@react-dnd)"
+      "<rootDir>/node_modules/(?!react-dnd|dnd-core|@react-dnd)",
+      "<rootDir>/src/assets/FNid_WHT_logo_rgb.svg"
     ]
   },
   "devDependencies": {
@@ -64,7 +65,7 @@
     "moment": "^2.22.2",
     "moment-timezone": "^0.5.21",
     "node-sass": "^7.0.1",
-    "openstack-uicore-foundation": "4.0.88",
+    "openstack-uicore-foundation": "4.1.18",
     "optimize-css-assets-webpack-plugin": "^6.0.1",
     "path": "^0.12.7",
     "react": "^16.8.4",
