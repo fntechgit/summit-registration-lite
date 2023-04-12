@@ -21,13 +21,13 @@
   "jest": {
     "moduleNameMapper": {
       "\\.(css|scss)$": "identity-obj-proxy",
-      "\\.(jpg|jpeg|png|gif|svg)$": "<rootDir>/src/__mocks__/fileMock.js"      
+      "\\.(jpg|jpeg|png|gif|svg)$": "<rootDir>/src/__mocks__/fileMock.js"
     },
     "setupFilesAfterEnv": [
       "<rootDir>/jest-setup.js"
     ],
     "transformIgnorePatterns": [
-      "<rootDir>/node_modules/(?!react-dnd|dnd-core|@react-dnd)"   
+      "<rootDir>/node_modules/(?!react-dnd|dnd-core|@react-dnd)"
     ]
   },
   "devDependencies": {

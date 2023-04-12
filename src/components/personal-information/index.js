@@ -67,7 +67,7 @@ const PersonalInfoComponent = ({
         setPersonalInfo({ ...personalInfo, company: newCompany });
     };
 
-    const onSubmit = data => {
+    const onSubmit = (data) => {
         if (!personalInfo.company.name && showCompanyInput) {
             setCompanyError(true);
             return;
@@ -145,10 +145,11 @@ const PersonalInfoComponent = ({
 
                                 {showCompanyInput && 
                                     <div className={styles.fieldWrapper}>
-                                        <div className={styles.companies} data-testid="company">
+                                        <div className={styles.companies}>
                                             <RegistrationCompanyInput
                                                 id="company"
                                                 name="company"
+                                                data-testid="company"
                                                 styles={customStyles}
                                                 summitId={summitId}
                                                 onChange={onCompanyChange}
