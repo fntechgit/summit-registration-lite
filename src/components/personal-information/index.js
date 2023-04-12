@@ -145,12 +145,10 @@ const PersonalInfoComponent = ({
 
                                 {showCompanyInput && 
                                     <div className={styles.fieldWrapper}>
-                                        <div className={styles.companies}>
+                                        <div className={styles.companies} data-testid="company">
                                             <RegistrationCompanyInput
                                                 id="company"
-                                                aria-labelledby="company-select"
                                                 name="company"
-                                                data-testid="company"
                                                 styles={customStyles}
                                                 summitId={summitId}
                                                 onChange={onCompanyChange}

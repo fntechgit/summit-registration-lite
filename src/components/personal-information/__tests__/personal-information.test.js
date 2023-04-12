@@ -33,7 +33,7 @@ const mockCallBack = jest.fn();
 afterEach(cleanup);
 
 it('PersonalInfoComponent set the initial values from the user profile', async () => {
-    const { getByTestId, getByLabelText } = render(<PersonalInfoComponent formValues={mockFormValues} userProfile={mockProfile} handleCompanyError={mockCallBack} />);
+    const { getByTestId, getByText } = render(<PersonalInfoComponent formValues={mockFormValues} userProfile={mockProfile} handleCompanyError={mockCallBack} />);
 
     const firstName = getByTestId('first-name');
     const lastName = getByTestId('last-name');
@@ -49,6 +49,8 @@ it('PersonalInfoComponent set the initial values from the user profile', async (
     expect(lastName.value).toBe(mockProfile.family_name);
     expect(email.value).toBe(mockProfile.email);
 
+    const placeholder = getByText('Select a company');
+    expect(placeholder).toBeTruthy();
 });
 
 it('PersonalInfoComponent shows the personal data when is not active', async () => {
@@ -62,7 +64,7 @@ it('PersonalInfoComponent shows the personal data when is not active', async () 
 });
 
 it('PersonalInfoComponent checks the validation of each field', async () => {
-    const { getByTestId } = render(<PersonalInfoComponent formValues={mockFormValues} userProfile={mockProfile} handleCompanyError={mockCallBack} />);
+    const { getByTestId, queryByTestId } = render(<PersonalInfoComponent isActive={true} formValues={mockFormValues} userProfile={mockProfile} handleCompanyError={mockCallBack} />);
 
     const form = getByTestId('personal-form');
     const firstName = getByTestId('first-name');
@@ -71,15 +73,18 @@ it('PersonalInfoComponent checks the validation of each field', async () => {
     fireEvent.change(lastName, { target: { value: '' } });
     const email = getByTestId('email');
     fireEvent.change(email, { target: { value: '' } });
-    const company = getByTestId('company');
-    fireEvent.change(company, { target: { value: '' } });
+
+    const company = queryByTestId('company');
+    expect(company).toBeDefined();
+    expect(company).not.toBeNull();
+
     fireEvent.submit(form);
 
     await waitFor(() => {
         const firstNameError = getByTestId('first-name-error');
         const lastNameError = getByTestId('last-name-error');
         const emailErrorRequired = getByTestId('email-error-required');        
-        const companyError = getByTestId('company-error');
+        const companyError = queryByTestId('company-error');
         expect(firstNameError).toBeTruthy();
         expect(lastNameError).toBeTruthy();
         expect(emailErrorRequired).toBeTruthy();
