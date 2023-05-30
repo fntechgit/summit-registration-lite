@@ -62,12 +62,46 @@ const PurchaseComplete = ({
 
     if (!checkout) return null;
 
-    let footerHasTicketText = (rest.hasOwnProperty('footerHasTicketText') && typeof rest.footerHasTicketText !== 'undefined' ?
-        rest.footerHasTicketText : T.translate('purchase_complete_step.footer_has_ticket_text'));
+    let orderComplete1stParagraph = (
+        currentUserTicket ? 
+            rest.hasOwnProperty('orderComplete1stParagraph') && typeof rest.orderComplete1stParagraph !== 'undefined' ?
+                rest.orderComplete1stParagraph
+                :
+                T.translate('purchase_complete_step.finish_now_label')
+            : 
+            rest.hasOwnProperty('initialOrderComplete1stParagraph') && typeof rest.initialOrderComplete1stParagraph !== 'undefined' ?
+                rest.initialOrderComplete1stParagraph
+                : 
+                T.translate('purchase_complete_step.my_orders_label')
+    );
 
-    footerHasTicketText = currentUserTicket ?
-        footerHasTicketText + T.translate('purchase_complete_step.footer_assistance_text', { supportEmail: `${supportEmail}` }) :
-        T.translate('purchase_complete_step.footer_assistance_text', { supportEmail: `${supportEmail}` });
+    let orderCompleteButtonText = (
+        currentUserTicket ? 
+            rest.hasOwnProperty('orderCompleteButton') && typeof rest.orderCompleteButton !== 'undefined' ?
+                rest.orderCompleteButton
+                :
+                null
+            : 
+            rest.hasOwnProperty('initialOrderCompleteButton') && typeof rest.initialOrderCompleteButton !== 'undefined' ?
+                rest.initialOrderCompleteButton
+                : 
+                null
+    );
+
+    let orderComplete2ndParagraph = (
+        currentUserTicket ? 
+            rest.hasOwnProperty('orderComplete2ndParagraph') && typeof rest.orderComplete2ndParagraph !== 'undefined' ?
+                rest.orderComplete2ndParagraph 
+                : 
+                T.translate('purchase_complete_step.footer_has_ticket_text') 
+            : 
+            rest.hasOwnProperty('initialOrderComplete2ndParagraph') && typeof rest.initialOrderComplete2ndParagraph !== 'undefined' ?
+                rest.initialOrderComplete2ndParagraph 
+                :
+                null
+    );
+
+    let footerHasTicketText = `${orderComplete2ndParagraph} ${T.translate('purchase_complete_step.footer_assistance_text', { supportEmail: `${supportEmail}` })}`;
 
     return (
         <div className={styles.wrapper}>
@@ -81,9 +115,10 @@ const PurchaseComplete = ({
                 isActive ?
                     (currentUserTicket && requireExtraQuestions) ?
                         <>
-                            <span>{T.translate('purchase_complete_step.finish_now_label')}</span>
-                            <CTAButton cta={goToExtraQuestions} clear={clearWidgetState}
-                                       close={closeWidget}>{T.translate('purchase_complete_step.finish_now_button')}</CTAButton>
+                            <span>{orderComplete1stParagraph ? orderComplete1stParagraph : T.translate('purchase_complete_step.finish_now_label')}</span>
+                            <CTAButton cta={goToExtraQuestions} clear={clearWidgetState} close={closeWidget}>
+                                {orderCompleteButtonText ? orderCompleteButtonText : T.translate('purchase_complete_step.my_orders_button')}
+                            </CTAButton>
                         </>
                         :
                         (_hasVirtualAccessLevel) ?
@@ -91,9 +126,10 @@ const PurchaseComplete = ({
                                        close={closeWidget}>{T.translate('purchase_complete_step.access_event_button')}</CTAButton>
                             :
                             <>
-                                <span>{T.translate('purchase_complete_step.my_orders_label')}</span>
-                                <CTAButton cta={goToMyOrders} clear={clearWidgetState}
-                                           close={closeWidget}>{T.translate('purchase_complete_step.my_orders_button')}</CTAButton>
+                                <span>{orderComplete1stParagraph ? orderComplete1stParagraph : T.translate('purchase_complete_step.my_orders_label')}</span>
+                                <CTAButton cta={goToMyOrders} clear={clearWidgetState} close={closeWidget}>
+                                    {orderCompleteButtonText ? orderCompleteButtonText : T.translate('purchase_complete_step.finish_now_button')}
+                                </CTAButton>
                             </>
                     :
                     <>
@@ -108,17 +144,19 @@ const PurchaseComplete = ({
                         <br /><br />
                         {
                             currentUserTicket && requireExtraQuestions ?
-                                T.translate('purchase_complete_step.finish_now_label') : T.translate('purchase_complete_step.my_orders_label')
+                                T.translate('purchase_complete_step.finish_now_label') : orderComplete1stParagraph
                         }
                     </span>
                         <div className={styles.actions}>
                             {
                                 currentUserTicket && requireExtraQuestions ?
-                                    <CTAButton cta={goToExtraQuestions} clear={clearWidgetState}
-                                               close={closeWidget}>{T.translate('purchase_complete_step.finish_now_button')}</CTAButton>
+                                    <CTAButton cta={goToExtraQuestions} clear={clearWidgetState} close={closeWidget}>
+                                        {orderCompleteButtonText ? orderCompleteButtonText : T.translate('purchase_complete_step.finish_now_button')}
+                                    </CTAButton>
                                     :
-                                    <CTAButton cta={goToMyOrders} clear={clearWidgetState}
-                                               close={closeWidget}>{T.translate('purchase_complete_step.my_orders_button')}</CTAButton>
+                                    <CTAButton cta={goToMyOrders} clear={clearWidgetState} close={closeWidget}>
+                                        {orderCompleteButtonText ? orderCompleteButtonText : T.translate('purchase_complete_step.my_orders_button')}
+                                    </CTAButton>
                             }
                         </div>
                     </>

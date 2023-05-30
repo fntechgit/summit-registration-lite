@@ -28,6 +28,18 @@ React component for the summit registration lite widget
 
    **ticketTaxesErrorMessage**= string with the message for the 'TicketAndTaxesError' component
 
+   **initialOrderComplete1stParagraph** = string with the text for the first paragraph when the user bought his first order
+
+   **initialOrderComplete2ndParagraph** = string with the text for the second paragraph when the user bought his first order
+
+   **initialOrderCompleteButton** = string with the text for the button when the user bought his first order
+
+   **orderComplete1stParagraph** = string with the text for the first paragraph when the user bought an order
+
+   **orderComplete2ndParagraph** = string with the text for the second paragraph when the user bought an order
+
+   **orderCompleteButton** = string with the text for the button when the user bought an order
+
 
    Example
 

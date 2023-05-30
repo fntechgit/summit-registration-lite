@@ -136,6 +136,12 @@ const RegistrationLite = (
         loadProfileData,
         closeWidget,
         hasVirtualAccessLevel,
+        initialOrderComplete1stParagraph,
+        initialOrderComplete2ndParagraph,
+        initialOrderCompleteButton,
+        orderComplete1stParagraph,
+        orderComplete2ndParagraph,
+        orderCompleteButton,
         ...rest
     }) => {
 
@@ -369,7 +375,12 @@ const RegistrationLite = (
                                         closeWidget={closeWidget}
                                         hasVirtualAccessLevel={hasVirtualAccessLevel}
                                         supportEmail={supportEmail}
-                                        footerHasTicketText={rest.footerHasTicketText}
+                                        initialOrderComplete1stParagraph={initialOrderComplete1stParagraph}
+                                        initialOrderComplete2ndParagraph={initialOrderComplete2ndParagraph}
+                                        initialOrderCompleteButton={initialOrderCompleteButton}
+                                        orderComplete1stParagraph={orderComplete1stParagraph}
+                                        orderComplete2ndParagraph={orderComplete2ndParagraph}
+                                        orderCompleteButton={orderCompleteButton}
                                     />
                                 )}
                             </div>
@@ -420,6 +431,12 @@ RegistrationLite.defaultProps = {
     authErrorCallback: (error) => { console.log(error) },
     hasVirtualAccessLevel: false,
     supportEmail : 'support@fntech.com',
+    initialOrderComplete1stParagraph: '',
+    initialOrderComplete2ndParagraph: '',
+    initialOrderCompleteButton: '',
+    orderComplete1stParagraph: '',
+    orderComplete2ndParagraph: '',
+    orderCompleteButton: '',
 };
 
 RegistrationLite.propTypes = {
@@ -433,7 +450,12 @@ RegistrationLite.propTypes = {
     closeWidget:PropTypes.func,
     hasVirtualAccessLevel:PropTypes.bool,
     supportEmail: PropTypes.string,
-    footerHasTicketText: PropTypes.string,
+    initialOrderComplete1stParagraph: PropTypes.string,
+    initialOrderComplete2ndParagraph: PropTypes.string,
+    initialOrderCompleteButton: PropTypes.string,
+    orderComplete1stParagraph: PropTypes.string,
+    orderComplete2ndParagraph: PropTypes.string,
+    orderCompleteButton: PropTypes.string,
 };
 
 export default connect(mapStateToProps, {

@@ -60,6 +60,12 @@ const filterProps = {
     showCompanyInput: true,
     companyInputPlaceholder: 'Enter your company!',
     companyDDLPlaceholder: 'Select a company',
+    initialOrderComplete1stParagraph: '',
+    initialOrderComplete2ndParagraph: '',
+    initialOrderCompleteButton: '',
+    orderComplete1stParagraph: '',
+    orderComplete2ndParagraph: '',
+    orderCompleteButton: '',
     completedExtraQuestions: () => console.log('evalulate user extra questions...')
 };
 
