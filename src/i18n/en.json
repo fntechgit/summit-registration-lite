@@ -1,12 +1,12 @@
 {
   "purchase_complete_step": {
     "title": " Your order is complete",
-    "finish_now_label": "A ticket has been assigned to you. To complete your additional ticket details, please click the \"Finish Now\" button.",
-    "finish_now_button": "Finish Now",
-    "my_orders_label": "You may visit the My Orders/Tickets tab in the top right-hand corner of the navigation bar to\n assign/reassign tickets or to complete any required ticket details.",
-    "my_orders_button": "View MyOrders/Tickets",
+    "initial_order_complete_1st_paragraph_label": "A ticket has been assigned to you. To complete your additional ticket details, please click the \"{button}\" button.",
+    "initial_order_complete_button": "Finish Now",
+    "order_complete_1st_paragraph_label": "You may visit the My Orders/Tickets tab in the top right-hand corner of the navigation bar to\n assign/reassign tickets or to complete any required ticket details.",
+    "order_complete_button": "View MyOrders/Tickets",
     "access_event_button": "Access Event Now",
-    "footer_has_ticket_text": "If you wish to transfer your assigned ticket, close this window and visit the \"My Orders/Tickets\" tab in the top navigation bar. ",
+    "initial_order_footer_label": "If you wish to transfer your assigned ticket, close this window and visit the \"{button}\" tab in the top navigation bar. ",
     "footer_assistance_text" : "For further assistance, please email <a href=\"mailto:{supportEmail}\">{supportEmail}</a>",
     "event_will_start_text": "The event will start on {date} at {time} {time_zone_label}"
   }

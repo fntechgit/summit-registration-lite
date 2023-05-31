@@ -136,12 +136,6 @@ const RegistrationLite = (
         loadProfileData,
         closeWidget,
         hasVirtualAccessLevel,
-        initialOrderComplete1stParagraph,
-        initialOrderComplete2ndParagraph,
-        initialOrderCompleteButton,
-        orderComplete1stParagraph,
-        orderComplete2ndParagraph,
-        orderCompleteButton,
         ...rest
     }) => {
 
@@ -375,12 +369,12 @@ const RegistrationLite = (
                                         closeWidget={closeWidget}
                                         hasVirtualAccessLevel={hasVirtualAccessLevel}
                                         supportEmail={supportEmail}
-                                        initialOrderComplete1stParagraph={initialOrderComplete1stParagraph}
-                                        initialOrderComplete2ndParagraph={initialOrderComplete2ndParagraph}
-                                        initialOrderCompleteButton={initialOrderCompleteButton}
-                                        orderComplete1stParagraph={orderComplete1stParagraph}
-                                        orderComplete2ndParagraph={orderComplete2ndParagraph}
-                                        orderCompleteButton={orderCompleteButton}
+                                        initialOrderComplete1stParagraph={rest.initialOrderComplete1stParagraph}
+                                        initialOrderComplete2ndParagraph={rest.initialOrderComplete2ndParagraph}
+                                        initialOrderCompleteButton={rest.initialOrderCompleteButton}
+                                        orderComplete1stParagraph={rest.orderComplete1stParagraph}
+                                        orderComplete2ndParagraph={rest.orderComplete2ndParagraph}
+                                        orderCompleteButton={rest.orderCompleteButton}
                                     />
                                 )}
                             </div>
@@ -431,12 +425,6 @@ RegistrationLite.defaultProps = {
     authErrorCallback: (error) => { console.log(error) },
     hasVirtualAccessLevel: false,
     supportEmail : 'support@fntech.com',
-    initialOrderComplete1stParagraph: '',
-    initialOrderComplete2ndParagraph: '',
-    initialOrderCompleteButton: '',
-    orderComplete1stParagraph: '',
-    orderComplete2ndParagraph: '',
-    orderCompleteButton: '',
 };
 
 RegistrationLite.propTypes = {
