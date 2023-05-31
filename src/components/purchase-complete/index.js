@@ -63,7 +63,7 @@ const PurchaseComplete = ({
     if (!checkout) return null;
 
     let orderCompleteButtonText = (
-        currentUserTicket ? 
+        currentUserTicket && requireExtraQuestions ? 
             rest.hasOwnProperty('initialOrderCompleteButton') && typeof rest.initialOrderCompleteButton !== 'undefined' ?
                 rest.initialOrderCompleteButton
                 :
