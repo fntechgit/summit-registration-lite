@@ -63,7 +63,7 @@ const PurchaseComplete = ({
     if (!checkout) return null;
 
     let orderCompleteButtonText = (
-        currentUserTicket && requireExtraQuestions ? 
+        currentUserTicket && requireExtraQuestions ?
             rest.hasOwnProperty('initialOrderCompleteButton') && typeof rest.initialOrderCompleteButton !== 'undefined' ?
                 rest.initialOrderCompleteButton
                 :
@@ -76,27 +76,27 @@ const PurchaseComplete = ({
     );
 
     let orderComplete1stParagraph = (
-        currentUserTicket ? 
+        currentUserTicket ?
             rest.hasOwnProperty('initialOrderComplete1stParagraph') && typeof rest.initialOrderComplete1stParagraph !== 'undefined' ?
                 rest.initialOrderComplete1stParagraph
                 :
                 T.translate('purchase_complete_step.initial_order_complete_1st_paragraph_label', {button: orderCompleteButtonText})
-            : 
+            :
             rest.hasOwnProperty('orderComplete1stParagraph') && typeof rest.orderComplete1stParagraph !== 'undefined' ?
                 rest.orderComplete1stParagraph
-                : 
+                :
                 T.translate('purchase_complete_step.order_complete_1st_paragraph_label')
     );
 
     let orderComplete2ndParagraph = (
-        currentUserTicket ? 
+        currentUserTicket ?
             rest.hasOwnProperty('initialOrderComplete2ndParagraph') && typeof rest.initialOrderComplete2ndParagraph !== 'undefined' ?
-                rest.initialOrderComplete2ndParagraph 
+                rest.initialOrderComplete2ndParagraph
                 :
-                T.translate('purchase_complete_step.initial_order_footer_label', {button: orderCompleteButtonText})
+                T.translate('purchase_complete_step.initial_order_footer_label')
             :
             rest.hasOwnProperty('orderComplete2ndParagraph') && typeof rest.orderComplete2ndParagraph !== 'undefined' ?
-                rest.orderComplete2ndParagraph 
+                rest.orderComplete2ndParagraph
                 :
                 ''
     );
