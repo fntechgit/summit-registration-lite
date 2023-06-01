@@ -14,7 +14,7 @@ const mockCallBack = jest.fn();
 afterEach(cleanup);
 
 it('PasswordlessLoginComponent renders the right email and quantity of input fields', () => {
-    const { getAllByTestId, getByText } = render(<PasswordlessLoginComponent email={mockEmail} codeLength={5} />);
+    const { getAllByTestId, getByText } = render(<PasswordlessLoginComponent email={mockEmail} codeLength={5} passwordlessLogin={mockCallBack} getLoginCode={mockCallBack} goToLogin={mockCallBack} />);
 
     const email = getByText(mockEmail);
     expect(email).toBeTruthy();
@@ -23,7 +23,7 @@ it('PasswordlessLoginComponent renders the right email and quantity of input fie
 });
 
 it('PasswordlessLoginComponent changes the style when there is missing characters in the code', async () => {
-    const { getByTestId, getAllByTestId, getByText } = render(<PasswordlessLoginComponent codeLength={5} passwordlessLogin={mockCallBack} />);
+    const { getByTestId, getAllByTestId, getByText } = render(<PasswordlessLoginComponent email={mockEmail} codeLength={5} passwordlessLogin={mockCallBack} getLoginCode={mockCallBack} goToLogin={mockCallBack}/>);
 
     const inputs = getAllByTestId(/^otp-input/)
     expect(inputs.length).toBe(5);
@@ -37,7 +37,7 @@ it('PasswordlessLoginComponent changes the style when there is missing character
 });
 
 it('PasswordlessLoginComponent shows an error when the code is incorrect', async () => {
-    const { getByTestId, getAllByTestId, getByText } = render(<PasswordlessLoginComponent codeLength={5} codeError={true} passwordlessLogin={mockCallBack} />);
+    const { getByTestId, getAllByTestId, getByText } = render(<PasswordlessLoginComponent email={mockEmail} codeLength={5} codeError={true} passwordlessLogin={mockCallBack} getLoginCode={mockCallBack} goToLogin={mockCallBack} />);
 
     const inputs = getAllByTestId(/^otp-input/)
     expect(inputs.length).toBe(5);
@@ -49,7 +49,7 @@ it('PasswordlessLoginComponent shows an error when the code is incorrect', async
 });
 
 it('PasswordlessLoginComponent goes to login when the user clicks the button', async () => {
-    const { getByTestId } = render(<PasswordlessLoginComponent goToLogin={mockCallBack} />);
+    const { getByTestId } = render(<PasswordlessLoginComponent goToLogin={mockCallBack} email={mockEmail} codeLength={5} passwordlessLogin={mockCallBack} getLoginCode={mockCallBack} />);
     
     const goToLogin = getByTestId('go-back');
     fireEvent.click(goToLogin);

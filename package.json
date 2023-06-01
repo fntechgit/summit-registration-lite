@@ -20,7 +20,8 @@
   },
   "jest": {
     "moduleNameMapper": {
-      "\\.(css|scss)$": "identity-obj-proxy"
+      "\\.(css|scss)$": "identity-obj-proxy",
+      "\\.(jpg|jpeg|png|gif|svg)$": "<rootDir>/src/__mocks__/fileMock.js"
     },
     "setupFilesAfterEnv": [
       "<rootDir>/jest-setup.js"
@@ -64,7 +65,7 @@
     "moment": "^2.22.2",
     "moment-timezone": "^0.5.21",
     "node-sass": "^7.0.1",
-    "openstack-uicore-foundation": "4.0.88",
+    "openstack-uicore-foundation": "4.1.18",
     "optimize-css-assets-webpack-plugin": "^6.0.1",
     "path": "^0.12.7",
     "react": "^16.8.4",

@@ -20,14 +20,14 @@ const mockCallBack = jest.fn();
 afterEach(cleanup);
 
 it('LoginComponent renders the right quantity of providers', () => {
-    const { getAllByTestId } = render(<LoginComponent options={mockOptions} login={mockCallBack} />);
+    const { getAllByTestId } = render(<LoginComponent loginOptions={mockOptions} getLoginCode={mockCallBack} login={mockCallBack} />);
 
     const buttons = getAllByTestId('login-button');
     expect(buttons.length).toBe(mockOptions.length);
 });
 
 it('LoginComponent triggers login function on button click', () => {
-    const { getAllByTestId } = render(<LoginComponent options={mockOptions} login={mockCallBack} />);
+    const { getAllByTestId } = render(<LoginComponent loginOptions={mockOptions} getLoginCode={mockCallBack} login={mockCallBack} />);
 
     const buttons = getAllByTestId('login-button');
     expect(buttons.length).toBeGreaterThan(0);
@@ -36,12 +36,12 @@ it('LoginComponent triggers login function on button click', () => {
 });
 
 it('LoginComponent should evaluate the email before sending the code', () => {
-    const { getByTestId, getByText } = render(<LoginComponent options={mockOptions} getLoginCode={mockCallBack} />);
+    const { getByTestId, getByText } = render(<LoginComponent loginOptions={mockOptions} getLoginCode={mockCallBack} login={mockCallBack} />);
 
     const emailInput = getByTestId('email-input');
     const button = getByTestId('email-button');
     fireEvent.click(button);
-    const emailError = getByText('Please enter a valid email adress');
+    const emailError = getByTestId('email-error');
     expect(emailError).toBeTruthy();
     fireEvent.change(emailInput, { target: { value: 'test@email.com' } })
     fireEvent.click(button);    
