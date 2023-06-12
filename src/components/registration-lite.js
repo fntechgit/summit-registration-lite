@@ -303,7 +303,7 @@ const RegistrationLite = (
 
                                 {profileData && step !== 3 && allowedTicketTypes.length > 0 && (
                                     <>
-                                        {ticketOwned &&
+                                        {ticketOwned && ownedTickets.length > 0 &&
                                             <TicketOwnedComponent ownedTickets={ownedTickets}
                                                                   ticketTypes={allowedTicketTypes} />}
 
