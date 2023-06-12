@@ -26,15 +26,11 @@ const TicketOwnedComponent = ({ ownedTickets, ticketTypes }) => {
     }, ''), [ownedTickets, ticketTypes]);
 
     return (
-        // wait until the ticket string is formed to display
-        ownedTicketsString ?
-            <div className={styles.ticketOwnedWrapper}>
-                <div className={`${styles.alert} alert alert-warning`} role="alert">
-                    You have already ordered {ownedTicketsString}. If you would like to order more, please do so below.
-                </div>
+        <div className={styles.ticketOwnedWrapper}>
+            <div className={`${styles.alert} alert alert-warning`} role="alert">
+                You have already ordered {ownedTicketsString}. If you would like to order more, please do so below.
             </div>
-            :
-            ''
+        </div>
     );
 };
 
