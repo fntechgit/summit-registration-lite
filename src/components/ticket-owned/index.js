@@ -14,16 +14,12 @@
 import React, { useMemo } from 'react';
 import styles from "./index.module.scss";
 
-const TicketOwnedComponent = ({ ownedTickets, ticketTypes }) => {
+const TicketOwnedComponent = ({ ownedTickets}) => {
     const ownedTicketsString = useMemo(() => ownedTickets.reduce((acc, ownedTicket, index) => {
-        const ticketType = ticketTypes.find(type => type.id === ownedTicket.type_id);
-
-        if (!ticketType) return acc;
-
         return `
             ${acc}${acc ? `${index+1===ownedTickets.length? ' and ' : ', '}` : ''}
-            ${ownedTicket.qty} ${ticketType.name}${index === 0 ? !ticketType.name.toLowerCase().endsWith('ticket') ? ' ticket' : '' : ticketType.name.toLowerCase().endsWith('ticket') ? '' : ''}${ownedTicket.qty > 1 ? 's' : ''}`;
-    }, ''), [ownedTickets, ticketTypes]);
+            ${ownedTicket.qty} ${ownedTicket.type_name}${index === 0 ? !wnedTicket.type_name.toLowerCase().endsWith('ticket') ? ' ticket' : '' : ownedTickets.type_name.toLowerCase().endsWith('ticket') ? '' : ''}${ownedTicket.qty > 1 ? 's' : ''}`;
+    }, ''), [ownedTickets]);
 
     return (
         <div className={styles.ticketOwnedWrapper}>
