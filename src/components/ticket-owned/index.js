@@ -18,7 +18,7 @@ const TicketOwnedComponent = ({ ownedTickets}) => {
     const ownedTicketsString = useMemo(() => ownedTickets.reduce((acc, ownedTicket, index) => {
         return `
             ${acc}${acc ? `${index+1===ownedTickets.length? ' and ' : ', '}` : ''}
-            ${ownedTicket.qty} ${ownedTicket.type_name}${index === 0 ? !wnedTicket.type_name.toLowerCase().endsWith('ticket') ? ' ticket' : '' : ownedTickets.type_name.toLowerCase().endsWith('ticket') ? '' : ''}${ownedTicket.qty > 1 ? 's' : ''}`;
+            ${ownedTicket.qty} ${ownedTicket.type_name}${index === 0 ? !ownedTicket.type_name.toLowerCase().endsWith('ticket') ? ' ticket' : '' : ownedTickets.type_name.toLowerCase().endsWith('ticket') ? '' : ''}${ownedTicket.qty > 1 ? 's' : ''}`;
     }, ''), [ownedTickets]);
 
     return (
