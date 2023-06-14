@@ -174,13 +174,7 @@ const RegistrationLite = (
 
     useEffect(() => {
         if (summitData && profileData) {
-            handleGetTicketTypesAndTaxes(summitData.id);
-        }
-    }, [summitData, profileData]);
-
-    useEffect(() => {
-        if (summitData && profileData) {
-            getMyInvitation(summitData.id).catch(e => console.log(e));
+            getMyInvitation(summitData.id).catch(e => console.log(e)).finally(() => handleGetTicketTypesAndTaxes(summitData.id));
         }
     }, [summitData, profileData]);
 

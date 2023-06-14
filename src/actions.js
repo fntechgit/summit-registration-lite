@@ -88,14 +88,12 @@ export const getTicketTypesAndTaxes = (summitId) => async (dispatch) => {
         dispatch(getTicketTypes(summitId)),
         dispatch(getTaxesTypes(summitId))
     ]).then((values) => {
-        dispatch(stopWidgetLoading());
         return values;
-    }).catch((err) => {
-        dispatch(stopWidgetLoading());
+    }).catch((err) => {        
         console.log(err);
         return Promise.reject(err);
-    })
-}
+    }).finally(() => dispatch(stopWidgetLoading()))
+};
 
 /**
  * @param summitId
@@ -118,10 +116,12 @@ const getTicketTypes = (summitId) => async (dispatch, getState, { apiBaseUrl, ge
         )(params)(dispatch).then((res) => {
             return res;
         }).catch((error) => {
+            console.log('catch ticket type', error)
             return Promise.reject(error);
         })
     }
     catch (e) {
+        console.log('trry/catch ticket type', e)
         console.log(e);
         return Promise.reject(e);
     }
@@ -146,10 +146,12 @@ const getTaxesTypes = (summitId) => async (dispatch, getState, { apiBaseUrl, get
         )(params)(dispatch).then((res) => {
           return res;
         }).catch((error) => {
+            console.log('catch tax type', error)
             return Promise.reject(error);
         })
     }
     catch (e) {
+        console.log('trry/catch tax type', e)
         console.log(e);
         return Promise.reject(e);
     }
