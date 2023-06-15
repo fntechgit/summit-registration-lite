@@ -88,14 +88,12 @@ export const getTicketTypesAndTaxes = (summitId) => async (dispatch) => {
         dispatch(getTicketTypes(summitId)),
         dispatch(getTaxesTypes(summitId))
     ]).then((values) => {
-        dispatch(stopWidgetLoading());
         return values;
-    }).catch((err) => {
-        dispatch(stopWidgetLoading());
+    }).catch((err) => {        
         console.log(err);
         return Promise.reject(err);
-    })
-}
+    }).finally(() => dispatch(stopWidgetLoading()))
+};
 
 /**
  * @param summitId
