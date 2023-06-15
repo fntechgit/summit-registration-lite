@@ -186,10 +186,10 @@ const RegistrationLite = (
 
     useEffect(() => {
         // check if there's personal information data and no ticket data to reset widget
-        if (step > 0 && !formValues?.ticketType) {
+        if (step > 0 && !registrationForm.values?.ticketType) {
             changeStep(0);
         }
-    }, [registrationForm.values]);
+    }, [registrationForm.values, step]);
 
     useEffect(() => {
         setFormErrors([]);
@@ -305,14 +305,14 @@ const RegistrationLite = (
                                             summitId={summitData.id}
                                             changeForm={(personalInformation) => {
                                                 setFormValues({
-                                                    ...formValues,
+                                                    ...registrationForm.values,
                                                     personalInformation
                                                 });
                                                 reserveTicket({
                                                     provider,
                                                     personalInformation: personalInformation,
-                                                    ticket: formValues?.ticketType,
-                                                    ticketQuantity: formValues?.ticketQuantity,
+                                                    ticket: registrationForm.values?.ticketType,
+                                                    ticketQuantity: registrationForm.values?.ticketQuantity,
                                                 }, {
                                                     onError: (err, res) => setFormErrors(res.body.errors)
                                                 }).catch((error) => {
