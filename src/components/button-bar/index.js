@@ -16,7 +16,7 @@ import React from 'react';
 import styles from "./index.module.scss";
 import { isInPersonTicketType } from "../../actions";
 
-const ButtonBarComponent = ({ step, changeStep, formValues, removeReservedTicket, inPersonDisclaimer }) => {
+const ButtonBarComponent = ({ step, changeStep, formValues, removeReservedTicket, inPersonDisclaimer, widgetLoading }) => {
     const { ticketType } = formValues || {};
 
     const nextButtonText = inPersonDisclaimer && ticketType && isInPersonTicketType(ticketType) ? 'Accept' : 'Next';
@@ -37,7 +37,7 @@ const ButtonBarComponent = ({ step, changeStep, formValues, removeReservedTicket
                             {step === 0 && <button disabled={!ticketType} className={`${styles.button} button`} onClick={() => changeStep(step + 1)}>{nextButtonText}</button>}
                             {step === 1 && ticketType?.cost === 0 && <button className={`${styles.button} button`} type="submit" form="personal-info-form">Get Ticket</button>}
                             {step === 1 && ticketType?.cost > 0 && <button className={`${styles.button} button`} type="submit" form="personal-info-form">Next</button>}
-                            {step === 2 && <button className={`${styles.button} button`} type="submit" form="payment-form">Pay Now</button>}
+                            {step === 2 && <button className={`${styles.button} button`} disabled={widgetLoading} type="submit" form="payment-form">Pay Now</button>}
                         </div>
                     </div>
                 </>
