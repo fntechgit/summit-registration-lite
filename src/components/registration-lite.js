@@ -386,7 +386,6 @@ const RegistrationLite = (
                                 formValues={formValues}
                                 removeReservedTicket={removeReservedTicket}
                                 changeStep={changeStep}
-                                widgetLoading={widgetLoading}
                             />
                         )}
                     </div>
