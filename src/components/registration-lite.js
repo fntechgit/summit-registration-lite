@@ -179,30 +179,11 @@ const RegistrationLite = (
     }, [summitData, profileData]);
 
     useEffect(() => {
-        if (step === 1 && formValues?.ticketType && formValues?.personalInformation) {
-            reserveTicket({
-                provider,
-                personalInformation: formValues?.personalInformation,
-                ticket: formValues?.ticketType,
-                ticketQuantity: formValues?.ticketQuantity,
-            }, {
-                onError: (err, res) => setFormErrors(res.body.errors)
-            }).catch((error) => {
-                let { message } = error;
-                if(message && (message.includes(AUTH_ERROR_MISSING_AUTH_INFO) ||
-                    message.includes(AUTH_ERROR_MISSING_REFRESH_TOKEN) ||
-                    message.includes(AUTH_ERROR_REFRESH_TOKEN_REQUEST_ERROR))){
-                    // we dont have an access token, init log out process
-                    clearWidgetState();
-                    return authErrorCallback(error);
-                }
-            });
-        }
-
-        if (step > 0 && !formValues?.ticketType) {
+        // check if there's personal information data and no ticket data to reset widget
+        if (step > 0 && !registrationForm.values?.ticketType) {
             changeStep(0);
         }
-    }, [formValues]);
+    }, [registrationForm.values, step]);
 
     useEffect(() => {
         setFormErrors([]);
@@ -316,10 +297,29 @@ const RegistrationLite = (
                                             userProfile={profileData}
                                             invitation={invitation}
                                             summitId={summitData.id}
-                                            changeForm={personalInformation => setFormValues({
-                                                ...formValues,
-                                                personalInformation
-                                            })}
+                                            changeForm={(personalInformation) => {
+                                                setFormValues({
+                                                    ...registrationForm.values,
+                                                    personalInformation
+                                                });
+                                                reserveTicket({
+                                                    provider,
+                                                    personalInformation: personalInformation,
+                                                    ticket: registrationForm.values?.ticketType,
+                                                    ticketQuantity: registrationForm.values?.ticketQuantity,
+                                                }, {
+                                                    onError: (err, res) => setFormErrors(res.body.errors)
+                                                }).catch((error) => {
+                                                    let { message } = error;
+                                                    if(message && (message.includes(AUTH_ERROR_MISSING_AUTH_INFO) ||
+                                                        message.includes(AUTH_ERROR_MISSING_REFRESH_TOKEN) ||
+                                                        message.includes(AUTH_ERROR_REFRESH_TOKEN_REQUEST_ERROR))){
+                                                        // we dont have an access token, init log out process
+                                                        clearWidgetState();
+                                                        return authErrorCallback(error);
+                                                    }
+                                                });
+                                            }}
                                             handleCompanyError={handleCompanyError}
                                             formValues={formValues}
                                             formErrors={formErrors}
