@@ -64,12 +64,14 @@ const PurchaseComplete = ({
 
     let orderCompleteButtonText = (
         currentUserTicket && requireExtraQuestions ?
-            rest.hasOwnProperty('initialOrderCompleteButton') && typeof rest.initialOrderCompleteButton !== 'undefined' ?
+            rest.hasOwnProperty('initialOrderCompleteButton') && typeof rest.initialOrderCompleteButton === 'string' 
+            && rest.initialOrderCompleteButton.trim().length > 0 ?
                 rest.initialOrderCompleteButton
                 :
                 T.translate('purchase_complete_step.initial_order_complete_button')
             :
-            rest.hasOwnProperty('orderCompleteButton') && typeof rest.orderCompleteButton !== 'undefined' ?
+            rest.hasOwnProperty('orderCompleteButton') && typeof rest.orderCompleteButton === 'string' 
+            && rest.orderCompleteButton.trim().length > 0 ?
                 rest.orderCompleteButton
                 :
                 T.translate('purchase_complete_step.order_complete_button')
@@ -77,12 +79,14 @@ const PurchaseComplete = ({
 
     let orderComplete1stParagraph = (
         currentUserTicket ?
-            rest.hasOwnProperty('initialOrderComplete1stParagraph') && typeof rest.initialOrderComplete1stParagraph !== 'undefined' ?
+            rest.hasOwnProperty('initialOrderComplete1stParagraph') && typeof rest.initialOrderComplete1stParagraph === 'string'
+            && rest.initialOrderComplete1stParagraph.trim().length > 0 ?
                 rest.initialOrderComplete1stParagraph
                 :
                 T.translate('purchase_complete_step.initial_order_complete_1st_paragraph_label', {button: orderCompleteButtonText})
             :
-            rest.hasOwnProperty('orderComplete1stParagraph') && typeof rest.orderComplete1stParagraph !== 'undefined' ?
+            rest.hasOwnProperty('orderComplete1stParagraph') && typeof rest.orderComplete1stParagraph === 'string'
+            && rest.orderComplete1stParagraph.trim().length > 0 ?
                 rest.orderComplete1stParagraph
                 :
                 T.translate('purchase_complete_step.order_complete_1st_paragraph_label')
@@ -90,12 +94,14 @@ const PurchaseComplete = ({
 
     let orderComplete2ndParagraph = (
         currentUserTicket ?
-            rest.hasOwnProperty('initialOrderComplete2ndParagraph') && typeof rest.initialOrderComplete2ndParagraph !== 'undefined' ?
+            rest.hasOwnProperty('initialOrderComplete2ndParagraph') && typeof rest.initialOrderComplete2ndParagraph === 'string'
+            && rest.initialOrderComplete2ndParagraph.trim().length > 0 ?
                 rest.initialOrderComplete2ndParagraph
                 :
                 T.translate('purchase_complete_step.initial_order_footer_label')
             :
-            rest.hasOwnProperty('orderComplete2ndParagraph') && typeof rest.orderComplete2ndParagraph !== 'undefined' ?
+            rest.hasOwnProperty('orderComplete2ndParagraph') && typeof rest.orderComplete2ndParagraph === 'string'
+            && rest.orderComplete2ndParagraph.trim().length > 0 ?
                 rest.orderComplete2ndParagraph
                 :
                 ''
