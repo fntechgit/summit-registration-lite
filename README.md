@@ -40,7 +40,6 @@ React component for the summit registration lite widget
 
    **orderCompleteButton** = string with the text for the button when the user bought an order
 
-
    Example
 
    ```
@@ -81,6 +80,10 @@ React component for the summit registration lite widget
    **companyInputPlaceholder**= string for the set the placeholder of the free text company input
 
    **companyDDLPlaceholder**  = string for the set the placeholder of the DDL company input
+
+   **logoDark**               = string for custom src for dark theme logo on otp login 
+
+   **logoLight**              = string for custom src for light theme logo on otp login 
 
 ## PUBLISH TO NPM:
 

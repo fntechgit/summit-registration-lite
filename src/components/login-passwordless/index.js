@@ -18,8 +18,11 @@ import OtpInput from 'react-otp-input';
 import styles from "./index.module.scss";
 
 import FNidLogo from '../../assets/FNid_WHT_logo_rgb.svg';
+import FNidLogoDark from '../../assets/FNid_BLK_logo_rgb.svg';
 
-const PasswordlessLoginComponent = ({ email, codeLength, passwordlessLogin, loginWithCode, codeError, goToLogin, getLoginCode, getPasswordlessCode }) => {
+const PasswordlessLoginComponent = ({ 
+        email, codeLength, passwordlessLogin, loginWithCode, codeError, goToLogin, 
+        getLoginCode, getPasswordlessCode, logoLight, logoDark }) => {
 
     const [otpCode, setOtpCode] = useState('');
     const [otpError, setOtpError] = useState(false)
@@ -46,7 +49,9 @@ const PasswordlessLoginComponent = ({ email, codeLength, passwordlessLogin, logi
         <div className={`${styles.passwordlessWrapper} step-wrapper`}>
             <>
                 <div className={`${styles.innerWrapper}`}>
-                    <img src={FNidLogo} alt="FNid" className={styles.logo} />
+                    {/* Only one logo is displayed based on data-theme through CSS */}
+                    <img src={logoDark || FNidLogoDark} alt="FNid" className={`${styles.logo} ${styles.logoDark}`} />
+                    <img src={logoLight || FNidLogo} alt="FNid" className={`${styles.logo} ${styles.logoLight}`} />
                     <span>
                         We sent your single-use login code to <br />
                         <span data-testid="email">{email}</span>

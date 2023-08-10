@@ -16,7 +16,9 @@
     .logo {
       width: 175px;
       align-self: center;
-      background-color: #fff;
+      &.logoDark {
+        display: none;
+      }
     }
     .digits {
       margin-top: 15px;
@@ -77,5 +79,23 @@
       text-decoration: underline;
       cursor: pointer;
     }
+  }
+}
+
+html[data-theme="DARK"] {
+  .logoLight {
+    display: none;
+  }
+  .logoDark {
+    display: block !important;
+  }
+}
+
+html[data-theme="LIGHT"] {
+  .logoDark {
+    display: none;
+  }
+  .logoLight {
+    display: block !important;
   }
 }
