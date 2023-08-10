@@ -75,13 +75,17 @@ const StripeForm = ({ reservation, payTicket, userProfile, marketingData, stripe
 
     if(!marketingData) return null;
 
+    const documentStyles = getComputedStyle(document.documentElement);
+    const bgColor = documentStyles.getPropertyValue('--color_input_background_color');
+    const textColor = documentStyles.getPropertyValue('--color_input_text_color');
+
     const stripeStyle = merge({}, {
         base: {
             // Add your base input styles here. For example: #d4e5f4
-            color: marketingData.color_input_text_color || marketingData.color_text_dark,
+            color: textColor,
             fontSize: '16px',
             //fontFamily: 'inherit',
-            backgroundColor: marketingData.color_input_background_color || '#ffffff',
+            backgroundColor: bgColor,
             '::placeholder': {
                 color: marketingData.color_text_input_hints
             }
