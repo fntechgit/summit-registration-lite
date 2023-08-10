@@ -60,7 +60,9 @@
   button {
     height: 36px;
     text-align: center;
-    border: 1px solid var(--color_primary);
+    border: 1px solid var(--color_input_border_color);
+    // color: var(--color_input_text_color);
+    // background-color: var(--color_input_background_color);
   }
 
   input {
@@ -69,9 +71,9 @@
 
     &,
     &:read-only {
-      color: inherit;
-      background-color: #fff;
-      border: 1px solid var(--color_primary);
+      border: 1px solid var(--color_input_border_color);
+      color: var(--color_input_text_color);
+      background-color: var(--color_input_background_color);
     }
   }
 

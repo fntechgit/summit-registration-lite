@@ -1,17 +1,17 @@
 .button {
   &[disabled] {
     background-color: var(--color_secondary_contrast)!important;
-  }
-  background-color: var(--color_secondary_contrast)!important;
-  color: #fff!important;
-  border: none!important;
+  }  
   font-weight: bold!important;
   font-size: 1em!important;
   cursor: pointer!important;
+  border: 1px solid var(--color_input_border_color)!important;
+  color: var(--color_input_text_color)!important;
+  background-color: var(--color_input_background_color)!important;
   &:hover {
-    color: #fff!important;
+    color: var(--color_input_text_color)!important;;
   }
   &:active, &:focus {
-    color: #fff!important;
+    color: var(--color_input_text_color)!important;;
   }
 }

@@ -1,3 +1,1 @@
-{
-    "colors": {"color_primary":"#004682","color_primary_contrast":"#FFFFFF","color_secondary":"#1e1e1e","color_secondary_contrast":"#414042","color_accent":"#FF5E32","color_text_dark":"#000000","color_text_med":"#828282","color_text_light":"#ffffff","color_gray_darker":"#4A4A4A","color_gray_dark":"#999999","color_gray_light":"#DFDFDF","color_gray_lighter":"#F2F2F2","color_text_input_hints":"#4290F7"}
-}
+{"colors":{"color_primary":"#004682","color_primary_contrast":"#FFFFFF","color_secondary":"#1e1e1e","color_secondary_contrast":"#414042","color_accent":"#FF5E32","color_text_dark":"#000000","color_text_med":"#828282","color_text_light":"#ffffff","color_gray_darker":"#4A4A4A","color_gray_dark":"#999999","color_gray_light":"#DFDFDF","color_gray_lighter":"#F2F2F2","color_text_input_hints":"#4290F7","color_input_text_color":"#FFFFFF","color_input_background_color":"rgb(24,26,27)"}}

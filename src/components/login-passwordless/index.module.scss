@@ -16,6 +16,7 @@
     .logo {
       width: 175px;
       align-self: center;
+      background-color: #fff;
     }
     .digits {
       margin-top: 15px;
@@ -26,17 +27,18 @@
       display: flex;
       justify-content: center;
       input {
-          height: 56px;
-          width: 56px;
-          font-size: 42px;
-          background-color: var(--color_primary50);
-          border: 1px solid var(--color_primary);
-          border-radius: 5px;
-          padding: 5px;
-          display: inline-flex;
-          text-transform: uppercase;
-          text-align: center;
-          margin: 0 5px;
+        height: 56px;
+        width: 56px;
+        font-size: 42px;
+        color: var(--color_input_text_color);
+        background-color: var(--color_input_background_color);
+        border: 1px solid var(--color_input_border_color);
+        border-radius: 5px;
+        padding: 5px;
+        display: inline-flex;
+        text-transform: uppercase;
+        text-align: center;
+        margin: 0 5px;
       }
     }
     .error {
@@ -53,8 +55,9 @@
         margin: 5px 0;
         border-radius: 5px;
         cursor: pointer;
-        background-color: var(--color_secondary_contrast);
-        color: #FFFFFF;
+        color: var(--color_input_text_color);
+        background-color: var(--color_input_background_color);
+        border: 1px solid var(--color_input_border_color);
         width: 100%;
         font-size: 1em;
       }

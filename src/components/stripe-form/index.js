@@ -78,10 +78,10 @@ const StripeForm = ({ reservation, payTicket, userProfile, marketingData, stripe
     const stripeStyle = merge({}, {
         base: {
             // Add your base input styles here. For example: #d4e5f4
-            color: marketingData.color_text_dark,
+            color: marketingData.color_input_text_color,
             fontSize: '16px',
             //fontFamily: 'inherit',
-            backgroundColor: '#ffffff',
+            backgroundColor: marketingData.color_input_background_color,
             '::placeholder': {
                 color: marketingData.color_text_input_hints
             }

@@ -84,13 +84,6 @@ const RegistrationLiteReducer = (state = DEFAULT_STATE, action) => {
         case LOAD_INITIAL_VARS:
             const { marketingData, summitData, apiBaseUrl, profileData } = payload;
 
-            Object.keys(marketingData).forEach(setting => {
-                if (getComputedStyle(document.documentElement).getPropertyValue(`--${setting}`)) {
-                    document.documentElement.style.setProperty(`--${setting}`, marketingData[setting]);
-                    document.documentElement.style.setProperty(`--${setting}50`, `${marketingData[setting]}50`);
-                }
-            });
-
             return {
                 ...state,
                 reservation: null,

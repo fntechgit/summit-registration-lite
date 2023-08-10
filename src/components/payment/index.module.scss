@@ -11,8 +11,9 @@
   div.fieldWrapper {
     width: 48%;
     border-radius: 5px;
-    background-color: #e6f3ff;
-    border: 1px solid #3fa2f7;
+    color: var(--color_input_text_color);
+    border: 1px solid var(--color_input_border_color);
+    background-color: var(--color_input_background_color);
     height: 36px;
     padding: 5px 10px;
     display: flex;
@@ -44,10 +45,10 @@
   input {
     width: 48%;
     border-radius: 5px;
-    border: 1px solid #3fa2f7;
-    color: #3486cd;
-    font-size: 16px;
-    background-color: #e6f3ff;
+    color: var(--color_input_text_color);
+    border: 1px solid var(--color_input_border_color);
+    background-color: var(--color_input_background_color);
+    font-size: 16px;    
     height: 36px;
     padding: 5px 10px;
     display: flex;
@@ -57,7 +58,7 @@
     font-weight: bold;
 
     &::placeholder {
-      color: #3486cd;
+      color: var(--color_text_input_hints);
     }
   }
 }

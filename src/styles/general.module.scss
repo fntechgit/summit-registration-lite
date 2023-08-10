@@ -8,8 +8,8 @@
 } 
 
 .outerWrapper {
-  border: 1px solid lightgray;
-  background-color: white;
+  border: 1px solid var(--color_input_border_color);
+  background-color: var(--color_background_light);
   border-radius: 5px;
 }
 
@@ -21,7 +21,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  border-bottom: 1px solid lightgray;
+  border-bottom: 1px solid var(--color_input_border_color);
   margin: 0px -10px;
   padding: 0px 15px 5px;
   i {
