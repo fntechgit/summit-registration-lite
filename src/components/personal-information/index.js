@@ -21,16 +21,16 @@ import { formatErrorMessage } from '../../helpers';
 
 import styles from "./index.module.scss";
 
-const PersonalInfoComponent = ({ 
-    isActive, 
-    changeForm, 
-    reservation, 
-    userProfile, 
-    summitId, 
-    handleCompanyError, 
-    formValues, 
-    formErrors = {}, 
-    invitation, 
+const PersonalInfoComponent = ({
+    isActive,
+    changeForm,
+    reservation,
+    userProfile,
+    summitId,
+    handleCompanyError,
+    formValues,
+    formErrors = {},
+    invitation,
     showMultipleTicketTexts,
     allowPromoCodes,
     showCompanyInput = true,
@@ -143,7 +143,7 @@ const PersonalInfoComponent = ({
                                     {errors.email?.type === 'pattern' && <div className={styles.fieldError} data-testid="email-error-invalid">The email is invalid.</div>}
                                 </div>
 
-                                {showCompanyInput && 
+                                {showCompanyInput &&
                                     <div className={styles.fieldWrapper}>
                                         <div className={styles.companies}>
                                             <RegistrationCompanyInput

@@ -12,7 +12,6 @@
  **/
 
 import React, { useEffect, useState } from 'react';
-import { connect } from "react-redux";
 
 import { Dropdown } from 'openstack-uicore-foundation/lib/components'
 
@@ -21,6 +20,8 @@ import Swal from 'sweetalert2';
 import { epochToMomentTimeZone } from "openstack-uicore-foundation/lib/utils/methods";
 
 import styles from "./index.module.scss";
+
+import {DefaultTextColor, DefaultHintColor} from '../../utils/constants';
 
 const LawPayForm = ({ reservation, payTicket, userProfile, providerKey, provider, timestamp }) => {
 
@@ -41,9 +42,9 @@ const LawPayForm = ({ reservation, payTicket, userProfile, providerKey, provider
         cvv: '',
         address1: '',
     });
-    
-    let textColor = '#FFFFFF';
-    let hintColor =  'rgb(58, 63, 65)';
+
+    let textColor = DefaultTextColor;
+    let hintColor =  DefaultHintColor;
 
     if(document && document.documentElement) {
         const documentStyles = getComputedStyle(document.documentElement);
@@ -183,7 +184,7 @@ const LawPayForm = ({ reservation, payTicket, userProfile, providerKey, provider
                 },
             }
         },
-        placeholder: (provided, state) => ({ 
+        placeholder: (provided, state) => ({
             ...provided,
             color: 'var(--color_text_input_hints)',
         }),
@@ -258,4 +259,4 @@ const LawPayForm = ({ reservation, payTicket, userProfile, providerKey, provider
     )
 };
 
-export default connect(mapStateToProps, null)(LawPayForm);
+export default LawPayForm;

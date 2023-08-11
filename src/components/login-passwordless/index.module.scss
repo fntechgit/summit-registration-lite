@@ -64,7 +64,7 @@
         font-size: 1em;
       }
       .link {
-        color: var(--color_primary);
+        color: var(--color_text_dark);
         text-decoration: underline;
         cursor: pointer;
       }
@@ -75,7 +75,7 @@
     font-weight: normal;
     font-size: 14px;
     span {
-      color: var(--color_primary);
+      color: var(--color_text_dark);
       text-decoration: underline;
       cursor: pointer;
     }

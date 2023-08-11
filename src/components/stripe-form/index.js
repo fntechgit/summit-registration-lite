@@ -12,9 +12,9 @@
  **/
 
 import React, { useState } from 'react';
-import { connect } from "react-redux";
 import { useForm } from 'react-hook-form';
 import merge from 'lodash/merge';
+import {DefaultBGColor, DefaultTextColor, DefaultHintColor} from '../../utils/constants';
 
 import {
     CardNumberElement,
@@ -67,15 +67,16 @@ const stripeErrorCodeMap = {
     }
 };
 
+
 const StripeForm = ({ reservation, payTicket, userProfile, stripeOptions, provider }) => {
     const stripe = useStripe();
     const elements = useElements();
     const [stripeErrors, setStripeErrors] = useState({});
     const { register, handleSubmit, formState: { errors } } = useForm();
 
-    let bgColor = '#000000';
-    let textColor = '#FFFFFF';
-    let hintColor =  'rgb(58, 63, 65)';
+    let bgColor = DefaultBGColor;
+    let textColor = DefaultTextColor;
+    let hintColor = DefaultHintColor;
 
     if(document && document.documentElement) {
         const documentStyles = getComputedStyle(document.documentElement);
@@ -175,4 +176,4 @@ const StripeForm = ({ reservation, payTicket, userProfile, stripeOptions, provid
     )
 };
 
-export default connect(mapStateToProps, null)(StripeForm);
+export default StripeForm;
