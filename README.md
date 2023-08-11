@@ -10,8 +10,6 @@ React component for the summit registration lite widget
 
    **profileData**            = object with the profile data from the user
 
-   **marketingData**          = object with the settings from the marketing API
-
    **supportEmail**           = string with the email address for support
 
    **allowsNativeAuth**       = boolean to show/hide native auth

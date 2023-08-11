@@ -22,7 +22,7 @@ import { epochToMomentTimeZone } from "openstack-uicore-foundation/lib/utils/met
 
 import styles from "./index.module.scss";
 
-const LawPayForm = ({ reservation, payTicket, userProfile, marketingData, providerKey, provider, timestamp }) => {
+const LawPayForm = ({ reservation, payTicket, userProfile, providerKey, provider, timestamp }) => {
 
     const [hostedFields, setHostedFields] = useState(null);
 
@@ -41,13 +41,22 @@ const LawPayForm = ({ reservation, payTicket, userProfile, marketingData, provid
         cvv: '',
         address1: '',
     });
+    
+    let textColor = '#FFFFFF';
+    let hintColor =  'rgb(58, 63, 65)';
+
+    if(document && document.documentElement) {
+        const documentStyles = getComputedStyle(document.documentElement);
+        textColor = documentStyles.getPropertyValue('--color_input_text_color');
+        hintColor = documentStyles.getPropertyValue('--color_text_input_hints');
+    }
 
     const style = {
-        color: marketingData.color_text_dark,
+        color: textColor,
         "font-size": '16px',
         "font-weight": 'inherit',
         '::placeholder': {
-            color: marketingData.color_text_input_hints
+            color: hintColor
         }
     }
 
@@ -248,9 +257,5 @@ const LawPayForm = ({ reservation, payTicket, userProfile, marketingData, provid
         </form>
     )
 };
-
-const mapStateToProps = ({ registrationLiteState }) => ({
-    marketingData: registrationLiteState.settings.marketingData
-});
 
 export default connect(mapStateToProps, null)(LawPayForm);

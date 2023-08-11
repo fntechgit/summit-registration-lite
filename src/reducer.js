@@ -58,7 +58,6 @@ const DEFAULT_STATE = {
     settings: {
         apiBaseUrl: null,
         summitId: null,
-        marketingData: null,
         userProfile: null,
     },
     nowUtc: localNowUtc,
@@ -82,7 +81,7 @@ const RegistrationLiteReducer = (state = DEFAULT_STATE, action) => {
             return { ...state, widgetLoading: false };
         }
         case LOAD_INITIAL_VARS:
-            const { marketingData, summitData, apiBaseUrl, profileData } = payload;
+            const { summitData, apiBaseUrl, profileData } = payload;
 
             return {
                 ...state,
@@ -95,7 +94,6 @@ const RegistrationLiteReducer = (state = DEFAULT_STATE, action) => {
                 passwordless: { ...DEFAULT_STATE.passwordless },
                 settings: {
                     ...DEFAULT_STATE.settings,
-                    marketingData: marketingData,
                     summitId: summitData.id,
                     userProfile: profileData,
                     apiBaseUrl: apiBaseUrl,

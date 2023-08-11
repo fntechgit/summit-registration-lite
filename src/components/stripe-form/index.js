@@ -67,17 +67,23 @@ const stripeErrorCodeMap = {
     }
 };
 
-const StripeForm = ({ reservation, payTicket, userProfile, marketingData, stripeOptions, provider }) => {
+const StripeForm = ({ reservation, payTicket, userProfile, stripeOptions, provider }) => {
     const stripe = useStripe();
     const elements = useElements();
     const [stripeErrors, setStripeErrors] = useState({});
     const { register, handleSubmit, formState: { errors } } = useForm();
 
-    if(!marketingData) return null;
+    let bgColor = '#000000';
+    let textColor = '#FFFFFF';
+    let hintColor =  'rgb(58, 63, 65)';
 
-    const documentStyles = getComputedStyle(document.documentElement);
-    const bgColor = documentStyles.getPropertyValue('--color_input_background_color');
-    const textColor = documentStyles.getPropertyValue('--color_input_text_color');
+    if(document && document.documentElement) {
+        const documentStyles = getComputedStyle(document.documentElement);
+        bgColor = documentStyles.getPropertyValue('--color_input_background_color');
+        textColor = documentStyles.getPropertyValue('--color_input_text_color');
+        hintColor = documentStyles.getPropertyValue('--color_text_input_hints');
+    }
+
 
     const stripeStyle = merge({}, {
         base: {
@@ -87,7 +93,7 @@ const StripeForm = ({ reservation, payTicket, userProfile, marketingData, stripe
             //fontFamily: 'inherit',
             backgroundColor: bgColor,
             '::placeholder': {
-                color: marketingData.color_text_input_hints
+                color: hintColor
             }
         },
         invalid: {
@@ -168,9 +174,5 @@ const StripeForm = ({ reservation, payTicket, userProfile, marketingData, stripe
         </form>
     )
 };
-
-const mapStateToProps = ({ registrationLiteState }) => ({
-    marketingData: registrationLiteState.settings.marketingData
-});
 
 export default connect(mapStateToProps, null)(StripeForm);
