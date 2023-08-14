@@ -157,6 +157,7 @@ const PersonalInfoComponent = ({
                                                 value={personalInfo.company}
                                                 inputPlaceholder={companyInputPlaceholder}
                                                 DDLPlaceholder={companyDDLPlaceholder}
+                                                isClearable={true}
                                             />
                                             {companyError && <div className={styles.fieldError} data-testid="company-error">This field is required.</div>}
                                         </div>
