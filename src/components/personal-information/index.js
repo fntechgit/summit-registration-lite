@@ -146,7 +146,7 @@ const PersonalInfoComponent = ({
 
                                 {showCompanyInput &&
                                     <div className={styles.fieldWrapper}>
-                                        <div className={styles.companies}>
+                                        <div>
                                             <RegistrationCompanyInput
                                                 id="company"
                                                 name="company"
@@ -156,8 +156,7 @@ const PersonalInfoComponent = ({
                                                 onChange={onCompanyChange}
                                                 onError={handleCompanyError}
                                                 value={personalInfo.company}
-                                                inputPlaceholder={companyInputPlaceholder}
-                                                DDLPlaceholder={companyDDLPlaceholder}
+                                                placeholder={companyDDLPlaceholder}
                                                 isClearable={true}
                                             />
                                             {companyError && <div className={styles.fieldError} data-testid="company-error">This field is required.</div>}
