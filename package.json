@@ -65,7 +65,7 @@
     "moment": "^2.22.2",
     "moment-timezone": "^0.5.21",
     "node-sass": "^7.0.1",
-    "openstack-uicore-foundation": "^4.1.30",
+    "openstack-uicore-foundation": "4.1.42",
     "optimize-css-assets-webpack-plugin": "^6.0.1",
     "path": "^0.12.7",
     "react": "^16.8.4",
@@ -132,6 +132,7 @@
     "validator": "^9.4.1"
   },
   "dependencies": {
+    "@react-pdf/renderer": "^3.1.12",
     "@stripe/react-stripe-js": "^1.4.1",
     "@stripe/stripe-js": "^1.15.0",
     "i18n-react": "^0.6.4",

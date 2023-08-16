@@ -68,60 +68,6 @@
       margin-right: 5px;
     }
   }
-
-  .companies {
-    > div {
-      position: relative;
-      width: 100%;
-      border-radius: 5px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-size: 15px;
-
-      &::placeholder {
-        color: var(--color_text_input_hints);
-      }
-
-      > div {
-        height: 100%;
-        width: 100%;
-
-        > div {
-          height: 36px;
-          padding: 0px;
-          border: 1px solid var(--color_primary);
-          box-shadow: 0 0 1px var(--color_primary);
-
-          > div {
-            height: 36px;
-          }
-        }
-
-        > span + div + div {
-          overflow: auto;
-          height: auto;
-
-          > div {
-            height: auto;
-          }
-        }
-      }
-
-      input {
-        padding: 5px 10px;
-        font-size: 16px;
-        color: inherit;
-        border: 1px solid var(--color_primary);
-        padding-right: 0px !important;
-        background-color: transparent;
-      }
-
-      i {
-        right: 10px !important;
-      }
-    }
-  }
 }
 
 .moreInfo {

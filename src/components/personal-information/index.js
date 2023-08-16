@@ -21,16 +21,16 @@ import { formatErrorMessage } from '../../helpers';
 
 import styles from "./index.module.scss";
 
-const PersonalInfoComponent = ({ 
-    isActive, 
-    changeForm, 
-    reservation, 
-    userProfile, 
-    summitId, 
-    handleCompanyError, 
-    formValues, 
-    formErrors = {}, 
-    invitation, 
+const PersonalInfoComponent = ({
+    isActive,
+    changeForm,
+    reservation,
+    userProfile,
+    summitId,
+    handleCompanyError,
+    formValues,
+    formErrors = {},
+    invitation,
     showMultipleTicketTexts,
     allowPromoCodes,
     showCompanyInput = true,
@@ -88,9 +88,14 @@ const PersonalInfoComponent = ({
     });
 
     const customStyles = {
+        control: (provided) => ({
+            ...provided,
+            minHeight: '36px',
+            height: '36px',
+        }),
         menuList: (provided) => ({
             ...provided,
-            maxHeight: 120,
+            maxHeight: '120px',
         }),
     }
 
@@ -143,9 +148,9 @@ const PersonalInfoComponent = ({
                                     {errors.email?.type === 'pattern' && <div className={styles.fieldError} data-testid="email-error-invalid">The email is invalid.</div>}
                                 </div>
 
-                                {showCompanyInput && 
+                                {showCompanyInput &&
                                     <div className={styles.fieldWrapper}>
-                                        <div className={styles.companies}>
+                                        <div>
                                             <RegistrationCompanyInput
                                                 id="company"
                                                 name="company"
@@ -155,8 +160,8 @@ const PersonalInfoComponent = ({
                                                 onChange={onCompanyChange}
                                                 onError={handleCompanyError}
                                                 value={personalInfo.company}
-                                                inputPlaceholder={companyInputPlaceholder}
-                                                DDLPlaceholder={companyDDLPlaceholder}
+                                                placeholder={companyDDLPlaceholder}
+                                                isClearable={true}
                                             />
                                             {companyError && <div className={styles.fieldError} data-testid="company-error">This field is required.</div>}
                                         </div>
