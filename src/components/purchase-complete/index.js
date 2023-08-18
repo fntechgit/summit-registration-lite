@@ -14,7 +14,7 @@
 import React, { useEffect, useMemo } from 'react';
 import styles from './index.module.scss';
 import { epochToMomentTimeZone } from 'openstack-uicore-foundation/lib/utils/methods';
-import { ticketHasAccessLevel } from '../../utils/utils';
+import { isEmptyString, ticketHasAccessLevel } from '../../utils/utils';
 import { VirtualAccessLevel } from '../../utils/constants';
 import T from 'i18n-react';
 import RawHTML from 'openstack-uicore-foundation/lib/components/raw-html';
@@ -64,12 +64,12 @@ const PurchaseComplete = ({
 
     let orderCompleteButtonText = (
         currentUserTicket && requireExtraQuestions ?
-            rest.hasOwnProperty('initialOrderCompleteButton') && typeof rest.initialOrderCompleteButton !== 'undefined' ?
+            rest.hasOwnProperty('initialOrderCompleteButton') && !isEmptyString(rest.initialOrderCompleteButton) ?
                 rest.initialOrderCompleteButton
                 :
                 T.translate('purchase_complete_step.initial_order_complete_button')
             :
-            rest.hasOwnProperty('orderCompleteButton') && typeof rest.orderCompleteButton !== 'undefined' ?
+            rest.hasOwnProperty('orderCompleteButton') && !isEmptyString(rest.orderCompleteButton) ?
                 rest.orderCompleteButton
                 :
                 T.translate('purchase_complete_step.order_complete_button')
@@ -77,12 +77,12 @@ const PurchaseComplete = ({
 
     let orderComplete1stParagraph = (
         currentUserTicket ?
-            rest.hasOwnProperty('initialOrderComplete1stParagraph') && typeof rest.initialOrderComplete1stParagraph !== 'undefined' ?
+            rest.hasOwnProperty('initialOrderComplete1stParagraph') && !isEmptyString(rest.initialOrderComplete1stParagraph) ?
                 rest.initialOrderComplete1stParagraph
                 :
                 T.translate('purchase_complete_step.initial_order_complete_1st_paragraph_label', {button: orderCompleteButtonText})
             :
-            rest.hasOwnProperty('orderComplete1stParagraph') && typeof rest.orderComplete1stParagraph !== 'undefined' ?
+            rest.hasOwnProperty('orderComplete1stParagraph') && !isEmptyString(rest.orderComplete1stParagraph) ?
                 rest.orderComplete1stParagraph
                 :
                 T.translate('purchase_complete_step.order_complete_1st_paragraph_label')
@@ -90,12 +90,12 @@ const PurchaseComplete = ({
 
     let orderComplete2ndParagraph = (
         currentUserTicket ?
-            rest.hasOwnProperty('initialOrderComplete2ndParagraph') && typeof rest.initialOrderComplete2ndParagraph !== 'undefined' ?
+            rest.hasOwnProperty('initialOrderComplete2ndParagraph') && !isEmptyString(rest.initialOrderComplete2ndParagraph) ?
                 rest.initialOrderComplete2ndParagraph
                 :
                 T.translate('purchase_complete_step.initial_order_footer_label')
             :
-            rest.hasOwnProperty('orderComplete2ndParagraph') && typeof rest.orderComplete2ndParagraph !== 'undefined' ?
+            rest.hasOwnProperty('orderComplete2ndParagraph') && !isEmptyString(rest.orderComplete2ndParagraph) ?
                 rest.orderComplete2ndParagraph
                 :
                 ''

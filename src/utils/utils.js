@@ -38,3 +38,7 @@ export const getCurrentUserLanguage = () => {
     }
     return language;
 };
+
+export const isEmptyString = (val) => {
+    return typeof val === 'string' && val.trim().length > 0;
+}
