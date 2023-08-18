@@ -89,9 +89,14 @@ const PersonalInfoComponent = ({
     });
 
     const customStyles = {
+        control: (provided) => ({
+            ...provided,
+            minHeight: '36px',
+            height: '36px',
+        }),
         menuList: (provided) => ({
             ...provided,
-            maxHeight: 120,
+            maxHeight: '120px',
         }),
     }
 
