@@ -64,7 +64,7 @@ const LoginComponent = ({
                             o.provider_param ?
                                 <div className={`${styles.button}`} key={`provider-${o.provider_param}`} data-testid="login-button"
                                     style={{
-                                        color: o.button_border_color ? o.button_border_color : '#ffffff',
+                                        color: o.button_text_color ? o.button_text_color : '#ffffff',
                                         border: `thin solid ${o.button_border_color ? o.button_border_color : o.button_color}`,
                                         backgroundColor: o.button_color,
                                         backgroundImage: o.provider_logo ? `url(${o.provider_logo})` : 'none',
