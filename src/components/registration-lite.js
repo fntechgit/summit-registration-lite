@@ -128,7 +128,6 @@ const RegistrationLite = (
         requestedTicketTypes,
         allowPromoCodes,
         showCompanyInput,
-        companyInputPlaceholder,
         companyDDLPlaceholder,
         nowUtc,
         updateClock,
@@ -326,7 +325,6 @@ const RegistrationLite = (
                                             showMultipleTicketTexts={showMultipleTicketTexts}
                                             allowPromoCodes={allowPromoCodes}
                                             showCompanyInput={showCompanyInput}
-                                            companyInputPlaceholder={companyInputPlaceholder}
                                             companyDDLPlaceholder={companyDDLPlaceholder}
                                         />
 
@@ -413,7 +411,6 @@ RegistrationLite.defaultProps = {
     noAllowedTicketsMessage: '<span>You already have purchased all available tickets for this event and/or there are no tickets available for you to purchase.</span><br/><span><a href="/a/my-tickets">Visit the my orders / my tickets page</a> to review your existing tickets.</span>',
     ticketTaxesErrorMessage: '<span>There was an error getting the information for the tickets. Please try it again.</span>',
     allowPromoCodes: true,
-    companyInputPlaceholder: 'Enter your company',
     companyDDLPlaceholder: 'Select a company',
     authErrorCallback: (error) => { console.log(error) },
     hasVirtualAccessLevel: false,
