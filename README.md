@@ -75,8 +75,6 @@ React component for the summit registration lite widget
 
    **showCompanyInput**       = booleaen to show/hide the "Company" field. Defaults to true.
 
-   **companyInputPlaceholder**= string for the set the placeholder of the free text company input
-
    **companyDDLPlaceholder**  = string for the set the placeholder of the DDL company input
 
    **logoDark**               = string for custom src for dark theme logo on otp login 
