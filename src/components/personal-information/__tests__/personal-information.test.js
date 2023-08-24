@@ -66,7 +66,7 @@ it('PersonalInfoComponent shows the personal data when is not active', async () 
 it('PersonalInfoComponent checks the validation of each field', async () => {
     const { getByTestId, queryByTestId } = render(<PersonalInfoComponent
         isActive={true} formValues={mockFormValues} userProfile={mockProfile} handleCompanyError={mockCallBack}
-        companyInputPlaceholder="" companyDDLPlaceholder="" summitId={13} />);
+        companyDDLPlaceholder="" summitId={13} />);
 
     const form = getByTestId('personal-form');
     const firstName = getByTestId('first-name');
