@@ -202,10 +202,21 @@ const RegistrationLite = (
     const handleCloseClick = () => {
         // Reset the step when closed to avoid unexpected behavior from `useEffect`s w/in other steps.
         // (i.e., recalling `onPurchaseComplete` after a user completes one order, closes the window, and then reopens the registration widget)
-        changeStep(0);
-        clearWidgetState();
-        if(closeWidget)
-            closeWidget();
+        const closeAndClearState = () => {
+            changeStep(0);
+            clearWidgetState();
+            if (closeWidget) {
+                closeWidget();
+            }
+        }
+        // if there's a reservation on the state, delete it before close the widget
+        if (reservation) {
+            removeReservedTicket().finally(() => {
+                closeAndClearState()
+            });
+        } else {
+            closeAndClearState()
+        }
     };
 
     const handleGetTicketTypesAndTaxes = (summitId) => {
