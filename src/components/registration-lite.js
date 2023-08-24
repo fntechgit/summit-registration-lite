@@ -211,7 +211,7 @@ const RegistrationLite = (
         }
         // if there's a reservation on the state, delete it before close the widget
         if (reservation) {
-            removeReservedTicket().then(() => {
+            removeReservedTicket().finally(() => {
                 closeAndClearState()
             });
         } else {
