@@ -9,17 +9,17 @@
   margin: 15px 0;
   padding: 15px;
   border-radius: 5px;
-  border: 1px solid lightgray;
+  border: 1px solid var(--color_input_border_color);
   text-align: center;
   .circle {
     margin-bottom: 10px;
-    background-color: var(--color_primary50);
+    background-color: var(--color_input_background_color);
     border-radius: 50px;
-    border: 1px solid var(--color_primary);
+    border: 1px solid  var(--color_text_dark);
     padding: 10px;
     i {
       font-size: 36px;
-      color: var(--color_primary);
+      color:  var(--color_text_dark);
     }
   }
   .complete {
@@ -36,7 +36,7 @@
       font-size: 14px;
   }
   a {
-    color: var(--color_primary);
+    color: var(--color_text_dark);
     text-decoration: underline;
   }
   .footer {

@@ -12,7 +12,6 @@
  **/
 
 import React, { useEffect, useState } from 'react';
-import { connect } from "react-redux";
 
 import { Dropdown } from 'openstack-uicore-foundation/lib/components'
 
@@ -22,7 +21,9 @@ import { epochToMomentTimeZone } from "openstack-uicore-foundation/lib/utils/met
 
 import styles from "./index.module.scss";
 
-const LawPayForm = ({ reservation, payTicket, userProfile, marketingData, providerKey, provider, timestamp }) => {
+import {DefaultTextColor, DefaultHintColor} from '../../utils/constants';
+
+const LawPayForm = ({ reservation, payTicket, userProfile, providerKey, provider, timestamp }) => {
 
     const [hostedFields, setHostedFields] = useState(null);
 
@@ -42,12 +43,21 @@ const LawPayForm = ({ reservation, payTicket, userProfile, marketingData, provid
         address1: '',
     });
 
+    let textColor = DefaultTextColor;
+    let hintColor =  DefaultHintColor;
+
+    if(document && document.documentElement) {
+        const documentStyles = getComputedStyle(document.documentElement);
+        textColor = documentStyles.getPropertyValue('--color_input_text_color');
+        hintColor = documentStyles.getPropertyValue('--color_text_input_hints');
+    }
+
     const style = {
-        color: marketingData.color_text_dark,
+        color: textColor,
         "font-size": '16px',
         "font-weight": 'inherit',
         '::placeholder': {
-            color: marketingData.color_text_input_hints
+            color: hintColor
         }
     }
 
@@ -174,7 +184,7 @@ const LawPayForm = ({ reservation, payTicket, userProfile, marketingData, provid
                 },
             }
         },
-        placeholder: (provided, state) => ({ 
+        placeholder: (provided, state) => ({
             ...provided,
             color: 'var(--color_text_input_hints)',
         }),
@@ -249,8 +259,4 @@ const LawPayForm = ({ reservation, payTicket, userProfile, marketingData, provid
     )
 };
 
-const mapStateToProps = ({ registrationLiteState }) => ({
-    marketingData: registrationLiteState.settings.marketingData
-});
-
-export default connect(mapStateToProps, null)(LawPayForm);
+export default LawPayForm;

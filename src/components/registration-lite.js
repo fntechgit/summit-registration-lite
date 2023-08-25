@@ -135,6 +135,8 @@ const RegistrationLite = (
         loadProfileData,
         closeWidget,
         hasVirtualAccessLevel,
+        logoLight,
+        logoDark,
         ...rest
     }) => {
 
@@ -283,6 +285,8 @@ const RegistrationLite = (
                                         goToLogin={goToLogin}
                                         getLoginCode={getLoginCode}
                                         getPasswordlessCode={getPasswordlessCode}
+                                        logoLight={logoLight}
+                                        logoDark={logoDark}
                                     />
                                 )}
 

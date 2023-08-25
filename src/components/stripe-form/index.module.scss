@@ -16,7 +16,8 @@
   div.inputWrapper {
     display: flex;
     border-radius: 5px;
-    border: 1px solid var(--color_primary);
+    border: 1px solid var(--color_input_border_color);
+    background-color: var(--color_input_background_color);
     height: 36px;
     padding: 5px 10px;
     justify-content: space-between;
@@ -24,7 +25,8 @@
 
     input {
       width: 100%;
-      background-color: transparent;
+      color: var(--color_input_text_color);
+      background-color: var(--color_input_background_color);
       border: none;
       padding: 0;
       font-size: 16px;

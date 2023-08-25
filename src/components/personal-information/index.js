@@ -62,6 +62,7 @@ const PersonalInfoComponent = ({
 
     const onCompanyChange = (ev) => {
         const newCompany = ev.target.value;
+        console.log("RegistrationLite::onCompanyChange", newCompany);
         setCompanyError(false);
         setPersonalInfo({ ...personalInfo, company: newCompany });
     };

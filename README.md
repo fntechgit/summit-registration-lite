@@ -10,8 +10,6 @@ React component for the summit registration lite widget
 
    **profileData**            = object with the profile data from the user
 
-   **marketingData**          = object with the settings from the marketing API
-
    **supportEmail**           = string with the email address for support
 
    **allowsNativeAuth**       = boolean to show/hide native auth
@@ -39,7 +37,6 @@ React component for the summit registration lite widget
    **orderComplete2ndParagraph** = string with the text for the second paragraph when the user bought an order
 
    **orderCompleteButton** = string with the text for the button when the user bought an order
-
 
    Example
 
@@ -79,6 +76,10 @@ React component for the summit registration lite widget
    **showCompanyInput**       = booleaen to show/hide the "Company" field. Defaults to true.
 
    **companyDDLPlaceholder**  = string for the set the placeholder of the DDL company input
+
+   **logoDark**               = string for custom src for dark theme logo on otp login 
+
+   **logoLight**              = string for custom src for light theme logo on otp login 
 
 ## PUBLISH TO NPM:
 

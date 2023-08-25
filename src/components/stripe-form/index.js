@@ -12,9 +12,9 @@
  **/
 
 import React, { useState } from 'react';
-import { connect } from "react-redux";
 import { useForm } from 'react-hook-form';
 import merge from 'lodash/merge';
+import {DefaultBGColor, DefaultTextColor, DefaultHintColor} from '../../utils/constants';
 
 import {
     CardNumberElement,
@@ -67,23 +67,34 @@ const stripeErrorCodeMap = {
     }
 };
 
-const StripeForm = ({ reservation, payTicket, userProfile, marketingData, stripeOptions, provider }) => {
+
+const StripeForm = ({ reservation, payTicket, userProfile, stripeOptions, provider }) => {
     const stripe = useStripe();
     const elements = useElements();
     const [stripeErrors, setStripeErrors] = useState({});
     const { register, handleSubmit, formState: { errors } } = useForm();
 
-    if(!marketingData) return null;
+    let bgColor = DefaultBGColor;
+    let textColor = DefaultTextColor;
+    let hintColor = DefaultHintColor;
+
+    if(document && document.documentElement) {
+        const documentStyles = getComputedStyle(document.documentElement);
+        bgColor = documentStyles.getPropertyValue('--color_input_background_color');
+        textColor = documentStyles.getPropertyValue('--color_input_text_color');
+        hintColor = documentStyles.getPropertyValue('--color_text_input_hints');
+    }
+
 
     const stripeStyle = merge({}, {
         base: {
             // Add your base input styles here. For example: #d4e5f4
-            color: marketingData.color_text_dark,
+            color: textColor,
             fontSize: '16px',
             //fontFamily: 'inherit',
-            backgroundColor: '#ffffff',
+            backgroundColor: bgColor,
             '::placeholder': {
-                color: marketingData.color_text_input_hints
+                color: hintColor
             }
         },
         invalid: {
@@ -165,8 +176,4 @@ const StripeForm = ({ reservation, payTicket, userProfile, marketingData, stripe
     )
 };
 
-const mapStateToProps = ({ registrationLiteState }) => ({
-    marketingData: registrationLiteState.settings.marketingData
-});
-
-export default connect(mapStateToProps, null)(StripeForm);
+export default StripeForm;

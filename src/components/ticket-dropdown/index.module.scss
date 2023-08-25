@@ -39,14 +39,16 @@
 .dropdown {
   margin-top: 10px;
   border-radius: 5px;
-  width: 100%;
-  border: 1px solid var(--color_primary);
+  width: 100%;  
+  border: 1px solid var(--color_input_border_color);
+  color: var(--color_input_text_color);
+  background-color: var(--color_input_background_color);
   cursor: pointer;
   div {
     padding: 5px;
     &:hover {
       background-color: var(--color_primary);
-      color: #fff;
+      color: var(--color_input_text_color);
     }
   }
 }

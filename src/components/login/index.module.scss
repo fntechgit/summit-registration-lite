@@ -57,7 +57,9 @@
   height: 40px;
   margin-top: 5px;
   input {
-    border: 1px solid var(--color_primary);
+    border: 1px solid var(--color_input_border_color);
+    color: var(--color_input_text_color);
+    background-color: var(--color_input_background_color);
     border-radius: 5px;
     padding: 5px;
     width: 100%;
@@ -67,10 +69,10 @@
   }
   button {
     margin-left: 5px;
-    background-color: var(--color_secondary_contrast);
+    background-color: var(--color_input_background_color);
     padding: 0px 15px;
-    border: 1px solid var(--color_secondary_contrast);
-    color: #fff;
+    border: 1px solid var(--color_input_border_color);
+    color: var(--color_text_dark);
     box-shadow: none;
     text-align: center;
     white-space: nowrap;
