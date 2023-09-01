@@ -257,7 +257,7 @@ const RegistrationLite = (
 
                         {ticketTaxesError && profileData && <TicketTaxesError ticketTaxesErrorMessage={ticketTaxesErrorMessage} retryTicketTaxes={() => handleGetTicketTypesAndTaxes(summitData?.id)} />}
 
-                        {!ticketTaxesError && profileData && allowedTicketTypes.length === 0 && requestedTicketTypes && <NoAllowedTickets noAllowedTicketsMessage={noAllowedTicketsMessage} />}
+                        {!ticketTaxesError && profileData && allowedTicketTypes.length === 0 && requestedTicketTypes && step !== 3  &&<NoAllowedTickets noAllowedTicketsMessage={noAllowedTicketsMessage} />}
 
                         {!ticketTaxesError &&
                             <div className={styles.stepsWrapper}>
