@@ -77,12 +77,12 @@ const PurchaseComplete = ({
 
     let orderComplete1stParagraph = (
         currentUserTicket ?
-            rest.hasOwnProperty('initialOrderComplete1stParagraph') && !isEmptyString(rest.initialOrderComplete1stParagraph) ?
+            rest.hasOwnProperty('initialOrderComplete1stParagraph') && typeof rest.initialOrderComplete1stParagraph !== 'undefined' ?
                 rest.initialOrderComplete1stParagraph
                 :
                 T.translate('purchase_complete_step.initial_order_complete_1st_paragraph_label', {button: orderCompleteButtonText})
             :
-            rest.hasOwnProperty('orderComplete1stParagraph') && !isEmptyString(rest.orderComplete1stParagraph) ?
+            rest.hasOwnProperty('orderComplete1stParagraph') && typeof rest.orderComplete1stParagraph !== 'undefined' ?
                 rest.orderComplete1stParagraph
                 :
                 T.translate('purchase_complete_step.order_complete_1st_paragraph_label')
@@ -90,12 +90,12 @@ const PurchaseComplete = ({
 
     let orderComplete2ndParagraph = (
         currentUserTicket ?
-            rest.hasOwnProperty('initialOrderComplete2ndParagraph') && !isEmptyString(rest.initialOrderComplete2ndParagraph) ?
+            rest.hasOwnProperty('initialOrderComplete2ndParagraph') && typeof rest.initialOrderComplete2ndParagraph !== 'undefined' ?
                 rest.initialOrderComplete2ndParagraph
                 :
                 T.translate('purchase_complete_step.initial_order_footer_label')
             :
-            rest.hasOwnProperty('orderComplete2ndParagraph') && !isEmptyString(rest.orderComplete2ndParagraph) ?
+            rest.hasOwnProperty('orderComplete2ndParagraph') && typeof rest.orderComplete2ndParagraph !== 'undefined' ?
                 rest.orderComplete2ndParagraph
                 :
                 ''
