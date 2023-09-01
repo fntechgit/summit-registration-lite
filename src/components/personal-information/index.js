@@ -152,8 +152,8 @@ const PersonalInfoComponent = ({
                                     <div className={styles.fieldWrapper}>
                                         <div>
                                             <RegistrationCompanyInput
-                                                id="company"
-                                                name="company"
+                                                id="reg-comp-input"
+                                                name="reg-comp-input"
                                                 data-testid="company"
                                                 styles={customStyles}
                                                 summitId={summitId}
