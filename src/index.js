@@ -60,7 +60,9 @@ const filterProps = {
     allowPromoCodes: true,
     showCompanyInput: true,
     companyDDLPlaceholder: 'Select a company',
-    completedExtraQuestions: () => console.log('evalulate user extra questions...')
+    completedExtraQuestions: () => console.log('evalulate user extra questions...'),
+    companyInputDefaultOptions: false,
+    companyInputCacheOptions: false,
 };
 
 // width 780px or 230px

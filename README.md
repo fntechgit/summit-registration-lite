@@ -73,13 +73,17 @@ React component for the summit registration lite widget
 
    **allowPromoCodes**        = boolean to show/hide promo code field. Defaults to true
 
-   **showCompanyInput**       = booleaen to show/hide the "Company" field. Defaults to true.
+   **showCompanyInput**       = boolean to show/hide the "Company" field. Defaults to true.
 
    **companyDDLPlaceholder**  = string for the set the placeholder of the DDL company input
 
    **logoDark**               = string for custom src for dark theme logo on otp login 
 
    **logoLight**              = string for custom src for light theme logo on otp login 
+
+   **companyInputDefaultOptions** = boolean to show/hide default company options on input
+
+   **companyInputCacheOptions** = boolean to cache the initial company data
 
 ## PUBLISH TO NPM:
 

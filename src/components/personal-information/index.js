@@ -34,7 +34,9 @@ const PersonalInfoComponent = ({
     showMultipleTicketTexts,
     allowPromoCodes,
     showCompanyInput = true,
-    companyDDLPlaceholder }) => {
+    companyDDLPlaceholder,
+    defaultOptions,
+    cacheOptions }) => {
     const [personalInfo, setPersonalInfo] = useState(
         {
             firstName: userProfile.given_name || (invitation ? invitation.first_name : ''),
@@ -161,6 +163,8 @@ const PersonalInfoComponent = ({
                                                 onError={handleCompanyError}
                                                 value={personalInfo.company}
                                                 placeholder={companyDDLPlaceholder}
+                                                defaultOptions={defaultOptions}
+                                                cacheOptions={cacheOptions}
                                                 isClearable={true}
                                             />
                                             {companyError && <div className={styles.fieldError} data-testid="company-error">This field is required.</div>}

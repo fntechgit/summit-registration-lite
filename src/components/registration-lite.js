@@ -137,6 +137,8 @@ const RegistrationLite = (
         hasVirtualAccessLevel,
         logoLight,
         logoDark,
+        companyInputDefaultOptions,
+        companyInputCacheOptions,
         ...rest
     }) => {
 
@@ -341,6 +343,8 @@ const RegistrationLite = (
                                             allowPromoCodes={allowPromoCodes}
                                             showCompanyInput={showCompanyInput}
                                             companyDDLPlaceholder={companyDDLPlaceholder}
+                                            defaultOptions={companyInputDefaultOptions}
+                                            cacheOptions={companyInputCacheOptions}
                                         />
 
                                         <animated.div style={{ ...toggleAnimation }}>
@@ -430,6 +434,8 @@ RegistrationLite.defaultProps = {
     authErrorCallback: (error) => { console.log(error) },
     hasVirtualAccessLevel: false,
     supportEmail : 'support@fntech.com',
+    companyInputDefaultOptions: false,
+    companyInputCacheOptions: false,
 };
 
 RegistrationLite.propTypes = {
@@ -449,6 +455,8 @@ RegistrationLite.propTypes = {
     orderComplete1stParagraph: PropTypes.string,
     orderComplete2ndParagraph: PropTypes.string,
     orderCompleteButton: PropTypes.string,
+    companyInputDefaultOptions: PropTypes.bool,
+    companyInputCacheOptions: PropTypes.bool
 };
 
 export default connect(mapStateToProps, {
