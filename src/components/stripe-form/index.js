@@ -128,6 +128,7 @@ const StripeForm = ({ reservation, payTicket, userProfile, stripeOptions, provid
         });
 
         if (token) {
+            cardElement.update({disabled: true})
             payTicket(provider, { token, stripe, zipCode : data.zipCode });
         } else if (error) {
             if (stripeErrorCodeMap[error.code]) {
