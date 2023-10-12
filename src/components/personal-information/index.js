@@ -95,6 +95,10 @@ const PersonalInfoComponent = ({
             minHeight: '36px',
             height: '36px',
         }),
+        placeholder: (provided) => ({
+            ...provided,
+            fontSize: '12px',
+        }),
         menuList: (provided) => ({
             ...provided,
             maxHeight: '120px',
