@@ -128,14 +128,14 @@ const PersonalInfoComponent = ({
                             <form id="personal-info-form" onSubmit={handleSubmit(onSubmit)} className={styles.form} data-testid="personal-form">
                                 <div className={styles.fieldWrapper}>
                                     <div className={styles.inputWrapper}>
-                                        <input type="text" placeholder="First name *" defaultValue={personalInfo.firstName || ''} {...register("firstName", { required: true, maxLength: 80 })} data-testid="first-name" />
+                                        <input type="text" placeholder="First name *" defaultValue={personalInfo.firstName || ''} {...register("firstName", { required: true, maxLength: 80 })} disabled={userProfile.given_name} data-testid="first-name" />
                                     </div>
                                     {errors.firstName && <div className={styles.fieldError} data-testid="first-name-error">This field is required.</div>}
                                 </div>
 
                                 <div className={styles.fieldWrapper}>
                                     <div className={styles.inputWrapper}>
-                                        <input type="text" placeholder="Last name *" defaultValue={personalInfo.lastName || ''} {...register("lastName", { required: true, maxLength: 100 })} data-testid="last-name" />
+                                        <input type="text" placeholder="Last name *" defaultValue={personalInfo.lastName || ''} {...register("lastName", { required: true, maxLength: 100 })} disabled={userProfile.family_name} data-testid="last-name" />
                                     </div>
                                     {errors.lastName && <div className={styles.fieldError} data-testid="last-name-error">This field is required.</div>}
                                 </div>
