@@ -103,6 +103,10 @@ const PersonalInfoComponent = ({
         }),
     }
 
+    const hasInitialValue = (initialValue) => {
+        return initialValue !== '';
+    }
+
     return (
         <div className={`${styles.outerWrapper} step-wrapper`}>
             <>
@@ -132,21 +136,42 @@ const PersonalInfoComponent = ({
                             <form id="personal-info-form" onSubmit={handleSubmit(onSubmit)} className={styles.form} data-testid="personal-form">
                                 <div className={styles.fieldWrapper}>
                                     <div className={styles.inputWrapper}>
-                                        <input type="text" placeholder="First name *" defaultValue={personalInfo.firstName || ''} {...register("firstName", { required: true, maxLength: 80 })} disabled={initialFirstName !== ''} data-testid="first-name" />
+                                        <input 
+                                            type="text" 
+                                            placeholder="First name *" 
+                                            className={hasInitialValue(initialFirstName) ? styles.readOnly : ''} 
+                                            readOnly={hasInitialValue(initialFirstName) ? true : false} 
+                                            defaultValue={personalInfo.firstName || ''} 
+                                            {...register("firstName", { required: true, maxLength: 80 })} 
+                                            data-testid="first-name" />
                                     </div>
                                     {errors.firstName && <div className={styles.fieldError} data-testid="first-name-error">This field is required.</div>}
                                 </div>
 
                                 <div className={styles.fieldWrapper}>
                                     <div className={styles.inputWrapper}>
-                                        <input type="text" placeholder="Last name *" defaultValue={personalInfo.lastName || ''} {...register("lastName", { required: true, maxLength: 100 })} disabled={initialLastName !== ''} data-testid="last-name" />
+                                        <input 
+                                            type="text" 
+                                            placeholder="Last name *" 
+                                            className={hasInitialValue(initialLastName) ? styles.readOnly : ''} 
+                                            readOnly={hasInitialValue(initialLastName) ? true : false} 
+                                            defaultValue={personalInfo.lastName || ''} 
+                                            {...register("lastName", { required: true, maxLength: 100 })} 
+                                            data-testid="last-name" />
                                     </div>
                                     {errors.lastName && <div className={styles.fieldError} data-testid="last-name-error">This field is required.</div>}
                                 </div>
 
                                 <div className={styles.fieldWrapper}>
                                     <div className={styles.inputWrapper}>
-                                        <input type="text" placeholder="Email *" className={styles.readOnly} readOnly={true} defaultValue={personalInfo.email || ''} {...register("email", { required: true, pattern: /^\S+@\S+$/i })} data-testid="email" />
+                                        <input 
+                                            type="text" 
+                                            placeholder="Email *" 
+                                            className={styles.readOnly} 
+                                            readOnly={true} 
+                                            defaultValue={personalInfo.email || ''} 
+                                            {...register("email", { required: true, pattern: /^\S+@\S+$/i })} 
+                                            data-testid="email" />
                                     </div>
                                     {errors.email?.type === 'required' && <div className={styles.fieldError} data-testid="email-error-required">This field is required.</div>}
                                     {errors.email?.type === 'pattern' && <div className={styles.fieldError} data-testid="email-error-invalid">The email is invalid.</div>}
