@@ -13,3 +13,4 @@ babel.config.js
 jest-setup.js
 .nvmrc
 .env.template
+.env
