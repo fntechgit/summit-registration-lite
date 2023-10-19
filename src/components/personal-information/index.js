@@ -101,6 +101,10 @@ const PersonalInfoComponent = ({
             ...provided,
             maxHeight: '120px',
         }),
+        placeholder: (provided) => ({
+            ...provided,
+            fontSize: '12px',
+        }),
     }
 
     return (
@@ -172,6 +176,8 @@ const PersonalInfoComponent = ({
                                                 value={personalInfo.company}
                                                 placeholder={companyDDLPlaceholder}
                                                 isClearable={true}
+                                                openMenuOnFocus={false}
+                                                openMenuOnClick={false}
                                             />
                                             {companyError && <div className={styles.fieldError} data-testid="company-error">This field is required.</div>}
                                         </div>
