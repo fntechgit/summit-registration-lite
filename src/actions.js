@@ -83,16 +83,16 @@ const customErrorHandler = (err, res) => (dispatch, state) => {
 // api/v1/summits/{id}/tax-types
 
 export const getTicketTypesAndTaxes = (summitId) => async (dispatch) => {
-    dispatch(startWidgetLoading());
+
     return Promise.all([
         dispatch(getTicketTypes(summitId)),
         dispatch(getTaxesTypes(summitId))
     ]).then((values) => {
         return values;
-    }).catch((err) => {        
+    }).catch((err) => {
         console.log(err);
         return Promise.reject(err);
-    }).finally(() => dispatch(stopWidgetLoading()))
+    })
 };
 
 /**
