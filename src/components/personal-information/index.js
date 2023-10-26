@@ -34,7 +34,8 @@ const PersonalInfoComponent = ({
     showMultipleTicketTexts,
     allowPromoCodes,
     showCompanyInput = true,
-    companyDDLPlaceholder }) => {
+    companyDDLPlaceholder,
+    showCompanyInputDefaultOptions }) => {
 
     const initialFirstName = userProfile.given_name || (invitation ? invitation.first_name : '');
     const initialLastName = userProfile.family_name || (invitation ? invitation.last_name : '');
@@ -175,8 +176,9 @@ const PersonalInfoComponent = ({
                                                 value={personalInfo.company}
                                                 placeholder={companyDDLPlaceholder}
                                                 isClearable={true}
-                                                openMenuOnFocus={false}
-                                                openMenuOnClick={false}
+                                                defaultOptions={showCompanyInputDefaultOptions}
+                                                openMenuOnFocus={showCompanyInputDefaultOptions}
+                                                openMenuOnClick={showCompanyInputDefaultOptions}
                                             />
                                             {companyError && <div className={styles.fieldError} data-testid="company-error">This field is required.</div>}
                                         </div>
@@ -220,4 +222,6 @@ const PersonalInfoComponent = ({
     );
 };
 
-export default PersonalInfoComponent
+
+
+export default PersonalInfoComponent;
