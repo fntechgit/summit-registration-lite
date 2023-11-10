@@ -105,7 +105,12 @@ const PersonalInfoComponent = ({
         placeholder: (provided) => ({
             ...provided,
             fontSize: '12px',
-        }),
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
+            overflow: 'hidden',
+            width: '95%',
+            paddingRight: '10px',
+        }),        
     }
 
     return (
