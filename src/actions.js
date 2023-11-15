@@ -20,6 +20,7 @@ import {
 import { authErrorHandler } from "openstack-uicore-foundation/lib/utils/actions";
 import Swal from 'sweetalert2';
 import { PaymentProviderFactory } from "./utils/payment-providers/payment-provider-factory";
+import { TICKET_OWNER_MYSELF, TICKET_OWNER_UNASSIGNED } from "./utils/constants";
 
 export const START_WIDGET_LOADING = 'START_WIDGET_LOADING';
 export const STOP_WIDGET_LOADING = 'STOP_WIDGET_LOADING';
@@ -157,7 +158,7 @@ export const reserveTicket = ({ provider, personalInformation, ticket, ticketQua
     async (dispatch, getState, { apiBaseUrl, getAccessToken }) => {
         try {
             const { registrationLiteState: { settings: { summitId } } } = getState();
-            let { firstName, lastName, email, company, promoCode, attendee, ticketForMyself } = personalInformation;
+            let { firstName, lastName, email, company, promoCode, attendee, ticketOwnerOption } = personalInformation;
             dispatch(startWidgetLoading());
 
             const access_token = await getAccessToken();
@@ -168,10 +169,10 @@ export const reserveTicket = ({ provider, personalInformation, ticket, ticketQua
             }));
 
             // if the ticket is for myself, or have any attendee data, assign it to the ticket
-            if(tickets.length === 1 && (ticketForMyself || ([attendee.firstName, attendee.lastName, attendee.email].some(e => e !== '')))) {
-                tickets[0].attendee_first_name = ticketForMyself ? firstName : attendee.firstName
-                tickets[0].attendee_last_name = ticketForMyself ? lastName : attendee.lastName
-                tickets[0].attendee_email = ticketForMyself ? email : attendee.email
+            if(tickets.length === 1 && ticketOwnerOption !== TICKET_OWNER_UNASSIGNED) {
+                tickets[0].attendee_first_name = ticketOwnerOption === TICKET_OWNER_MYSELF ? firstName : attendee.firstName
+                tickets[0].attendee_last_name = ticketOwnerOption === TICKET_OWNER_MYSELF ? lastName : attendee.lastName
+                tickets[0].attendee_email = ticketOwnerOption === TICKET_OWNER_MYSELF ? email : attendee.email
             }
 
             let params = {

@@ -20,6 +20,7 @@ import ReactTooltip from 'react-tooltip';
 import { formatErrorMessage } from '../../helpers';
 
 import styles from "./index.module.scss";
+import { EMAIL_REGEXP, TICKET_OWNER_MYSELF, TICKET_OWNER_SOMEONE, TICKET_OWNER_UNASSIGNED } from '../../utils/constants';
 
 const PersonalInfoComponent = ({
     isActive,
@@ -42,19 +43,21 @@ const PersonalInfoComponent = ({
     
     const [ticketOwnerOption, setTicketOwnerOption] = useState('');
     const [ticketOwnerError, setTicketOwnerError] = useState(false);
+
+    // if there's only one ticket on the order, display the radio button to assign the ticket
+    const shouldDisplayTicketAssignment = () => formValues.ticketQuantity === 1;
     
     const radioListOptions = [
-        {label: "Myself", value: 'myself'},
-        {label: "Someone Else", value: 'someoneElse'},
-        {label: "Leave Unassigned", value: 'unassigned'},
+        {label: "Myself", value: TICKET_OWNER_MYSELF},
+        {label: "Someone Else", value: TICKET_OWNER_SOMEONE},
+        {label: "Leave Unassigned", value: TICKET_OWNER_UNASSIGNED},
     ]
 
     const handleRadioButtonChange = (ev) => {
         const {value} = ev.target;
-        const selfTicket = value === 'myself';        
         setTicketOwnerOption(value);
         setTicketOwnerError(false);
-        setPersonalInfo({ ...personalInfo, ticketForMyself: selfTicket, attendee: { firstName: '', lastName: '', email: '' }});
+        setPersonalInfo({ ...personalInfo, ticketOwnerOption: value, attendee: { firstName: '', lastName: '', email: '' }});
         reset("attendee.email");
         reset("attendee.firstName");
         reset("attendee.lastName");
@@ -67,7 +70,6 @@ const PersonalInfoComponent = ({
             email: userProfile.email || '',
             company: { id: null, name: '' },
             promoCode: '',
-            ticketForMyself: null,
             attendee: {
                 firstName: '',
                 lastName: '',
@@ -224,9 +226,9 @@ const PersonalInfoComponent = ({
                                     </div>
                                 }
 
-                                {formValues.ticketQuantity === 1 &&
+                                {shouldDisplayTicketAssignment() &&
                                     <>
-                                        <br/>                            
+                                        <br/>
                                         <div className={styles.fieldWrapperRadio}>
                                             <label>Ticket is for:</label>
                                             <RadioList
@@ -244,7 +246,7 @@ const PersonalInfoComponent = ({
                                                 </>
                                             }
                                         </div>
-                                        {ticketOwnerOption === 'someoneElse' && 
+                                        {ticketOwnerOption === TICKET_OWNER_SOMEONE && 
                                             <>
                                                 <div className={styles.fieldWrapper}>
                                                     <div className={styles.inputWrapper}>
@@ -262,7 +264,7 @@ const PersonalInfoComponent = ({
                                                                     
                                                                     return true;
                                                             }}, 
-                                                            pattern: /^\S+@\S+$/i 
+                                                            pattern: EMAIL_REGEXP
                                                         })} data-testid="attendee-email" />
                                                     </div>
                                                     {errors.attendee?.email?.type === 'emailRequired' && <div className={styles.fieldError} data-testid="attendee-email-error-required">This field is required.</div>}
