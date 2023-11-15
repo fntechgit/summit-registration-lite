@@ -35,7 +35,9 @@ const PersonalInfoComponent = ({
     allowPromoCodes,
     showCompanyInput = true,
     companyDDLPlaceholder,
-    showCompanyInputDefaultOptions }) => {
+    showCompanyInputDefaultOptions,
+    companyDDLOptions2Show
+}) => {
 
     const initialFirstName = userProfile.given_name || (invitation ? invitation.first_name : '');
     const initialLastName = userProfile.family_name || (invitation ? invitation.last_name : '');
@@ -110,7 +112,7 @@ const PersonalInfoComponent = ({
             overflow: 'hidden',
             width: '95%',
             paddingRight: '10px',
-        }),        
+        }),
     }
 
     return (
@@ -185,6 +187,7 @@ const PersonalInfoComponent = ({
                                                 defaultOptions={showCompanyInputDefaultOptions}
                                                 openMenuOnFocus={showCompanyInputDefaultOptions}
                                                 openMenuOnClick={showCompanyInputDefaultOptions}
+                                                options2Show={companyDDLOptions2Show}
                                             />
                                             {companyError && <div className={styles.fieldError} data-testid="company-error">This field is required.</div>}
                                         </div>

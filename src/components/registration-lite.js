@@ -138,6 +138,7 @@ const RegistrationLite = (
         logoLight,
         logoDark,
         showCompanyInputDefaultOptions,
+        companyDDLOptions2Show,
         ...rest
     }) => {
 
@@ -343,6 +344,7 @@ const RegistrationLite = (
                                             showCompanyInput={showCompanyInput}
                                             companyDDLPlaceholder={companyDDLPlaceholder}
                                             showCompanyInputDefaultOptions={showCompanyInputDefaultOptions}
+                                            companyDDLOptions2Show={companyDDLOptions2Show}
                                         />
 
                                         <animated.div style={{ ...toggleAnimation }}>
@@ -432,7 +434,8 @@ RegistrationLite.defaultProps = {
     authErrorCallback: (error) => { console.log(error) },
     hasVirtualAccessLevel: false,
     supportEmail : 'support@fntech.com',
-    showCompanyInputDefaultOptions: false
+    showCompanyInputDefaultOptions: false,
+    companyDDLOptions2Show: 25
 };
 
 RegistrationLite.propTypes = {
@@ -453,6 +456,7 @@ RegistrationLite.propTypes = {
     orderComplete2ndParagraph: PropTypes.string,
     orderCompleteButton: PropTypes.string,
     showCompanyInputDefaultOptions: PropTypes.bool,
+    companyDDLOptions2Show: PropTypes.number,
 };
 
 export default connect(mapStateToProps, {

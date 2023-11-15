@@ -77,9 +77,11 @@ React component for the summit registration lite widget
 
    **companyDDLPlaceholder**  = string for the set the placeholder of the DDL company input
 
-   **logoDark**               = string for custom src for dark theme logo on otp login 
+   **companyDDLOptions2Show** = Maximum number of companies to show on a match of the DDL company input
 
-   **logoLight**              = string for custom src for light theme logo on otp login 
+   **logoDark**               = string for custom src for dark theme logo on otp login
+
+   **logoLight**              = string for custom src for light theme logo on otp login
 
 ## PUBLISH TO NPM:
 
