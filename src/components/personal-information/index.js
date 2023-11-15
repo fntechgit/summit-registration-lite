@@ -57,7 +57,14 @@ const PersonalInfoComponent = ({
         const {value} = ev.target;
         setTicketOwnerOption(value);
         setTicketOwnerError(false);
-        setPersonalInfo({ ...personalInfo, ticketOwnerOption: value, attendee: { firstName: '', lastName: '', email: '' }});
+        setPersonalInfo({ 
+            ...personalInfo,
+            attendee: value === TICKET_OWNER_UNASSIGNED ? null : 
+                      value === TICKET_OWNER_MYSELF ? 
+                        { firstName: personalInfo.firstName, lastName: personalInfo.lastName, email: personalInfo.email } 
+                        : 
+                        { firstName: '', lastName: '', email: '' }
+        });
         reset("attendee.email");
         reset("attendee.firstName");
         reset("attendee.lastName");

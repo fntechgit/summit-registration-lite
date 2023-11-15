@@ -158,7 +158,7 @@ export const reserveTicket = ({ provider, personalInformation, ticket, ticketQua
     async (dispatch, getState, { apiBaseUrl, getAccessToken }) => {
         try {
             const { registrationLiteState: { settings: { summitId } } } = getState();
-            let { firstName, lastName, email, company, promoCode, attendee, ticketOwnerOption } = personalInformation;
+            let { firstName, lastName, email, company, promoCode, attendee } = personalInformation;
             dispatch(startWidgetLoading());
 
             const access_token = await getAccessToken();
@@ -168,11 +168,10 @@ export const reserveTicket = ({ provider, personalInformation, ticket, ticketQua
                 promo_code: promoCode || null
             }));
 
-            // if the ticket is for myself, or have any attendee data, assign it to the ticket
-            if(tickets.length === 1 && ticketOwnerOption !== TICKET_OWNER_UNASSIGNED) {
-                tickets[0].attendee_first_name = ticketOwnerOption === TICKET_OWNER_MYSELF ? firstName : attendee.firstName
-                tickets[0].attendee_last_name = ticketOwnerOption === TICKET_OWNER_MYSELF ? lastName : attendee.lastName
-                tickets[0].attendee_email = ticketOwnerOption === TICKET_OWNER_MYSELF ? email : attendee.email
+            if(tickets.length === 1 && attendee) {
+                tickets[0].attendee_first_name = attendee.firstName
+                tickets[0].attendee_last_name = attendee.lastName
+                tickets[0].attendee_email = attendee.email
             }
 
             let params = {
