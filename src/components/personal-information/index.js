@@ -12,7 +12,7 @@
  **/
 
 import React, { useState, useEffect } from 'react';
-import { RegistrationCompanyInput } from 'openstack-uicore-foundation/lib/components'
+import { RegistrationCompanyInput, RadioList } from 'openstack-uicore-foundation/lib/components'
 import { useForm } from 'react-hook-form';
 import { useSpring, config, animated } from "react-spring";
 import { useMeasure } from "react-use";
@@ -39,6 +39,26 @@ const PersonalInfoComponent = ({
 
     const initialFirstName = userProfile.given_name || (invitation ? invitation.first_name : '');
     const initialLastName = userProfile.family_name || (invitation ? invitation.last_name : '');
+    
+    const [ticketOwnerOption, setTicketOwnerOption] = useState('');
+    const [ticketOwnerError, setTicketOwnerError] = useState(false);
+    
+    const radioListOptions = [
+        {label: "Myself", value: 'myself'},
+        {label: "Someone Else", value: 'someoneElse'},
+        {label: "Leave Unassigned", value: 'unassigned'},
+    ]
+
+    const handleRadioButtonChange = (ev) => {
+        const {value} = ev.target;
+        const selfTicket = value === 'myself';        
+        setTicketOwnerOption(value);
+        setTicketOwnerError(false);
+        setPersonalInfo({ ...personalInfo, ticketForMyself: selfTicket, attendee: { firstName: '', lastName: '', email: '' }});
+        reset("attendee.email");
+        reset("attendee.firstName");
+        reset("attendee.lastName");
+    }
 
     const [personalInfo, setPersonalInfo] = useState(
         {
@@ -47,12 +67,18 @@ const PersonalInfoComponent = ({
             email: userProfile.email || '',
             company: { id: null, name: '' },
             promoCode: '',
+            ticketForMyself: null,
+            attendee: {
+                firstName: '',
+                lastName: '',
+                email: ''
+            }
         }
     );
 
     const [companyError, setCompanyError] = useState(false);
 
-    const { register, handleSubmit, formState: { errors } } = useForm();
+    const { register, reset, handleSubmit, getValues, formState: { errors } } = useForm();    
 
     useEffect(() => {
         if (reservation) {
@@ -75,6 +101,10 @@ const PersonalInfoComponent = ({
     const onSubmit = (data) => {
         if (!personalInfo.company.name && showCompanyInput) {
             setCompanyError(true);
+            return;
+        }
+        if (!ticketOwnerOption) {
+            setTicketOwnerError(true);
             return;
         }
         setPersonalInfo({ ...personalInfo, ...data });
@@ -113,7 +143,7 @@ const PersonalInfoComponent = ({
             <>
                 <div className={`${styles.innerWrapper}`}>
                     <div className={styles.title} >
-                        <span>Personal Information</span>
+                        <span>Purchaser Information</span>
                         {!isActive &&
                             <div data-testid="personal-info">
                                 <span>
@@ -192,6 +222,68 @@ const PersonalInfoComponent = ({
                                             <input type="text" placeholder="Promo code" {...register("promoCode")} />
                                         </div>
                                     </div>
+                                }
+
+                                {formValues.ticketQuantity === 1 &&
+                                    <>
+                                        <br/>                            
+                                        <div className={styles.fieldWrapperRadio}>
+                                            <label>Ticket is for:</label>
+                                            <RadioList
+                                                id={`ticket-self-radio`}
+                                                value={ticketOwnerOption}
+                                                options={radioListOptions}
+                                                onChange={handleRadioButtonChange}
+                                                inline
+                                                html
+                                            />
+                                            {ticketOwnerError && 
+                                                <>
+                                                    <br/>
+                                                    <div className={styles.fieldError} data-testid="company-error">This field is required.</div>
+                                                </>
+                                            }
+                                        </div>
+                                        {ticketOwnerOption === 'someoneElse' && 
+                                            <>
+                                                <div className={styles.fieldWrapper}>
+                                                    <div className={styles.inputWrapper}>
+                                                        <input type="text" placeholder="Email *" defaultValue={personalInfo.attendee.email || ''} 
+                                                        {...register("attendee.email", { 
+                                                            validate: {                                                            
+                                                                emailRequired: (value) => {                                                                
+                                                                    const formValues = getValues();
+                                                                    const firstName = formValues.attendee.firstName;
+                                                                    const lastName = formValues.attendee.lastName;
+
+                                                                    if (firstName && lastName && !value) {
+                                                                        return 'This field is required.';
+                                                                    }
+                                                                    
+                                                                    return true;
+                                                            }}, 
+                                                            pattern: /^\S+@\S+$/i 
+                                                        })} data-testid="attendee-email" />
+                                                    </div>
+                                                    {errors.attendee?.email?.type === 'emailRequired' && <div className={styles.fieldError} data-testid="attendee-email-error-required">This field is required.</div>}
+                                                    {errors.attendee?.email?.type === 'pattern' && <div className={styles.fieldError} data-testid="attendee-email-error-invalid">The email is invalid.</div>}
+                                                </div>
+                                                <div className={styles.fieldWrapper}>
+                                                    <div className={styles.inputWrapper}>
+                                                        <input type="text" placeholder="First name *" defaultValue={personalInfo.attendee.firstName || ''}
+                                                            {...register("attendee.firstName", { required: false, maxLength: 80 })} data-testid="attendee-first-name" />
+                                                    </div>
+                                                </div>
+
+                                                <div className={styles.fieldWrapper}>
+                                                    <div className={styles.inputWrapper}>
+                                                        <input type="text" placeholder="Last name *" defaultValue={personalInfo.attendee.lastName || ''}
+                                                            {...register("attendee.lastName", { required: false, maxLength: 100 })}  data-testid="attendee-last-name" />
+                                                    </div>
+                                                </div>
+                                            </>
+                                        }
+                                    </>
                                 }
 
                             </form>
