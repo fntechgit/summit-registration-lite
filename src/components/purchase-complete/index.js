@@ -50,10 +50,13 @@ const PurchaseComplete = ({
         onPurchaseComplete(checkout);
     }, []);
 
-    const isActive = useMemo(() => summit.start_date <= nowUtc && summit.end_date >= nowUtc, [summit, nowUtc]);
-    const currentUserTicket = useMemo(() => checkout?.tickets.find(t => t?.owner?.email == user?.email), [user]);
-    const requireExtraQuestions = useMemo(() => completedExtraQuestions(checkout), [user]);
-    const _hasVirtualAccessLevel = hasVirtualAccessLevel || (currentUserTicket && ticketHasAccessLevel(currentUserTicket, VirtualAccessLevel));
+    const isActive = useMemo(() => summit.start_date <= nowUtc && summit.end_date >= nowUtc, [summit, nowUtc]);    
+    const currentTicket = useMemo(
+        () => checkout?.tickets.length > 1 ? checkout?.tickets.find(t => t?.owner?.email == user?.email) : checkout?.tickets.find(t => t?.owner),
+        [user]
+    );
+    const requireExtraQuestions = useMemo(() => completedExtraQuestions(currentTicket.owner), [user]);
+    const _hasVirtualAccessLevel = hasVirtualAccessLevel || (currentTicket && ticketHasAccessLevel(currentTicket, VirtualAccessLevel));
 
     const startDateFormatted = {
         date: epochToMomentTimeZone(summit.start_date, summit.time_zone_id).format('MMMM D'),
@@ -63,7 +66,7 @@ const PurchaseComplete = ({
     if (!checkout) return null;
 
     let orderCompleteButtonText = (
-        currentUserTicket && requireExtraQuestions ?
+        currentTicket && requireExtraQuestions ?
             rest.hasOwnProperty('initialOrderCompleteButton') && !isEmptyString(rest.initialOrderCompleteButton) ?
                 rest.initialOrderCompleteButton
                 :
@@ -76,7 +79,7 @@ const PurchaseComplete = ({
     );
 
     let orderComplete1stParagraph = (
-        currentUserTicket ?
+        currentTicket ?
             rest.hasOwnProperty('initialOrderComplete1stParagraph') && typeof rest.initialOrderComplete1stParagraph !== 'undefined' ?
                 rest.initialOrderComplete1stParagraph
                 :
@@ -89,7 +92,7 @@ const PurchaseComplete = ({
     );
 
     let orderComplete2ndParagraph = (
-        currentUserTicket ?
+        currentTicket ?
             rest.hasOwnProperty('initialOrderComplete2ndParagraph') && typeof rest.initialOrderComplete2ndParagraph !== 'undefined' ?
                 rest.initialOrderComplete2ndParagraph
                 :
@@ -105,7 +108,7 @@ const PurchaseComplete = ({
 
     const getCTAButton = () => {
         return (
-            <CTAButton cta={currentUserTicket && requireExtraQuestions ? goToExtraQuestions : goToMyOrders} clear={clearWidgetState} close={closeWidget}>
+            <CTAButton cta={currentTicket && requireExtraQuestions ? goToExtraQuestions : goToMyOrders} clear={clearWidgetState} close={closeWidget}>
                 {orderCompleteButtonText}
             </CTAButton>
         )
@@ -121,7 +124,7 @@ const PurchaseComplete = ({
             </span>
             {
                 isActive ?
-                    (currentUserTicket && requireExtraQuestions) ?
+                    (currentTicket && requireExtraQuestions) ?
                         <>
                             <span>{orderComplete1stParagraph}</span>
                             {getCTAButton()}
