@@ -52,11 +52,13 @@ const PurchaseComplete = ({
 
     const isActive = useMemo(() => summit.start_date <= nowUtc && summit.end_date >= nowUtc, [summit, nowUtc]);    
     const currentTicket = useMemo(
-        () => checkout?.tickets.length > 1 ? checkout?.tickets.find(t => t?.owner?.email == user?.email) : checkout?.tickets.find(t => t?.owner),
+        () => checkout?.tickets.length > 1 ? checkout?.tickets.find(t => t?.owner?.email === user?.email) : checkout?.tickets.find(t => t?.owner),
         [user]
     );
     const requireExtraQuestions = useMemo(() => completedExtraQuestions(currentTicket.owner), [user]);
     const _hasVirtualAccessLevel = hasVirtualAccessLevel || (currentTicket && ticketHasAccessLevel(currentTicket, VirtualAccessLevel));
+
+    const attendeeId = checkout?.tickets.length === 1 ? checkout?.tickets.find(t => t?.owner?.email !== user?.email)?.owner?.id : null;
 
     const startDateFormatted = {
         date: epochToMomentTimeZone(summit.start_date, summit.time_zone_id).format('MMMM D'),
@@ -108,7 +110,7 @@ const PurchaseComplete = ({
 
     const getCTAButton = () => {
         return (
-            <CTAButton cta={currentTicket && requireExtraQuestions ? goToExtraQuestions : goToMyOrders} clear={clearWidgetState} close={closeWidget}>
+            <CTAButton cta={currentTicket && requireExtraQuestions ? () => goToExtraQuestions(attendeeId) : goToMyOrders} clear={clearWidgetState} close={closeWidget}>
                 {orderCompleteButtonText}
             </CTAButton>
         )

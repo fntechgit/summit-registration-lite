@@ -25,7 +25,7 @@ const filterProps = {
     loginWithCode: (code) => console.log('login with code', code),
     getAccessToken: () => process.env.ACCESS_TOKEN,
     closeWidget: () => console.log('close widget'),
-    goToExtraQuestions: () => console.log('extra questions required'),
+    goToExtraQuestions: (attendeeId) => console.log('extra questions required for attendee: ', attendeeId),
     goToMyOrders: () => console.log('go to my orders'),
     goToEvent: () => console.log('go to event'),
     onPurchaseComplete: (order) => console.log('purchase complete', order),
@@ -60,7 +60,8 @@ const filterProps = {
     allowPromoCodes: true,
     showCompanyInput: true,
     companyDDLPlaceholder: 'Select a company',
-    completedExtraQuestions: () => console.log('evalulate user extra questions...')
+    completedExtraQuestions: () => console.log('evalulate user extra questions...'),
+    handleCompanyError: (err) => console.log('catch error company', err)
 };
 
 // width 780px or 230px
