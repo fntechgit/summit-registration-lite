@@ -17,10 +17,13 @@ import { getStore, getPersistor } from "./store";
 import { PersistGate } from "redux-persist/integration/react";
 import RegistrationLite from "./components/registration-lite";
 
-window.API_BASE_URL             = process.env['API_BASE_URL'];
-
-if(typeof window !== 'undefined') {
-    window.localStorage.setItem('authInfo', JSON.stringify({accessToken: process.env['ACCESS_TOKEN']}));
+// Access token is required to fetch registration company input. For standalone widget use
+if (process.env === 'development') {
+    window.API_BASE_URL             = process.env['API_BASE_URL'];
+    
+    if(typeof window !== 'undefined') {
+        window.localStorage.setItem('authInfo', JSON.stringify({accessToken: process.env['ACCESS_TOKEN']}));
+    }
 }
 
 class RegistrationLiteWidget extends React.PureComponent {

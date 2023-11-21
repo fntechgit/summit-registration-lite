@@ -58,6 +58,7 @@ const PurchaseComplete = ({
     const requireExtraQuestions = useMemo(() => completedExtraQuestions(currentTicket.owner), [user]);
     const _hasVirtualAccessLevel = hasVirtualAccessLevel || (currentTicket && ticketHasAccessLevel(currentTicket, VirtualAccessLevel));
 
+    // attendeeId is only passed to event-site only if the ticket is for someone else. If not pass it as null to use the default flow
     const attendeeId = checkout?.tickets.length === 1 ? checkout?.tickets.find(t => t?.owner?.email !== user?.email)?.owner?.id : null;
 
     const startDateFormatted = {
