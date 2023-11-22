@@ -60,7 +60,10 @@ const filterProps = {
     allowPromoCodes: true,
     showCompanyInput: true,
     companyDDLPlaceholder: 'Select a company',
-    completedExtraQuestions: () => console.log('evalulate user extra questions...'),
+    completedExtraQuestions: (attendeeId) => {
+        console.log('evalulate user extra questions...', attendeeId)
+        return true;
+    },
     handleCompanyError: (err) => console.log('catch error company', err)
 };
 

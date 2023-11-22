@@ -18,7 +18,7 @@ import { PersistGate } from "redux-persist/integration/react";
 import RegistrationLite from "./components/registration-lite";
 
 // Access token is required to fetch registration company input. For standalone widget use
-if (process.env === 'development') {
+if (process.env.NODE_ENV === 'development') {
     window.API_BASE_URL             = process.env['API_BASE_URL'];
     
     if(typeof window !== 'undefined') {

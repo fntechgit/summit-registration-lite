@@ -53,23 +53,6 @@ const PersonalInfoComponent = ({
         {label: "Leave Unassigned", value: TICKET_OWNER_UNASSIGNED},
     ]
 
-    const handleRadioButtonChange = (ev) => {
-        const {value} = ev.target;
-        setTicketOwnerOption(value);
-        setTicketOwnerError(false);
-        setPersonalInfo({ 
-            ...personalInfo,
-            attendee: value === TICKET_OWNER_UNASSIGNED ? null : 
-                      value === TICKET_OWNER_MYSELF ? 
-                        { firstName: personalInfo.firstName, lastName: personalInfo.lastName, email: personalInfo.email } 
-                        : 
-                        { firstName: '', lastName: '', email: '' }
-        });
-        reset("attendee.email");
-        reset("attendee.firstName");
-        reset("attendee.lastName");
-    }
-
     const [personalInfo, setPersonalInfo] = useState(
         {
             firstName: initialFirstName,
@@ -119,6 +102,27 @@ const PersonalInfoComponent = ({
         setPersonalInfo({ ...personalInfo, ...data });
         changeForm({ ...personalInfo, ...data });
     };
+
+    const handleRadioButtonChange = (ev) => {
+        const {value} = ev.target;
+        setTicketOwnerOption(value);
+        setTicketOwnerError(false);
+        setPersonalInfo({ 
+            ...personalInfo,
+            attendee: value === TICKET_OWNER_UNASSIGNED ? null : 
+                      value === TICKET_OWNER_MYSELF ? 
+                        { firstName: personalInfo.firstName, lastName: personalInfo.lastName, email: personalInfo.email } 
+                        : 
+                        { firstName: '', lastName: '', email: '' }
+        });
+        reset({
+            attendee: {
+                email: '',
+                firstName: '',
+                lastName: '',
+            },
+        });        
+    }
 
     const [ref, { height }] = useMeasure();
 
@@ -177,8 +181,8 @@ const PersonalInfoComponent = ({
                                 <div className={styles.fieldWrapper}>
                                     <div className={styles.inputWrapper}>
                                         <input type="text" placeholder="First name *" defaultValue={personalInfo.firstName || ''}
-                                               readOnly={initialLastName !== ''}
-                                               className={initialLastName !== '' ? styles.readOnly : ''}
+                                               readOnly={initialFirstName !== ''}
+                                               className={initialFirstName !== '' ? styles.readOnly : ''}
                                                {...register("firstName", { required: true, maxLength: 80 })} data-testid="first-name" />
                                     </div>
                                     {errors.firstName && <div className={styles.fieldError} data-testid="first-name-error">This field is required.</div>}
@@ -257,20 +261,9 @@ const PersonalInfoComponent = ({
                                             <>
                                                 <div className={styles.fieldWrapper}>
                                                     <div className={styles.inputWrapper}>
-                                                        <input type="text" placeholder="Email *" defaultValue={personalInfo.attendee.email || ''} 
+                                                        <input type="text" placeholder="Email *" defaultValue={personalInfo?.attendee?.email ?? ''} 
                                                         {...register("attendee.email", { 
-                                                            validate: {                                                            
-                                                                emailRequired: (value) => {                                                                
-                                                                    const formValues = getValues();
-                                                                    const firstName = formValues.attendee.firstName;
-                                                                    const lastName = formValues.attendee.lastName;
-
-                                                                    if (firstName && lastName && !value) {
-                                                                        return 'This field is required.';
-                                                                    }
-                                                                    
-                                                                    return true;
-                                                            }}, 
+                                                            required: true,
                                                             pattern: EMAIL_REGEXP
                                                         })} data-testid="attendee-email" />
                                                     </div>
@@ -279,15 +272,15 @@ const PersonalInfoComponent = ({
                                                 </div>
                                                 <div className={styles.fieldWrapper}>
                                                     <div className={styles.inputWrapper}>
-                                                        <input type="text" placeholder="First name *" defaultValue={personalInfo.attendee.firstName || ''}
+                                                        <input type="text" placeholder="First name *" defaultValue={personalInfo?.attendee?.firstName ?? ''}
                                                             {...register("attendee.firstName", { required: false, maxLength: 80 })} data-testid="attendee-first-name" />
                                                     </div>
                                                 </div>
 
                                                 <div className={styles.fieldWrapper}>
                                                     <div className={styles.inputWrapper}>
-                                                        <input type="text" placeholder="Last name *" defaultValue={personalInfo.attendee.lastName || ''}
-                                                            {...register("attendee.lastName", { required: false, maxLength: 100 })}  data-testid="attendee-last-name" />
+                                                        <input type="text" placeholder="Last name *" defaultValue={personalInfo?.attendee?.lastName ?? ''}
+                                                            {...register("attendee.lastName", { required: false, maxLength: 100 })} data-testid="attendee-last-name" />
                                                     </div>
                                                 </div>
                                             </>
