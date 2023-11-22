@@ -99,8 +99,10 @@ const PersonalInfoComponent = ({
             setTicketOwnerError(true);
             return;
         }
-        setPersonalInfo({ ...personalInfo, ...data });
-        changeForm({ ...personalInfo, ...data });
+        // if the ticket is for someone else, set the attende with the data from form
+        const attendeeData = ticketOwnerOption === TICKET_OWNER_SOMEONE ? data.attendee : personalInfo.attendee;
+        setPersonalInfo({ ...personalInfo, ...data, attendee: attendeeData });
+        changeForm({ ...personalInfo, ...data, attendee: attendeeData });
     };
 
     const handleRadioButtonChange = (ev) => {
