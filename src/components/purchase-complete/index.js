@@ -55,11 +55,12 @@ const PurchaseComplete = ({
         () => checkout?.tickets.length > 1 ? checkout?.tickets.find(t => t?.owner?.email === user?.email) : checkout?.tickets.find(t => t?.owner),
         [user]
     );
-    const requireExtraQuestions = useMemo(() => completedExtraQuestions(currentTicket.owner), [user]);
+    const requireExtraQuestions = useMemo(() => completedExtraQuestions(currentTicket?.owner || null), [user]);
     const _hasVirtualAccessLevel = hasVirtualAccessLevel || (currentTicket && ticketHasAccessLevel(currentTicket, VirtualAccessLevel));
 
     // attendeeId is only passed to event-site only if the ticket is for someone else. If not pass it as null to use the default flow
-    const attendeeId = checkout?.tickets.length === 1 ? checkout?.tickets.find(t => t?.owner?.email !== user?.email)?.owner?.id : null;
+    const attendeeTicket = checkout?.tickets.find(t => t?.owner?.email !== user?.email);
+    const attendeeId = checkout?.tickets.length === 1 ? attendeeTicket?.owner?.id : null;
 
     const startDateFormatted = {
         date: epochToMomentTimeZone(summit.start_date, summit.time_zone_id).format('MMMM D'),
