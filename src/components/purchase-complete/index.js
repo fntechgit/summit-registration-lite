@@ -11,7 +11,7 @@
  * limitations under the License.
  **/
 
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import styles from './index.module.scss';
 import { epochToMomentTimeZone } from 'openstack-uicore-foundation/lib/utils/methods';
 import { isEmptyString, ticketHasAccessLevel } from '../../utils/utils';
@@ -50,12 +50,20 @@ const PurchaseComplete = ({
         onPurchaseComplete(checkout);
     }, []);
 
-    const isActive = useMemo(() => summit.start_date <= nowUtc && summit.end_date >= nowUtc, [summit, nowUtc]);    
+    const [requireExtraQuestions, setRequireExtraQuestions] = useState(null);
+    const isMultiOrder = useMemo(() => checkout?.tickets.length > 1 , [checkout]);
+    const isActive = useMemo(() => summit.start_date <= nowUtc && summit.end_date >= nowUtc, [summit, nowUtc]);
     const currentTicket = useMemo(
-        () => checkout?.tickets.length > 1 ? checkout?.tickets.find(t => t?.owner?.email === user?.email) : checkout?.tickets.find(t => t?.owner),
+        () => isMultiOrder ? checkout?.tickets.find(t => t?.owner?.email === user?.email) : checkout?.tickets.find(t => t?.owner),
         [user]
     );
-    const requireExtraQuestions = useMemo(() => completedExtraQuestions(currentTicket?.owner || null), [user]);
+
+    useEffect( ()=>{
+         completedExtraQuestions(currentTicket?.owner || null).then((res) => {
+             setRequireExtraQuestions(res);
+         });
+    }, [currentTicket]);
+
     const _hasVirtualAccessLevel = hasVirtualAccessLevel || (currentTicket && ticketHasAccessLevel(currentTicket, VirtualAccessLevel));
 
     // attendeeId is only passed to event-site only if the ticket is for someone else. If not pass it as null to use the default flow
@@ -68,6 +76,7 @@ const PurchaseComplete = ({
     };
 
     if (!checkout) return null;
+    if(requireExtraQuestions == null) return null;
 
     let orderCompleteButtonText = (
         currentTicket && requireExtraQuestions ?
@@ -88,8 +97,8 @@ const PurchaseComplete = ({
             rest.hasOwnProperty('initialOrderComplete1stParagraph') && typeof rest.initialOrderComplete1stParagraph !== 'undefined' ?
                 rest.initialOrderComplete1stParagraph
                 :
-                T.translate('purchase_complete_step.initial_order_complete_1st_paragraph_label', 
-                    {                        
+                T.translate('purchase_complete_step.initial_order_complete_1st_paragraph_label',
+                    {
                         attendee: `${attendeeTicket ? ` ${attendeeTicket.owner.email}` : 'you'}`,
                         adv: `${attendeeTicket ? `${attendeeTicket.owner.email}` : 'your'}`,
                         button: orderCompleteButtonText
@@ -103,7 +112,7 @@ const PurchaseComplete = ({
     );
 
     let orderComplete2ndParagraph = (
-        currentTicket ?
+        currentTicket?
             rest.hasOwnProperty('initialOrderComplete2ndParagraph') && typeof rest.initialOrderComplete2ndParagraph !== 'undefined' ?
                 rest.initialOrderComplete2ndParagraph
                 :

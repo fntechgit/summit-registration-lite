@@ -95,14 +95,19 @@ const PersonalInfoComponent = ({
             setCompanyError(true);
             return;
         }
-        if (!ticketOwnerOption) {
-            setTicketOwnerError(true);
-            return;
+
+        if(shouldDisplayTicketAssignment()) {
+            if (!ticketOwnerOption) {
+                setTicketOwnerError(true);
+                return;
+            }
+            // if the ticket is for someone else, set the attende with the data from form
+            const attendeeData = ticketOwnerOption === TICKET_OWNER_SOMEONE ? data.attendee : personalInfo.attendee;
+            data = {...data , attendee: attendeeData };
         }
-        // if the ticket is for someone else, set the attende with the data from form
-        const attendeeData = ticketOwnerOption === TICKET_OWNER_SOMEONE ? data.attendee : personalInfo.attendee;
-        setPersonalInfo({ ...personalInfo, ...data, attendee: attendeeData });
-        changeForm({ ...personalInfo, ...data, attendee: attendeeData });
+
+        setPersonalInfo({ ...personalInfo, ...data});
+        changeForm({ ...personalInfo, ...data });
     };
 
     const handleRadioButtonChange = (ev) => {
