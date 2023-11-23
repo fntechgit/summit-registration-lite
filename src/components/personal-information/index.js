@@ -40,13 +40,13 @@ const PersonalInfoComponent = ({
 
     const initialFirstName = userProfile.given_name || (invitation ? invitation.first_name : '');
     const initialLastName = userProfile.family_name || (invitation ? invitation.last_name : '');
-    
+
     const [ticketOwnerOption, setTicketOwnerOption] = useState('');
     const [ticketOwnerError, setTicketOwnerError] = useState(false);
 
-    // if there's only one ticket on the order, display the radio button to assign the ticket
-    const shouldDisplayTicketAssignment = () => formValues.ticketQuantity === 1;
-    
+    // if there's only one ticket on the order and there is no invitation available, display the radio button to assign the ticket
+    const shouldDisplayTicketAssignment = () => formValues.ticketQuantity === 1 && !invitation;
+
     const radioListOptions = [
         {label: "Myself", value: TICKET_OWNER_MYSELF},
         {label: "Someone Else", value: TICKET_OWNER_SOMEONE},
@@ -70,7 +70,7 @@ const PersonalInfoComponent = ({
 
     const [companyError, setCompanyError] = useState(false);
 
-    const { register, reset, handleSubmit, getValues, formState: { errors } } = useForm();    
+    const { register, reset, handleSubmit, getValues, formState: { errors } } = useForm();
 
     useEffect(() => {
         if (reservation) {
@@ -109,12 +109,12 @@ const PersonalInfoComponent = ({
         const {value} = ev.target;
         setTicketOwnerOption(value);
         setTicketOwnerError(false);
-        setPersonalInfo({ 
+        setPersonalInfo({
             ...personalInfo,
-            attendee: value === TICKET_OWNER_UNASSIGNED ? null : 
-                      value === TICKET_OWNER_MYSELF ? 
-                        { firstName: personalInfo.firstName, lastName: personalInfo.lastName, email: personalInfo.email } 
-                        : 
+            attendee: value === TICKET_OWNER_UNASSIGNED ? null :
+                      value === TICKET_OWNER_MYSELF ?
+                        { firstName: personalInfo.firstName, lastName: personalInfo.lastName, email: personalInfo.email }
+                        :
                         { firstName: '', lastName: '', email: '' }
         });
         reset({
@@ -123,7 +123,7 @@ const PersonalInfoComponent = ({
                 firstName: '',
                 lastName: '',
             },
-        });        
+        });
     }
 
     const [ref, { height }] = useMeasure();
@@ -252,19 +252,19 @@ const PersonalInfoComponent = ({
                                                 inline
                                                 html
                                             />
-                                            {ticketOwnerError && 
+                                            {ticketOwnerError &&
                                                 <>
                                                     <br/>
                                                     <div className={styles.fieldError} data-testid="company-error">This field is required.</div>
                                                 </>
                                             }
                                         </div>
-                                        {ticketOwnerOption === TICKET_OWNER_SOMEONE && 
+                                        {ticketOwnerOption === TICKET_OWNER_SOMEONE &&
                                             <>
                                                 <div className={styles.fieldWrapper}>
                                                     <div className={styles.inputWrapper}>
-                                                        <input type="text" placeholder="Email *" defaultValue={personalInfo?.attendee?.email ?? ''} 
-                                                        {...register("attendee.email", { 
+                                                        <input type="text" placeholder="Email *" defaultValue={personalInfo?.attendee?.email ?? ''}
+                                                        {...register("attendee.email", {
                                                             required: true,
                                                             pattern: EMAIL_REGEXP
                                                         })} data-testid="attendee-email" />
