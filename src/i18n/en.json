@@ -1,7 +1,7 @@
 {
   "purchase_complete_step": {
     "title": " Your order is complete",
-    "initial_order_complete_1st_paragraph_label": "A ticket has been assigned to you. To complete your additional ticket details, please click the \"{button}\" button.",
+    "initial_order_complete_1st_paragraph_label": "A ticket has been assigned to {attendee}. To complete {adv} additional ticket details, please click the \"{button}\" button.",
     "initial_order_complete_button": "Finish Now",
     "order_complete_1st_paragraph_label": "You may visit the \"My Orders/Tickets\" tab in the top right-hand corner of the navigation bar to\n assign/reassign tickets or to complete any required ticket details.",
     "order_complete_button": "View My Orders/Tickets",

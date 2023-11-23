@@ -11,7 +11,7 @@
  * limitations under the License.
  **/
 
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import styles from './index.module.scss';
 import { epochToMomentTimeZone } from 'openstack-uicore-foundation/lib/utils/methods';
 import { isEmptyString, ticketHasAccessLevel } from '../../utils/utils';
@@ -50,10 +50,25 @@ const PurchaseComplete = ({
         onPurchaseComplete(checkout);
     }, []);
 
+    const [requireExtraQuestions, setRequireExtraQuestions] = useState(null);
+    const isMultiOrder = useMemo(() => checkout?.tickets.length > 1 , [checkout]);
     const isActive = useMemo(() => summit.start_date <= nowUtc && summit.end_date >= nowUtc, [summit, nowUtc]);
-    const currentUserTicket = useMemo(() => checkout?.tickets.find(t => t?.owner?.email == user?.email), [user]);
-    const requireExtraQuestions = useMemo(() => completedExtraQuestions(checkout), [user]);
-    const _hasVirtualAccessLevel = hasVirtualAccessLevel || (currentUserTicket && ticketHasAccessLevel(currentUserTicket, VirtualAccessLevel));
+    const currentTicket = useMemo(
+        () => isMultiOrder ? checkout?.tickets.find(t => t?.owner?.email === user?.email) : checkout?.tickets.find(t => t?.owner),
+        [user]
+    );
+
+    useEffect( ()=>{
+         completedExtraQuestions(currentTicket?.owner || null).then((res) => {
+             setRequireExtraQuestions(res);
+         });
+    }, [currentTicket]);
+
+    const _hasVirtualAccessLevel = hasVirtualAccessLevel || (currentTicket && ticketHasAccessLevel(currentTicket, VirtualAccessLevel));
+
+    // attendeeId is only passed to event-site only if the ticket is for someone else. If not pass it as null to use the default flow
+    const attendeeTicket = checkout?.tickets.find(t => t?.owner?.email !== user?.email);
+    const attendeeId = checkout?.tickets.length === 1 ? attendeeTicket?.owner?.id : null;
 
     const startDateFormatted = {
         date: epochToMomentTimeZone(summit.start_date, summit.time_zone_id).format('MMMM D'),
@@ -61,10 +76,12 @@ const PurchaseComplete = ({
     };
 
     if (!checkout) return null;
+    if(requireExtraQuestions == null) return null;
 
     let orderCompleteButtonText = (
-        currentUserTicket && requireExtraQuestions ?
-            rest.hasOwnProperty('initialOrderCompleteButton') && !isEmptyString(rest.initialOrderCompleteButton) ?
+        currentTicket && requireExtraQuestions ?
+            rest.hasOwnProperty('initialOrderCompleteButton') && !isEmptyString(rest.initialOrderCompleteButton)
+            && typeof rest.initialOrderCompleteButton !== 'undefined' ?
                 rest.initialOrderCompleteButton
                 :
                 T.translate('purchase_complete_step.initial_order_complete_button')
@@ -76,11 +93,17 @@ const PurchaseComplete = ({
     );
 
     let orderComplete1stParagraph = (
-        currentUserTicket ?
+        currentTicket ?
             rest.hasOwnProperty('initialOrderComplete1stParagraph') && typeof rest.initialOrderComplete1stParagraph !== 'undefined' ?
                 rest.initialOrderComplete1stParagraph
                 :
-                T.translate('purchase_complete_step.initial_order_complete_1st_paragraph_label', {button: orderCompleteButtonText})
+                T.translate('purchase_complete_step.initial_order_complete_1st_paragraph_label',
+                    {
+                        attendee: `${attendeeTicket ? ` ${attendeeTicket.owner.email}` : 'you'}`,
+                        adv: `${attendeeTicket ? `${attendeeTicket.owner.email}` : 'your'}`,
+                        button: orderCompleteButtonText
+                    }
+                )
             :
             rest.hasOwnProperty('orderComplete1stParagraph') && typeof rest.orderComplete1stParagraph !== 'undefined' ?
                 rest.orderComplete1stParagraph
@@ -89,7 +112,7 @@ const PurchaseComplete = ({
     );
 
     let orderComplete2ndParagraph = (
-        currentUserTicket ?
+        currentTicket?
             rest.hasOwnProperty('initialOrderComplete2ndParagraph') && typeof rest.initialOrderComplete2ndParagraph !== 'undefined' ?
                 rest.initialOrderComplete2ndParagraph
                 :
@@ -105,7 +128,7 @@ const PurchaseComplete = ({
 
     const getCTAButton = () => {
         return (
-            <CTAButton cta={currentUserTicket && requireExtraQuestions ? goToExtraQuestions : goToMyOrders} clear={clearWidgetState} close={closeWidget}>
+            <CTAButton cta={currentTicket && requireExtraQuestions ? () => goToExtraQuestions(attendeeId) : goToMyOrders} clear={clearWidgetState} close={closeWidget}>
                 {orderCompleteButtonText}
             </CTAButton>
         )
@@ -121,7 +144,7 @@ const PurchaseComplete = ({
             </span>
             {
                 isActive ?
-                    (currentUserTicket && requireExtraQuestions) ?
+                    (currentTicket && requireExtraQuestions) ?
                         <>
                             <span>{orderComplete1stParagraph}</span>
                             {getCTAButton()}

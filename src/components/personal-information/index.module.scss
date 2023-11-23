@@ -18,6 +18,18 @@
   div.fieldWrapper {
     width: 48%;
     margin-bottom: 5px;
+    &Radio{
+      width: 100%;
+      margin-bottom: 10px;
+      label {
+        display: inline-block;
+        margin-bottom: 5px;
+      }
+      // adjust radio button circles
+      > div > div {
+        padding-left: 0px !important;
+      }
+    }
   }
 
   div.inputWrapper {
@@ -68,6 +80,13 @@
       font-family: FontAwesome;
       content: '\f071';
       margin-right: 5px;
+    }
+  }
+
+  .fieldWrapperRadio {
+    >div {
+      display: flex;
+      flex-direction: row;
     }
   }
 
