@@ -71,7 +71,8 @@ const PurchaseComplete = ({
 
     let orderCompleteButtonText = (
         currentTicket && requireExtraQuestions ?
-            rest.hasOwnProperty('initialOrderCompleteButton') && !isEmptyString(rest.initialOrderCompleteButton) ?
+            rest.hasOwnProperty('initialOrderCompleteButton') && !isEmptyString(rest.initialOrderCompleteButton)
+            && typeof rest.initialOrderCompleteButton !== 'undefined' ?
                 rest.initialOrderCompleteButton
                 :
                 T.translate('purchase_complete_step.initial_order_complete_button')
@@ -87,7 +88,13 @@ const PurchaseComplete = ({
             rest.hasOwnProperty('initialOrderComplete1stParagraph') && typeof rest.initialOrderComplete1stParagraph !== 'undefined' ?
                 rest.initialOrderComplete1stParagraph
                 :
-                T.translate('purchase_complete_step.initial_order_complete_1st_paragraph_label', {button: orderCompleteButtonText})
+                T.translate('purchase_complete_step.initial_order_complete_1st_paragraph_label', 
+                    {                        
+                        attendee: `${attendeeTicket ? ` ${attendeeTicket.owner.email}` : 'you'}`,
+                        adv: `${attendeeTicket ? `${attendeeTicket.owner.email}` : 'your'}`,
+                        button: orderCompleteButtonText
+                    }
+                )
             :
             rest.hasOwnProperty('orderComplete1stParagraph') && typeof rest.orderComplete1stParagraph !== 'undefined' ?
                 rest.orderComplete1stParagraph
