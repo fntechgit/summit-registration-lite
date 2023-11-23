@@ -83,6 +83,13 @@
     }
   }
 
+  .fieldWrapperRadio {
+    >div {
+      display: flex;
+      flex-direction: row;
+    }
+  }
+
 }
 
 .moreInfo {
