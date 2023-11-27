@@ -25,11 +25,15 @@ const StripeProvider = ({ userProfile, reservation, payTicket, providerKey, prov
     const stripePromise = useMemo(() => loadStripe(providerKey), [providerKey])
 
     const options = {
-        fonts: stripeOptions?.fonts
+        fonts: stripeOptions?.fonts,
+        mode: 'payment',
+        currency: 'usd',
+        amount: 15
     };
 
     return (
-        <Elements options={options} stripe={stripePromise}>
+        reservation ?
+        <Elements stripe={stripePromise} options={options}>
             <StripeForm
                 reservation={reservation}
                 payTicket={payTicket}
@@ -38,7 +42,9 @@ const StripeProvider = ({ userProfile, reservation, payTicket, providerKey, prov
                 provider={provider}
                 hidePostalCode={hidePostalCode}
             />
-        </Elements>
+        </Elements>        
+        :
+        <div>Loading...</div>
     );
 }
 

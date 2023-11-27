@@ -24,7 +24,16 @@ module.exports = merge(common, {
     mode: 'development',
     devtool: 'inline-source-map',
     devServer: {
-        historyApiFallback: true
+        historyApiFallback: true,
+        port: 8888,
+        https: true,
+        // point local certs here
+        // https: {
+        //     cert: './.cert/cert.pem',
+        //     key: './.cert/key.pem',
+        //     ca: './ca.cer',
+        //     disableHostCheck: true,            
+        // },
     },
     output: {
         filename: 'index.js',
