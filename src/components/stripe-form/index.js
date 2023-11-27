@@ -22,6 +22,7 @@ import {
     CardCvcElement,
     useStripe,
     useElements,
+    PaymentElement,
 } from '@stripe/react-stripe-js';
 
 import Swal from 'sweetalert2';
@@ -148,7 +149,8 @@ const StripeForm = ({ reservation, payTicket, userProfile, stripeOptions, provid
 
     return (
         <form className={styles.form} id="payment-form" onSubmit={handleSubmit(onSubmit)}>
-            <div className={styles.fieldWrapper}>
+            <PaymentElement options={{ style: stripeStyle }}/>
+            {/* <div className={styles.fieldWrapper}>
                 <div className={styles.inputWrapper}>
                     <CardNumberElement options={{ style: stripeStyle, placeholder: '1234 1234 1234 1234 *' }} />
                     <i className="fa fa-credit-card" />
@@ -168,7 +170,7 @@ const StripeForm = ({ reservation, payTicket, userProfile, stripeOptions, provid
                     <CardCvcElement options={{ style: stripeStyle, placeholder: 'CVC *' }} />
                 </div>
                 {stripeErrors.cardCvc && <div className={styles.fieldError}>{stripeErrors.cardCvc}</div>}
-            </div>
+            </div> */}
 
             <div className={styles.fieldWrapper}>
                 <div className={styles.inputWrapper}>
