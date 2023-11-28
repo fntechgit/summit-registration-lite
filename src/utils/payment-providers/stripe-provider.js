@@ -23,7 +23,7 @@ export class StripeProvider {
         this.dispatch = dispatch;
     }
 
-    payTicket = ({ token = null, stripe = null, zipCode = null }) => async (dispatch) => {
+    payTicket = ({ elements = null, paymentMethod = null, stripe = null, zipCode = null }) => async (dispatch) => {
 
         const errorHandler = (err, res) => (dispatch, state) => {
             let code = err.status;

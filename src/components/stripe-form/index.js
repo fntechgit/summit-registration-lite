@@ -14,7 +14,7 @@
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import merge from 'lodash/merge';
-import {DefaultBGColor, DefaultTextColor, DefaultHintColor} from '../../utils/constants';
+import { DefaultBGColor, DefaultTextColor, DefaultHintColor } from '../../utils/constants';
 
 import {
     CardNumberElement,
@@ -79,7 +79,7 @@ const StripeForm = ({ reservation, payTicket, userProfile, stripeOptions, provid
     let textColor = DefaultTextColor;
     let hintColor = DefaultHintColor;
 
-    if(document && document.documentElement) {
+    if (document && document.documentElement) {
         const documentStyles = getComputedStyle(document.documentElement);
         bgColor = documentStyles.getPropertyValue('--color_input_background_color');
         textColor = documentStyles.getPropertyValue('--color_input_text_color');
@@ -110,33 +110,49 @@ const StripeForm = ({ reservation, payTicket, userProfile, stripeOptions, provid
 
         setStripeErrors({});
 
-        if (!stripe) {
+        if (!stripe || !elements) {
             // Stripe.js has not loaded yet. Make sure to disable
             // form submission until Stripe.js has loaded.
             return;
         }
         const btn = document.getElementById('payment-form-btn');
-        if(btn) btn.disabled = true;
-        const cardElement = elements.getElement(CardNumberElement);
-        // @see https://stripe.com/docs/js/tokens_sources/create_token?type=cardElement
-        const { error, token } = await stripe.createToken(cardElement, {
-            name: `${reservation.owner_first_name} ${reservation.owner_last_name}`,
-            address_line1: userProfile.address1 || '',
-            address_line2: userProfile.address2 || '',
-            address_city: userProfile.locality || '',
-            address_state: userProfile.region || '',
-            address_zip: data.zipCode,
-            address_country: userProfile.country || '',
-            email: userProfile.email,
-        });
-
-        if (token) {
-            cardElement.update({disabled: true})
-            payTicket(provider, { token, stripe, zipCode : data.zipCode });
+        if (btn) btn.disabled = true;
+        
+        // Trigger form validation and wallet collection
+        const { error: submitError } = await elements.submit();
+        if (submitError) {
             return;
         }
-        if (error) {
-            if(btn) btn.disabled = false;
+
+        try {
+            // Create a payment method using PaymentElement
+            const { paymentMethod, error } = await stripe.createPaymentMethod({
+                elements
+            });
+
+            if (error) {
+                if (stripeErrorCodeMap[error.code]) {
+                    setStripeErrors({
+                        [stripeErrorCodeMap[error.code].field]: stripeErrorCodeMap[error.code].message || error.message
+                    });
+                }
+                if (btn) btn.disabled = false;
+            } else {
+                // Send the paymentMethod ID to your server
+                if (paymentMethod) {
+                    payTicket(provider, { elements, paymentMethod, stripe, zipCode: data.zipCode });
+                } else if (error) {
+                    if (stripeErrorCodeMap[error.code]) {
+                        setStripeErrors({
+                            [stripeErrorCodeMap[error.code].field]: stripeErrorCodeMap[error.code].message || error.message
+                        });
+                    } else {
+                        Swal.fire("Payment error", error.message, "warning");
+                    }
+                }
+            }
+        } catch (error) {
+            // setPaymentError('Error processing payment');
             if (stripeErrorCodeMap[error.code]) {
                 setStripeErrors({
                     [stripeErrorCodeMap[error.code].field]: stripeErrorCodeMap[error.code].message || error.message
@@ -149,28 +165,7 @@ const StripeForm = ({ reservation, payTicket, userProfile, stripeOptions, provid
 
     return (
         <form className={styles.form} id="payment-form" onSubmit={handleSubmit(onSubmit)}>
-            <PaymentElement options={{ style: stripeStyle }}/>
-            {/* <div className={styles.fieldWrapper}>
-                <div className={styles.inputWrapper}>
-                    <CardNumberElement options={{ style: stripeStyle, placeholder: '1234 1234 1234 1234 *' }} />
-                    <i className="fa fa-credit-card" />
-                </div>
-                {stripeErrors.cardNumber && <div className={styles.fieldError}>{stripeErrors.cardNumber}</div>}
-            </div>
-
-            <div className={styles.fieldWrapper}>
-                <div className={styles.inputWrapper}>
-                    <CardExpiryElement options={{ style: stripeStyle, placeholder: 'MM / YY *' }} />
-                </div>
-                {stripeErrors.cardExpiry && <div className={styles.fieldError}>{stripeErrors.cardExpiry}</div>}
-            </div>
-
-            <div className={styles.fieldWrapper}>
-                <div className={styles.inputWrapper}>
-                    <CardCvcElement options={{ style: stripeStyle, placeholder: 'CVC *' }} />
-                </div>
-                {stripeErrors.cardCvc && <div className={styles.fieldError}>{stripeErrors.cardCvc}</div>}
-            </div> */}
+            <PaymentElement options={{ style: stripeStyle }} />
 
             <div className={styles.fieldWrapper}>
                 <div className={styles.inputWrapper}>
