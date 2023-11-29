@@ -67,7 +67,6 @@ export class StripeProvider {
         dispatch(startWidgetLoading());
 
         if (this.reservation.amount > 0) {
-            const {id} = paymentMethod;
             stripe.confirmPayment(
                 {
                     elements, 
