@@ -93,14 +93,21 @@ export class StripeProvider {
 
         }
         // regular flow
-        const { id } = token;
-        stripe.confirmCardPayment(
-            this.reservation.payment_gateway_client_token, { payment_method: { card: { token: id } } }
+        stripe.confirmPayment(
+            {
+                elements,
+                clientSecret: this.reservation.payment_gateway_client_token,
+                confirmParams: {
+                    return_url: `${window.location.origin}/a/my-tickets/`,
+                    payment_method: paymentMethod.id
+                },
+                redirect: "if_required"
+            }
         ).then((result) => {
             if (result.error) {
                 // Reserve error.message in your UI.
-                Swal.fire(result.error.message, 'Please retry purchase.', 'warning');
-                this.dispatch(changeStep(STEP_PERSONAL_INFO));
+                Swal.fire(result.error.message, "Please retry purchase.", "warning");
+                this.dispatch(changeStep(1));
                 this.dispatch(removeReservedTicket());
                 this.dispatch(stopWidgetLoading());
             } else {
@@ -109,13 +116,13 @@ export class StripeProvider {
                     createAction(PAY_RESERVATION),
                     `${this.apiBaseUrl}/api/v1/summits/${this.summitId}/orders/${this.reservation.hash}/checkout`,
                     normalizedEntity,
-                    errorHandler
+                    errorHandler,
                     // entity
                 )(params)(this.dispatch)
                     .then((payload) => {
                         this.dispatch(stopWidgetLoading());
                         this.dispatch(createAction(CLEAR_RESERVATION)({}));
-                        this.dispatch(changeStep(STEP_COMPLETE));
+                        this.dispatch(changeStep(3));
                         return (payload);
                     })
                     .catch(e => {
@@ -127,7 +134,7 @@ export class StripeProvider {
         })
             .catch(e => {
                 this.dispatch(removeReservedTicket());
-                this.dispatch(changeStep(STEP_PERSONAL_INFO));
+                this.dispatch(changeStep(1));
                 this.dispatch(stopWidgetLoading());
                 return (e);
             });
