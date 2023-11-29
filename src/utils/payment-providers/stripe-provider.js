@@ -72,7 +72,7 @@ export class StripeProvider {
                     elements, 
                     clientSecret: this.reservation.payment_gateway_client_token, 
                     confirmParams: {
-                        return_url: 'https://example.com',
+                        return_url: `${window.location.origin}/a/my-tickets/`,
                         payment_method: paymentMethod.id
                     },
                     redirect: "if_required"
