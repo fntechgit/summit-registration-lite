@@ -94,7 +94,7 @@ const PurchaseComplete = ({
 
     let orderComplete1stParagraph = (
         currentTicket ?
-            rest.hasOwnProperty('initialOrderComplete1stParagraph') && typeof rest.initialOrderComplete1stParagraph !== 'undefined' ?
+            !attendeeTicket && rest.hasOwnProperty('initialOrderComplete1stParagraph') && typeof rest.initialOrderComplete1stParagraph !== 'undefined' ?
                 rest.initialOrderComplete1stParagraph
                 :
                 T.translate('purchase_complete_step.initial_order_complete_1st_paragraph_label',

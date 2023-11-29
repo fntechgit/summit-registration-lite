@@ -287,14 +287,14 @@ const PersonalInfoComponent = ({
                                                 </div>
                                                 <div className={styles.fieldWrapper}>
                                                     <div className={styles.inputWrapper}>
-                                                        <input type="text" placeholder="First name *" defaultValue={personalInfo?.attendee?.firstName ?? ''}
+                                                        <input type="text" placeholder="First name" defaultValue={personalInfo?.attendee?.firstName ?? ''}
                                                             {...register("attendee.firstName", { required: false, maxLength: 80 })} data-testid="attendee-first-name" />
                                                     </div>
                                                 </div>
 
                                                 <div className={styles.fieldWrapper}>
                                                     <div className={styles.inputWrapper}>
-                                                        <input type="text" placeholder="Last name *" defaultValue={personalInfo?.attendee?.lastName ?? ''}
+                                                        <input type="text" placeholder="Last name" defaultValue={personalInfo?.attendee?.lastName ?? ''}
                                                             {...register("attendee.lastName", { required: false, maxLength: 100 })} data-testid="attendee-last-name" />
                                                     </div>
                                                 </div>
