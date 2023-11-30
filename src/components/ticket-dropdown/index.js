@@ -15,7 +15,7 @@ import React, { useState } from 'react';
 import { getTicketMaxQuantity } from '../../helpers';
 import styles from "./index.module.scss";
 
-const TicketDropdownComponent = ({ selectedTicket, ticketTypes, onTicketSelect }) => {
+const TicketDropdownComponent = ({ selectedTicket, ticketTypes, taxTypes, onTicketSelect }) => {
     const [active, setActive] = useState(false);
 
     const ticketSelect = (ticket) => {
@@ -47,6 +47,7 @@ const TicketDropdownComponent = ({ selectedTicket, ticketTypes, onTicketSelect }
                         console.log('TicketDropdownComponent::render');
                         const maxQuantity = getTicketMaxQuantity(t);
                         const isTicketSoldOut = maxQuantity < 1;
+                        const ticketTax = taxTypes.find(tax => tax.ticket_types.includes(t.id)) || null;
 
                             return (
                                 <div key={t.id} className={isTicketSoldOut ? styles.soldOut : ''} onClick={() => {
@@ -55,6 +56,7 @@ const TicketDropdownComponent = ({ selectedTicket, ticketTypes, onTicketSelect }
                                 }}>
                                     {t.name} -{` `}
                                     {!isTicketSoldOut && <>{t.currency_symbol}{t.cost} {t.currency}</>}
+                                    {ticketTax && ` plus ${ticketTax.name}`}
                                     {isTicketSoldOut && <>Sold Out</>}
                                 </div>
                             )
