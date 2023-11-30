@@ -18,6 +18,7 @@ import EmailRoundedIcon from '@mui/icons-material/EmailRounded';
 import styles from "./index.module.scss";
 
 const LoginComponent = ({
+    summitData,
     loginOptions,
     login,
     allowsNativeAuth,
@@ -48,6 +49,7 @@ const LoginComponent = ({
             <>
                 <div className={`${styles.innerWrapper}`}>
                     <div className={styles.loginCode}>
+                        {summitData?.logo && <img src={`${summitData?.logo}`} />}
                         {title}
                         <div className={styles.input}>
                             <input placeholder="youremail@example.com" value={email} onChange={e => setEmail(e.target.value)}

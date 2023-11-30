@@ -267,6 +267,7 @@ const RegistrationLite = (
                             <div className={styles.stepsWrapper}>
                                 {!profileData && !passwordlessCodeSent && (
                                     <LoginComponent
+                                        summitData={summitData}
                                         loginOptions={loginOptions}
                                         allowsNativeAuth={allowsNativeAuth}
                                         allowsOtpAuth={allowsOtpAuth}

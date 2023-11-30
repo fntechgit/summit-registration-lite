@@ -57,7 +57,7 @@
 }
 
 .buttonDisabled {
-  background-color: #BDBDBD;
+  background-color: var(--color_text_input_hints);
 }
 
 .pointerDisabled {
@@ -66,7 +66,7 @@
 
 .email_login_button {
   display: flex;
-  color: #fff;
+  color: var(--color_primary_contrast);
   width: 100%;
   span {
     padding: 0 0 0 8px;
@@ -76,7 +76,7 @@
 }
 
 .h2Styled {
-  color: black !important;
+  color: var(--color_gray_darker) !important;
   font-size: 16px !important;
   font-weight: bold;
   display: flex;
@@ -85,7 +85,7 @@
   &::before, &::after {
     content: "";
     flex: 1 1;
-    border-bottom: 1px solid #C4C4C4;
+    border-bottom: 1px solid var(--color_gray_dark);
     margin: auto;
   }
   &::before {
