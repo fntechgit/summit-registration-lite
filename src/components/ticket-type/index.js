@@ -20,6 +20,7 @@ import { isInPersonTicketType } from "../../actions";
 import ReactTooltip from 'react-tooltip';
 import { formatCurrency } from '../../helpers';
 import { getTicketMaxQuantity } from '../../helpers';
+import { getTicketTaxes } from '../../utils/utils';
 
 const TicketTypeComponent = ({ ticketTypes, taxTypes, isActive, changeForm, reservation, inPersonDisclaimer, showMultipleTicketTexts }) => {
     const [ticket, setTicket] = useState(null);
@@ -70,7 +71,8 @@ const TicketTypeComponent = ({ ticketTypes, taxTypes, isActive, changeForm, rese
                             <span>
                                 {ticket && (
                                     <>
-                                        {`${ticket.name} (${quantity}): ${formatCurrency(ticket.cost * quantity, { currency: ticket.currency })} ${ticket.currency}`}
+                                        {`${ticket.name} (${quantity}): ${formatCurrency(ticket.cost * quantity, { currency: ticket.currency })} ${ticket.currency} 
+                                        ${getTicketTaxes(ticket, taxTypes)}`}
 
                                         {!isActive && reservation?.discount_amount > 0 && (
                                             <>
