@@ -23,13 +23,16 @@ const TicketDropdownComponent = ({ selectedTicket, ticketTypes, taxTypes, onTick
         setActive(!active);
     }
 
+    const selectedTicketTaxes = taxTypes.filter(tax => tax.ticket_types.includes(selectedTicket?.id));
+
     return (
         <div className={`${styles.outerWrapper}`}>
             <div className={styles.placeholder} onClick={() => setActive(!active)} data-testid="ticket-dropdown">
                 {selectedTicket ?
                     <>
                         <span className={styles.selectedTicket} data-testid="selected-ticket">
-                            {`${selectedTicket.name} - ${selectedTicket.currency_symbol}${selectedTicket.cost} ${selectedTicket.currency}`}
+                            {`${selectedTicket.name} - ${selectedTicket.currency_symbol}${selectedTicket.cost} ${selectedTicket.currency}
+                            ${selectedTicketTaxes.length > 0 && ` plus ${selectedTicketTaxes.map(t => t.name).join(' & ')}`}`}
                         </span>
                         <i className="fa fa-chevron-down"></i>
                     </>
@@ -47,7 +50,7 @@ const TicketDropdownComponent = ({ selectedTicket, ticketTypes, taxTypes, onTick
                         console.log('TicketDropdownComponent::render');
                         const maxQuantity = getTicketMaxQuantity(t);
                         const isTicketSoldOut = maxQuantity < 1;
-                        const ticketTax = taxTypes.find(tax => tax.ticket_types.includes(t.id)) || null;
+                        const ticketTax = taxTypes.filter(tax => tax.ticket_types.includes(t.id));
 
                             return (
                                 <div key={t.id} className={isTicketSoldOut ? styles.soldOut : ''} onClick={() => {
@@ -56,7 +59,7 @@ const TicketDropdownComponent = ({ selectedTicket, ticketTypes, taxTypes, onTick
                                 }}>
                                     {t.name} -{` `}
                                     {!isTicketSoldOut && <>{t.currency_symbol}{t.cost} {t.currency}</>}
-                                    {ticketTax && ` plus ${ticketTax.name}`}
+                                    {ticketTax.length > 0 && ` plus ${ticketTax.map(t => t.name).join(' & ')}`}
                                     {isTicketSoldOut && <>Sold Out</>}
                                 </div>
                             )
