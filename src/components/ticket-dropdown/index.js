@@ -15,12 +15,17 @@ import React, { useState } from 'react';
 import { getTicketMaxQuantity } from '../../helpers';
 import styles from "./index.module.scss";
 
-const TicketDropdownComponent = ({ selectedTicket, ticketTypes, onTicketSelect }) => {
+const TicketDropdownComponent = ({ selectedTicket, ticketTypes, taxTypes, onTicketSelect }) => {
     const [active, setActive] = useState(false);
 
     const ticketSelect = (ticket) => {
         onTicketSelect(ticket);
         setActive(!active);
+    }
+
+    const getTicketTaxes = (ticket, taxes) => {
+        const ticketTaxes = taxes.filter(tax => tax.ticket_types.includes(ticket?.id));
+        return `${ticketTaxes.length > 0 ? ` plus ${taxes.map(t => t.name).join(' & ')}` : ''}`;
     }
 
     return (
@@ -29,7 +34,8 @@ const TicketDropdownComponent = ({ selectedTicket, ticketTypes, onTicketSelect }
                 {selectedTicket ?
                     <>
                         <span className={styles.selectedTicket} data-testid="selected-ticket">
-                            {`${selectedTicket.name} - ${selectedTicket.currency_symbol}${selectedTicket.cost} ${selectedTicket.currency}`}
+                            {`${selectedTicket.name} - ${selectedTicket.currency_symbol}${selectedTicket.cost} ${selectedTicket.currency}
+                            ${getTicketTaxes(selectedTicket, taxTypes)}`}
                         </span>
                         <i className="fa fa-chevron-down"></i>
                     </>
@@ -55,10 +61,10 @@ const TicketDropdownComponent = ({ selectedTicket, ticketTypes, onTicketSelect }
                                 }}>
                                     {t.name} -{` `}
                                     {!isTicketSoldOut && <>{t.currency_symbol}{t.cost} {t.currency}</>}
+                                    {getTicketTaxes(t, taxTypes)}
                                     {isTicketSoldOut && <>Sold Out</>}
                                 </div>
                             )
-
                     })}
                 </div>
             }
