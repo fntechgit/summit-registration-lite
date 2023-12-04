@@ -14,6 +14,7 @@
 import React, { useState } from 'react';
 import { getTicketMaxQuantity } from '../../helpers';
 import styles from "./index.module.scss";
+import { getTicketTaxes } from '../../utils/utils';
 
 const TicketDropdownComponent = ({ selectedTicket, ticketTypes, taxTypes, onTicketSelect }) => {
     const [active, setActive] = useState(false);
@@ -21,11 +22,6 @@ const TicketDropdownComponent = ({ selectedTicket, ticketTypes, taxTypes, onTick
     const ticketSelect = (ticket) => {
         onTicketSelect(ticket);
         setActive(!active);
-    }
-
-    const getTicketTaxes = (ticket, taxes) => {
-        const ticketTaxes = taxes.filter(tax => tax.ticket_types.includes(ticket?.id));
-        return `${ticketTaxes.length > 0 ? ` plus ${taxes.map(t => t.name).join(' & ')}` : ''}`;
     }
 
     return (

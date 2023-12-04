@@ -42,3 +42,8 @@ export const getCurrentUserLanguage = () => {
 export const isEmptyString = (val) => {
     return typeof val === 'string' && val.trim().length == 0;
 }
+
+export const getTicketTaxes = (ticket, taxes) => {
+    const ticketTaxes = taxes.filter(tax => tax.ticket_types.includes(ticket?.id));
+    return `${ticketTaxes.length > 0 ? ` plus ${taxes.map(t => t.name).join(' & ')}` : ''}`;
+}
