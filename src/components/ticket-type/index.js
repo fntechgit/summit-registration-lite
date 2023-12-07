@@ -20,8 +20,9 @@ import { isInPersonTicketType } from "../../actions";
 import ReactTooltip from 'react-tooltip';
 import { formatCurrency } from '../../helpers';
 import { getTicketMaxQuantity } from '../../helpers';
+import { getTicketTaxes } from '../../utils/utils';
 
-const TicketTypeComponent = ({ ticketTypes, isActive, changeForm, reservation, inPersonDisclaimer, showMultipleTicketTexts }) => {
+const TicketTypeComponent = ({ ticketTypes, taxTypes, isActive, changeForm, reservation, inPersonDisclaimer, showMultipleTicketTexts }) => {
     const [ticket, setTicket] = useState(null);
     const [quantity, setQuantity] = useState(1);
 
@@ -70,7 +71,8 @@ const TicketTypeComponent = ({ ticketTypes, isActive, changeForm, reservation, i
                             <span>
                                 {ticket && (
                                     <>
-                                        {`${ticket.name} (${quantity}): ${formatCurrency(ticket.cost * quantity, { currency: ticket.currency })} ${ticket.currency}`}
+                                        {`${ticket.name} (${quantity}): ${formatCurrency(ticket.cost * quantity, { currency: ticket.currency })} ${ticket.currency} 
+                                        ${getTicketTaxes(ticket, taxTypes)}`}
 
                                         {!isActive && reservation?.discount_amount > 0 && (
                                             <>
@@ -127,6 +129,7 @@ const TicketTypeComponent = ({ ticketTypes, isActive, changeForm, reservation, i
                                 <div className={styles.dropdown}>
                                     <TicketDropdownComponent selectedTicket={ticket}
                                                              ticketTypes={ticketTypes}
+                                                             taxTypes={taxTypes}
                                                              onTicketSelect={handleTicketChange}
                                     />
                                 </div>

@@ -20,6 +20,7 @@ import {
 import { authErrorHandler } from "openstack-uicore-foundation/lib/utils/actions";
 import Swal from 'sweetalert2';
 import { PaymentProviderFactory } from "./utils/payment-providers/payment-provider-factory";
+import { TICKET_OWNER_MYSELF, TICKET_OWNER_UNASSIGNED } from "./utils/constants";
 
 export const START_WIDGET_LOADING = 'START_WIDGET_LOADING';
 export const STOP_WIDGET_LOADING = 'STOP_WIDGET_LOADING';
@@ -157,7 +158,7 @@ export const reserveTicket = ({ provider, personalInformation, ticket, ticketQua
     async (dispatch, getState, { apiBaseUrl, getAccessToken }) => {
         try {
             const { registrationLiteState: { settings: { summitId } } } = getState();
-            let { firstName, lastName, email, company, promoCode } = personalInformation;
+            let { firstName, lastName, email, company, promoCode, attendee } = personalInformation;
             dispatch(startWidgetLoading());
 
             const access_token = await getAccessToken();
@@ -166,6 +167,12 @@ export const reserveTicket = ({ provider, personalInformation, ticket, ticketQua
                 type_id: ticket.id,
                 promo_code: promoCode || null
             }));
+
+            if(tickets.length === 1 && attendee) {
+                tickets[0].attendee_first_name = attendee.firstName
+                tickets[0].attendee_last_name = attendee.lastName
+                tickets[0].attendee_email = attendee.email
+            }
 
             let params = {
                 access_token,

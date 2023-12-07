@@ -12,7 +12,7 @@
  **/
 
 import React, { useState, useEffect } from 'react';
-import { RegistrationCompanyInput } from 'openstack-uicore-foundation/lib/components'
+import { RegistrationCompanyInput, RadioList } from 'openstack-uicore-foundation/lib/components'
 import { useForm } from 'react-hook-form';
 import { useSpring, config, animated } from "react-spring";
 import { useMeasure } from "react-use";
@@ -20,6 +20,7 @@ import ReactTooltip from 'react-tooltip';
 import { formatErrorMessage } from '../../helpers';
 
 import styles from "./index.module.scss";
+import { EMAIL_REGEXP, TICKET_OWNER_MYSELF, TICKET_OWNER_SOMEONE, TICKET_OWNER_UNASSIGNED } from '../../utils/constants';
 
 const PersonalInfoComponent = ({
     isActive,
@@ -42,6 +43,18 @@ const PersonalInfoComponent = ({
     const initialFirstName = userProfile.given_name || (invitation ? invitation.first_name : '');
     const initialLastName = userProfile.family_name || (invitation ? invitation.last_name : '');
 
+    const [ticketOwnerOption, setTicketOwnerOption] = useState('');
+    const [ticketOwnerError, setTicketOwnerError] = useState(false);
+
+    // if there's only one ticket on the order and there is no invitation available, display the radio button to assign the ticket
+    const shouldDisplayTicketAssignment = () => formValues.ticketQuantity === 1 && !invitation;
+
+    const radioListOptions = [
+        {label: "Myself", value: TICKET_OWNER_MYSELF},
+        {label: "Someone Else", value: TICKET_OWNER_SOMEONE},
+        {label: "Leave Unassigned", value: TICKET_OWNER_UNASSIGNED},
+    ]
+
     const [personalInfo, setPersonalInfo] = useState(
         {
             firstName: initialFirstName,
@@ -49,12 +62,17 @@ const PersonalInfoComponent = ({
             email: userProfile.email || '',
             company: { id: null, name: '' },
             promoCode: '',
+            attendee: {
+                firstName: '',
+                lastName: '',
+                email: ''
+            }
         }
     );
 
     const [companyError, setCompanyError] = useState(false);
 
-    const { register, handleSubmit, formState: { errors } } = useForm();
+    const { register, reset, handleSubmit, getValues, formState: { errors } } = useForm();
 
     useEffect(() => {
         if (reservation) {
@@ -79,9 +97,41 @@ const PersonalInfoComponent = ({
             setCompanyError(true);
             return;
         }
-        setPersonalInfo({ ...personalInfo, ...data });
+
+        if(shouldDisplayTicketAssignment()) {
+            if (!ticketOwnerOption) {
+                setTicketOwnerError(true);
+                return;
+            }
+            // if the ticket is for someone else, set the attende with the data from form
+            const attendeeData = ticketOwnerOption === TICKET_OWNER_SOMEONE ? data.attendee : personalInfo.attendee;
+            data = {...data , attendee: attendeeData };
+        }
+
+        setPersonalInfo({ ...personalInfo, ...data});
         changeForm({ ...personalInfo, ...data });
     };
+
+    const handleRadioButtonChange = (ev) => {
+        const {value} = ev.target;
+        setTicketOwnerOption(value);
+        setTicketOwnerError(false);
+        setPersonalInfo({
+            ...personalInfo,
+            attendee: value === TICKET_OWNER_UNASSIGNED ? null :
+                      value === TICKET_OWNER_MYSELF ?
+                        { firstName: personalInfo.firstName, lastName: personalInfo.lastName, email: personalInfo.email }
+                        :
+                        { firstName: '', lastName: '', email: '' }
+        });
+        reset({
+            attendee: {
+                email: '',
+                firstName: '',
+                lastName: '',
+            },
+        });
+    }
 
     const [ref, { height }] = useMeasure();
 
@@ -120,7 +170,7 @@ const PersonalInfoComponent = ({
             <>
                 <div className={`${styles.innerWrapper}`}>
                     <div className={styles.title} >
-                        <span>Personal Information</span>
+                        <span>Purchaser Information</span>
                         {!isActive &&
                             <div data-testid="personal-info">
                                 <span>
@@ -145,8 +195,8 @@ const PersonalInfoComponent = ({
                                 <div className={styles.fieldWrapper}>
                                     <div className={styles.inputWrapper}>
                                         <input type="text" placeholder="First name *" defaultValue={personalInfo.firstName || ''}
-                                               readOnly={initialLastName !== ''}
-                                               className={initialLastName !== '' ? styles.readOnly : ''}
+                                               readOnly={initialFirstName !== ''}
+                                               className={initialFirstName !== '' ? styles.readOnly : ''}
                                                {...register("firstName", { required: true, maxLength: 80 })} data-testid="first-name" />
                                     </div>
                                     {errors.firstName && <div className={styles.fieldError} data-testid="first-name-error">This field is required.</div>}
@@ -200,6 +250,57 @@ const PersonalInfoComponent = ({
                                             <input type="text" placeholder="Promo code" {...register("promoCode")} />
                                         </div>
                                     </div>
+                                }
+
+                                {shouldDisplayTicketAssignment() &&
+                                    <>
+                                        <br/>
+                                        <div className={styles.fieldWrapperRadio}>
+                                            <label>Ticket is for:</label>
+                                            <RadioList
+                                                id={`ticket-self-radio`}
+                                                value={ticketOwnerOption}
+                                                options={radioListOptions}
+                                                onChange={handleRadioButtonChange}
+                                                inline
+                                                html
+                                            />
+                                            {ticketOwnerError &&
+                                                <>
+                                                    <br/>
+                                                    <div className={styles.fieldError} data-testid="company-error">This field is required.</div>
+                                                </>
+                                            }
+                                        </div>
+                                        {ticketOwnerOption === TICKET_OWNER_SOMEONE &&
+                                            <>
+                                                <div className={styles.fieldWrapper}>
+                                                    <div className={styles.inputWrapper}>
+                                                        <input type="text" placeholder="Email *" defaultValue={personalInfo?.attendee?.email ?? ''}
+                                                        {...register("attendee.email", {
+                                                            required: true,
+                                                            pattern: EMAIL_REGEXP
+                                                        })} data-testid="attendee-email" />
+                                                    </div>
+                                                    {errors.attendee?.email?.type === 'emailRequired' && <div className={styles.fieldError} data-testid="attendee-email-error-required">This field is required.</div>}
+                                                    {errors.attendee?.email?.type === 'pattern' && <div className={styles.fieldError} data-testid="attendee-email-error-invalid">The email is invalid.</div>}
+                                                </div>
+                                                <div className={styles.fieldWrapper}>
+                                                    <div className={styles.inputWrapper}>
+                                                        <input type="text" placeholder="First name" defaultValue={personalInfo?.attendee?.firstName ?? ''}
+                                                            {...register("attendee.firstName", { required: false, maxLength: 80 })} data-testid="attendee-first-name" />
+                                                    </div>
+                                                </div>
+
+                                                <div className={styles.fieldWrapper}>
+                                                    <div className={styles.inputWrapper}>
+                                                        <input type="text" placeholder="Last name" defaultValue={personalInfo?.attendee?.lastName ?? ''}
+                                                            {...register("attendee.lastName", { required: false, maxLength: 100 })} data-testid="attendee-last-name" />
+                                                    </div>
+                                                </div>
+                                            </>
+                                        }
+                                    </>
                                 }
 
                             </form>
