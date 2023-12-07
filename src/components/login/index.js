@@ -49,7 +49,7 @@ const LoginComponent = ({
             <>
                 <div className={`${styles.innerWrapper}`}>
                     <div className={styles.loginCode}>
-                        {summitData?.logo && <img className="login-logo" src={`${summitData?.logo}`} />}
+                        {summitData?.secondary_logo && <img className="login-logo" src={`${summitData?.secondary_logo}`} />}
                         {title}
                         <div className={styles.input}>
                             <input placeholder="youremail@example.com" value={email} onChange={e => setEmail(e.target.value)}
