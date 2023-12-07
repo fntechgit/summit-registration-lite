@@ -40,7 +40,7 @@
 
 .loginCode {
   margin-bottom: 10px;
-  font-size: 16px;
+  font-size: 15px;
   > div {
     margin-top: 10px;
   }
@@ -49,6 +49,50 @@
     font-weight: normal;
     font-size: 14px;
     color: #e5424d;
+  }
+}
+
+.primaryEmailButton {
+  background-color: var(--color_primary);
+}
+
+.buttonDisabled {
+  background-color: var(--color_text_input_hints);
+}
+
+.pointerDisabled {
+  pointer-events: none;
+}
+
+.email_login_button {
+  display: flex;
+  color: var(--color_primary_contrast);
+  width: 100%;
+  span {
+    padding: 0 0 0 8px;
+    margin: 0;
+    color: #fff;
+  }
+}
+
+.h2Styled {
+  color: var(--color_gray_darker) !important;
+  font-size: 16px !important;
+  font-weight: bold;
+  display: flex;
+  flex-direction: row;
+
+  &::before, &::after {
+    content: "";
+    flex: 1 1;
+    border-bottom: 1px solid var(--color_gray_dark);
+    margin: auto;
+  }
+  &::before {
+    margin-right: 10px
+  }
+  &::after {
+    margin-left: 10px
   }
 }
 

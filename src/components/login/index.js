@@ -13,10 +13,12 @@
 
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
+import EmailRoundedIcon from '@mui/icons-material/EmailRounded';
 
 import styles from "./index.module.scss";
 
 const LoginComponent = ({
+    summitData,
     loginOptions,
     login,
     allowsNativeAuth,
@@ -41,24 +43,26 @@ const LoginComponent = ({
             getLoginCode(email, getPasswordlessCode);
         }
     }
-
+    
     return (
         <div className={`${styles.loginWrapper} step-wrapper`}>
             <>
                 <div className={`${styles.innerWrapper}`}>
                     <div className={styles.loginCode}>
+                        {summitData?.secondary_logo && <img className="login-logo" src={`${summitData?.secondary_logo}`} />}
                         {title}
                         <div className={styles.input}>
                             <input placeholder="youremail@example.com" value={email} onChange={e => setEmail(e.target.value)}
-                                   onKeyPress={(ev) => ev.key === 'Enter' ? loginCode() : null} data-testid="email-input" />
-                            <button onClick={() => loginCode()} data-testid="email-button">
-                                &gt;
-                            </button>
-                            <br />
+                                   onKeyPress={(ev) => ev.key === 'Enter' ? loginCode() : null} data-testid="email-input" />                           
+                        </div>
+                        <div onClick={() => loginCode()} data-testid="email-button"
+                            className={`${styles.button} ${styles.email_login_button} ${email === '' ? `${styles.pointerDisabled} ${styles.buttonDisabled}` : `${styles.primaryEmailButton}`}`}>
+                            <EmailRoundedIcon style={{ fontSize: '20px' }} />
+                            <span>Email me a login code</span>
                         </div>
                         {emailError && <span data-testid="email-error">Please enter a valid email address</span>}
+                        <h2 className={styles.h2Styled}>or</h2>
                     </div>
-                    <span>Or you may login with one of the following:</span>
                     {loginOptions.map((o, index) => {
                         return (
                             o.provider_param ?
@@ -95,10 +99,10 @@ const LoginComponent = ({
                             or get a login code emailed to you
                             <div className={styles.input}>
                                 <input placeholder="youremail@example.com" value={email} onChange={e => setEmail(e.target.value)} onKeyPress={(ev) => ev.key === 'Enter' ? loginCode() : null} data-testid="email-input" />
-                                <button onClick={() => loginCode()} data-testid="email-button">
-                                    &gt;
-                                </button>
                                 <br />
+                            </div>
+                            <div onClick={() => loginCode()} data-testid="email-button" className="button" style={{ background: "#000", color: "#fff"}}>
+                                Email me a login code
                             </div>
                             {emailError && <span data-testid="email-error">Please enter a valid email adress</span>}
                         </div>
