@@ -65,10 +65,10 @@ const PurchaseComplete = ({
     }, [currentTicket]);
 
     const _hasVirtualAccessLevel = hasVirtualAccessLevel || (currentTicket && ticketHasAccessLevel(currentTicket, VirtualAccessLevel));
-
-    // attendeeId is only passed to event-site only if the ticket is for someone else. If not pass it as null to use the default flow
-    const attendeeTicket = checkout?.tickets.find(t => t?.owner?.email !== user?.email);
-    const attendeeId = checkout?.tickets.length === 1 ? attendeeTicket?.owner?.id : null;
+    const attendeeIsSomeoneElse = !isMultiOrder && currentTicket && currentTicket.hasOwnProperty('owner') && currentTicket.owner?.email !== user?.email;
+    // attendeeId is only passed to event-site only if the ticket is for someone else.
+    // If not pass it as null to use the default flow
+    const attendeeId = attendeeIsSomeoneElse ? currentTicket?.owner?.id : null;
 
     const startDateFormatted = {
         date: epochToMomentTimeZone(summit.start_date, summit.time_zone_id).format('MMMM D'),
@@ -94,13 +94,13 @@ const PurchaseComplete = ({
 
     let orderComplete1stParagraph = (
         currentTicket ?
-            !attendeeTicket && rest.hasOwnProperty('initialOrderComplete1stParagraph') && typeof rest.initialOrderComplete1stParagraph !== 'undefined' ?
+            !attendeeIsSomeoneElse && rest.hasOwnProperty('initialOrderComplete1stParagraph') && typeof rest.initialOrderComplete1stParagraph !== 'undefined' ?
                 rest.initialOrderComplete1stParagraph
                 :
                 T.translate('purchase_complete_step.initial_order_complete_1st_paragraph_label',
                     {
-                        attendee: `${attendeeTicket ? ` ${attendeeTicket.owner.email}` : 'you'}`,
-                        adv: `${attendeeTicket ? `${attendeeTicket.owner.email}` : 'your'}`,
+                        attendee: `${attendeeIsSomeoneElse ? ` ${currentTicket.owner.email}` : 'you'}`,
+                        adv: `${attendeeIsSomeoneElse ? `${currentTicket.owner.email}` : 'your'}`,
                         button: orderCompleteButtonText
                     }
                 )
