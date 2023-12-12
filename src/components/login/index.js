@@ -50,7 +50,7 @@ const LoginComponent = ({
                 <div className={`${styles.innerWrapper}`}>
                     <div className={styles.loginCode}>
                         {summitData?.secondary_logo && <img className="login-logo" src={`${summitData?.secondary_logo}`} />}
-                        <div style={{ padding: "15px 0 0 0"}}>{title}</div>
+                        <div class={styles.title}>{title}</div>
                         <div className={styles.input}>
                             <input placeholder="youremail@example.com" value={email} onChange={e => setEmail(e.target.value)}
                                    onKeyPress={(ev) => ev.key === 'Enter' ? loginCode() : null} data-testid="email-input" />                           
