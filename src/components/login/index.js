@@ -74,7 +74,6 @@ const LoginComponent = ({
                                         backgroundColor: o.button_color,
                                         backgroundImage: o.provider_logo ? `url(${o.provider_logo})` : 'none',
                                         backgroundSize: o.provider_logo_size ? o.provider_logo_size : '',
-                                        backgroundPosition: '12px'
                                     }}
                                     onClick={() => login(o.provider_param)}>
                                     {o.provider_label}
