@@ -45,7 +45,7 @@ const LoginComponent = ({
     }
     
     return (
-        <div className={`${styles.loginWrapper} step-wrapper`}>
+        <div className={`${styles.loginWrapper}`}>
             <>
                 <div className={`${styles.innerWrapper}`}>
                     <div className={styles.loginCode}>
