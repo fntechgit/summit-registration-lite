@@ -74,6 +74,8 @@ const PersonalInfoComponent = ({
 
     const { register, reset, handleSubmit, getValues, formState: { errors } } = useForm();
 
+    console.log('errors', errors);
+
     useEffect(() => {
         if (reservation) {
             setPersonalInfo({
@@ -93,6 +95,7 @@ const PersonalInfoComponent = ({
     };
 
     const onSubmit = (data) => {
+        console.log('DATA', data);
         if (!personalInfo.company.name && showCompanyInput) {
             setCompanyError(true);
             return;
@@ -276,17 +279,6 @@ const PersonalInfoComponent = ({
                                             <>
                                                 <div className={styles.fieldWrapper}>
                                                     <div className={styles.inputWrapper}>
-                                                        <input type="text" placeholder="Email *" defaultValue={personalInfo?.attendee?.email ?? ''}
-                                                        {...register("attendee.email", {
-                                                            required: true,
-                                                            pattern: EMAIL_REGEXP
-                                                        })} data-testid="attendee-email" />
-                                                    </div>
-                                                    {errors.attendee?.email?.type === 'emailRequired' && <div className={styles.fieldError} data-testid="attendee-email-error-required">This field is required.</div>}
-                                                    {errors.attendee?.email?.type === 'pattern' && <div className={styles.fieldError} data-testid="attendee-email-error-invalid">The email is invalid.</div>}
-                                                </div>
-                                                <div className={styles.fieldWrapper}>
-                                                    <div className={styles.inputWrapper}>
                                                         <input type="text" placeholder="First name" defaultValue={personalInfo?.attendee?.firstName ?? ''}
                                                             {...register("attendee.firstName", { required: false, maxLength: 80 })} data-testid="attendee-first-name" />
                                                     </div>
@@ -297,6 +289,18 @@ const PersonalInfoComponent = ({
                                                         <input type="text" placeholder="Last name" defaultValue={personalInfo?.attendee?.lastName ?? ''}
                                                             {...register("attendee.lastName", { required: false, maxLength: 100 })} data-testid="attendee-last-name" />
                                                     </div>
+                                                </div>
+
+                                                <div className={styles.fieldWrapper}>
+                                                    <div className={styles.inputWrapper}>
+                                                        <input type="text" placeholder="Email *" defaultValue={personalInfo?.attendee?.email ?? ''}
+                                                        {...register("attendee.email", {
+                                                            required: true,
+                                                            pattern: EMAIL_REGEXP
+                                                        })} data-testid="attendee-email" />
+                                                    </div>
+                                                    {errors.attendee?.email?.type === 'required' && <div className={styles.fieldError} data-testid="attendee-email-error-required">This field is required.</div>}
+                                                    {errors.attendee?.email?.type === 'pattern' && <div className={styles.fieldError} data-testid="attendee-email-error-invalid">The email is invalid.</div>}
                                                 </div>
                                             </>
                                         }
