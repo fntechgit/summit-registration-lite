@@ -58,7 +58,7 @@ const LoginComponent = ({
                         <div onClick={() => loginCode()} data-testid="email-button"
                             className={`${styles.button} ${styles.email_login_button} ${email === '' ? `${styles.pointerDisabled} ${styles.buttonDisabled}` : `${styles.primaryEmailButton}`}`}>
                             <EmailRoundedIcon style={{ fontSize: "20px" }} />
-                            <span>Email me a one time login code</span>
+                            <span>Email me a single-use login code</span>
                             <span></span>
                         </div>
                         {emailError && <span data-testid="email-error">Please enter a valid email address</span>}
