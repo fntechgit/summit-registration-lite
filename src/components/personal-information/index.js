@@ -296,7 +296,7 @@ const PersonalInfoComponent = ({
                                                             pattern: EMAIL_REGEXP
                                                         })} data-testid="attendee-email" />
                                                     </div>
-                                                    {errors.attendee?.email?.type === 'emailRequired' && <div className={styles.fieldError} data-testid="attendee-email-error-required">This field is required.</div>}
+                                                    {errors.attendee?.email?.type === 'required' && <div className={styles.fieldError} data-testid="attendee-email-error-required">This field is required.</div>}
                                                     {errors.attendee?.email?.type === 'pattern' && <div className={styles.fieldError} data-testid="attendee-email-error-invalid">The email is invalid.</div>}
                                                 </div>
                                             </>
