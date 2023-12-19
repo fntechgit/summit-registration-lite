@@ -21,7 +21,7 @@ export class StripeProvider {
         this.dispatch = dispatch;
     }
 
-    payTicket = ({ token = null, stripe = null, zipCode = null }) => async (dispatch) => {
+    payTicket = ({ elements = null, paymentMethod = null, stripe = null, zipCode = null }) => async (dispatch) => {
 
         const errorHandler = (err, res) => (dispatch, state) => {
             let code = err.status;
@@ -67,9 +67,16 @@ export class StripeProvider {
         dispatch(startWidgetLoading());
 
         if (this.reservation.amount > 0) {
-            const { id } = token;
-            stripe.confirmCardPayment(
-                this.reservation.payment_gateway_client_token, { payment_method: { card: { token: id } } }
+            stripe.confirmPayment(
+                {
+                    elements, 
+                    clientSecret: this.reservation.payment_gateway_client_token, 
+                    confirmParams: {
+                        return_url: `${window.location.origin}/a/my-tickets/`,
+                        payment_method: paymentMethod.id
+                    },
+                    redirect: "if_required"
+                }
             ).then((result) => {
                 if (result.error) {
                     // Reserve error.message in your UI.
