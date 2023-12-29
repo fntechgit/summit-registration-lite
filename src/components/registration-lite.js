@@ -36,6 +36,8 @@ import {
     clearWidgetState,
     updateClock,
     loadProfileData,
+    getTicketDiscount,
+    removePromoCode
 } from '../actions';
 
 import AjaxLoader from "openstack-uicore-foundation/lib/components/ajaxloader";
@@ -139,6 +141,9 @@ const RegistrationLite = (
         logoDark,
         showCompanyInputDefaultOptions,
         companyDDLOptions2Show,
+        promoCode,        
+        getTicketDiscount,
+        removePromoCode,
         ...rest
     }) => {
 
@@ -304,6 +309,10 @@ const RegistrationLite = (
                                             taxTypes={taxTypes}
                                             reservation={reservation}
                                             isActive={step === 0}
+                                            allowPromoCodes={allowPromoCodes}
+                                            applyPromoCode={getTicketDiscount}
+                                            removePromoCode={removePromoCode}
+                                            promoCode={promoCode}
                                             changeForm={ticketForm => setFormValues({ ...formValues, ...ticketForm })}
                                             showMultipleTicketTexts={showMultipleTicketTexts}
                                         />
@@ -422,6 +431,7 @@ const mapStateToProps = ({ registrationLiteState }) => ({
     passwordlessCodeSent: registrationLiteState.passwordless.code_sent,
     passwordlessCodeError: registrationLiteState.passwordless.error,
     nowUtc: registrationLiteState.nowUtc,
+    promoCode: registrationLiteState.promoCode,
 })
 
 RegistrationLite.defaultProps = {
@@ -474,4 +484,6 @@ export default connect(mapStateToProps, {
     clearWidgetState,
     updateClock,
     loadProfileData,
+    getTicketDiscount,
+    removePromoCode
 })(RegistrationLite)

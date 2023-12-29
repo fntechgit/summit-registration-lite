@@ -56,7 +56,15 @@ const TicketDropdownComponent = ({ selectedTicket, ticketTypes, taxTypes, onTick
                                     ticketSelect(t);
                                 }}>
                                     {t.name} -{` `}
-                                    {!isTicketSoldOut && <>{t.currency_symbol}{t.cost} {t.currency}</>}
+                                    {!isTicketSoldOut && 
+                                        t.cost_with_applied_discount ? 
+                                            <>
+                                                <s>{t.currency_symbol}{t.cost} {t.currency}</s>
+                                                <> {t.currency_symbol}{t.cost_with_applied_discount} {t.currency}</>
+                                            </>
+                                        :
+                                        <>{t.currency_symbol}{t.cost} {t.currency}</>
+                                    }
                                     {getTicketTaxes(t, taxTypes)}
                                     {isTicketSoldOut && <>Sold Out</>}
                                 </div>

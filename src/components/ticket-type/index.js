@@ -21,10 +21,24 @@ import ReactTooltip from 'react-tooltip';
 import { formatCurrency } from '../../helpers';
 import { getTicketMaxQuantity } from '../../helpers';
 import { getTicketTaxes } from '../../utils/utils';
+import PromoCodeInput from '../promocode-input';
 
-const TicketTypeComponent = ({ ticketTypes, taxTypes, isActive, changeForm, reservation, inPersonDisclaimer, showMultipleTicketTexts }) => {
+const TicketTypeComponent = ({ 
+        ticketTypes,
+        taxTypes,
+        isActive,
+        changeForm,
+        reservation,
+        inPersonDisclaimer,
+        showMultipleTicketTexts,
+        allowPromoCodes,
+        applyPromoCode,
+        removePromoCode
+    }) => {
     const [ticket, setTicket] = useState(null);
     const [quantity, setQuantity] = useState(1);
+
+    const [promoCode, setPromoCode] = useState('');
 
     const minQuantity = 1;
     const maxQuantity = getTicketMaxQuantity(ticket);
@@ -71,8 +85,19 @@ const TicketTypeComponent = ({ ticketTypes, taxTypes, isActive, changeForm, rese
                             <span>
                                 {ticket && (
                                     <>
-                                        {`${ticket.name} (${quantity}): ${formatCurrency(ticket.cost * quantity, { currency: ticket.currency })} ${ticket.currency} 
-                                        ${getTicketTaxes(ticket, taxTypes)}`}
+                                        {`${ticket.name} (${quantity}): `}
+                                        <>
+                                            {!ticket.cost_with_applied_discount ? 
+                                                <>
+                                                    <s>{formatCurrency(ticket.cost * quantity, { currency: ticket.currency })} {ticket.currency}</s>
+                                                    &nbsp;
+                                                    <>{formatCurrency(123 * quantity, { currency: ticket.currency })} {ticket.currency}</>
+                                                </>
+                                                :
+                                                <>{formatCurrency(ticket.cost * quantity, { currency: ticket.currency })} {ticket.currency}</>
+                                            }
+                                        </>
+                                        {`${getTicketTaxes(ticket, taxTypes)}`}
 
                                         {!isActive && reservation?.discount_amount > 0 && (
                                             <>
@@ -86,9 +111,9 @@ const TicketTypeComponent = ({ ticketTypes, taxTypes, isActive, changeForm, rese
                                             </>
                                         )}
 
-                                        {!isActive && reservation &&(
+                                        {!isActive && reservation && (
                                             <span className={styles.promo}>
-                                                Subtotal: {`${ticket?.currency_symbol} ${((reservation?.raw_amount_in_cents - reservation?.discount_amount_in_cents)/100).toFixed(2)} ${ticket?.currency}`}
+                                                Subtotal: {`${ticket?.currency_symbol} ${((reservation?.raw_amount_in_cents - reservation?.discount_amount_in_cents) / 100).toFixed(2)} ${ticket?.currency}`}
                                             </span>
                                         )}
 
@@ -128,36 +153,46 @@ const TicketTypeComponent = ({ ticketTypes, taxTypes, isActive, changeForm, rese
                             <div className={styles.form}>
                                 <div className={styles.dropdown}>
                                     <TicketDropdownComponent selectedTicket={ticket}
-                                                             ticketTypes={ticketTypes}
-                                                             taxTypes={taxTypes}
-                                                             onTicketSelect={handleTicketChange}
+                                        ticketTypes={ticketTypes}
+                                        taxTypes={taxTypes}
+                                        onTicketSelect={handleTicketChange}
                                     />
                                 </div>
 
                                 {ticket && (
-                                    <div className={styles.quantity}>
-                                        <div className="input-group">
-                                            <span className="input-group-btn">
-                                                <button aria-label="remove a ticket" className="btn btn-default" onClick={decrementQuantity} disabled={maxQuantity === 0 || quantity === minQuantity}>
-                                                    <i className="fa fa-minus"></i>
-                                                </button>
-                                            </span>
-                                            <input className="form-control" aria-label="ticket quanity" name="ticket_quantity" type="text" value={quantity} readOnly={true} disabled={maxQuantity === 0} />
-                                            <span className="input-group-btn">
-                                                <button aria-label="add a ticket" className="btn btn-default" onClick={incrementQuantity} disabled={maxQuantity === 0 || quantity >= maxQuantity}>
-                                                    <i className="glyphicon glyphicon-plus" />
-                                                </button>
-                                            </span>
+                                    <>
+                                        <div className={styles.quantity}>
+                                            <div className="input-group">
+                                                <span className="input-group-btn">
+                                                    <button aria-label="remove a ticket" className="btn btn-default" onClick={decrementQuantity} disabled={maxQuantity === 0 || quantity === minQuantity}>
+                                                        <i className="fa fa-minus"></i>
+                                                    </button>
+                                                </span>
+                                                <input className="form-control" aria-label="ticket quanity" name="ticket_quantity" type="text" value={quantity} readOnly={true} disabled={maxQuantity === 0} />
+                                                <span className="input-group-btn">
+                                                    <button aria-label="add a ticket" className="btn btn-default" onClick={incrementQuantity} disabled={maxQuantity === 0 || quantity >= maxQuantity}>
+                                                        <i className="glyphicon glyphicon-plus" />
+                                                    </button>
+                                                </span>
+                                            </div>
                                         </div>
-                                    </div>
+                                    </>
                                 )}
                             </div>
+                            {ticket && allowPromoCodes &&
+                                <PromoCodeInput 
+                                    promoCode={promoCode} 
+                                    applyPromoCode={applyPromoCode} 
+                                    showMultipleTicketTexts={showMultipleTicketTexts} 
+                                    removePromoCode={removePromoCode} />
+                            }
+
                             {showMultipleTicketTexts &&
                                 <a className={styles.moreInfo} data-tip data-for="ticket-quantity-info">
                                     <i className="glyphicon glyphicon-info-sign" aria-hidden="true" />{` `}
                                     Need multiple ticket types?
                                 </a>
-                            }
+                            }                            
                             <ReactTooltip id="ticket-quantity-info">
                                 <div className={styles.moreInfoTooltip}>To purchase more than one ticket type, simply place another order after this registration order is complete. Only one ticket type can be chosen per order.</div>
                             </ReactTooltip>

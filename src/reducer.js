@@ -33,6 +33,9 @@ import {
     REQUESTED_TICKET_TYPES,
     UPDATE_CLOCK,
     LOAD_PROFILE_DATA,
+    REQUEST_TICKET_DISCOUNT,
+    GET_TICKET_DISCOUNT,
+    REMOVE_TICKET_DISCOUNT,
 } from './actions';
 
 import { LOGOUT_USER } from 'openstack-uicore-foundation/lib/security/actions';
@@ -61,6 +64,7 @@ const DEFAULT_STATE = {
         userProfile: null,
     },
     nowUtc: localNowUtc,
+    promoCode: null
 };
 
 const RegistrationLiteReducer = (state = DEFAULT_STATE, action) => {
@@ -151,6 +155,19 @@ const RegistrationLiteReducer = (state = DEFAULT_STATE, action) => {
         case UPDATE_CLOCK: {
             const { timestamp } = payload;
             return { ...state, nowUtc: timestamp };
+        }
+        case REQUEST_TICKET_DISCOUNT: {
+            const {promoCode} = payload;
+            return {...state, promoCode}
+        }
+        case REMOVE_TICKET_DISCOUNT: {
+            return {...state, promocode: null}
+        }
+        case GET_TICKET_DISCOUNT: {
+            const hasDiscount = payload.response.data.some(e => e.hasOwnProperty('cost_with_applied_discount'))
+            const ticket_types = hasDiscount ? payload.response.data : state.ticketTypes;
+            const promoCode = hasDiscount ? state.promoCode : null;
+            return {...state, promoCode, ticketTypes: ticket_types }
         }
         default: {
             return state;

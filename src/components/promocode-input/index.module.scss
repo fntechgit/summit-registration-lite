@@ -1,0 +1,62 @@
+.promoCodeWrapper {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 15px;
+  span {
+    color: var(--color_text_dark);
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 140%; /* 19.6px */
+  }
+  .promoCodeInput {
+    display: flex;
+    align-items: center;
+    position: relative;
+    flex: 1;
+    input {
+      display: inline-flex;
+      border-radius: 4px;
+      height: 33px;
+      padding: 8px 42px 7px 8px;
+      width: 100%;
+      color: var(--color_input_text_color);
+      background-color: var(--color_input_background_color);
+      border: 1.5px solid var(--color_input_border_color);
+      &.promoCodeActive {
+        padding: 8px 80px 7px 8px;
+      }
+    }
+    .appliedCode {
+      display: flex;
+      align-items: center;
+      position: absolute;
+      right: 0px;
+      button {
+        position: relative;
+      }
+      img {
+        margin-right: 10px;
+      }
+    }
+    button {
+      background-color: transparent;
+      border: none;
+      font-size: 12px;
+      font-style: normal;
+      font-weight: 400;
+      line-height: 16.693px; /* 139.108% */
+      letter-spacing: -0.12px;
+      position: absolute;
+      right: 8px;
+      padding: 0;
+      cursor: pointer;
+    }
+  }
+  .moreInfo {
+    display: inline-block;
+  }
+  .moreInfoTooltip {
+    max-width: 280px;
+  }
+}

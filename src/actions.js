@@ -46,6 +46,9 @@ export const CLEAR_MY_INVITATION = 'CLEAR_MY_INVITATION';
 export const CLEAR_WIDGET_STATE = 'CLEAR_WIDGET_STATE';
 export const UPDATE_CLOCK = 'UPDATE_CLOCK';
 export const LOAD_PROFILE_DATA = 'LOAD_PROFILE_DATA';
+export const REQUEST_TICKET_DISCOUNT = 'REQUEST_TICKET_DISCOUNT';
+export const GET_TICKET_DISCOUNT = 'GET_TICKET_DISCOUNT';
+export const REMOVE_TICKET_DISCOUNT = 'REMOVE_TICKET_DISCOUNT';
 
 export const startWidgetLoading = createAction(START_WIDGET_LOADING);
 export const stopWidgetLoading = createAction(STOP_WIDGET_LOADING);
@@ -143,7 +146,7 @@ const getTaxesTypes = (summitId) => async (dispatch, getState, { apiBaseUrl, get
             `${apiBaseUrl}/api/v1/summits/${summitId}/tax-types`,
             customErrorHandler
         )(params)(dispatch).then((res) => {
-          return res;
+            return res;
         }).catch((error) => {
             return Promise.reject(error);
         })
@@ -153,6 +156,45 @@ const getTaxesTypes = (summitId) => async (dispatch, getState, { apiBaseUrl, get
         return Promise.reject(e);
     }
 }
+
+export const getTicketDiscount = (promoCode) => async (dispatch, getState, { apiBaseUrl, getAccessToken }) => {
+    try {
+        const { registrationLiteState: { settings: { summitId } } } = getState();
+        const accessToken = await getAccessToken();
+        let params = {
+            access_token: accessToken,
+            expand: 'badge_type,badge_type.access_levels,badge_type.badge_features',
+            filter: `promo_code==${promoCode}`
+        };
+        return getRequest(
+            createAction(REQUEST_TICKET_DISCOUNT),
+            createAction(GET_TICKET_DISCOUNT),
+            `${apiBaseUrl}/api/v1/summits/${summitId}/ticket-types/allowed`,
+            customErrorHandler,
+            { promoCode }
+        )(params)(dispatch).then((res) => {
+            return res;
+        }).catch((error) => {
+            return Promise.reject(error);
+        })
+    }
+    catch (e) {
+        console.log(e);
+        return Promise.reject(e);
+    }
+}
+
+export const removePromoCode = () => (dispatch, getState) => {
+    try {
+        const { registrationLiteState: { settings: { summitId } } } = getState();        
+        dispatch(getTicketTypes(summitId));
+        dispatch(createAction(REMOVE_TICKET_DISCOUNT)());
+    } catch (e) {
+        dispatch(createAction(REMOVE_TICKET_DISCOUNT)());        
+        return Promise.reject(e);
+    }
+}
+
 
 export const reserveTicket = ({ provider, personalInformation, ticket, ticketQuantity }, { onError }) =>
     async (dispatch, getState, { apiBaseUrl, getAccessToken }) => {
@@ -168,7 +210,7 @@ export const reserveTicket = ({ provider, personalInformation, ticket, ticketQua
                 promo_code: promoCode || null
             }));
 
-            if(tickets.length === 1 && attendee) {
+            if (tickets.length === 1 && attendee) {
                 tickets[0].attendee_first_name = attendee.firstName
                 tickets[0].attendee_last_name = attendee.lastName
                 tickets[0].attendee_email = attendee.email
@@ -190,12 +232,14 @@ export const reserveTicket = ({ provider, personalInformation, ticket, ticketQua
             const errorHandler = (err, res) => (dispatch, state) => {
                 if (res && res.statusCode === 412 && onError) return onError(err, res);
                 if (res && res.statusCode === 404) {
-                    const msg = res.body.message;
+                    const defaultMessage = 'Validation Error';
+                    const msg = res?.body?.message || defaultMessage;
                     Swal.fire("Validation Error", msg, "warning");
                     return;
                 }
                 if (res && res.statusCode === 500) {
-                    const msg = res.body.message;
+                    const defaultMessage = 'Server Error';
+                    const msg = res?.body?.message || defaultMessage;
                     Swal.fire("Server Error", msg, "error");
                     return;
                 }
@@ -331,7 +375,7 @@ export const getLoginCode = (email, getPasswordlessCode) => async (dispatch, get
 export const passwordlessLogin = (code, loginWithCode) => async (dispatch, getState) => {
     const { registrationLiteState: { passwordless: { email } } } = getState();
     return loginWithCode(code, email).then((res) => {
-       return res;
+        return res;
     }).catch((e) => {
         console.log(e);
         dispatch(createAction(SET_PASSWORDLESS_ERROR)())
