@@ -47,3 +47,7 @@ export const getTicketTaxes = (ticket, taxes) => {
     const ticketTaxes = taxes.filter(tax => tax.ticket_types.includes(ticket?.id));
     return `${ticketTaxes.length > 0 ? ` plus ${taxes.map(t => t.name).join(' & ')}` : ''}`;
 }
+
+export const isOrderFree = (order) => order.amount === 0;
+
+export const isOrderPrepaid = (order) => order.status === 'Paid' && order.payment_method === 'Offline';

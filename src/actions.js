@@ -214,7 +214,10 @@ export const reserveTicket = ({ provider, personalInformation, ticket, ticketQua
                     dispatch(stopWidgetLoading());
                     payload.response.promo_code = promoCode || null;
 
-                    if (!payload.response.amount) {
+                    const isFree = isOrderFree(payload.response);
+                    const isPrepaid = isOrderPrepaid(payload.response);
+
+                    if (isFree || isPrepaid) {
                         dispatch(payTicketWithProvider(provider));
                         return (payload)
                     }

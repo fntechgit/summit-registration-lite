@@ -66,7 +66,10 @@ export class StripeProvider {
 
         dispatch(startWidgetLoading());
 
-        if (this.reservation.amount > 0) {
+        const isFree = isOrderFree(this.reservation);
+        const isPrepaid = isOrderPrepaid(this.reservation);
+
+        if (!isFree && !isPrepaid) {
             const { id } = token;
             stripe.confirmCardPayment(
                 this.reservation.payment_gateway_client_token, { payment_method: { card: { token: id } } }
