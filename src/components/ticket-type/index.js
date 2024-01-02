@@ -20,11 +20,12 @@ import { isInPersonTicketType } from "../../actions";
 import ReactTooltip from 'react-tooltip';
 import { formatCurrency } from '../../helpers';
 import { getTicketMaxQuantity } from '../../helpers';
-import { getTicketTaxes } from '../../utils/utils';
+import { getTicketTaxes, hasDiscountApplied } from '../../utils/utils';
 import PromoCodeInput from '../promocode-input';
 
-const TicketTypeComponent = ({ 
-        ticketTypes,
+const TicketTypeComponent = ({
+        allowedTicketTypes,
+        originalTicketTypes, // these are the original ones
         taxTypes,
         isActive,
         changeForm,
@@ -35,8 +36,6 @@ const TicketTypeComponent = ({
         applyPromoCode,
         removePromoCode,
         promoCode,
-        hasDiscount,
-        promoCodeLoader
     }) => {
     const [ticket, setTicket] = useState(null);
     const [quantity, setQuantity] = useState(1);
@@ -57,21 +56,26 @@ const TicketTypeComponent = ({
 
     useEffect(() => {
         if (reservation && reservation.tickets?.length > 0) {
-            setTicket(ticketTypes.find(t => t.id === reservation.tickets[0].ticket_type_id))
+            setTicket(allowedTicketTypes.find(t => t.id === reservation.tickets[0].ticket_type_id))
         }
     }, [])
 
     useEffect(() => {
-        const newTicket = ticketTypes.find(t => t?.id === ticket?.id);        
-        if (newTicket) {
-            changeForm({ ticketType: newTicket })
-            setTicket(newTicket);
-        }        
-    }, [hasDiscount])
-
-    useEffect(() => {
         changeForm({ ticketType: ticket, ticketQuantity: quantity });
     }, [ticket, quantity])
+
+    useEffect(() => {
+        // if the promo code had changed ( set or not set)
+        // try to find the updated ticket from the original ticket types collection from api
+        // and update the current ticket that exist on component state
+        // bc a discount could be applied to the current selected ticket type
+        if(!ticket) return;
+        const updatedCurrentTicket = originalTicketTypes.find(t => t?.id === ticket.id);
+        if (updatedCurrentTicket) {
+            changeForm({ ticketType: updatedCurrentTicket })
+            setTicket(updatedCurrentTicket);
+        }
+    }, [promoCode, originalTicketTypes])
 
     const handleTicketChange = (t) => {
         setTicket(t);
@@ -96,7 +100,7 @@ const TicketTypeComponent = ({
                                     <>
                                         {`${ticket.name} (${quantity}): `}
                                         <>
-                                            {ticket.cost_with_applied_discount ? 
+                                            {hasDiscountApplied(ticket) ?
                                                 <>
                                                     <s>{formatCurrency(ticket.cost * quantity, { currency: ticket.currency })} {ticket.currency}</s>
                                                     &nbsp;
@@ -162,7 +166,7 @@ const TicketTypeComponent = ({
                             <div className={styles.form}>
                                 <div className={styles.dropdown}>
                                     <TicketDropdownComponent selectedTicket={ticket}
-                                        ticketTypes={ticketTypes}
+                                        ticketTypes={allowedTicketTypes}
                                         taxTypes={taxTypes}
                                         onTicketSelect={handleTicketChange}
                                     />
@@ -188,13 +192,11 @@ const TicketTypeComponent = ({
                                     </>
                                 )}
                             </div>
-                            {ticket && allowPromoCodes &&
-                                <PromoCodeInput 
-                                    promoCode={promoCode} 
-                                    hasDiscount={hasDiscount}
-                                    promoCodeLoader={promoCodeLoader}
-                                    applyPromoCode={applyPromoCode} 
-                                    showMultipleTicketTexts={showMultipleTicketTexts} 
+                            {allowPromoCodes &&
+                                <PromoCodeInput
+                                    promoCode={promoCode}
+                                    applyPromoCode={applyPromoCode}
+                                    showMultipleTicketTexts={showMultipleTicketTexts}
                                     removePromoCode={removePromoCode} />
                             }
 
@@ -203,7 +205,7 @@ const TicketTypeComponent = ({
                                     <i className="glyphicon glyphicon-info-sign" aria-hidden="true" />{` `}
                                     Need multiple ticket types?
                                 </a>
-                            }                            
+                            }
                             <ReactTooltip id="ticket-quantity-info">
                                 <div className={styles.moreInfoTooltip}>To purchase more than one ticket type, simply place another order after this registration order is complete. Only one ticket type can be chosen per order.</div>
                             </ReactTooltip>

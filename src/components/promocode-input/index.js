@@ -13,35 +13,34 @@
 
 import React, { useState, useEffect } from 'react';
 import ReactTooltip from 'react-tooltip';
-import PropTypes from 'prop-types';
-
 import appliedCode from '../../assets/icon-check-circle.svg';
-
 import styles from "./index.module.scss";
+import { isEmptyString } from '../../utils/utils';
 
-const PromoCodeInput = ({ applyPromoCode, hasDiscount, promoCodeLoader, promoCode, removePromoCode, showMultipleTicketTexts }) => {
+const PromoCodeInput = ({ applyPromoCode, promoCode, removePromoCode, showMultipleTicketTexts }) => {
 
     const [statePromoCode, setStatePromoCode] = useState(promoCode);
 
     useEffect(() => {
-        if (!promoCode) setStatePromoCode('');
+        if (isEmptyString(promoCode)) setStatePromoCode('');
     }, [promoCode])
-
-    const handleInputSubmit = (ev) => {
-        ev.preventDefault()
-        return hasDiscount ? removePromoCode() : applyPromoCode(statePromoCode)
-    }
 
     return (
         <>
-            <form onSubmit={handleInputSubmit}>
-                <fieldset disabled={promoCodeLoader}>
-                    <div className={styles.promoCodeWrapper}>
+                <div className={styles.promoCodeWrapper}>
                         <span>Do you have a promo code?</span>
-
                         <div className={styles.promoCodeInput}>
-                            <input className={`${promoCode ? styles.promoCodeActive : ''}`} type="text" value={statePromoCode} onChange={(ev) => setStatePromoCode(ev.target.value)} placeholder="Enter your promo code" />
-                            {hasDiscount ?
+                            <input className={`${promoCode ? styles.promoCodeActive : ''}`}
+                                   type="text"
+                                   value={statePromoCode}
+                                   onChange={(ev) => setStatePromoCode(ev.target.value)}
+                                   placeholder="Enter your promo code"
+                                   onKeyDown={(e) => {
+                                       if (e.key === "Enter")
+                                           applyPromoCode(statePromoCode)
+                                   }}
+                                   readOnly={!isEmptyString(promoCode)} />
+                            {promoCode !== '' ?
                                 <div className={styles.appliedCode}>
                                     <img src={appliedCode} className={styles.appliedCodeIcon} />
                                     <button onClick={() => removePromoCode()}>Remove</button>
@@ -58,13 +57,11 @@ const PromoCodeInput = ({ applyPromoCode, hasDiscount, promoCodeLoader, promoCod
                             </a>
                         }
                     </div>
-                </fieldset>
                 <ReactTooltip id="promo-code-info">
                     <div className={styles.moreInfoTooltip}>
                         Promo code will be applied to all tickets in this order.  If you wish to utilize more than one promo code, simply place another order after you complete this registration order. Only one promo code can be applied per order.
                     </div>
                 </ReactTooltip>
-            </form>
         </>
     );
 }

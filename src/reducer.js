@@ -33,19 +33,13 @@ import {
     REQUESTED_TICKET_TYPES,
     UPDATE_CLOCK,
     LOAD_PROFILE_DATA,
-    REQUEST_TICKET_DISCOUNT,
-    GET_TICKET_DISCOUNT,
-    REMOVE_TICKET_DISCOUNT,
+    SET_CURRENT_PROMO_CODE,
+    CLEAR_CURRENT_PROMO_CODE,
 } from './actions';
 
 import { LOGOUT_USER } from 'openstack-uicore-foundation/lib/security/actions';
 const localNowUtc = Date.now();
 
-const DEFAULT_PROMO_CODE_STATE = {
-    loading: false,
-    code: '',
-    hasDiscount: false
-}
 
 const DEFAULT_STATE = {
     reservation: null,
@@ -70,7 +64,7 @@ const DEFAULT_STATE = {
         userProfile: null,
     },
     nowUtc: localNowUtc,
-    promoCode: DEFAULT_PROMO_CODE_STATE
+    promoCode: '',
 };
 
 const RegistrationLiteReducer = (state = DEFAULT_STATE, action) => {
@@ -122,7 +116,7 @@ const RegistrationLiteReducer = (state = DEFAULT_STATE, action) => {
             return { ...state, step: payload }
         }
         case GET_TICKET_TYPES: {
-            return { ...state, ticketTypes: payload.response.data, requestedTicketTypes: true, promoCode: DEFAULT_PROMO_CODE_STATE };
+            return { ...state, ticketTypes: payload.response.data, requestedTicketTypes: true };
         }
         case GET_TAX_TYPES: {
             return { ...state, taxTypes: payload.response.data }
@@ -162,19 +156,12 @@ const RegistrationLiteReducer = (state = DEFAULT_STATE, action) => {
             const { timestamp } = payload;
             return { ...state, nowUtc: timestamp };
         }
-        case REQUEST_TICKET_DISCOUNT: {
-            const { promoCode } = payload;
-            return { ...state, promoCode: { ...state.promoCode, code: promoCode, loading: true } }
+        case CLEAR_CURRENT_PROMO_CODE: {
+            return { ...state, promoCode: ''}
         }
-        case REMOVE_TICKET_DISCOUNT: {
-            return { ...state, promoCode: { loading: true } }
-        }
-        case GET_TICKET_DISCOUNT: {
-            const hasDiscount = payload.response.data.some(e => e.hasOwnProperty('cost_with_applied_discount'))
-            const ticket_types = hasDiscount ? payload.response.data : state.ticketTypes;
-            const code = hasDiscount ? state.promoCode.code : '';
-            const promoCode = { code, hasDiscount, loading: false }
-            return { ...state, promoCode, ticketTypes: ticket_types, promoCode }
+        case SET_CURRENT_PROMO_CODE:{
+            const { currentPromoCode } = payload;
+            return { ...state, promoCode: currentPromoCode}
         }
         default: {
             return state;

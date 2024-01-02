@@ -24,3 +24,12 @@ export const EMAIL_REGEXP = /(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*
 export const TICKET_OWNER_MYSELF = 'myself';
 export const TICKET_OWNER_SOMEONE = 'someoneElse';
 export const TICKET_OWNER_UNASSIGNED = 'unassigned';
+
+export const TICKET_TYPE_SUBTYPE_PREPAID = 'PrePaid';
+export const ORDER_STATUS_PAID = 'Paid';
+export const ORDER_PAYMENT_METHOD_OFFLINE = 'Offline';
+
+export const STEP_SELECT_TICKET_TYPE = 0;
+export const STEP_PERSONAL_INFO = 1;
+export const STEP_PAYMENT = 2;
+export const STEP_COMPLETE = 3;

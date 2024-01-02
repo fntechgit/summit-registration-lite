@@ -36,8 +36,8 @@ import {
     clearWidgetState,
     updateClock,
     loadProfileData,
-    getTicketDiscount,
-    removePromoCode
+    removePromoCode,
+    applyPromoCode,
 } from '../actions';
 
 import AjaxLoader from "openstack-uicore-foundation/lib/components/ajaxloader";
@@ -59,6 +59,7 @@ import NoAllowedTickets from './no-allowed-tickets';
 import TicketTaxesError from './ticket-taxes-error';
 import T from 'i18n-react';
 import { getCurrentUserLanguage } from '../utils/utils';
+import { STEP_COMPLETE, STEP_PAYMENT, STEP_PERSONAL_INFO, STEP_SELECT_TICKET_TYPE } from '../utils/constants';
 
 let language = getCurrentUserLanguage();
 
@@ -141,11 +142,11 @@ const RegistrationLite = (
         logoDark,
         showCompanyInputDefaultOptions,
         companyDDLOptions2Show,
-        promoCode,        
+        promoCode,
         hasDiscount,
         getTicketDiscount,
         removePromoCode,
-        promoCodeLoader,
+        applyPromoCode,
         ...rest
     }) => {
 
@@ -306,23 +307,22 @@ const RegistrationLite = (
                                             <TicketOwnedComponent ownedTickets={ownedTickets} />}
 
                                         <TicketTypeComponent
-                                            ticketTypes={allowedTicketTypes}
+                                            allowedTicketTypes={allowedTicketTypes}
+                                            originalTicketTypes={ticketTypes}
                                             inPersonDisclaimer={inPersonDisclaimer}
                                             taxTypes={taxTypes}
                                             reservation={reservation}
-                                            isActive={step === 0}
+                                            isActive={step === STEP_SELECT_TICKET_TYPE}
                                             allowPromoCodes={allowPromoCodes}
-                                            applyPromoCode={getTicketDiscount}
+                                            applyPromoCode={applyPromoCode}
                                             removePromoCode={removePromoCode}
                                             promoCode={promoCode}
-                                            hasDiscount={hasDiscount}
-                                            promoCodeLoader={promoCodeLoader}
                                             changeForm={ticketForm => setFormValues({ ...formValues, ...ticketForm })}
                                             showMultipleTicketTexts={showMultipleTicketTexts}
                                         />
 
                                         <PersonalInfoComponent
-                                            isActive={step === 1}
+                                            isActive={step === STEP_PERSONAL_INFO}
                                             reservation={reservation}
                                             userProfile={profileData}
                                             invitation={invitation}
@@ -363,7 +363,7 @@ const RegistrationLite = (
                                         <animated.div style={{ ...toggleAnimation }}>
                                             <div ref={ref}>
                                                 <PaymentComponent
-                                                    isActive={step === 2}
+                                                    isActive={step === STEP_PAYMENT}
                                                     reservation={reservation}
                                                     payTicket={payTicketWithProvider}
                                                     userProfile={profileData}
@@ -377,7 +377,7 @@ const RegistrationLite = (
                                     </>
                                 )}
 
-                                {profileData && step === 3 && (
+                                {profileData && step === STEP_COMPLETE && (
                                     <PurchaseComplete
                                         checkout={checkout}
                                         user={profileData}
@@ -434,9 +434,7 @@ const mapStateToProps = ({ registrationLiteState }) => ({
     passwordlessCodeSent: registrationLiteState.passwordless.code_sent,
     passwordlessCodeError: registrationLiteState.passwordless.error,
     nowUtc: registrationLiteState.nowUtc,
-    promoCode: registrationLiteState.promoCode.code,
-    hasDiscount: registrationLiteState.promoCode.hasDiscount,
-    promoCodeLoader: registrationLiteState.promoCode.loading,
+    promoCode: registrationLiteState.promoCode,
 })
 
 RegistrationLite.defaultProps = {
@@ -489,6 +487,6 @@ export default connect(mapStateToProps, {
     clearWidgetState,
     updateClock,
     loadProfileData,
-    getTicketDiscount,
+    applyPromoCode,
     removePromoCode
 })(RegistrationLite)
