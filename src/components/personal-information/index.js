@@ -32,8 +32,6 @@ const PersonalInfoComponent = ({
     formValues,
     formErrors = {},
     invitation,
-    showMultipleTicketTexts,
-    allowPromoCodes,
     showCompanyInput = true,
     companyDDLPlaceholder,
     showCompanyInputDefaultOptions,
@@ -61,7 +59,6 @@ const PersonalInfoComponent = ({
             lastName: initialLastName,
             email: userProfile.email || '',
             company: { id: null, name: '' },
-            promoCode: '',
             attendee: {
                 firstName: '',
                 lastName: '',
@@ -244,14 +241,6 @@ const PersonalInfoComponent = ({
                                     </div>
                                 }
 
-                                {allowPromoCodes &&
-                                    <div className={styles.fieldWrapper}>
-                                        <div className={styles.inputWrapper}>
-                                            <input type="text" placeholder="Promo code" {...register("promoCode")} />
-                                        </div>
-                                    </div>
-                                }
-
                                 {shouldDisplayTicketAssignment() &&
                                     <>
                                         <br/>
@@ -305,18 +294,6 @@ const PersonalInfoComponent = ({
                                 }
 
                             </form>
-
-                            {allowPromoCodes && showMultipleTicketTexts &&
-                                <a className={styles.moreInfo} data-tip data-for="promo-code-info">
-                                    <i className="glyphicon glyphicon-info-sign" aria-hidden="true" />{` `}
-                                    Have multiple promo codes?
-                                </a>
-                            }
-                            <ReactTooltip id="promo-code-info">
-                                <div className={styles.moreInfoTooltip}>
-                                    Promo code will be applied to all tickets in this order.  If you wish to utilize more than one promo code, simply place another order after you complete this registration order. Only one promo code can be applied per order.
-                                </div>
-                            </ReactTooltip>
 
                             {formErrors.length > 0 && (
                                 <div className={`${styles.formErrors} alert alert-danger`}>

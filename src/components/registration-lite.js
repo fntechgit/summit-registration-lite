@@ -142,8 +142,10 @@ const RegistrationLite = (
         showCompanyInputDefaultOptions,
         companyDDLOptions2Show,
         promoCode,        
+        hasDiscount,
         getTicketDiscount,
         removePromoCode,
+        promoCodeLoader,
         ...rest
     }) => {
 
@@ -313,6 +315,8 @@ const RegistrationLite = (
                                             applyPromoCode={getTicketDiscount}
                                             removePromoCode={removePromoCode}
                                             promoCode={promoCode}
+                                            hasDiscount={hasDiscount}
+                                            promoCodeLoader={promoCodeLoader}
                                             changeForm={ticketForm => setFormValues({ ...formValues, ...ticketForm })}
                                             showMultipleTicketTexts={showMultipleTicketTexts}
                                         />
@@ -350,7 +354,6 @@ const RegistrationLite = (
                                             formValues={formValues}
                                             formErrors={formErrors}
                                             showMultipleTicketTexts={showMultipleTicketTexts}
-                                            allowPromoCodes={allowPromoCodes}
                                             showCompanyInput={showCompanyInput}
                                             companyDDLPlaceholder={companyDDLPlaceholder}
                                             showCompanyInputDefaultOptions={showCompanyInputDefaultOptions}
@@ -431,7 +434,9 @@ const mapStateToProps = ({ registrationLiteState }) => ({
     passwordlessCodeSent: registrationLiteState.passwordless.code_sent,
     passwordlessCodeError: registrationLiteState.passwordless.error,
     nowUtc: registrationLiteState.nowUtc,
-    promoCode: registrationLiteState.promoCode,
+    promoCode: registrationLiteState.promoCode.code,
+    hasDiscount: registrationLiteState.promoCode.hasDiscount,
+    promoCodeLoader: registrationLiteState.promoCode.loading,
 })
 
 RegistrationLite.defaultProps = {

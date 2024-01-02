@@ -41,6 +41,12 @@ import {
 import { LOGOUT_USER } from 'openstack-uicore-foundation/lib/security/actions';
 const localNowUtc = Date.now();
 
+const DEFAULT_PROMO_CODE_STATE = {
+    loading: false,
+    code: '',
+    hasDiscount: false
+}
+
 const DEFAULT_STATE = {
     reservation: null,
     checkout: null,
@@ -64,7 +70,7 @@ const DEFAULT_STATE = {
         userProfile: null,
     },
     nowUtc: localNowUtc,
-    promoCode: null
+    promoCode: DEFAULT_PROMO_CODE_STATE
 };
 
 const RegistrationLiteReducer = (state = DEFAULT_STATE, action) => {
@@ -75,8 +81,8 @@ const RegistrationLiteReducer = (state = DEFAULT_STATE, action) => {
         case LOGOUT_USER: {
             return DEFAULT_STATE;
         }
-        case REQUESTED_TICKET_TYPES:{
-            return {...state, requestedTicketTypes: false}
+        case REQUESTED_TICKET_TYPES: {
+            return { ...state, requestedTicketTypes: false }
         }
         case START_WIDGET_LOADING: {
             return { ...state, widgetLoading: true };
@@ -103,7 +109,7 @@ const RegistrationLiteReducer = (state = DEFAULT_STATE, action) => {
                     apiBaseUrl: apiBaseUrl,
                 }
             };
-        case LOAD_PROFILE_DATA:{
+        case LOAD_PROFILE_DATA: {
             return {
                 ...state,
                 settings: {
@@ -116,7 +122,7 @@ const RegistrationLiteReducer = (state = DEFAULT_STATE, action) => {
             return { ...state, step: payload }
         }
         case GET_TICKET_TYPES: {
-            return { ...state, ticketTypes: payload.response.data, requestedTicketTypes: true };
+            return { ...state, ticketTypes: payload.response.data, requestedTicketTypes: true, promoCode: DEFAULT_PROMO_CODE_STATE };
         }
         case GET_TAX_TYPES: {
             return { ...state, taxTypes: payload.response.data }
@@ -146,28 +152,29 @@ const RegistrationLiteReducer = (state = DEFAULT_STATE, action) => {
         case PAY_RESERVATION: {
             return { ...state, checkout: payload.response, reservation: null, userProfile: null, invitation: null };
         }
-        case GET_MY_INVITATION:{
-            return {...state, invitation: payload.response};
+        case GET_MY_INVITATION: {
+            return { ...state, invitation: payload.response };
         }
-        case CLEAR_MY_INVITATION:{
-            return {...state, invitation: null};
+        case CLEAR_MY_INVITATION: {
+            return { ...state, invitation: null };
         }
         case UPDATE_CLOCK: {
             const { timestamp } = payload;
             return { ...state, nowUtc: timestamp };
         }
         case REQUEST_TICKET_DISCOUNT: {
-            const {promoCode} = payload;
-            return {...state, promoCode}
+            const { promoCode } = payload;
+            return { ...state, promoCode: { ...state.promoCode, code: promoCode, loading: true } }
         }
         case REMOVE_TICKET_DISCOUNT: {
-            return {...state, promocode: null}
+            return { ...state, promoCode: { loading: true } }
         }
         case GET_TICKET_DISCOUNT: {
             const hasDiscount = payload.response.data.some(e => e.hasOwnProperty('cost_with_applied_discount'))
             const ticket_types = hasDiscount ? payload.response.data : state.ticketTypes;
-            const promoCode = hasDiscount ? state.promoCode : null;
-            return {...state, promoCode, ticketTypes: ticket_types }
+            const code = hasDiscount ? state.promoCode.code : '';
+            const promoCode = { code, hasDiscount, loading: false }
+            return { ...state, promoCode, ticketTypes: ticket_types, promoCode }
         }
         default: {
             return state;

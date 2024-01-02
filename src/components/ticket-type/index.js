@@ -33,12 +33,13 @@ const TicketTypeComponent = ({
         showMultipleTicketTexts,
         allowPromoCodes,
         applyPromoCode,
-        removePromoCode
+        removePromoCode,
+        promoCode,
+        hasDiscount,
+        promoCodeLoader
     }) => {
     const [ticket, setTicket] = useState(null);
     const [quantity, setQuantity] = useState(1);
-
-    const [promoCode, setPromoCode] = useState('');
 
     const minQuantity = 1;
     const maxQuantity = getTicketMaxQuantity(ticket);
@@ -59,6 +60,14 @@ const TicketTypeComponent = ({
             setTicket(ticketTypes.find(t => t.id === reservation.tickets[0].ticket_type_id))
         }
     }, [])
+
+    useEffect(() => {
+        const newTicket = ticketTypes.find(t => t?.id === ticket?.id);        
+        if (newTicket) {
+            changeForm({ ticketType: newTicket })
+            setTicket(newTicket);
+        }        
+    }, [hasDiscount])
 
     useEffect(() => {
         changeForm({ ticketType: ticket, ticketQuantity: quantity });
@@ -87,11 +96,11 @@ const TicketTypeComponent = ({
                                     <>
                                         {`${ticket.name} (${quantity}): `}
                                         <>
-                                            {!ticket.cost_with_applied_discount ? 
+                                            {ticket.cost_with_applied_discount ? 
                                                 <>
                                                     <s>{formatCurrency(ticket.cost * quantity, { currency: ticket.currency })} {ticket.currency}</s>
                                                     &nbsp;
-                                                    <>{formatCurrency(123 * quantity, { currency: ticket.currency })} {ticket.currency}</>
+                                                    <>{formatCurrency(ticket.cost_with_applied_discount * quantity, { currency: ticket.currency })} {ticket.currency}</>
                                                 </>
                                                 :
                                                 <>{formatCurrency(ticket.cost * quantity, { currency: ticket.currency })} {ticket.currency}</>
@@ -182,6 +191,8 @@ const TicketTypeComponent = ({
                             {ticket && allowPromoCodes &&
                                 <PromoCodeInput 
                                     promoCode={promoCode} 
+                                    hasDiscount={hasDiscount}
+                                    promoCodeLoader={promoCodeLoader}
                                     applyPromoCode={applyPromoCode} 
                                     showMultipleTicketTexts={showMultipleTicketTexts} 
                                     removePromoCode={removePromoCode} />

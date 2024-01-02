@@ -185,6 +185,7 @@ export const getTicketDiscount = (promoCode) => async (dispatch, getState, { api
 }
 
 export const removePromoCode = () => (dispatch, getState) => {
+    console.log('check here...')
     try {
         const { registrationLiteState: { settings: { summitId } } } = getState();        
         dispatch(getTicketTypes(summitId));
@@ -199,15 +200,15 @@ export const removePromoCode = () => (dispatch, getState) => {
 export const reserveTicket = ({ provider, personalInformation, ticket, ticketQuantity }, { onError }) =>
     async (dispatch, getState, { apiBaseUrl, getAccessToken }) => {
         try {
-            const { registrationLiteState: { settings: { summitId } } } = getState();
-            let { firstName, lastName, email, company, promoCode, attendee } = personalInformation;
+            const { registrationLiteState: { settings: { summitId }, promoCode: { code } } } = getState();
+            let { firstName, lastName, email, company, attendee } = personalInformation;
             dispatch(startWidgetLoading());
 
             const access_token = await getAccessToken();
 
             const tickets = [...Array(ticketQuantity)].map(() => ({
                 type_id: ticket.id,
-                promo_code: promoCode || null
+                promo_code: code || null
             }));
 
             if (tickets.length === 1 && attendee) {
@@ -256,7 +257,7 @@ export const reserveTicket = ({ provider, personalInformation, ticket, ticketQua
             )(params)(dispatch)
                 .then((payload) => {
                     dispatch(stopWidgetLoading());
-                    payload.response.promo_code = promoCode || null;
+                    payload.response.promo_code = code || null;
 
                     if (!payload.response.amount) {
                         dispatch(payTicketWithProvider(provider));

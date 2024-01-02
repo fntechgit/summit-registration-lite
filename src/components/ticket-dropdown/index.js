@@ -29,10 +29,18 @@ const TicketDropdownComponent = ({ selectedTicket, ticketTypes, taxTypes, onTick
             <div className={styles.placeholder} onClick={() => setActive(!active)} data-testid="ticket-dropdown">
                 {selectedTicket ?
                     <>
-                        <span className={styles.selectedTicket} data-testid="selected-ticket">
-                            {`${selectedTicket.name} - ${selectedTicket.currency_symbol}${selectedTicket.cost} ${selectedTicket.currency}
+                        {selectedTicket.cost_with_applied_discount ?
+                            <span className={styles.selectedTicket} data-testid="selected-ticket">
+                                {`${selectedTicket.name} - ${selectedTicket.currency_symbol}`}
+                                <s>{selectedTicket.cost}</s>{` ${selectedTicket.cost_with_applied_discount} ${selectedTicket.currency}`}
+                                {`${getTicketTaxes(selectedTicket, taxTypes)}`}
+                            </span>
+                            :
+                            <span className={styles.selectedTicket} data-testid="selected-ticket">
+                                {`${selectedTicket.name} - ${selectedTicket.currency_symbol}${selectedTicket.cost} ${selectedTicket.currency}
                             ${getTicketTaxes(selectedTicket, taxTypes)}`}
-                        </span>
+                            </span>
+                        }                        
                         <i className="fa fa-chevron-down"></i>
                     </>
                     :
@@ -50,25 +58,25 @@ const TicketDropdownComponent = ({ selectedTicket, ticketTypes, taxTypes, onTick
                         const maxQuantity = getTicketMaxQuantity(t);
                         const isTicketSoldOut = maxQuantity < 1;
 
-                            return (
-                                <div key={t.id} className={isTicketSoldOut ? styles.soldOut : ''} onClick={() => {
-                                    if (isTicketSoldOut) return;
-                                    ticketSelect(t);
-                                }}>
-                                    {t.name} -{` `}
-                                    {!isTicketSoldOut && 
-                                        t.cost_with_applied_discount ? 
-                                            <>
-                                                <s>{t.currency_symbol}{t.cost} {t.currency}</s>
-                                                <> {t.currency_symbol}{t.cost_with_applied_discount} {t.currency}</>
-                                            </>
-                                        :
-                                        <>{t.currency_symbol}{t.cost} {t.currency}</>
-                                    }
-                                    {getTicketTaxes(t, taxTypes)}
-                                    {isTicketSoldOut && <>Sold Out</>}
-                                </div>
-                            )
+                        return (
+                            <div key={t.id} className={isTicketSoldOut ? styles.soldOut : ''} onClick={() => {
+                                if (isTicketSoldOut) return;
+                                ticketSelect(t);
+                            }}>
+                                {t.name} -{` `}
+                                {!isTicketSoldOut &&
+                                    t.cost_with_applied_discount ?
+                                    <>
+                                        <s>{t.currency_symbol}{t.cost} {t.currency}</s>
+                                        <> {t.currency_symbol}{t.cost_with_applied_discount} {t.currency}</>
+                                    </>
+                                    :
+                                    <>{t.currency_symbol}{t.cost} {t.currency}</>
+                                }
+                                {getTicketTaxes(t, taxTypes)}
+                                {isTicketSoldOut && <>Sold Out</>}
+                            </div>
+                        )
                     })}
                 </div>
             }
