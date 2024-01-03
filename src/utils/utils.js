@@ -1,3 +1,5 @@
+import { ORDER_PAYMENT_METHOD_OFFLINE, ORDER_STATUS_PAID } from './constants';
+
 /**
  * Copyright 2022 OpenStack Foundation
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -47,3 +49,10 @@ export const getTicketTaxes = (ticket, taxes) => {
     const ticketTaxes = taxes.filter(tax => tax.ticket_types.includes(ticket?.id));
     return `${ticketTaxes.length > 0 ? ` plus ${taxes.map(t => t.name).join(' & ')}` : ''}`;
 }
+
+export const hasDiscountApplied = (ticketType) => ticketType?.cost_with_applied_discount > 0;
+
+export const isFreeOrder = (reservation) => reservation.amount === 0 ;
+
+export const isPrePaidOrder = (reservation) => reservation.status === ORDER_STATUS_PAID  && reservation.payment_method === ORDER_PAYMENT_METHOD_OFFLINE;
+

@@ -20,7 +20,13 @@ import ReactTooltip from 'react-tooltip';
 import { formatErrorMessage } from '../../helpers';
 
 import styles from "./index.module.scss";
-import { EMAIL_REGEXP, TICKET_OWNER_MYSELF, TICKET_OWNER_SOMEONE, TICKET_OWNER_UNASSIGNED } from '../../utils/constants';
+import {
+    EMAIL_REGEXP,
+    TICKET_OWNER_MYSELF,
+    TICKET_OWNER_SOMEONE,
+    TICKET_OWNER_UNASSIGNED,
+    TICKET_TYPE_SUBTYPE_PREPAID
+} from '../../utils/constants';
 
 const PersonalInfoComponent = ({
     isActive,
@@ -45,7 +51,7 @@ const PersonalInfoComponent = ({
     const [ticketOwnerError, setTicketOwnerError] = useState(false);
 
     // if there's only one ticket on the order and there is no invitation available, display the radio button to assign the ticket
-    const shouldDisplayTicketAssignment = () => formValues.ticketQuantity === 1 && !invitation;
+    const shouldDisplayTicketAssignment = () => formValues.ticketQuantity === 1 && !invitation && formValues.ticketType?.sub_type !== TICKET_TYPE_SUBTYPE_PREPAID;
 
     const radioListOptions = [
         {label: "Myself", value: TICKET_OWNER_MYSELF},
