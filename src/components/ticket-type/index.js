@@ -20,7 +20,7 @@ import { isInPersonTicketType } from "../../actions";
 import ReactTooltip from 'react-tooltip';
 import { formatCurrency } from '../../helpers';
 import { getTicketMaxQuantity } from '../../helpers';
-import { getTicketTaxes, hasDiscountApplied } from '../../utils/utils';
+import { getTicketCost, getTicketTaxes } from '../../utils/utils';
 import PromoCodeInput from '../promocode-input';
 
 const TicketTypeComponent = ({
@@ -100,15 +100,7 @@ const TicketTypeComponent = ({
                                     <>
                                         {`${ticket.name} (${quantity}): `}
                                         <>
-                                            {hasDiscountApplied(ticket) ?
-                                                <>
-                                                    <s>{formatCurrency(ticket.cost * quantity, { currency: ticket.currency })} {ticket.currency}</s>
-                                                    &nbsp;
-                                                    <>{formatCurrency(ticket.cost_with_applied_discount * quantity, { currency: ticket.currency })} {ticket.currency}</>
-                                                </>
-                                                :
-                                                <>{formatCurrency(ticket.cost * quantity, { currency: ticket.currency })} {ticket.currency}</>
-                                            }
+                                            {getTicketCost(ticket, quantity)}
                                         </>
                                         {`${getTicketTaxes(ticket, taxTypes)}`}
 
@@ -118,19 +110,21 @@ const TicketTypeComponent = ({
                                                 <span className={styles.promoCode}>
                                                     Promo code&nbsp;<abbr title={reservation.promo_code}>{reservation.promo_code}</abbr>&nbsp;applied:
                                                 </span>
-                                                <span className={styles.discount}>
-                                                    {` - ${formatCurrency(reservation.discount_amount, { currency: ticket.currency })} ${ticket.currency}`}
-                                                </span>
+                                                {!isPrePaidOrder(reservation) &&
+                                                    <span className={styles.discount}>
+                                                        {` - ${formatCurrency(reservation.discount_amount, { currency: ticket.currency })} ${ticket.currency}`}
+                                                    </span>
+                                                }
                                             </>
                                         )}
 
-                                        {!isActive && reservation && (
+                                        {!isActive && reservation && !isPrePaidOrder(reservation) && (
                                             <span className={styles.promo}>
                                                 Subtotal: {`${ticket?.currency_symbol} ${((reservation?.raw_amount_in_cents - reservation?.discount_amount_in_cents) / 100).toFixed(2)} ${ticket?.currency}`}
                                             </span>
                                         )}
 
-                                        {!isActive && reservation?.taxes_amount > 0 && (
+                                        {!isActive && reservation?.taxes_amount > 0 && !isPrePaidOrder(reservation) && (
                                             <>
                                                 {reservation?.applied_taxes.map((tax) => {
                                                     return (
@@ -147,7 +141,7 @@ const TicketTypeComponent = ({
                                                 })}
                                             </>
                                         )}
-                                        {!isActive && reservation && (
+                                        {!isActive && reservation && !isPrePaidOrder(reservation) (
                                             <>
                                                 <br />
                                                 Total: {`${formatCurrency(reservation.amount, { currency: ticket.currency })} ${ticket.currency}`}

@@ -1,4 +1,7 @@
+import { formatCurrency } from '../helpers';
 import { ORDER_PAYMENT_METHOD_OFFLINE, ORDER_STATUS_PAID } from './constants';
+
+import React from 'react';
 
 /**
  * Copyright 2022 OpenStack Foundation
@@ -55,4 +58,15 @@ export const hasDiscountApplied = (ticketType) => ticketType?.cost_with_applied_
 export const isFreeOrder = (reservation) => reservation.amount === 0 ;
 
 export const isPrePaidOrder = (reservation) => reservation.status === ORDER_STATUS_PAID  && reservation.payment_method === ORDER_PAYMENT_METHOD_OFFLINE;
+
+export const getTicketCost = (ticket, quantity = 1) => {
+    return hasDiscountApplied(ticket) ?
+        <>
+            <s>{formatCurrency(ticket.cost * quantity, { currency: ticket.currency })} {ticket.currency}</s>
+            &nbsp;
+            <>{formatCurrency(ticket.cost_with_applied_discount * quantity, { currency: ticket.currency })} {ticket.currency}</>
+        </>
+        :
+        <>{formatCurrency(ticket.cost * quantity, { currency: ticket.currency })} {ticket.currency}</>
+}
 

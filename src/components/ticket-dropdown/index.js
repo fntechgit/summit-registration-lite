@@ -14,7 +14,7 @@
 import React, { useState } from 'react';
 import { getTicketMaxQuantity } from '../../helpers';
 import styles from "./index.module.scss";
-import { getTicketTaxes, hasDiscountApplied } from '../../utils/utils';
+import { getTicketCost, getTicketTaxes, hasDiscountApplied } from '../../utils/utils';
 
 const TicketDropdownComponent = ({ selectedTicket, ticketTypes, taxTypes, onTicketSelect }) => {
     const [active, setActive] = useState(false);
@@ -32,13 +32,14 @@ const TicketDropdownComponent = ({ selectedTicket, ticketTypes, taxTypes, onTick
                         {hasDiscountApplied(selectedTicket) ?
                             <span className={styles.selectedTicket} data-testid="selected-ticket">
                                 {`${selectedTicket.name} - ${selectedTicket.currency_symbol}`}
-                                <s>{selectedTicket.cost}</s>{` ${selectedTicket.cost_with_applied_discount} ${selectedTicket.currency}`}
-                                {`${getTicketTaxes(selectedTicket, taxTypes)}`}
+                                {getTicketCost(selectedTicket)}
+                                {getTicketTaxes(selectedTicket, taxTypes)}
                             </span>
                             :
                             <span className={styles.selectedTicket} data-testid="selected-ticket">
-                                {`${selectedTicket.name} - ${selectedTicket.currency_symbol}${selectedTicket.cost} ${selectedTicket.currency}
-                            ${getTicketTaxes(selectedTicket, taxTypes)}`}
+                                {`${selectedTicket.name} - ${selectedTicket.currency_symbol}`}
+                                {getTicketCost(selectedTicket)}
+                                {getTicketTaxes(selectedTicket, taxTypes)}
                             </span>
                         }
                         <i className="fa fa-chevron-down"></i>
@@ -64,13 +65,8 @@ const TicketDropdownComponent = ({ selectedTicket, ticketTypes, taxTypes, onTick
                                 ticketSelect(t);
                             }}>
                                 {t.name} -{` `}
-                                {!isTicketSoldOut && hasDiscountApplied(t) ?
-                                    <>
-                                        <s>{t.currency_symbol}{t.cost} {t.currency}</s>
-                                        <> {t.currency_symbol}{t.cost_with_applied_discount} {t.currency}</>
-                                    </>
-                                    :
-                                    <>{t.currency_symbol}{t.cost} {t.currency}</>
+                                {!isTicketSoldOut && 
+                                    getTicketCost(t)
                                 }
                                 {getTicketTaxes(t, taxTypes)}
                                 {isTicketSoldOut && <> Sold Out</>}
