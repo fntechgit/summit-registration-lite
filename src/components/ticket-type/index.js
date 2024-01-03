@@ -11,7 +11,7 @@
  * limitations under the License.
  **/
 import RawHTML from 'openstack-uicore-foundation/lib/components/raw-html'
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useSpring, config, animated } from "react-spring";
 import { useMeasure } from "react-use";
 import styles from "./index.module.scss";
@@ -20,7 +20,8 @@ import { isInPersonTicketType } from "../../actions";
 import ReactTooltip from 'react-tooltip';
 import { formatCurrency } from '../../helpers';
 import { getTicketMaxQuantity } from '../../helpers';
-import { getTicketCost, getTicketTaxes } from '../../utils/utils';
+import { getTicketCost, getTicketTaxes, isPrePaidOrder  } from '../../utils/utils';
+
 import PromoCodeInput from '../promocode-input';
 
 const TicketTypeComponent = ({
@@ -77,6 +78,11 @@ const TicketTypeComponent = ({
         }
     }, [promoCode, originalTicketTypes])
 
+    const isPrePaidReservation = useMemo(
+        () => reservation ? isPrePaidOrder(reservation) : false,
+        [reservation]
+    );
+
     const handleTicketChange = (t) => {
         setTicket(t);
         setQuantity(minQuantity);
@@ -110,7 +116,7 @@ const TicketTypeComponent = ({
                                                 <span className={styles.promoCode}>
                                                     Promo code&nbsp;<abbr title={reservation.promo_code}>{reservation.promo_code}</abbr>&nbsp;applied:
                                                 </span>
-                                                {!isPrePaidOrder(reservation) &&
+                                                {!isPrePaidReservation &&
                                                     <span className={styles.discount}>
                                                         {` - ${formatCurrency(reservation.discount_amount, { currency: ticket.currency })} ${ticket.currency}`}
                                                     </span>
@@ -118,13 +124,13 @@ const TicketTypeComponent = ({
                                             </>
                                         )}
 
-                                        {!isActive && reservation && !isPrePaidOrder(reservation) && (
+                                        {!isActive && reservation && !isPrePaidReservation && (
                                             <span className={styles.promo}>
                                                 Subtotal: {`${ticket?.currency_symbol} ${((reservation?.raw_amount_in_cents - reservation?.discount_amount_in_cents) / 100).toFixed(2)} ${ticket?.currency}`}
                                             </span>
                                         )}
 
-                                        {!isActive && reservation?.taxes_amount > 0 && !isPrePaidOrder(reservation) && (
+                                        {!isActive && reservation?.taxes_amount > 0 && !isPrePaidReservation && (
                                             <>
                                                 {reservation?.applied_taxes.map((tax) => {
                                                     return (
@@ -141,7 +147,7 @@ const TicketTypeComponent = ({
                                                 })}
                                             </>
                                         )}
-                                        {!isActive && reservation && !isPrePaidOrder(reservation) (
+                                        {!isActive && reservation && !isPrePaidReservation && (
                                             <>
                                                 <br />
                                                 Total: {`${formatCurrency(reservation.amount, { currency: ticket.currency })} ${ticket.currency}`}

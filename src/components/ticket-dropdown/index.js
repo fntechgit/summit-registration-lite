@@ -14,7 +14,7 @@
 import React, { useState } from 'react';
 import { getTicketMaxQuantity } from '../../helpers';
 import styles from "./index.module.scss";
-import { getTicketCost, getTicketTaxes, hasDiscountApplied } from '../../utils/utils';
+import { getTicketCost, getTicketTaxes } from '../../utils/utils';
 
 const TicketDropdownComponent = ({ selectedTicket, ticketTypes, taxTypes, onTicketSelect }) => {
     const [active, setActive] = useState(false);
@@ -29,19 +29,11 @@ const TicketDropdownComponent = ({ selectedTicket, ticketTypes, taxTypes, onTick
             <div className={styles.placeholder} onClick={() => setActive(!active)} data-testid="ticket-dropdown">
                 {selectedTicket ?
                     <>
-                        {hasDiscountApplied(selectedTicket) ?
-                            <span className={styles.selectedTicket} data-testid="selected-ticket">
-                                {`${selectedTicket.name} - ${selectedTicket.currency_symbol}`}
+                        <span className={styles.selectedTicket} data-testid="selected-ticket">
+                                {`${selectedTicket.name} - `}
                                 {getTicketCost(selectedTicket)}
                                 {getTicketTaxes(selectedTicket, taxTypes)}
-                            </span>
-                            :
-                            <span className={styles.selectedTicket} data-testid="selected-ticket">
-                                {`${selectedTicket.name} - ${selectedTicket.currency_symbol}`}
-                                {getTicketCost(selectedTicket)}
-                                {getTicketTaxes(selectedTicket, taxTypes)}
-                            </span>
-                        }
+                        </span>
                         <i className="fa fa-chevron-down"></i>
                     </>
                     :
@@ -65,7 +57,7 @@ const TicketDropdownComponent = ({ selectedTicket, ticketTypes, taxTypes, onTick
                                 ticketSelect(t);
                             }}>
                                 {t.name} -{` `}
-                                {!isTicketSoldOut && 
+                                {!isTicketSoldOut &&
                                     getTicketCost(t)
                                 }
                                 {getTicketTaxes(t, taxTypes)}
@@ -79,6 +71,4 @@ const TicketDropdownComponent = ({ selectedTicket, ticketTypes, taxTypes, onTick
     );
 }
 
-
 export default TicketDropdownComponent
-

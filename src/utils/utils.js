@@ -1,5 +1,5 @@
 import { formatCurrency } from '../helpers';
-import { ORDER_PAYMENT_METHOD_OFFLINE, ORDER_STATUS_PAID } from './constants';
+import { ORDER_PAYMENT_METHOD_OFFLINE, ORDER_STATUS_PAID, TICKET_TYPE_SUBTYPE_PREPAID } from './constants';
 
 import React from 'react';
 
@@ -49,6 +49,7 @@ export const isEmptyString = (val) => {
 }
 
 export const getTicketTaxes = (ticket, taxes) => {
+    if(isPrePaidTicketType(ticket)) return '';
     const ticketTaxes = taxes.filter(tax => tax.ticket_types.includes(ticket?.id));
     return `${ticketTaxes.length > 0 ? ` plus ${taxes.map(t => t.name).join(' & ')}` : ''}`;
 }
@@ -70,3 +71,4 @@ export const getTicketCost = (ticket, quantity = 1) => {
         <>{formatCurrency(ticket.cost * quantity, { currency: ticket.currency })} {ticket.currency}</>
 }
 
+export const isPrePaidTicketType = (ticketType) => ticketType?.sub_type === TICKET_TYPE_SUBTYPE_PREPAID;

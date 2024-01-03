@@ -27,6 +27,7 @@ import {
     TICKET_OWNER_UNASSIGNED,
     TICKET_TYPE_SUBTYPE_PREPAID
 } from '../../utils/constants';
+import { isPrePaidTicketType } from '../../utils/utils';
 
 const PersonalInfoComponent = ({
     isActive,
@@ -51,7 +52,7 @@ const PersonalInfoComponent = ({
     const [ticketOwnerError, setTicketOwnerError] = useState(false);
 
     // if there's only one ticket on the order and there is no invitation available, display the radio button to assign the ticket
-    const shouldDisplayTicketAssignment = () => formValues.ticketQuantity === 1 && !invitation && formValues.ticketType?.sub_type !== TICKET_TYPE_SUBTYPE_PREPAID;
+    const shouldDisplayTicketAssignment = () => formValues.ticketQuantity === 1 && !invitation && !isPrePaidTicketType(formValues.ticketType);
 
     const radioListOptions = [
         {label: "Myself", value: TICKET_OWNER_MYSELF},
