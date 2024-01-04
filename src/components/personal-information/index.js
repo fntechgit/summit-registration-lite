@@ -250,7 +250,6 @@ const PersonalInfoComponent = ({
 
                                 {shouldDisplayTicketAssignment() &&
                                     <>
-                                        <br/>
                                         <div className={styles.fieldWrapperRadio}>
                                             <label>Ticket is for:</label>
                                             <RadioList
