@@ -24,8 +24,7 @@ import {
     EMAIL_REGEXP,
     TICKET_OWNER_MYSELF,
     TICKET_OWNER_SOMEONE,
-    TICKET_OWNER_UNASSIGNED,
-    TICKET_TYPE_SUBTYPE_PREPAID
+    TICKET_OWNER_UNASSIGNED
 } from '../../utils/constants';
 import { isPrePaidTicketType } from '../../utils/utils';
 

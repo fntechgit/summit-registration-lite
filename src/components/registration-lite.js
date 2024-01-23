@@ -38,6 +38,7 @@ import {
     loadProfileData,
     removePromoCode,
     applyPromoCode,
+    validatePromoCode
 } from '../actions';
 
 import AjaxLoader from "openstack-uicore-foundation/lib/components/ajaxloader";
@@ -147,6 +148,7 @@ const RegistrationLite = (
         getTicketDiscount,
         removePromoCode,
         applyPromoCode,
+        validatePromoCode,
         ...rest
     }) => {
 
@@ -409,6 +411,7 @@ const RegistrationLite = (
                                 inPersonDisclaimer={inPersonDisclaimer}
                                 formValues={formValues}
                                 removeReservedTicket={removeReservedTicket}
+                                validatePromoCode={validatePromoCode}
                                 changeStep={changeStep}
                             />
                         )}
@@ -488,5 +491,6 @@ export default connect(mapStateToProps, {
     updateClock,
     loadProfileData,
     applyPromoCode,
-    removePromoCode
+    removePromoCode,
+    validatePromoCode
 })(RegistrationLite)

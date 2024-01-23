@@ -27,41 +27,42 @@ const PromoCodeInput = ({ applyPromoCode, promoCode, removePromoCode, showMultip
 
     return (
         <>
-                <div className={styles.promoCodeWrapper}>
-                        <span>Do you have a promo code?</span>
-                        <div className={styles.promoCodeInput}>
-                            <input className={`${promoCode ? styles.promoCodeActive : ''}`}
-                                   type="text"
-                                   value={statePromoCode}
-                                   onChange={(ev) => setStatePromoCode(ev.target.value)}
-                                   placeholder="Enter your promo code"
-                                   onKeyDown={(e) => {
-                                       if (e.key === "Enter")
-                                           applyPromoCode(statePromoCode)
-                                   }}
-                                   readOnly={!isEmptyString(promoCode)} />
-                            {promoCode !== '' ?
-                                <div className={styles.appliedCode}>
-                                    <img src={appliedCode} className={styles.appliedCodeIcon} />
-                                    <button onClick={() => removePromoCode()}>Remove</button>
-                                </div>
-                                :
-                                <button onClick={() => applyPromoCode(statePromoCode)}>Apply</button>
-                            }
-                        </div>
+            <div className={styles.promoCodeWrapper}>
+                <span>Do you have a promo code?</span>
+                <div className={styles.promoCodeInput}>
+                    <input className={`${promoCode ? styles.promoCodeActive : ''}`}
+                        type="text"
+                        value={statePromoCode}
+                        onChange={(ev) => setStatePromoCode(ev.target.value)}
+                        placeholder="Enter your promo code"
+                        onKeyDown={(e) => {
+                            if (e.key === "Enter")
+                                applyPromoCode(statePromoCode)
+                        }}
+                        readOnly={!isEmptyString(promoCode)} />
 
-                        {showMultipleTicketTexts &&
-                            <a className={styles.moreInfo} data-tip data-for="promo-code-info">
-                                <i className="glyphicon glyphicon-info-sign" aria-hidden="true" />{` `}
-                                Have multiple promo codes?
-                            </a>
+                    {promoCode && <img src={appliedCode} className={styles.appliedCodeIcon} />}
+                    <div className={`${styles.codeButtonWrapper} ${statePromoCode ? '' : styles.noCode}`}>
+                        {promoCode !== '' ?
+                            <button onClick={() => removePromoCode()}>Remove</button>
+                            :
+                            <button disabled={!statePromoCode} onClick={() => applyPromoCode(statePromoCode)}>Apply</button>
                         }
                     </div>
-                <ReactTooltip id="promo-code-info">
-                    <div className={styles.moreInfoTooltip}>
-                        Promo code will be applied to all tickets in this order.  If you wish to utilize more than one promo code, simply place another order after you complete this registration order. Only one promo code can be applied per order.
-                    </div>
-                </ReactTooltip>
+                </div>
+
+                {showMultipleTicketTexts &&
+                    <a className={styles.moreInfo} data-tip data-for="promo-code-info">
+                        <i className="glyphicon glyphicon-info-sign" aria-hidden="true" />{` `}
+                        Have multiple promo codes?
+                    </a>
+                }
+            </div>
+            <ReactTooltip id="promo-code-info">
+                <div className={styles.moreInfoTooltip}>
+                    Promo code will be applied to all tickets in this order.  If you wish to utilize more than one promo code, simply place another order after you complete this registration order. Only one promo code can be applied per order.
+                </div>
+            </ReactTooltip>
         </>
     );
 }

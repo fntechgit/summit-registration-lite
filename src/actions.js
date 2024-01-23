@@ -50,6 +50,7 @@ export const LOAD_PROFILE_DATA = 'LOAD_PROFILE_DATA';
 
 export const SET_CURRENT_PROMO_CODE = 'SET_CURRENT_PROMO_CODE';
 export const CLEAR_CURRENT_PROMO_CODE = 'CLEAR_CURRENT_PROMO_CODE';
+export const VALIDATE_PROMO_CODE = 'VALIDATE_PROMO_CODE';
 
 export const startWidgetLoading = createAction(START_WIDGET_LOADING);
 export const stopWidgetLoading = createAction(STOP_WIDGET_LOADING);
@@ -187,6 +188,73 @@ export const removePromoCode = () => (dispatch, getState) => {
         return Promise.reject(e);
     }
 }
+
+export const validatePromoCode = (ticketData) => async (dispatch, getState, { apiBaseUrl, getAccessToken }) => {
+
+    const { registrationLiteState: { settings: { summitId }, promoCode: currentPromoCode } } = getState();    
+
+    if (summitId && currentPromoCode) {
+
+        dispatch(startWidgetLoading());
+
+        const { ticketQuantity, id, sub_type } = ticketData;
+
+        const access_token = await getAccessToken();
+
+        let params = {
+            access_token,
+            filter: `ticket_type_id==${id},ticket_type_qty==${ticketQuantity},ticket_type_subtype==${sub_type}`
+        };
+
+        const errorHandler = (err, res) => (dispatch, state) => {
+            if (res && res.statusCode === 412) {
+                let error = res?.body?.message || 'Validation Error';
+                let msg = '';
+                if (Array.isArray(res?.body?.errors)) {
+                    res?.body?.errors.forEach(er => {
+                        msg += er + '<br>';
+                    });
+                } else {
+                    for (var [key, value] of Object.entries(res?.body?.errors)) {
+                        if (isNaN(key)) {
+                            msg += key + ': ';
+                        }
+    
+                        msg += value + '<br>';
+                    }
+                }
+                Swal.fire(error, msg, "error");
+                return Promise.reject(err, res);
+            }
+            if (res && res.statusCode === 500) {
+                const defaultMessage = 'Server Error';
+                const msg = res?.body?.message || defaultMessage;
+                Swal.fire("Server Error", msg, "error");
+                return;
+            }
+            return authErrorHandler(err, res)(dispatch, state);
+        };
+
+        return getRequest(
+            null,
+            createAction(VALIDATE_PROMO_CODE),
+            `${apiBaseUrl}/api/v1/summits/${summitId}/promo-codes/${currentPromoCode}/apply`,
+            errorHandler
+        )(params)(dispatch).then((res) => {
+            dispatch(changeStep(STEP_PERSONAL_INFO));
+            dispatch(stopWidgetLoading());
+            return res;
+        }).catch((error) => {
+            dispatch(stopWidgetLoading());
+            return Promise.reject(error);
+        });
+    } else {        
+        dispatch(changeStep(STEP_PERSONAL_INFO));
+    }
+
+
+}
+
 
 
 export const reserveTicket = ({ provider, personalInformation, ticket, ticketQuantity }, { onError }) =>
