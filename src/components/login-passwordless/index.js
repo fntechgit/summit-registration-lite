@@ -53,7 +53,7 @@ const PasswordlessLoginComponent = ({
                     <img src={logoDark || FNidLogoDark} alt="FNid" className={`${styles.logo} ${styles.logoDark}`} />
                     <img src={logoLight || FNidLogo} alt="FNid" className={`${styles.logo} ${styles.logoLight}`} />
                     <span>
-                        We sent your single-use login code to <br />
+                        We sent your single-use code to <br />
                         <span data-testid="email">{email}</span>
                         <br />
                         <span className={styles.digits} data-testid="code-digits">

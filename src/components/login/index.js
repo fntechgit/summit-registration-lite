@@ -45,20 +45,21 @@ const LoginComponent = ({
     }
     
     return (
-        <div className={`${styles.loginWrapper} step-wrapper`}>
+        <div className={`${styles.loginWrapper}`}>
             <>
                 <div className={`${styles.innerWrapper}`}>
                     <div className={styles.loginCode}>
                         {summitData?.secondary_logo && <img className="login-logo" src={`${summitData?.secondary_logo}`} />}
-                        {title}
+                        <div class={styles.title}>{title}</div>
                         <div className={styles.input}>
                             <input placeholder="youremail@example.com" value={email} onChange={e => setEmail(e.target.value)}
                                    onKeyPress={(ev) => ev.key === 'Enter' ? loginCode() : null} data-testid="email-input" />                           
                         </div>
                         <div onClick={() => loginCode()} data-testid="email-button"
                             className={`${styles.button} ${styles.email_login_button} ${email === '' ? `${styles.pointerDisabled} ${styles.buttonDisabled}` : `${styles.primaryEmailButton}`}`}>
-                            <EmailRoundedIcon style={{ fontSize: '20px' }} />
-                            <span>Email me a login code</span>
+                            <EmailRoundedIcon style={{ fontSize: "20px" }} />
+                            <span>Email me a single-use code</span>
+                            <span></span>
                         </div>
                         {emailError && <span data-testid="email-error">Please enter a valid email address</span>}
                         <h2 className={styles.h2Styled}>or</h2>
@@ -72,7 +73,7 @@ const LoginComponent = ({
                                         border: `thin solid ${o.button_border_color ? o.button_border_color : o.button_color}`,
                                         backgroundColor: o.button_color,
                                         backgroundImage: o.provider_logo ? `url(${o.provider_logo})` : 'none',
-                                        backgroundSize: o.provider_logo_size ? o.provider_logo_size : ''
+                                        backgroundSize: o.provider_logo_size ? o.provider_logo_size : '',
                                     }}
                                     onClick={() => login(o.provider_param)}>
                                     {o.provider_label}

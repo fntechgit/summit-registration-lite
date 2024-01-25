@@ -255,7 +255,7 @@ const RegistrationLite = (
                 <div className={`${styles.outerWrapper} summit-registration-lite`}>
                     <div className={styles.innerWrapper}>
                         <div className={styles.title}>
-                            <span>{summitData.name}</span>
+                            {profileData && <span>{summitData.name}</span>}
                             <i className="fa fa-close" aria-label="close" onClick={handleCloseClick}></i>
                         </div>
 
