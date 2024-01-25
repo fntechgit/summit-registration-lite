@@ -23,6 +23,8 @@ import { PaymentProviderFactory } from "./utils/payment-providers/payment-provid
 import { isFreeOrder, isPrePaidOrder } from './utils/utils';
 import { STEP_PAYMENT, STEP_PERSONAL_INFO } from './utils/constants';
 
+import URI from 'urijs';
+
 export const START_WIDGET_LOADING = 'START_WIDGET_LOADING';
 export const STOP_WIDGET_LOADING = 'STOP_WIDGET_LOADING';
 export const LOAD_INITIAL_VARS = 'LOAD_INITIAL_VARS';
@@ -189,7 +191,7 @@ export const removePromoCode = () => (dispatch, getState) => {
     }
 }
 
-export const validatePromoCode = (ticketData) => async (dispatch, getState, { apiBaseUrl, getAccessToken }) => {
+export const validatePromoCode = (ticketData, {onError}) => async (dispatch, getState, { apiBaseUrl, getAccessToken }) => {
 
     const { registrationLiteState: { settings: { summitId }, promoCode: currentPromoCode } } = getState();    
 
@@ -201,31 +203,16 @@ export const validatePromoCode = (ticketData) => async (dispatch, getState, { ap
 
         const access_token = await getAccessToken();
 
-        let params = {
-            access_token,
-            filter: `ticket_type_id==${id},ticket_type_qty==${ticketQuantity},ticket_type_subtype==${sub_type}`
-        };
+        let apiUrl = URI(`${apiBaseUrl}/api/v1/summits/${summitId}/promo-codes/${currentPromoCode}/apply`);
+        apiUrl.addQuery('access_token', access_token);
+        apiUrl.addQuery('filter[]', `ticket_type_id==${id}`);
+        apiUrl.addQuery('filter[]', `ticket_type_qty==${ticketQuantity}`);
+        apiUrl.addQuery('filter[]', `ticket_type_subtype==${sub_type}`);
 
         const errorHandler = (err, res) => (dispatch, state) => {
-            if (res && res.statusCode === 412) {
-                let error = res?.body?.message || 'Validation Error';
-                let msg = '';
-                if (Array.isArray(res?.body?.errors)) {
-                    res?.body?.errors.forEach(er => {
-                        msg += er + '<br>';
-                    });
-                } else {
-                    for (var [key, value] of Object.entries(res?.body?.errors)) {
-                        if (isNaN(key)) {
-                            msg += key + ': ';
-                        }
-    
-                        msg += value + '<br>';
-                    }
-                }
-                Swal.fire(error, msg, "error");
-                return Promise.reject(err, res);
-            }
+            if (res && res.statusCode === 404 && onError) return onError(err, res);
+            if (res && res.statusCode === 412 && onError) return onError(err, res);
+            if (res && res.statusCode === 429 && onError) return onError(err, res);
             if (res && res.statusCode === 500) {
                 const defaultMessage = 'Server Error';
                 const msg = res?.body?.message || defaultMessage;
@@ -238,9 +225,9 @@ export const validatePromoCode = (ticketData) => async (dispatch, getState, { ap
         return getRequest(
             null,
             createAction(VALIDATE_PROMO_CODE),
-            `${apiBaseUrl}/api/v1/summits/${summitId}/promo-codes/${currentPromoCode}/apply`,
+            `${apiUrl}`,
             errorHandler
-        )(params)(dispatch).then((res) => {
+        )({})(dispatch).then((res) => {
             dispatch(changeStep(STEP_PERSONAL_INFO));
             dispatch(stopWidgetLoading());
             return res;
@@ -248,10 +235,9 @@ export const validatePromoCode = (ticketData) => async (dispatch, getState, { ap
             dispatch(stopWidgetLoading());
             return Promise.reject(error);
         });
-    } else {        
-        dispatch(changeStep(STEP_PERSONAL_INFO));
     }
 
+    return dispatch(changeStep(STEP_PERSONAL_INFO));
 
 }
 

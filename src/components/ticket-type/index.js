@@ -30,6 +30,7 @@ const TicketTypeComponent = ({
         taxTypes,
         isActive,
         changeForm,
+        formErrors,
         reservation,
         inPersonDisclaimer,
         showMultipleTicketTexts,
@@ -91,6 +92,8 @@ const TicketTypeComponent = ({
     const incrementQuantity = () => setQuantity(quantity + 1);
 
     const decrementQuantity = () => setQuantity(quantity - 1);
+
+    const promoCodeError = Object.keys(formErrors).length > 0 ? formErrors : null;
 
     return (
         <div className={`${styles.outerWrapper} step-wrapper`}>
@@ -193,11 +196,16 @@ const TicketTypeComponent = ({
                                 )}
                             </div>
                             {allowPromoCodes &&
-                                <PromoCodeInput
-                                    promoCode={promoCode}
-                                    applyPromoCode={applyPromoCode}
-                                    showMultipleTicketTexts={showMultipleTicketTexts}
-                                    removePromoCode={removePromoCode} />
+                                <>
+                                    <PromoCodeInput
+                                        promoCode={promoCode}
+                                        applyPromoCode={applyPromoCode}
+                                        showMultipleTicketTexts={showMultipleTicketTexts}
+                                        removePromoCode={removePromoCode} />
+                                    {promoCodeError &&
+                                        Object.values(promoCodeError).map((er) => (<div className={`${styles.promocodeError} alert alert-danger`}>{er}</div>))
+                                    }
+                                </>
                             }
 
                             {showMultipleTicketTexts &&

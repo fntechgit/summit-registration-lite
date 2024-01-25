@@ -319,6 +319,7 @@ const RegistrationLite = (
                                             applyPromoCode={applyPromoCode}
                                             removePromoCode={removePromoCode}
                                             promoCode={promoCode}
+                                            formErrors={formErrors}
                                             changeForm={ticketForm => setFormValues({ ...formValues, ...ticketForm })}
                                             showMultipleTicketTexts={showMultipleTicketTexts}
                                         />
@@ -412,6 +413,9 @@ const RegistrationLite = (
                                 formValues={formValues}
                                 removeReservedTicket={removeReservedTicket}
                                 validatePromoCode={validatePromoCode}
+                                onValidateError={{
+                                    onError: (err, res) => setFormErrors(res.body.errors)
+                                }}
                                 changeStep={changeStep}
                             />
                         )}
