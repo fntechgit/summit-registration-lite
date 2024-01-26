@@ -20,7 +20,10 @@ import {
 import { authErrorHandler } from "openstack-uicore-foundation/lib/utils/actions";
 import Swal from 'sweetalert2';
 import { PaymentProviderFactory } from "./utils/payment-providers/payment-provider-factory";
-import { TICKET_OWNER_MYSELF, TICKET_OWNER_UNASSIGNED } from "./utils/constants";
+import { isFreeOrder, isPrePaidOrder } from './utils/utils';
+import { STEP_PAYMENT, STEP_PERSONAL_INFO } from './utils/constants';
+
+import URI from 'urijs';
 
 export const START_WIDGET_LOADING = 'START_WIDGET_LOADING';
 export const STOP_WIDGET_LOADING = 'STOP_WIDGET_LOADING';
@@ -46,6 +49,10 @@ export const CLEAR_MY_INVITATION = 'CLEAR_MY_INVITATION';
 export const CLEAR_WIDGET_STATE = 'CLEAR_WIDGET_STATE';
 export const UPDATE_CLOCK = 'UPDATE_CLOCK';
 export const LOAD_PROFILE_DATA = 'LOAD_PROFILE_DATA';
+
+export const SET_CURRENT_PROMO_CODE = 'SET_CURRENT_PROMO_CODE';
+export const CLEAR_CURRENT_PROMO_CODE = 'CLEAR_CURRENT_PROMO_CODE';
+export const VALIDATE_PROMO_CODE = 'VALIDATE_PROMO_CODE';
 
 export const startWidgetLoading = createAction(START_WIDGET_LOADING);
 export const stopWidgetLoading = createAction(STOP_WIDGET_LOADING);
@@ -103,11 +110,18 @@ export const getTicketTypesAndTaxes = (summitId) => async (dispatch) => {
 const getTicketTypes = (summitId) => async (dispatch, getState, { apiBaseUrl, getAccessToken }) => {
     try {
         const accessToken = await getAccessToken();
+        // try to get the current promo code
+        const { registrationLiteState: {promoCode : currentPromoCode} } = getState();
 
         let params = {
             expand: 'badge_type,badge_type.access_levels,badge_type.badge_features',
             access_token: accessToken
         };
+
+        if(currentPromoCode !== ''){
+            console.log(`getTicketTypes current promo code is ${currentPromoCode}`)
+            params['filter']= `promo_code==${currentPromoCode}`;
+        }
 
         return getRequest(
             createAction(REQUESTED_TICKET_TYPES),
@@ -143,7 +157,7 @@ const getTaxesTypes = (summitId) => async (dispatch, getState, { apiBaseUrl, get
             `${apiBaseUrl}/api/v1/summits/${summitId}/tax-types`,
             customErrorHandler
         )(params)(dispatch).then((res) => {
-          return res;
+            return res;
         }).catch((error) => {
             return Promise.reject(error);
         })
@@ -154,21 +168,96 @@ const getTaxesTypes = (summitId) => async (dispatch, getState, { apiBaseUrl, get
     }
 }
 
+export const applyPromoCode = (currentPromoCode) => (dispatch, getState) => {
+    try {
+        const { registrationLiteState: { settings: { summitId } } } = getState();
+        // set the current promo code and get ticket types again
+        dispatch(createAction(SET_CURRENT_PROMO_CODE)({currentPromoCode}));
+        dispatch(getTicketTypes(summitId));
+    } catch (e) {
+        return Promise.reject(e);
+    }
+}
+
+export const removePromoCode = () => (dispatch, getState) => {
+    try {
+        const { registrationLiteState: { settings: { summitId } } } = getState();
+        // clear the promo code and get the ticket types again
+        dispatch(createAction(CLEAR_CURRENT_PROMO_CODE)({}));
+        dispatch(getTicketTypes(summitId));
+    } catch (e) {
+        dispatch(createAction(CLEAR_CURRENT_PROMO_CODE)({}));
+        return Promise.reject(e);
+    }
+}
+
+export const validatePromoCode = (ticketData, {onError}) => async (dispatch, getState, { apiBaseUrl, getAccessToken }) => {
+
+    const { registrationLiteState: { settings: { summitId }, promoCode: currentPromoCode } } = getState();    
+
+    if (summitId && currentPromoCode) {
+
+        dispatch(startWidgetLoading());
+
+        const { ticketQuantity, id, sub_type } = ticketData;
+
+        const access_token = await getAccessToken();
+
+        let apiUrl = URI(`${apiBaseUrl}/api/v1/summits/${summitId}/promo-codes/${currentPromoCode}/apply`);
+        apiUrl.addQuery('access_token', access_token);
+        apiUrl.addQuery('filter[]', `ticket_type_id==${id}`);
+        apiUrl.addQuery('filter[]', `ticket_type_qty==${ticketQuantity}`);
+        apiUrl.addQuery('filter[]', `ticket_type_subtype==${sub_type}`);
+
+        const errorHandler = (err, res) => (dispatch, state) => {
+            if (res && res.statusCode === 404 && onError) return onError(err, res);
+            if (res && res.statusCode === 412 && onError) return onError(err, res);
+            if (res && res.statusCode === 429 && onError) return onError(err, res);
+            if (res && res.statusCode === 500) {
+                const defaultMessage = 'Server Error';
+                const msg = res?.body?.message || defaultMessage;
+                Swal.fire("Server Error", msg, "error");
+                return;
+            }
+            return authErrorHandler(err, res)(dispatch, state);
+        };
+
+        return getRequest(
+            null,
+            createAction(VALIDATE_PROMO_CODE),
+            `${apiUrl}`,
+            errorHandler
+        )({})(dispatch).then((res) => {
+            dispatch(changeStep(STEP_PERSONAL_INFO));
+            dispatch(stopWidgetLoading());
+            return res;
+        }).catch((error) => {
+            dispatch(stopWidgetLoading());
+            return Promise.reject(error);
+        });
+    }
+
+    return dispatch(changeStep(STEP_PERSONAL_INFO));
+
+}
+
+
+
 export const reserveTicket = ({ provider, personalInformation, ticket, ticketQuantity }, { onError }) =>
     async (dispatch, getState, { apiBaseUrl, getAccessToken }) => {
         try {
-            const { registrationLiteState: { settings: { summitId } } } = getState();
-            let { firstName, lastName, email, company, promoCode, attendee } = personalInformation;
+            const { registrationLiteState: { settings: { summitId }, promoCode: currentPromoCode  } } = getState();
+            let { firstName, lastName, email, company, attendee } = personalInformation;
             dispatch(startWidgetLoading());
 
             const access_token = await getAccessToken();
 
             const tickets = [...Array(ticketQuantity)].map(() => ({
                 type_id: ticket.id,
-                promo_code: promoCode || null
+                promo_code: currentPromoCode || null
             }));
 
-            if(tickets.length === 1 && attendee) {
+            if (tickets.length === 1 && attendee) {
                 tickets[0].attendee_first_name = attendee.firstName
                 tickets[0].attendee_last_name = attendee.lastName
                 tickets[0].attendee_email = attendee.email
@@ -190,12 +279,14 @@ export const reserveTicket = ({ provider, personalInformation, ticket, ticketQua
             const errorHandler = (err, res) => (dispatch, state) => {
                 if (res && res.statusCode === 412 && onError) return onError(err, res);
                 if (res && res.statusCode === 404) {
-                    const msg = res.body.message;
+                    const defaultMessage = 'Validation Error';
+                    const msg = res?.body?.message || defaultMessage;
                     Swal.fire("Validation Error", msg, "warning");
                     return;
                 }
                 if (res && res.statusCode === 500) {
-                    const msg = res.body.message;
+                    const defaultMessage = 'Server Error';
+                    const msg = res?.body?.message || defaultMessage;
                     Swal.fire("Server Error", msg, "error");
                     return;
                 }
@@ -211,15 +302,18 @@ export const reserveTicket = ({ provider, personalInformation, ticket, ticketQua
                 // entity
             )(params)(dispatch)
                 .then((payload) => {
+                    let {response : reservation} = payload;
                     dispatch(stopWidgetLoading());
-                    payload.response.promo_code = promoCode || null;
+                    reservation.promo_code = currentPromoCode || null;
 
-                    if (!payload.response.amount) {
+                    if(isFreeOrder(reservation) || isPrePaidOrder(reservation))
+                    {
                         dispatch(payTicketWithProvider(provider));
                         return (payload)
                     }
 
-                    dispatch(changeStep(2));
+                    // we need to pay the reservation ...
+                    dispatch(changeStep(STEP_PAYMENT));
                     return (payload)
                 })
                 .catch(e => {
@@ -258,19 +352,19 @@ export const removeReservedTicket = () => async (dispatch, getState, { apiBaseUr
         )(params)(dispatch)
             .then((payload) => {
                 dispatch(stopWidgetLoading());
-                dispatch(changeStep(1));
+                dispatch(changeStep(STEP_PERSONAL_INFO));
                 return (payload)
             })
             .catch(e => {
                 dispatch(createAction(DELETE_RESERVATION_ERROR)(e));
-                dispatch(changeStep(1));
+                dispatch(changeStep(STEP_PERSONAL_INFO));
                 dispatch(stopWidgetLoading());
                 return Promise.reject(e);
             })
     }
     catch (e) {
         dispatch(createAction(DELETE_RESERVATION_ERROR)(e));
-        dispatch(changeStep(1));
+        dispatch(changeStep(STEP_PERSONAL_INFO));
         dispatch(stopWidgetLoading());
         return Promise.reject(e);
     }
@@ -331,7 +425,7 @@ export const getLoginCode = (email, getPasswordlessCode) => async (dispatch, get
 export const passwordlessLogin = (code, loginWithCode) => async (dispatch, getState) => {
     const { registrationLiteState: { passwordless: { email } } } = getState();
     return loginWithCode(code, email).then((res) => {
-       return res;
+        return res;
     }).catch((e) => {
         console.log(e);
         dispatch(createAction(SET_PASSWORDLESS_ERROR)())

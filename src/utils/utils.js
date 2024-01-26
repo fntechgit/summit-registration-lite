@@ -1,3 +1,8 @@
+import { formatCurrency } from '../helpers';
+import { ORDER_PAYMENT_METHOD_OFFLINE, ORDER_STATUS_PAID, TICKET_TYPE_SUBTYPE_PREPAID } from './constants';
+
+import React from 'react';
+
 /**
  * Copyright 2022 OpenStack Foundation
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -44,6 +49,26 @@ export const isEmptyString = (val) => {
 }
 
 export const getTicketTaxes = (ticket, taxes) => {
+    if(isPrePaidTicketType(ticket)) return '';
     const ticketTaxes = taxes.filter(tax => tax.ticket_types.includes(ticket?.id));
     return `${ticketTaxes.length > 0 ? ` plus ${taxes.map(t => t.name).join(' & ')}` : ''}`;
 }
+
+export const hasDiscountApplied = (ticketType) => ticketType?.cost_with_applied_discount > 0;
+
+export const isFreeOrder = (reservation) => reservation.amount === 0 ;
+
+export const isPrePaidOrder = (reservation) => reservation.status === ORDER_STATUS_PAID  && reservation.payment_method === ORDER_PAYMENT_METHOD_OFFLINE;
+
+export const getTicketCost = (ticket, quantity = 1) => {
+    return hasDiscountApplied(ticket) ?
+        <>
+            <s>{formatCurrency(ticket.cost * quantity, { currency: ticket.currency })} {ticket.currency}</s>
+            &nbsp;
+            <>{formatCurrency(ticket.cost_with_applied_discount * quantity, { currency: ticket.currency })} {ticket.currency}</>
+        </>
+        :
+        <>{formatCurrency(ticket.cost * quantity, { currency: ticket.currency })} {ticket.currency}</>
+}
+
+export const isPrePaidTicketType = (ticketType) => ticketType?.sub_type === TICKET_TYPE_SUBTYPE_PREPAID;

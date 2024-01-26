@@ -33,10 +33,13 @@ import {
     REQUESTED_TICKET_TYPES,
     UPDATE_CLOCK,
     LOAD_PROFILE_DATA,
+    SET_CURRENT_PROMO_CODE,
+    CLEAR_CURRENT_PROMO_CODE,
 } from './actions';
 
 import { LOGOUT_USER } from 'openstack-uicore-foundation/lib/security/actions';
 const localNowUtc = Date.now();
+
 
 const DEFAULT_STATE = {
     reservation: null,
@@ -61,6 +64,7 @@ const DEFAULT_STATE = {
         userProfile: null,
     },
     nowUtc: localNowUtc,
+    promoCode: ''
 };
 
 const RegistrationLiteReducer = (state = DEFAULT_STATE, action) => {
@@ -71,8 +75,8 @@ const RegistrationLiteReducer = (state = DEFAULT_STATE, action) => {
         case LOGOUT_USER: {
             return DEFAULT_STATE;
         }
-        case REQUESTED_TICKET_TYPES:{
-            return {...state, requestedTicketTypes: false}
+        case REQUESTED_TICKET_TYPES: {
+            return { ...state, requestedTicketTypes: false }
         }
         case START_WIDGET_LOADING: {
             return { ...state, widgetLoading: true };
@@ -99,7 +103,7 @@ const RegistrationLiteReducer = (state = DEFAULT_STATE, action) => {
                     apiBaseUrl: apiBaseUrl,
                 }
             };
-        case LOAD_PROFILE_DATA:{
+        case LOAD_PROFILE_DATA: {
             return {
                 ...state,
                 settings: {
@@ -135,22 +139,28 @@ const RegistrationLiteReducer = (state = DEFAULT_STATE, action) => {
             return { ...state, reservation }
         }
         case DELETE_RESERVATION_SUCCESS:
-            return { ...state, reservation: null }
         case CLEAR_RESERVATION: {
-            return { ...state, reservation: null }
+            return { ...state, reservation: null, promoCode: '' }
         }
         case PAY_RESERVATION: {
-            return { ...state, checkout: payload.response, reservation: null, userProfile: null, invitation: null };
+            return { ...state, checkout: payload.response, reservation: null, userProfile: null, invitation: null, promoCode: '' };
         }
-        case GET_MY_INVITATION:{
-            return {...state, invitation: payload.response};
+        case GET_MY_INVITATION: {
+            return { ...state, invitation: payload.response };
         }
-        case CLEAR_MY_INVITATION:{
-            return {...state, invitation: null};
+        case CLEAR_MY_INVITATION: {
+            return { ...state, invitation: null };
         }
         case UPDATE_CLOCK: {
             const { timestamp } = payload;
             return { ...state, nowUtc: timestamp };
+        }
+        case CLEAR_CURRENT_PROMO_CODE: {
+            return { ...state, promoCode: ''}
+        }
+        case SET_CURRENT_PROMO_CODE:{
+            const { currentPromoCode } = payload;
+            return { ...state, promoCode: currentPromoCode}
         }
         default: {
             return state;

@@ -27,6 +27,16 @@
   color: red;
 }
 
+.promocodeError {
+  margin-top: 10px;
+  color: red;
+  &::before {
+    font-family: FontAwesome;
+    content: '\f071';
+    margin-right: 5px;
+  }
+}
+
 .taxes {  
   display: inline-flex;
   abbr {

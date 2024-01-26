@@ -14,7 +14,7 @@
 import React, { useState } from 'react';
 import { getTicketMaxQuantity } from '../../helpers';
 import styles from "./index.module.scss";
-import { getTicketTaxes } from '../../utils/utils';
+import { getTicketCost, getTicketTaxes } from '../../utils/utils';
 
 const TicketDropdownComponent = ({ selectedTicket, ticketTypes, taxTypes, onTicketSelect }) => {
     const [active, setActive] = useState(false);
@@ -30,8 +30,9 @@ const TicketDropdownComponent = ({ selectedTicket, ticketTypes, taxTypes, onTick
                 {selectedTicket ?
                     <>
                         <span className={styles.selectedTicket} data-testid="selected-ticket">
-                            {`${selectedTicket.name} - ${selectedTicket.currency_symbol}${selectedTicket.cost} ${selectedTicket.currency}
-                            ${getTicketTaxes(selectedTicket, taxTypes)}`}
+                                {`${selectedTicket.name} - `}
+                                {getTicketCost(selectedTicket)}
+                                {getTicketTaxes(selectedTicket, taxTypes)}
                         </span>
                         <i className="fa fa-chevron-down"></i>
                     </>
@@ -50,17 +51,19 @@ const TicketDropdownComponent = ({ selectedTicket, ticketTypes, taxTypes, onTick
                         const maxQuantity = getTicketMaxQuantity(t);
                         const isTicketSoldOut = maxQuantity < 1;
 
-                            return (
-                                <div key={t.id} className={isTicketSoldOut ? styles.soldOut : ''} onClick={() => {
-                                    if (isTicketSoldOut) return;
-                                    ticketSelect(t);
-                                }}>
-                                    {t.name} -{` `}
-                                    {!isTicketSoldOut && <>{t.currency_symbol}{t.cost} {t.currency}</>}
-                                    {getTicketTaxes(t, taxTypes)}
-                                    {isTicketSoldOut && <>Sold Out</>}
-                                </div>
-                            )
+                        return (
+                            <div key={t.id} className={isTicketSoldOut ? styles.soldOut : ''} onClick={() => {
+                                if (isTicketSoldOut) return;
+                                ticketSelect(t);
+                            }}>
+                                {t.name} -{` `}
+                                {!isTicketSoldOut &&
+                                    getTicketCost(t)
+                                }
+                                {getTicketTaxes(t, taxTypes)}
+                                {isTicketSoldOut && <> Sold Out</>}
+                            </div>
+                        )
                     })}
                 </div>
             }
@@ -68,6 +71,4 @@ const TicketDropdownComponent = ({ selectedTicket, ticketTypes, taxTypes, onTick
     );
 }
 
-
 export default TicketDropdownComponent
-

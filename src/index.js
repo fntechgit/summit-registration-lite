@@ -62,7 +62,7 @@ const filterProps = {
     companyDDLPlaceholder: 'Select a company',
     completedExtraQuestions: (attendeeId) => {
         console.log('evalulate user extra questions...', attendeeId)
-        return true;
+        return Promise.resolve(true);
     },
     handleCompanyError: (err) => console.log('catch error company', err)
 };

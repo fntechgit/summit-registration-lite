@@ -11,7 +11,7 @@
  * limitations under the License.
  **/
 import RawHTML from 'openstack-uicore-foundation/lib/components/raw-html'
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useSpring, config, animated } from "react-spring";
 import { useMeasure } from "react-use";
 import styles from "./index.module.scss";
@@ -20,9 +20,25 @@ import { isInPersonTicketType } from "../../actions";
 import ReactTooltip from 'react-tooltip';
 import { formatCurrency } from '../../helpers';
 import { getTicketMaxQuantity } from '../../helpers';
-import { getTicketTaxes } from '../../utils/utils';
+import { getTicketCost, getTicketTaxes, isPrePaidOrder  } from '../../utils/utils';
 
-const TicketTypeComponent = ({ ticketTypes, taxTypes, isActive, changeForm, reservation, inPersonDisclaimer, showMultipleTicketTexts }) => {
+import PromoCodeInput from '../promocode-input';
+
+const TicketTypeComponent = ({
+        allowedTicketTypes,
+        originalTicketTypes, // these are the original ones
+        taxTypes,
+        isActive,
+        changeForm,
+        formErrors,
+        reservation,
+        inPersonDisclaimer,
+        showMultipleTicketTexts,
+        allowPromoCodes,
+        applyPromoCode,
+        removePromoCode,
+        promoCode,
+    }) => {
     const [ticket, setTicket] = useState(null);
     const [quantity, setQuantity] = useState(1);
 
@@ -42,13 +58,31 @@ const TicketTypeComponent = ({ ticketTypes, taxTypes, isActive, changeForm, rese
 
     useEffect(() => {
         if (reservation && reservation.tickets?.length > 0) {
-            setTicket(ticketTypes.find(t => t.id === reservation.tickets[0].ticket_type_id))
+            setTicket(allowedTicketTypes.find(t => t.id === reservation.tickets[0].ticket_type_id))
         }
     }, [])
 
     useEffect(() => {
         changeForm({ ticketType: ticket, ticketQuantity: quantity });
     }, [ticket, quantity])
+
+    useEffect(() => {
+        // if the promo code had changed ( set or not set)
+        // try to find the updated ticket from the original ticket types collection from api
+        // and update the current ticket that exist on component state
+        // bc a discount could be applied to the current selected ticket type
+        if(!ticket) return;
+        const updatedCurrentTicket = originalTicketTypes.find(t => t?.id === ticket.id);
+        if (updatedCurrentTicket) {
+            changeForm({ ticketType: updatedCurrentTicket })
+            setTicket(updatedCurrentTicket);
+        }
+    }, [promoCode, originalTicketTypes])
+
+    const isPrePaidReservation = useMemo(
+        () => reservation ? isPrePaidOrder(reservation) : false,
+        [reservation]
+    );
 
     const handleTicketChange = (t) => {
         setTicket(t);
@@ -58,6 +92,8 @@ const TicketTypeComponent = ({ ticketTypes, taxTypes, isActive, changeForm, rese
     const incrementQuantity = () => setQuantity(quantity + 1);
 
     const decrementQuantity = () => setQuantity(quantity - 1);
+
+    const promoCodeError = Object.keys(formErrors).length > 0 ? formErrors : null;
 
     return (
         <div className={`${styles.outerWrapper} step-wrapper`}>
@@ -71,8 +107,11 @@ const TicketTypeComponent = ({ ticketTypes, taxTypes, isActive, changeForm, rese
                             <span>
                                 {ticket && (
                                     <>
-                                        {`${ticket.name} (${quantity}): ${formatCurrency(ticket.cost * quantity, { currency: ticket.currency })} ${ticket.currency} 
-                                        ${getTicketTaxes(ticket, taxTypes)}`}
+                                        {`${ticket.name} (${quantity}): `}
+                                        <>
+                                            {getTicketCost(ticket, quantity)}
+                                        </>
+                                        {`${getTicketTaxes(ticket, taxTypes)}`}
 
                                         {!isActive && reservation?.discount_amount > 0 && (
                                             <>
@@ -80,19 +119,21 @@ const TicketTypeComponent = ({ ticketTypes, taxTypes, isActive, changeForm, rese
                                                 <span className={styles.promoCode}>
                                                     Promo code&nbsp;<abbr title={reservation.promo_code}>{reservation.promo_code}</abbr>&nbsp;applied:
                                                 </span>
-                                                <span className={styles.discount}>
-                                                    {` - ${formatCurrency(reservation.discount_amount, { currency: ticket.currency })} ${ticket.currency}`}
-                                                </span>
+                                                {!isPrePaidReservation &&
+                                                    <span className={styles.discount}>
+                                                        {` - ${formatCurrency(reservation.discount_amount, { currency: ticket.currency })} ${ticket.currency}`}
+                                                    </span>
+                                                }
                                             </>
                                         )}
 
-                                        {!isActive && reservation &&(
+                                        {!isActive && reservation && !isPrePaidReservation && (
                                             <span className={styles.promo}>
-                                                Subtotal: {`${ticket?.currency_symbol} ${((reservation?.raw_amount_in_cents - reservation?.discount_amount_in_cents)/100).toFixed(2)} ${ticket?.currency}`}
+                                                Subtotal: {`${ticket?.currency_symbol} ${((reservation?.raw_amount_in_cents - reservation?.discount_amount_in_cents) / 100).toFixed(2)} ${ticket?.currency}`}
                                             </span>
                                         )}
 
-                                        {!isActive && reservation?.taxes_amount > 0 && (
+                                        {!isActive && reservation?.taxes_amount > 0 && !isPrePaidReservation && (
                                             <>
                                                 {reservation?.applied_taxes.map((tax) => {
                                                     return (
@@ -109,7 +150,7 @@ const TicketTypeComponent = ({ ticketTypes, taxTypes, isActive, changeForm, rese
                                                 })}
                                             </>
                                         )}
-                                        {!isActive && reservation && (
+                                        {!isActive && reservation && !isPrePaidReservation && (
                                             <>
                                                 <br />
                                                 Total: {`${formatCurrency(reservation.amount, { currency: ticket.currency })} ${ticket.currency}`}
@@ -128,30 +169,45 @@ const TicketTypeComponent = ({ ticketTypes, taxTypes, isActive, changeForm, rese
                             <div className={styles.form}>
                                 <div className={styles.dropdown}>
                                     <TicketDropdownComponent selectedTicket={ticket}
-                                                             ticketTypes={ticketTypes}
-                                                             taxTypes={taxTypes}
-                                                             onTicketSelect={handleTicketChange}
+                                        ticketTypes={allowedTicketTypes}
+                                        taxTypes={taxTypes}
+                                        onTicketSelect={handleTicketChange}
                                     />
                                 </div>
 
                                 {ticket && (
-                                    <div className={styles.quantity}>
-                                        <div className="input-group">
-                                            <span className="input-group-btn">
-                                                <button aria-label="remove a ticket" className="btn btn-default" onClick={decrementQuantity} disabled={maxQuantity === 0 || quantity === minQuantity}>
-                                                    <i className="fa fa-minus"></i>
-                                                </button>
-                                            </span>
-                                            <input className="form-control" aria-label="ticket quanity" name="ticket_quantity" type="text" value={quantity} readOnly={true} disabled={maxQuantity === 0} />
-                                            <span className="input-group-btn">
-                                                <button aria-label="add a ticket" className="btn btn-default" onClick={incrementQuantity} disabled={maxQuantity === 0 || quantity >= maxQuantity}>
-                                                    <i className="glyphicon glyphicon-plus" />
-                                                </button>
-                                            </span>
+                                    <>
+                                        <div className={styles.quantity}>
+                                            <div className="input-group">
+                                                <span className="input-group-btn">
+                                                    <button aria-label="remove a ticket" className="btn btn-default" onClick={decrementQuantity} disabled={maxQuantity === 0 || quantity === minQuantity}>
+                                                        <i className="fa fa-minus"></i>
+                                                    </button>
+                                                </span>
+                                                <input className="form-control" aria-label="ticket quanity" name="ticket_quantity" type="text" value={quantity} readOnly={true} disabled={maxQuantity === 0} />
+                                                <span className="input-group-btn">
+                                                    <button aria-label="add a ticket" className="btn btn-default" onClick={incrementQuantity} disabled={maxQuantity === 0 || quantity >= maxQuantity}>
+                                                        <i className="glyphicon glyphicon-plus" />
+                                                    </button>
+                                                </span>
+                                            </div>
                                         </div>
-                                    </div>
+                                    </>
                                 )}
                             </div>
+                            {allowPromoCodes &&
+                                <>
+                                    <PromoCodeInput
+                                        promoCode={promoCode}
+                                        applyPromoCode={applyPromoCode}
+                                        showMultipleTicketTexts={showMultipleTicketTexts}
+                                        removePromoCode={removePromoCode} />
+                                    {promoCodeError &&
+                                        Object.values(promoCodeError).map((er) => (<div className={`${styles.promocodeError} alert alert-danger`}>{er}</div>))
+                                    }
+                                </>
+                            }
+
                             {showMultipleTicketTexts &&
                                 <a className={styles.moreInfo} data-tip data-for="ticket-quantity-info">
                                     <i className="glyphicon glyphicon-info-sign" aria-hidden="true" />{` `}

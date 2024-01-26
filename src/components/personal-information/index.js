@@ -20,7 +20,13 @@ import ReactTooltip from 'react-tooltip';
 import { formatErrorMessage } from '../../helpers';
 
 import styles from "./index.module.scss";
-import { EMAIL_REGEXP, TICKET_OWNER_MYSELF, TICKET_OWNER_SOMEONE, TICKET_OWNER_UNASSIGNED } from '../../utils/constants';
+import {
+    EMAIL_REGEXP,
+    TICKET_OWNER_MYSELF,
+    TICKET_OWNER_SOMEONE,
+    TICKET_OWNER_UNASSIGNED
+} from '../../utils/constants';
+import { isPrePaidTicketType } from '../../utils/utils';
 
 const PersonalInfoComponent = ({
     isActive,
@@ -32,8 +38,6 @@ const PersonalInfoComponent = ({
     formValues,
     formErrors = {},
     invitation,
-    showMultipleTicketTexts,
-    allowPromoCodes,
     showCompanyInput = true,
     companyDDLPlaceholder,
     showCompanyInputDefaultOptions,
@@ -47,7 +51,7 @@ const PersonalInfoComponent = ({
     const [ticketOwnerError, setTicketOwnerError] = useState(false);
 
     // if there's only one ticket on the order and there is no invitation available, display the radio button to assign the ticket
-    const shouldDisplayTicketAssignment = () => formValues.ticketQuantity === 1 && !invitation;
+    const shouldDisplayTicketAssignment = () => formValues.ticketQuantity === 1 && !invitation && !isPrePaidTicketType(formValues.ticketType);
 
     const radioListOptions = [
         {label: "Myself", value: TICKET_OWNER_MYSELF},
@@ -61,7 +65,6 @@ const PersonalInfoComponent = ({
             lastName: initialLastName,
             email: userProfile.email || '',
             company: { id: null, name: '' },
-            promoCode: '',
             attendee: {
                 firstName: '',
                 lastName: '',
@@ -244,17 +247,8 @@ const PersonalInfoComponent = ({
                                     </div>
                                 }
 
-                                {allowPromoCodes &&
-                                    <div className={styles.fieldWrapper}>
-                                        <div className={styles.inputWrapper}>
-                                            <input type="text" placeholder="Promo code" {...register("promoCode")} />
-                                        </div>
-                                    </div>
-                                }
-
                                 {shouldDisplayTicketAssignment() &&
                                     <>
-                                        <br/>
                                         <div className={styles.fieldWrapperRadio}>
                                             <label>Ticket is for:</label>
                                             <RadioList
@@ -305,18 +299,6 @@ const PersonalInfoComponent = ({
                                 }
 
                             </form>
-
-                            {allowPromoCodes && showMultipleTicketTexts &&
-                                <a className={styles.moreInfo} data-tip data-for="promo-code-info">
-                                    <i className="glyphicon glyphicon-info-sign" aria-hidden="true" />{` `}
-                                    Have multiple promo codes?
-                                </a>
-                            }
-                            <ReactTooltip id="promo-code-info">
-                                <div className={styles.moreInfoTooltip}>
-                                    Promo code will be applied to all tickets in this order.  If you wish to utilize more than one promo code, simply place another order after you complete this registration order. Only one promo code can be applied per order.
-                                </div>
-                            </ReactTooltip>
 
                             {formErrors.length > 0 && (
                                 <div className={`${styles.formErrors} alert alert-danger`}>
