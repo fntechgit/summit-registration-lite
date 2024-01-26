@@ -30,7 +30,11 @@
 .promocodeError {
   margin-top: 10px;
   color: red;
-  font-weight: bold;
+  &::before {
+    font-family: FontAwesome;
+    content: '\f071';
+    margin-right: 5px;
+  }
 }
 
 .taxes {  
