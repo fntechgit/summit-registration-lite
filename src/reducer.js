@@ -64,8 +64,7 @@ const DEFAULT_STATE = {
         userProfile: null,
     },
     nowUtc: localNowUtc,
-    promoCode: '',
-    promoCodeError: {}
+    promoCode: ''
 };
 
 const RegistrationLiteReducer = (state = DEFAULT_STATE, action) => {
@@ -157,7 +156,7 @@ const RegistrationLiteReducer = (state = DEFAULT_STATE, action) => {
             return { ...state, nowUtc: timestamp };
         }
         case CLEAR_CURRENT_PROMO_CODE: {
-            return { ...state, promoCode: '', promoCodeError: {}}
+            return { ...state, promoCode: ''}
         }
         case SET_CURRENT_PROMO_CODE:{
             const { currentPromoCode } = payload;
