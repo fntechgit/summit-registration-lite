@@ -65,6 +65,7 @@ const DEFAULT_STATE = {
     },
     nowUtc: localNowUtc,
     promoCode: '',
+    promoCodeError: {}
 };
 
 const RegistrationLiteReducer = (state = DEFAULT_STATE, action) => {
@@ -139,12 +140,11 @@ const RegistrationLiteReducer = (state = DEFAULT_STATE, action) => {
             return { ...state, reservation }
         }
         case DELETE_RESERVATION_SUCCESS:
-            return { ...state, reservation: null }
         case CLEAR_RESERVATION: {
-            return { ...state, reservation: null }
+            return { ...state, reservation: null, promoCode: '' }
         }
         case PAY_RESERVATION: {
-            return { ...state, checkout: payload.response, reservation: null, userProfile: null, invitation: null };
+            return { ...state, checkout: payload.response, reservation: null, userProfile: null, invitation: null, promoCode: '' };
         }
         case GET_MY_INVITATION: {
             return { ...state, invitation: payload.response };
@@ -157,7 +157,7 @@ const RegistrationLiteReducer = (state = DEFAULT_STATE, action) => {
             return { ...state, nowUtc: timestamp };
         }
         case CLEAR_CURRENT_PROMO_CODE: {
-            return { ...state, promoCode: ''}
+            return { ...state, promoCode: '', promoCodeError: {}}
         }
         case SET_CURRENT_PROMO_CODE:{
             const { currentPromoCode } = payload;

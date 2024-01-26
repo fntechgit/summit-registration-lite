@@ -317,7 +317,7 @@ const RegistrationLite = (
                                             isActive={step === STEP_SELECT_TICKET_TYPE}
                                             allowPromoCodes={allowPromoCodes}
                                             applyPromoCode={applyPromoCode}
-                                            removePromoCode={removePromoCode}
+                                            removePromoCode={() => {setFormErrors({});removePromoCode()}}
                                             promoCode={promoCode}
                                             formErrors={formErrors}
                                             changeForm={ticketForm => setFormValues({ ...formValues, ...ticketForm })}
