@@ -20,12 +20,13 @@ import styles from "./index.module.scss";
 import FNidLogo from '../../assets/FNid_WHT_logo_rgb.svg';
 import FNidLogoDark from '../../assets/FNid_BLK_logo_rgb.svg';
 
-const PasswordlessLoginComponent = ({ 
-        email, codeLength, passwordlessLogin, loginWithCode, codeError, goToLogin, 
+const PasswordlessLoginComponent = ({
+        email, codeLength, passwordlessLogin, loginWithCode, codeError, goToLogin,
         getLoginCode, getPasswordlessCode, logoLight, logoDark }) => {
 
     const [otpCode, setOtpCode] = useState('');
     const [otpError, setOtpError] = useState(false)
+    const [codeSent, setCodeSent] = useState(false);
 
     const tryPasswordlessLogin = (code) => {
         if (code.length === codeLength) {
@@ -37,7 +38,11 @@ const PasswordlessLoginComponent = ({
     }
 
     const resendCode = () => {
-        getLoginCode(email, getPasswordlessCode);
+        getLoginCode(email, getPasswordlessCode)
+            .then(() => {
+                setCodeSent(true);
+                setTimeout(() => setCodeSent(false), 3000);
+            });
     }
 
     const handleSubmit = (e) => {
@@ -48,6 +53,9 @@ const PasswordlessLoginComponent = ({
     return (
         <div className={`${styles.passwordlessWrapper} step-wrapper`}>
             <>
+                {codeSent &&
+                <div className={styles.codeSent}>Code has been resent.</div>
+                }
                 <div className={`${styles.innerWrapper}`}>
                     {/* Only one logo is displayed based on data-theme through CSS */}
                     <img src={logoDark || FNidLogoDark} alt="FNid" className={`${styles.logo} ${styles.logoDark}`} />
@@ -89,7 +97,7 @@ const PasswordlessLoginComponent = ({
                     </div>
                 </div>
                 <div className={styles.resend}>
-                    Didn’t receive it? Check your spam/junk folder, or <span className={styles.link} onClick={() => resendCode()} data-testid="resend">resend email</span> now.
+                    Didn’t receive it? Check your spam/junk folder, or <span className={styles.link} onClick={() => resendCode()} data-testid="resend">resend code</span> now.
                 </div>
             </>
         </div>

@@ -21,8 +21,8 @@ import ProfileData from './profile.json';
 
 const filterProps = {
     authUser: (provider) => console.log('login with ', provider),
-    getPasswordlessCode: (email) => console.log('get code', email),
-    loginWithCode: (code) => console.log('login with code', code),
+    getPasswordlessCode: (email) => Promise.resolve({response: { otp_length: 5}}),
+    loginWithCode: (code) => Promise.reject('eerror'),
     getAccessToken: () => process.env.ACCESS_TOKEN,
     closeWidget: () => console.log('close widget'),
     goToExtraQuestions: (attendeeId) => console.log('extra questions required for attendee: ', attendeeId),
@@ -32,7 +32,7 @@ const filterProps = {
     loading: false,
     apiBaseUrl: process.env.API_BASE_URL,
     summitData: SummitData,
-    profileData: ProfileData /* or null */,
+    profileData: null, //ProfileData /* or null */,
     ticketOwned: false,
     ownedTickets: [],
     // ownedTickets: [
