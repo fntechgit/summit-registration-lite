@@ -54,7 +54,7 @@ export const getTicketTaxes = (ticket, taxes) => {
     return `${ticketTaxes.length > 0 ? ` plus ${taxes.map(t => t.name).join(' & ')}` : ''}`;
 }
 
-export const hasDiscountApplied = (ticketType) => ticketType?.cost_with_applied_discount > 0;
+export const hasDiscountApplied = (ticketType) => ticketType.hasOwnProperty('cost_with_applied_discount') && ticketType.cost !== ticketType?.cost_with_applied_discount;
 
 export const isFreeOrder = (reservation) => reservation.amount === 0 ;
 
