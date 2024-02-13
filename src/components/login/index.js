@@ -43,17 +43,17 @@ const LoginComponent = ({
             getLoginCode(email, getPasswordlessCode);
         }
     }
-    
+
     return (
         <div className={`${styles.loginWrapper}`}>
             <>
                 <div className={`${styles.innerWrapper}`}>
                     <div className={styles.loginCode}>
                         {summitData?.secondary_logo && <img className="login-logo" src={`${summitData?.secondary_logo}`} />}
-                        <div class={styles.title}>{title}</div>
+                        <div className={styles.title}>{title}</div>
                         <div className={styles.input}>
                             <input placeholder="youremail@example.com" value={email} onChange={e => setEmail(e.target.value)}
-                                   onKeyPress={(ev) => ev.key === 'Enter' ? loginCode() : null} data-testid="email-input" />                           
+                                   onKeyPress={(ev) => ev.key === 'Enter' ? loginCode() : null} data-testid="email-input" />
                         </div>
                         <div onClick={() => loginCode()} data-testid="email-button"
                             className={`${styles.button} ${styles.email_login_button} ${email === '' ? `${styles.pointerDisabled} ${styles.buttonDisabled}` : `${styles.primaryEmailButton}`}`}>
