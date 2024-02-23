@@ -31,6 +31,8 @@
   }
   button {
       margin: 10px 5px 0 5px;
+      background-color: var(--color_input_button_background_accent) !important;
+      color: var(--color_input_button_background_accent_text) !important;
   }
   span {
       font-size: 14px;
