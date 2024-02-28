@@ -47,7 +47,7 @@
   div {
     padding: 5px;
     &:hover {
-      background-color: var(--color_primary);
+      background-color: var(--color_input_background_color);
       color: var(--color_input_text_color);
     }
   }
