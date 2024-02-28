@@ -41,12 +41,13 @@
   border-radius: 5px;
   width: 100%;  
   border: 1px solid var(--color_input_border_color);
-  color: var(--color_input_text_color);
-  background-color: var(--color_input_background_color);
   cursor: pointer;
   div {
     padding: 5px;
+    color: var(--color_input_text_color);
+    background-color: var(--color_input_background_color);
     &:hover {
+      border-radius: 5px;
       background-color: var(--color_accent);
       color: var(--color_text_light);
     }
