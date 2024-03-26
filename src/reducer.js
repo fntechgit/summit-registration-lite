@@ -55,6 +55,7 @@ const DEFAULT_STATE = {
     ticketTypes: [],
     // added this flag to really know if we requested or not the ticket types collection
     // ( empty bc initial value or empty bc api empty response)
+    allowedTicketTypes: null,
     requestedTicketTypes: false,
     taxTypes: [],
     invitation: null,
@@ -153,7 +154,8 @@ const RegistrationLiteReducer = (state = DEFAULT_STATE, action) => {
         }
         case UPDATE_CLOCK: {
             const { timestamp } = payload;
-            return { ...state, nowUtc: timestamp };
+            const allowedTicketTypes = state.requestedTicketTypes ? state.ticketTypes.filter((tt) => (tt.sales_start_date === null && tt.sales_end_date === null) || (timestamp >= tt.sales_start_date && timestamp <= tt.sales_end_date)) : null;
+            return { ...state, nowUtc: timestamp, allowedTicketTypes };
         }
         case CLEAR_CURRENT_PROMO_CODE: {
             return { ...state, promoCode: ''}

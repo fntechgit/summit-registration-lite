@@ -149,6 +149,7 @@ const RegistrationLite = (
         removePromoCode,
         applyPromoCode,
         validatePromoCode,
+        allowedTicketTypes,
         ...rest
     }) => {
 
@@ -163,6 +164,7 @@ const RegistrationLite = (
     });
 
     const [ticketTaxesError, setTicketTaxesError] = useState(false);
+    const [ticketDataLoaded, setTicketDataLoaded] = useState(false);
 
     const { values: formValues, errors: formErrors } = registrationForm;
 
@@ -186,8 +188,9 @@ const RegistrationLite = (
     }, [])
 
     useEffect(() => {
+        setTicketDataLoaded(false);
         if (summitData && profileData) {
-            getMyInvitation(summitData.id).catch(e => console.log(e)).finally(() => handleGetTicketTypesAndTaxes(summitData.id));
+            getMyInvitation(summitData.id).catch(e => console.log(e)).finally(() => {handleGetTicketTypesAndTaxes(summitData.id)});
         }
     }, [summitData, profileData]);
 
@@ -234,8 +237,9 @@ const RegistrationLite = (
 
     const handleGetTicketTypesAndTaxes = (summitId) => {
         setTicketTaxesError(false);
-        getTicketTypesAndTaxes(summitId).
-            then()
+        setTicketDataLoaded(false);
+        getTicketTypesAndTaxes(summitId)
+            .then()
             .catch((error) => {
                 let { message } = error;
                 if(message && (message.includes(AUTH_ERROR_MISSING_AUTH_INFO) ||
@@ -245,7 +249,12 @@ const RegistrationLite = (
                     clearWidgetState();
                     return authErrorCallback(error);
                 }
+                setTicketDataLoaded(true);
                 setTicketTaxesError(true);
+            })
+            .finally(() => {
+                console.log('checking... finally load...', ticketTypes);
+                setTicketDataLoaded(true);
             });
     }
 
@@ -253,8 +262,6 @@ const RegistrationLite = (
     // just dont render
     if(ticketTypes.length === 0 && !requestedTicketTypes && profileData) return null;
 
-    const allowedTicketTypes = ticketTypes.filter((tt) => (tt.sales_start_date === null && tt.sales_end_date === null) ||
-        (nowUtc >= tt.sales_start_date && nowUtc <= tt.sales_end_date));
 
     return (
         <div id={`${styles.modal}`} className="modal is-active">
@@ -269,11 +276,11 @@ const RegistrationLite = (
                             <i className="fa fa-close" aria-label="close" onClick={handleCloseClick}></i>
                         </div>
 
-                        {ticketTaxesError && profileData && <TicketTaxesError ticketTaxesErrorMessage={ticketTaxesErrorMessage} retryTicketTaxes={() => handleGetTicketTypesAndTaxes(summitData?.id)} />}
+                        {profileData && ticketDataLoaded && ticketTaxesError && <TicketTaxesError ticketTaxesErrorMessage={ticketTaxesErrorMessage} retryTicketTaxes={() => handleGetTicketTypesAndTaxes(summitData?.id)} />}
 
-                        {!ticketTaxesError && profileData && allowedTicketTypes.length === 0 && requestedTicketTypes && step !== 3  &&<NoAllowedTickets noAllowedTicketsMessage={noAllowedTicketsMessage} />}
+                        {profileData && ticketDataLoaded && !ticketTaxesError && allowedTicketTypes?.length === 0 && step !== 3  && <NoAllowedTickets noAllowedTicketsMessage={noAllowedTicketsMessage} />}
 
-                        {!ticketTaxesError &&
+                        {ticketDataLoaded && !ticketTaxesError &&
                             <div className={styles.stepsWrapper}>
                                 {!profileData && !passwordlessCodeSent && (
                                     <LoginComponent
@@ -303,7 +310,7 @@ const RegistrationLite = (
                                     />
                                 )}
 
-                                {profileData && step !== 3 && allowedTicketTypes.length > 0 && (
+                                {profileData && step !== 3 && allowedTicketTypes?.length > 0 && (
                                     <>
                                         { ownedTickets.length > 0 &&
                                             <TicketOwnedComponent ownedTickets={ownedTickets} />}
@@ -406,7 +413,7 @@ const RegistrationLite = (
                             </div>
                         }
 
-                        {!ticketTaxesError && profileData && step !== 3 && allowedTicketTypes.length > 0 && (
+                        {ticketDataLoaded && !ticketTaxesError && profileData && step !== 3 && allowedTicketTypes?.length > 0 && (
                             <ButtonBarComponent
                                 step={step}
                                 inPersonDisclaimer={inPersonDisclaimer}
@@ -433,6 +440,7 @@ const mapStateToProps = ({ registrationLiteState }) => ({
     userProfile: registrationLiteState.settings.userProfile,
     checkout: registrationLiteState.checkout,
     ticketTypes: registrationLiteState.ticketTypes,
+    allowedTicketTypes: registrationLiteState.allowedTicketTypes,
     requestedTicketTypes: registrationLiteState.requestedTicketTypes,
     taxTypes: registrationLiteState.taxTypes,
     step: registrationLiteState.step,
