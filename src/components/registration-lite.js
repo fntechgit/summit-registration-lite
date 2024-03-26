@@ -253,7 +253,6 @@ const RegistrationLite = (
                 setTicketTaxesError(true);
             })
             .finally(() => {
-                console.log('checking... finally load...', ticketTypes);
                 setTicketDataLoaded(true);
             });
     }
