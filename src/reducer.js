@@ -38,7 +38,9 @@ import {
 } from './actions';
 
 import { LOGOUT_USER } from 'openstack-uicore-foundation/lib/security/actions';
-const localNowUtc = Date.now();
+import moment from 'moment';
+
+const localNowUtc = moment().unix();
 
 
 const DEFAULT_STATE = {
@@ -55,7 +57,6 @@ const DEFAULT_STATE = {
     ticketTypes: [],
     // added this flag to really know if we requested or not the ticket types collection
     // ( empty bc initial value or empty bc api empty response)
-    allowedTicketTypes: null,
     requestedTicketTypes: false,
     taxTypes: [],
     invitation: null,
@@ -154,8 +155,7 @@ const RegistrationLiteReducer = (state = DEFAULT_STATE, action) => {
         }
         case UPDATE_CLOCK: {
             const { timestamp } = payload;
-            const allowedTicketTypes = state.requestedTicketTypes ? state.ticketTypes.filter((tt) => (tt.sales_start_date === null && tt.sales_end_date === null) || (timestamp >= tt.sales_start_date && timestamp <= tt.sales_end_date)) : null;
-            return { ...state, nowUtc: timestamp, allowedTicketTypes };
+            return { ...state, nowUtc: timestamp };
         }
         case CLEAR_CURRENT_PROMO_CODE: {
             return { ...state, promoCode: ''}
