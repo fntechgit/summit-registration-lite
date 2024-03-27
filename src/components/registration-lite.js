@@ -259,7 +259,7 @@ const RegistrationLite = (
     // just dont render
     if(ticketTypes.length === 0 && !requestedTicketTypes && profileData) return null;
 
-    const allowedTicketTypes = ticketTypes.filter((tt) => (tt.sales_start_date === null && tt.sales_end_date === null) || (nowUtc >= tt.sales_start_date && nowUtc <= tt.sales_end_date));
+    const allowedTicketTypes = ticketTaxesLoaded ? ticketTypes.filter((tt) => (tt.sales_start_date === null && tt.sales_end_date === null) || (nowUtc >= tt.sales_start_date && nowUtc <= tt.sales_end_date)) : [];
 
     return (
         <div id={`${styles.modal}`} className="modal is-active">
