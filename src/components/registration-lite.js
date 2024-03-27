@@ -274,7 +274,7 @@ const RegistrationLite = (
                             <i className="fa fa-close" aria-label="close" onClick={handleCloseClick}></i>
                         </div>
 
-                        {profileData && ticketTaxesLoaded && ticketTaxesError && <TicketTaxesError ticketTaxesErrorMessage={ticketTaxesErrorMessage} retryTicketTaxes={() => handleGetTicketTypesAndTaxes(summitData?.id)} />}
+                        {profileData && ticketTaxesError && <TicketTaxesError ticketTaxesErrorMessage={ticketTaxesErrorMessage} retryTicketTaxes={() => handleGetTicketTypesAndTaxes(summitData?.id)} />}
 
                         {profileData && ticketTaxesLoaded && !ticketTaxesError && allowedTicketTypes.length === 0 && step !== 3  && <NoAllowedTickets noAllowedTicketsMessage={noAllowedTicketsMessage} />}
 
