@@ -278,7 +278,7 @@ const RegistrationLite = (
 
                         {profileData && ticketTaxesLoaded && !ticketTaxesError && allowedTicketTypes.length === 0 && step !== 3  && <NoAllowedTickets noAllowedTicketsMessage={noAllowedTicketsMessage} />}
 
-                        {ticketTaxesLoaded && !ticketTaxesError &&
+                        {!ticketTaxesError &&
                             <div className={styles.stepsWrapper}>
                                 {!profileData && !passwordlessCodeSent && (
                                     <LoginComponent
