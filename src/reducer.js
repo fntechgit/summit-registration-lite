@@ -38,7 +38,9 @@ import {
 } from './actions';
 
 import { LOGOUT_USER } from 'openstack-uicore-foundation/lib/security/actions';
-const localNowUtc = Date.now();
+import moment from 'moment';
+
+const localNowUtc = moment().unix();
 
 
 const DEFAULT_STATE = {

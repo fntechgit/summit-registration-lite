@@ -163,6 +163,7 @@ const RegistrationLite = (
     });
 
     const [ticketTaxesError, setTicketTaxesError] = useState(false);
+    const [ticketTaxesLoaded, setTicketTaxesLoaded] = useState(false);
 
     const { values: formValues, errors: formErrors } = registrationForm;
 
@@ -233,9 +234,9 @@ const RegistrationLite = (
     };
 
     const handleGetTicketTypesAndTaxes = (summitId) => {
-        setTicketTaxesError(false);
-        getTicketTypesAndTaxes(summitId).
-            then()
+        setTicketTaxesError(false);        
+        getTicketTypesAndTaxes(summitId)
+            .then()
             .catch((error) => {
                 let { message } = error;
                 if(message && (message.includes(AUTH_ERROR_MISSING_AUTH_INFO) ||
@@ -246,6 +247,9 @@ const RegistrationLite = (
                     return authErrorCallback(error);
                 }
                 setTicketTaxesError(true);
+            })
+            .finally(() => {
+                setTicketTaxesLoaded(true);
             });
     }
 
@@ -253,8 +257,7 @@ const RegistrationLite = (
     // just dont render
     if(ticketTypes.length === 0 && !requestedTicketTypes && profileData) return null;
 
-    const allowedTicketTypes = ticketTypes.filter((tt) => (tt.sales_start_date === null && tt.sales_end_date === null) ||
-        (nowUtc >= tt.sales_start_date && nowUtc <= tt.sales_end_date));
+    const allowedTicketTypes = ticketTaxesLoaded ? ticketTypes.filter((tt) => (tt.sales_start_date === null && tt.sales_end_date === null) || (nowUtc >= tt.sales_start_date && nowUtc <= tt.sales_end_date)) : [];
 
     return (
         <div id={`${styles.modal}`} className="modal is-active">
@@ -269,9 +272,9 @@ const RegistrationLite = (
                             <i className="fa fa-close" aria-label="close" onClick={handleCloseClick}></i>
                         </div>
 
-                        {ticketTaxesError && profileData && <TicketTaxesError ticketTaxesErrorMessage={ticketTaxesErrorMessage} retryTicketTaxes={() => handleGetTicketTypesAndTaxes(summitData?.id)} />}
+                        {profileData && ticketTaxesError && <TicketTaxesError ticketTaxesErrorMessage={ticketTaxesErrorMessage} retryTicketTaxes={() => handleGetTicketTypesAndTaxes(summitData?.id)} />}
 
-                        {!ticketTaxesError && profileData && allowedTicketTypes.length === 0 && requestedTicketTypes && step !== 3  &&<NoAllowedTickets noAllowedTicketsMessage={noAllowedTicketsMessage} />}
+                        {profileData && ticketTaxesLoaded && !ticketTaxesError && allowedTicketTypes.length === 0 && step !== 3  && <NoAllowedTickets noAllowedTicketsMessage={noAllowedTicketsMessage} />}
 
                         {!ticketTaxesError &&
                             <div className={styles.stepsWrapper}>
@@ -406,7 +409,7 @@ const RegistrationLite = (
                             </div>
                         }
 
-                        {!ticketTaxesError && profileData && step !== 3 && allowedTicketTypes.length > 0 && (
+                        {ticketTaxesLoaded && !ticketTaxesError && profileData && step !== 3 && allowedTicketTypes.length > 0 && (
                             <ButtonBarComponent
                                 step={step}
                                 inPersonDisclaimer={inPersonDisclaimer}
