@@ -194,7 +194,7 @@ const RegistrationLite = (
 
     useEffect(() => {
         // check if there's personal information data and no ticket data to reset widget
-        if (step > 0 && !registrationForm.values?.ticketType) {
+        if (step > 0 && !registrationForm.values?.ticketType && !reservation) {
             changeStep(0);
         }
     }, [registrationForm.values, step]);
@@ -234,7 +234,8 @@ const RegistrationLite = (
     };
 
     const handleGetTicketTypesAndTaxes = (summitId) => {
-        setTicketTaxesError(false);        
+        setTicketTaxesError(false);
+        setTicketTaxesLoaded(false);
         getTicketTypesAndTaxes(summitId)
             .then()
             .catch((error) => {
@@ -306,7 +307,7 @@ const RegistrationLite = (
                                     />
                                 )}
 
-                                {profileData && step !== 3 && allowedTicketTypes.length > 0 && (
+                                {profileData && step !== 3 && (
                                     <>
                                         { ownedTickets.length > 0 &&
                                             <TicketOwnedComponent ownedTickets={ownedTickets} />}

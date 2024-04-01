@@ -58,7 +58,8 @@ const TicketTypeComponent = ({
 
     useEffect(() => {
         if (reservation && reservation.tickets?.length > 0) {
-            setTicket(allowedTicketTypes.find(t => t.id === reservation.tickets[0].ticket_type_id))
+            setTicket(allowedTicketTypes.find(t => t.id === reservation.tickets[0].ticket_type_id));
+            setQuantity(reservation.tickets.length);
         }
     }, [])
 
