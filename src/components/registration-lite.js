@@ -214,11 +214,9 @@ const RegistrationLite = (
     });
 
     const handleCloseClick = () => {
-        console.log('check close click...')
         // Reset the step when closed to avoid unexpected behavior from `useEffect`s w/in other steps.
         // (i.e., recalling `onPurchaseComplete` after a user completes one order, closes the window, and then reopens the registration widget)
         const closeAndClearState = () => {
-            console.log('close and clear state...')
             changeStep(0);
             clearWidgetState();
             if (closeWidget) {
@@ -227,12 +225,10 @@ const RegistrationLite = (
         }
         // if there's a reservation on the state, delete it before close the widget
         if (reservation) {
-            console.log('close with reservation...')
             removeReservedTicket().finally(() => {
                 closeAndClearState()
             });
         } else {
-            console.log('close no reservation...')
             closeAndClearState()
         }
     };
