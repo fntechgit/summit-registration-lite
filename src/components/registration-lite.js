@@ -410,7 +410,7 @@ const RegistrationLite = (
                             </div>
                         }
 
-                        {ticketTaxesLoaded && !ticketTaxesError && profileData && step !== STEP_COMPLETE && allowedTicketTypes.length > 0 && (
+                        {!ticketTaxesError && profileData && step !== STEP_COMPLETE && (
                             <ButtonBarComponent
                                 step={step}
                                 inPersonDisclaimer={inPersonDisclaimer}
