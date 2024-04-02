@@ -10,6 +10,7 @@ import {
 } from "../../actions";
 
 import Swal from "sweetalert2";
+import { STEP_COMPLETE, STEP_PERSONAL_INFO } from "../constants";
 
 export class LawPayProvider {
 
@@ -83,12 +84,12 @@ export class LawPayProvider {
             .then((payload) => {
                 this.dispatch(stopWidgetLoading());
                 this.dispatch(createAction(CLEAR_RESERVATION)({}));
-                this.dispatch(changeStep(3));
+                this.dispatch(changeStep(STEP_COMPLETE));
                 return (payload);
             })
             .catch(e => {
                 this.dispatch(removeReservedTicket());
-                this.dispatch(changeStep(1));
+                this.dispatch(changeStep(STEP_PERSONAL_INFO));
                 this.dispatch(stopWidgetLoading());
                 return (e);
             });
