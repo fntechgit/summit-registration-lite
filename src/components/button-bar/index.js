@@ -38,7 +38,7 @@ const ButtonBarComponent = ({ step, changeStep, validatePromoCode, onValidateErr
                             {step === STEP_SELECT_TICKET_TYPE && <button disabled={!ticketType} className={`${styles.button} button`} onClick={() => validatePromoCode({ ...ticketType, ticketQuantity }, onValidateError)}>{nextButtonText}</button>}
                             {step === STEP_PERSONAL_INFO && ticketType?.cost === 0 && <button className={`${styles.button} button`} type="submit" form="personal-info-form">Get Ticket</button>}
                             {step === STEP_PERSONAL_INFO && ticketType?.cost > 0 && <button className={`${styles.button} button`} type="submit" form="personal-info-form">Next</button>}
-                            {step === STEP_PAYMENT && <button className={`${styles.button} button`} type="submit" form="payment-form">Pay Now</button>}
+                            {step === STEP_PAYMENT && <button className={`${styles.button} button`} id="payment-form-btn" type="submit" form="payment-form">Pay Now</button>}
                         </div>
                     </div>
                 </>
