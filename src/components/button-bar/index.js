@@ -15,7 +15,7 @@ import React from 'react';
 
 import styles from "./index.module.scss";
 import { isInPersonTicketType } from "../../actions";
-import { STEP_PAYMENT, STEP_PERSONAL_INFO, STEP_SELECT_TICKET_TYPE } from '../../utils/constants';
+import { STEP_COMPLETE, STEP_PAYMENT, STEP_PERSONAL_INFO, STEP_SELECT_TICKET_TYPE } from '../../utils/constants';
 
 const ButtonBarComponent = ({ step, changeStep, validatePromoCode, onValidateError, formValues, removeReservedTicket, inPersonDisclaimer }) => {
     const { ticketType, ticketQuantity } = formValues || {};
@@ -24,11 +24,11 @@ const ButtonBarComponent = ({ step, changeStep, validatePromoCode, onValidateErr
 
     return (
         <div className={`${styles.outerWrapper}`}>
-            {step !== 3 &&
+            {step !== STEP_COMPLETE &&
                 <>
                     <div className={`${styles.innerWrapper}`}>
                         <div className={styles.required}>
-                            {step !== 0 && <span>* Required fields <br /> </span>}
+                            {step !== STEP_SELECT_TICKET_TYPE && <span>* Required fields <br /> </span>}
                         </div>
                         <div className={styles.actions}>
                             {/* Back Button */}
@@ -38,7 +38,7 @@ const ButtonBarComponent = ({ step, changeStep, validatePromoCode, onValidateErr
                             {step === STEP_SELECT_TICKET_TYPE && <button disabled={!ticketType} className={`${styles.button} button`} onClick={() => validatePromoCode({ ...ticketType, ticketQuantity }, onValidateError)}>{nextButtonText}</button>}
                             {step === STEP_PERSONAL_INFO && ticketType?.cost === 0 && <button className={`${styles.button} button`} type="submit" form="personal-info-form">Get Ticket</button>}
                             {step === STEP_PERSONAL_INFO && ticketType?.cost > 0 && <button className={`${styles.button} button`} type="submit" form="personal-info-form">Next</button>}
-                            {step === STEP_PAYMENT && <button className={`${styles.button} button`} type="submit" form="payment-form">Pay Now</button>}
+                            {step === STEP_PAYMENT && <button className={`${styles.button} button`} id="payment-form-btn" type="submit" form="payment-form">Pay Now</button>}
                         </div>
                     </div>
                 </>

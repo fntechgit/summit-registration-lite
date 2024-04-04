@@ -39,6 +39,7 @@ import {
 
 import { LOGOUT_USER } from 'openstack-uicore-foundation/lib/security/actions';
 import moment from 'moment';
+import { STEP_SELECT_TICKET_TYPE } from './utils/constants';
 
 const localNowUtc = moment().unix();
 
@@ -46,7 +47,7 @@ const localNowUtc = moment().unix();
 const DEFAULT_STATE = {
     reservation: null,
     checkout: null,
-    step: 0,
+    step: STEP_SELECT_TICKET_TYPE,
     widgetLoading: false,
     passwordless: {
         email: null,

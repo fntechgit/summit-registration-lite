@@ -182,7 +182,7 @@ const RegistrationLite = (
     useEffect(() => {
         loadSession({ ...rest, summitData, profileData });
         if (!profileData) {
-            changeStep(0);
+            changeStep(STEP_SELECT_TICKET_TYPE);
         }
     }, [])
 
@@ -194,8 +194,8 @@ const RegistrationLite = (
 
     useEffect(() => {
         // check if there's personal information data and no ticket data to reset widget
-        if (step > 0 && !registrationForm.values?.ticketType) {
-            changeStep(0);
+        if (step > STEP_SELECT_TICKET_TYPE && !registrationForm.values?.ticketType && !reservation) {
+            changeStep(STEP_SELECT_TICKET_TYPE);
         }
     }, [registrationForm.values, step]);
 
@@ -217,7 +217,7 @@ const RegistrationLite = (
         // Reset the step when closed to avoid unexpected behavior from `useEffect`s w/in other steps.
         // (i.e., recalling `onPurchaseComplete` after a user completes one order, closes the window, and then reopens the registration widget)
         const closeAndClearState = () => {
-            changeStep(0);
+            changeStep(STEP_SELECT_TICKET_TYPE);
             clearWidgetState();
             if (closeWidget) {
                 closeWidget();
@@ -234,7 +234,8 @@ const RegistrationLite = (
     };
 
     const handleGetTicketTypesAndTaxes = (summitId) => {
-        setTicketTaxesError(false);        
+        setTicketTaxesError(false);
+        setTicketTaxesLoaded(false);
         getTicketTypesAndTaxes(summitId)
             .then()
             .catch((error) => {
@@ -274,7 +275,7 @@ const RegistrationLite = (
 
                         {profileData && ticketTaxesError && <TicketTaxesError ticketTaxesErrorMessage={ticketTaxesErrorMessage} retryTicketTaxes={() => handleGetTicketTypesAndTaxes(summitData?.id)} />}
 
-                        {profileData && ticketTaxesLoaded && !ticketTaxesError && allowedTicketTypes.length === 0 && step !== 3  && <NoAllowedTickets noAllowedTicketsMessage={noAllowedTicketsMessage} />}
+                        {profileData && ticketTaxesLoaded && !ticketTaxesError && allowedTicketTypes.length === 0 && step !== STEP_COMPLETE  && <NoAllowedTickets noAllowedTicketsMessage={noAllowedTicketsMessage} />}
 
                         {!ticketTaxesError &&
                             <div className={styles.stepsWrapper}>
@@ -306,7 +307,7 @@ const RegistrationLite = (
                                     />
                                 )}
 
-                                {profileData && step !== 3 && allowedTicketTypes.length > 0 && (
+                                {profileData && step !== STEP_COMPLETE && (
                                     <>
                                         { ownedTickets.length > 0 &&
                                             <TicketOwnedComponent ownedTickets={ownedTickets} />}
@@ -409,7 +410,7 @@ const RegistrationLite = (
                             </div>
                         }
 
-                        {ticketTaxesLoaded && !ticketTaxesError && profileData && step !== 3 && allowedTicketTypes.length > 0 && (
+                        {!ticketTaxesError && profileData && step !== STEP_COMPLETE && (
                             <ButtonBarComponent
                                 step={step}
                                 inPersonDisclaimer={inPersonDisclaimer}

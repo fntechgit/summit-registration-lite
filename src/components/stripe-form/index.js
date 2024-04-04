@@ -105,7 +105,8 @@ const StripeForm = ({ reservation, payTicket, userProfile, stripeOptions, provid
         },
     }, stripeOptions?.style);
 
-    const onSubmit = async (data) => {
+    const onSubmit = async (data, ev) => {
+
         setStripeErrors({});
 
         if (!stripe) {
@@ -113,7 +114,8 @@ const StripeForm = ({ reservation, payTicket, userProfile, stripeOptions, provid
             // form submission until Stripe.js has loaded.
             return;
         }
-
+        const btn = document.getElementById('payment-form-btn');
+        if(btn) btn.disabled = true;
         const cardElement = elements.getElement(CardNumberElement);
         // @see https://stripe.com/docs/js/tokens_sources/create_token?type=cardElement
         const { error, token } = await stripe.createToken(cardElement, {
@@ -130,14 +132,17 @@ const StripeForm = ({ reservation, payTicket, userProfile, stripeOptions, provid
         if (token) {
             cardElement.update({disabled: true})
             payTicket(provider, { token, stripe, zipCode : data.zipCode });
-        } else if (error) {
+            return;
+        }
+        if (error) {
+            if(btn) btn.disabled = false;
             if (stripeErrorCodeMap[error.code]) {
                 setStripeErrors({
                     [stripeErrorCodeMap[error.code].field]: stripeErrorCodeMap[error.code].message || error.message
                 });
-            } else {
-                Swal.fire("Payment error", error.message, "warning");
+                return;
             }
+            Swal.fire("Payment error", error.message, "warning");
         }
     };
 
