@@ -115,7 +115,7 @@ PasswordlessLoginComponent.propTypes = {
     getPasswordlessCode: PropTypes.func,
     idpLogoLight: PropTypes.string,
     idpLogoDark: PropTypes.string,
-    idpLogoAlt: PropTypes.string.isRequired
+    idpLogoAlt: PropTypes.string
 }
 
 export default PasswordlessLoginComponent;
