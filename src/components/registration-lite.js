@@ -139,8 +139,9 @@ const RegistrationLite = (
         loadProfileData,
         closeWidget,
         hasVirtualAccessLevel,
-        logoLight,
-        logoDark,
+        idpLogoLight,
+        idpLogoDark,
+        idpLogoAlt,
         showCompanyInputDefaultOptions,
         companyDDLOptions2Show,
         promoCode,
@@ -302,8 +303,9 @@ const RegistrationLite = (
                                         goToLogin={goToLogin}
                                         getLoginCode={getLoginCode}
                                         getPasswordlessCode={getPasswordlessCode}
-                                        logoLight={logoLight}
-                                        logoDark={logoDark}
+                                        idpLogoLight={idpLogoLight}
+                                        idpLogoDark={idpLogoDark}                                    
+                                        idpLogoAlt={idpLogoAlt}
                                     />
                                 )}
 
@@ -460,7 +462,9 @@ RegistrationLite.defaultProps = {
     hasVirtualAccessLevel: false,
     supportEmail : 'support@fntech.com',
     showCompanyInputDefaultOptions: false,
-    companyDDLOptions2Show: 25
+    companyDDLOptions2Show: 25,
+    idpLogoLight: null,
+    idpLogoDark: null
 };
 
 RegistrationLite.propTypes = {
