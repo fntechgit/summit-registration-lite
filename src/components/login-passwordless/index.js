@@ -22,7 +22,7 @@ import FNidLogoDark from '../../assets/FNid_BLK_logo_rgb.svg';
 
 const PasswordlessLoginComponent = ({
         email, codeLength, passwordlessLogin, loginWithCode, codeError, goToLogin,
-        getLoginCode, getPasswordlessCode, logoLight, logoDark }) => {
+        getLoginCode, getPasswordlessCode, idpLogoLight, idpLogoDark, idpLogoAlt }) => {
 
     const [otpCode, setOtpCode] = useState('');
     const [otpError, setOtpError] = useState(false)
@@ -58,8 +58,8 @@ const PasswordlessLoginComponent = ({
                 }
                 <div className={`${styles.innerWrapper}`}>
                     {/* Only one logo is displayed based on data-theme through CSS */}
-                    <img src={logoDark || FNidLogoDark} alt="FNid" className={`${styles.logo} ${styles.logoDark}`} />
-                    <img src={logoLight || FNidLogo} alt="FNid" className={`${styles.logo} ${styles.logoLight}`} />
+                    <img src={idpLogoDark || FNidLogoDark} alt={idpLogoAlt || "FNid"} className={`${styles.logo} ${styles.logoDark}`} />
+                    <img src={idpLogoLight || FNidLogo} alt={idpLogoAlt || "FNid"} className={`${styles.logo} ${styles.logoLight}`} />
                     <span>
                         We sent your single-use code to <br />
                         <span data-testid="email">{email}</span>
@@ -112,7 +112,10 @@ PasswordlessLoginComponent.propTypes = {
     codeError: PropTypes.bool,
     goToLogin: PropTypes.func.isRequired,
     getLoginCode: PropTypes.func.isRequired,
-    getPasswordlessCode: PropTypes.func
+    getPasswordlessCode: PropTypes.func,
+    idpLogoLight: PropTypes.string,
+    idpLogoDark: PropTypes.string,
+    idpLogoAlt: PropTypes.string.isRequired
 }
 
 export default PasswordlessLoginComponent;
