@@ -55,12 +55,18 @@ import ButtonBarComponent from './button-bar';
 import PurchaseComplete from './purchase-complete';
 import PasswordlessLoginComponent from './login-passwordless';
 import TicketOwnedComponent from './ticket-owned';
-import { getCurrentProvider } from "../utils/utils";
+import { buildTrackEvent, getCurrentProvider } from '../utils/utils';
 import NoAllowedTickets from './no-allowed-tickets';
 import TicketTaxesError from './ticket-taxes-error';
 import T from 'i18n-react';
 import { getCurrentUserLanguage } from '../utils/utils';
-import { STEP_COMPLETE, STEP_PAYMENT, STEP_PERSONAL_INFO, STEP_SELECT_TICKET_TYPE } from '../utils/constants';
+import {
+    ADD_TO_CART, BEGIN_CHECKOUT,
+    STEP_COMPLETE,
+    STEP_PAYMENT,
+    STEP_PERSONAL_INFO,
+    STEP_SELECT_TICKET_TYPE, VIEW_ITEM
+} from '../utils/constants';
 
 let language = getCurrentUserLanguage();
 
@@ -88,6 +94,7 @@ const RegistrationLite = (
         removeReservedTicket,
         reserveTicket,
         payTicketWithProvider,
+        trackEvent,
         onPurchaseComplete,
         getTicketTypesAndTaxes,
         getLoginCode,
@@ -261,6 +268,27 @@ const RegistrationLite = (
             });
     }
 
+    const handleValidatePromocode = (data, onError) => {
+        validatePromoCode(data, onError).then(() => {
+            trackAddToCart(data);
+        });
+    }
+
+    const trackViewItem = (data) => {
+        const eventData = buildTrackEvent(data);
+        trackEvent(VIEW_ITEM, eventData);
+    }
+
+    const trackAddToCart = (data) => {
+        const eventData = buildTrackEvent(data, data.ticketQuantity, promoCode);
+        trackEvent(ADD_TO_CART, eventData);
+    }
+
+    const trackBeginCheckout = (data) => {
+        const eventData = buildTrackEvent(data.ticketType, data.ticketQuantity, promoCode);
+        trackEvent(BEGIN_CHECKOUT, eventData);
+    }
+
     // if we dont have yet ticket types and we didnt requested so far for them but we are already logged in
     // just dont render
     if(ticketTypes.length === 0 && !requestedTicketTypes && profileData) return null;
@@ -308,7 +336,7 @@ const RegistrationLite = (
                                         getLoginCode={getLoginCode}
                                         getPasswordlessCode={getPasswordlessCode}
                                         idpLogoLight={idpLogoLight}
-                                        idpLogoDark={idpLogoDark}                                    
+                                        idpLogoDark={idpLogoDark}
                                         idpLogoAlt={idpLogoAlt}
                                     />
                                 )}
@@ -331,6 +359,7 @@ const RegistrationLite = (
                                             promoCode={promoCode}
                                             formErrors={formErrors}
                                             changeForm={ticketForm => setFormValues({ ...formValues, ...ticketForm })}
+                                            trackViewItem={trackViewItem}
                                             showMultipleTicketTexts={showMultipleTicketTexts}
                                         />
 
@@ -345,6 +374,7 @@ const RegistrationLite = (
                                                     ...registrationForm.values,
                                                     personalInformation
                                                 });
+
                                                 reserveTicket({
                                                     provider,
                                                     personalInformation: personalInformation,
@@ -352,16 +382,20 @@ const RegistrationLite = (
                                                     ticketQuantity: registrationForm.values?.ticketQuantity,
                                                 }, {
                                                     onError: (err, res) => setFormErrors(res.body.errors)
-                                                }).catch((error) => {
-                                                    let { message } = error;
-                                                    if(message && (message.includes(AUTH_ERROR_MISSING_AUTH_INFO) ||
-                                                        message.includes(AUTH_ERROR_MISSING_REFRESH_TOKEN) ||
-                                                        message.includes(AUTH_ERROR_REFRESH_TOKEN_REQUEST_ERROR))){
-                                                        // we dont have an access token, init log out process
-                                                        clearWidgetState();
-                                                        return authErrorCallback(error);
-                                                    }
-                                                });
+                                                })
+                                                    .then(() => {
+                                                        trackBeginCheckout(registrationForm.values);
+                                                    })
+                                                    .catch((error) => {
+                                                        let { message } = error;
+                                                        if(message && (message.includes(AUTH_ERROR_MISSING_AUTH_INFO) ||
+                                                            message.includes(AUTH_ERROR_MISSING_REFRESH_TOKEN) ||
+                                                            message.includes(AUTH_ERROR_REFRESH_TOKEN_REQUEST_ERROR))){
+                                                            // we dont have an access token, init log out process
+                                                            clearWidgetState();
+                                                            return authErrorCallback(error);
+                                                        }
+                                                    });
                                             }}
                                             handleCompanyError={handleCompanyError}
                                             formValues={formValues}
@@ -422,7 +456,7 @@ const RegistrationLite = (
                                 inPersonDisclaimer={inPersonDisclaimer}
                                 formValues={formValues}
                                 removeReservedTicket={removeReservedTicket}
-                                validatePromoCode={validatePromoCode}
+                                validatePromoCode={handleValidatePromocode}
                                 onValidateError={{
                                     onError: (err, res) => setFormErrors(res.body.errors)
                                 }}
