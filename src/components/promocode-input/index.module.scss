@@ -60,6 +60,26 @@
       position: absolute;
       left: 60%;
     }
+    @media screen and (max-width: 685px) {
+      flex-direction: column;
+      min-width: 30%;
+      input {
+        width: 100%;
+        border-radius: 4px 4px 0px 0px;
+      }
+      .codeButtonWrapper {
+        width: 100%;
+        border-radius: 0px 0px 4px 4px;
+        button {
+          height: 24px;
+        }
+      }
+      .appliedCodeIcon {
+        left: auto;
+        right: 5%;
+        top: 5px;
+      }
+    }
   }
   .moreInfo {
     display: inline-block;
