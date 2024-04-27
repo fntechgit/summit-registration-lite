@@ -71,12 +71,15 @@
   .moreInfoTooltip {
     max-width: 280px;
   }
-  @media screen and (max-width: 400px) {
+  @media screen and (max-width: 540px) {
     span {
       width: 100%;
     }
     .promoCodeInput {
-      width: 70%;
+      width: 100%;
+    }
+    .moreInfo {
+      width: 100%;
     }
   }
 }
