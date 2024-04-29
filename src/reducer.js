@@ -35,7 +35,6 @@ import {
     LOAD_PROFILE_DATA,
     SET_CURRENT_PROMO_CODE,
     CLEAR_CURRENT_PROMO_CODE,
-    CHANGE_PROMO_CODE,
 } from './actions';
 
 import { LOGOUT_USER } from 'openstack-uicore-foundation/lib/security/actions';
@@ -161,11 +160,7 @@ const RegistrationLiteReducer = (state = DEFAULT_STATE, action) => {
             return { ...state, nowUtc: timestamp };
         }
         case CLEAR_CURRENT_PROMO_CODE: {
-            return { ...state, promoCode: '', localPromoCode: ''}
-        }
-        case CHANGE_PROMO_CODE: {
-            const { localPromoCode } = payload;
-            return {...state, localPromoCode }
+            return { ...state, promoCode: ''}
         }
         case SET_CURRENT_PROMO_CODE:{
             const { currentPromoCode } = payload;

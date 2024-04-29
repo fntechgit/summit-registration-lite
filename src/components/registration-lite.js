@@ -38,7 +38,6 @@ import {
     loadProfileData,
     removePromoCode,
     applyPromoCode,
-    changePromoCode,
     validatePromoCode
 } from '../actions';
 
@@ -150,7 +149,6 @@ const RegistrationLite = (
         getTicketDiscount,
         removePromoCode,
         applyPromoCode,
-        changePromoCode,
         validatePromoCode,
         ...rest
     }) => {
@@ -161,6 +159,7 @@ const RegistrationLite = (
             ticketQuantity: 1,
             personalInformation: null,
             paymentInformation: null,
+            promoCode: null,
         },
         errors: []
     });
@@ -326,7 +325,6 @@ const RegistrationLite = (
                                             allowPromoCodes={allowPromoCodes}
                                             applyPromoCode={applyPromoCode}
                                             removePromoCode={() => {setFormErrors({});removePromoCode()}}
-                                            onPromoCodeChange={changePromoCode}
                                             promoCode={promoCode}
                                             formErrors={formErrors}
                                             changeForm={ticketForm => setFormValues({ ...formValues, ...ticketForm })}
@@ -506,7 +504,6 @@ export default connect(mapStateToProps, {
     updateClock,
     loadProfileData,
     applyPromoCode,
-    changePromoCode,
     removePromoCode,
     validatePromoCode
 })(RegistrationLite)
