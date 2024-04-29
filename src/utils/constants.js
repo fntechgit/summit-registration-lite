@@ -38,3 +38,4 @@ export const STEP_COMPLETE = 3;
 export const VIEW_ITEM = 'view_item';
 export const ADD_TO_CART = 'add_to_cart';
 export const BEGIN_CHECKOUT = 'begin_checkout';
+export const PURCHASE_COMPLETE = 'purchase_complete';

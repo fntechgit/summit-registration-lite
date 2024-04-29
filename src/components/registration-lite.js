@@ -61,7 +61,7 @@ import TicketTaxesError from './ticket-taxes-error';
 import T from 'i18n-react';
 import { getCurrentUserLanguage } from '../utils/utils';
 import {
-    ADD_TO_CART, BEGIN_CHECKOUT,
+    ADD_TO_CART, BEGIN_CHECKOUT, PURCHASE_COMPLETE,
     STEP_COMPLETE,
     STEP_PAYMENT,
     STEP_PERSONAL_INFO,
@@ -289,6 +289,11 @@ const RegistrationLite = (
         trackEvent(BEGIN_CHECKOUT, eventData);
     }
 
+    const handlePurchaseComplete = (order) => {
+        onPurchaseComplete(order);
+        trackEvent(PURCHASE_COMPLETE, { order });
+    }
+
     // if we dont have yet ticket types and we didnt requested so far for them but we are already logged in
     // just dont render
     if(ticketTypes.length === 0 && !requestedTicketTypes && profileData) return null;
@@ -429,7 +434,7 @@ const RegistrationLite = (
                                         checkout={checkout}
                                         user={profileData}
                                         summit={summitData}
-                                        onPurchaseComplete={onPurchaseComplete}
+                                        onPurchaseComplete={handlePurchaseComplete}
                                         goToEvent={goToEvent}
                                         goToMyOrders={goToMyOrders}
                                         goToExtraQuestions={goToExtraQuestions}
