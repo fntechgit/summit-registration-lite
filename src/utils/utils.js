@@ -92,7 +92,7 @@ export const buildTrackEvent = (data, ticketQuantity = null, promoCode = null) =
 
     if (promoCode) {
         eventData.coupon = promoCode;
-        eventData.items_array[0].discount = data.cost - data.cost_with_applied_discount;
+        eventData.items_array[0].discount = data.cost - (data.cost_with_applied_discount || 0);
     }
 
     return eventData;
