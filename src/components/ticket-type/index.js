@@ -37,6 +37,7 @@ const TicketTypeComponent = ({
         allowPromoCodes,
         applyPromoCode,
         removePromoCode,
+        onPromoCodeChange,
         promoCode,
     }) => {
     const [ticket, setTicket] = useState(null);
@@ -202,7 +203,8 @@ const TicketTypeComponent = ({
                                         promoCode={promoCode}
                                         applyPromoCode={applyPromoCode}
                                         showMultipleTicketTexts={showMultipleTicketTexts}
-                                        removePromoCode={removePromoCode} />
+                                        removePromoCode={removePromoCode}
+                                        onPromoCodeChange={onPromoCodeChange} />
                                     {promoCodeError &&
                                         Object.values(promoCodeError).map((er) => (<div className={`${styles.promocodeError} alert alert-danger`}>{er}</div>))
                                     }

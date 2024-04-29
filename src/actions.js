@@ -52,6 +52,7 @@ export const LOAD_PROFILE_DATA = 'LOAD_PROFILE_DATA';
 
 export const SET_CURRENT_PROMO_CODE = 'SET_CURRENT_PROMO_CODE';
 export const CLEAR_CURRENT_PROMO_CODE = 'CLEAR_CURRENT_PROMO_CODE';
+export const CHANGE_PROMO_CODE = 'CHANGE_PROMO_CODE';
 export const VALIDATE_PROMO_CODE = 'VALIDATE_PROMO_CODE';
 
 export const startWidgetLoading = createAction(START_WIDGET_LOADING);
@@ -191,9 +192,20 @@ export const removePromoCode = () => (dispatch, getState) => {
     }
 }
 
-export const validatePromoCode = (ticketData, {onError}) => async (dispatch, getState, { apiBaseUrl, getAccessToken }) => {
+export const changePromoCode = (localPromoCode) => (dispatch, getState) => {
+    dispatch(createAction(CHANGE_PROMO_CODE)({ localPromoCode }));
+}
 
-    const { registrationLiteState: { settings: { summitId }, promoCode: currentPromoCode } } = getState();    
+export const validatePromoCode = (ticketData, { onError }) => async (dispatch, getState, { apiBaseUrl, getAccessToken }) => {
+
+    const { registrationLiteState: { settings: { summitId }, localPromoCode, promoCode: currentPromoCode } } = getState();
+
+    if (localPromoCode && !currentPromoCode) {
+        return Swal.fire(
+            "Code not applied", 
+            `You entered a promo code but it hasn't been applied. Make sure to click the 'Apply' button before continuing.`, 
+            "warning");
+    }
 
     if (summitId && currentPromoCode) {
 

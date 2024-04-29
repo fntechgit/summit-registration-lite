@@ -17,9 +17,14 @@ import appliedCode from '../../assets/icon-check-circle.svg';
 import styles from "./index.module.scss";
 import { isEmptyString } from '../../utils/utils';
 
-const PromoCodeInput = ({ applyPromoCode, promoCode, removePromoCode, showMultipleTicketTexts }) => {
+const PromoCodeInput = ({ applyPromoCode, promoCode, removePromoCode, showMultipleTicketTexts, onPromoCodeChange }) => {
 
     const [statePromoCode, setStatePromoCode] = useState(promoCode);
+    
+    const handlePromoCodeChange = (value) => {
+        onPromoCodeChange(value);
+        setStatePromoCode(value);
+    }
 
     useEffect(() => {
         if (isEmptyString(promoCode)) setStatePromoCode('');
@@ -33,7 +38,7 @@ const PromoCodeInput = ({ applyPromoCode, promoCode, removePromoCode, showMultip
                     <input className={`${promoCode ? styles.promoCodeActive : ''}`}
                         type="text"
                         value={statePromoCode}
-                        onChange={(ev) => setStatePromoCode(ev.target.value)}
+                        onChange={(ev) => handlePromoCodeChange(ev.target.value)}
                         placeholder="Enter your promo code"
                         onKeyDown={(e) => {
                             if (e.key === "Enter")
