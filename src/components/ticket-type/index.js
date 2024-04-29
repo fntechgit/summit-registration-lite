@@ -37,7 +37,6 @@ const TicketTypeComponent = ({
         allowPromoCodes,
         applyPromoCode,
         removePromoCode,
-        onPromoCodeChange,
         promoCode,
     }) => {
     const [ticket, setTicket] = useState(null);
@@ -89,6 +88,10 @@ const TicketTypeComponent = ({
     const handleTicketChange = (t) => {
         setTicket(t);
         setQuantity(minQuantity);
+    }
+
+    const handlePromoCodeChange = (code) => {
+        changeForm({promoCode: code});
     }
 
     const incrementQuantity = () => setQuantity(quantity + 1);
@@ -204,7 +207,7 @@ const TicketTypeComponent = ({
                                         applyPromoCode={applyPromoCode}
                                         showMultipleTicketTexts={showMultipleTicketTexts}
                                         removePromoCode={removePromoCode}
-                                        onPromoCodeChange={onPromoCodeChange} />
+                                        onPromoCodeChange={handlePromoCodeChange}/>
                                     {promoCodeError &&
                                         Object.values(promoCodeError).map((er) => (<div className={`${styles.promocodeError} alert alert-danger`}>{er}</div>))
                                     }
