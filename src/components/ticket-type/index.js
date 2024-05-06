@@ -209,7 +209,7 @@ const TicketTypeComponent = ({
                                         removePromoCode={removePromoCode}
                                         onPromoCodeChange={handlePromoCodeChange}/>
                                     {promoCodeError &&
-                                        Object.values(promoCodeError).map((er) => (<div className={`${styles.promocodeError} alert alert-danger`}>{er}</div>))
+                                        Object.values(promoCodeError).map((er, index) => (<div key={`error-${index}`} className={`${styles.promocodeError} alert alert-danger`}>{er}</div>))
                                     }
                                 </>
                             }
