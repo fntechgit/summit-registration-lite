@@ -67,8 +67,7 @@ const DEFAULT_STATE = {
         userProfile: null,
     },
     nowUtc: localNowUtc,
-    promoCode: '',
-    localPromoCode: ''
+    promoCode: ''
 };
 
 const RegistrationLiteReducer = (state = DEFAULT_STATE, action) => {

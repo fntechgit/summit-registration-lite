@@ -195,9 +195,9 @@ export const validatePromoCode = (ticketData, { onError }) => async (dispatch, g
 
     const { registrationLiteState: { settings: { summitId }, promoCode: currentPromoCode } } = getState();
 
-    const { promoCode } = ticketData;
+    const { promoCode: formPromoCode } = ticketData;
 
-    if (promoCode && !currentPromoCode) {
+    if (formPromoCode && !currentPromoCode) {
         const defaultMessage = `You entered a promo code but it hasn't been applied. Make sure to click the 'Apply' button or remove it before continuing.`;
         const notAppliedCodeError = { body: { errors: [defaultMessage] } };
         return onError(null, notAppliedCodeError);
