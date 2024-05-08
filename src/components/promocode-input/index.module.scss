@@ -3,12 +3,14 @@
   display: flex;
   justify-content: space-between;
   align-items: baseline;
+  flex-wrap: wrap;
   gap: 15px;
   span {
     color: var(--color_text_dark);
     font-size: 14px;
     font-weight: 600;
     line-height: 140%; /* 19.6px */
+    width: 30%;
   }
   .promoCodeInput {
     display: flex;
@@ -16,6 +18,8 @@
     position: relative;
     flex: 1;    
     height: 33px;
+    width: 50%;
+    min-width: 220px;
     input {
       display: inline-flex;
       padding: 13px 8px;
@@ -59,12 +63,23 @@
     .appliedCodeIcon {
       position: absolute;
       left: 60%;
-    }
+    }    
   }
   .moreInfo {
     display: inline-block;
   }
   .moreInfoTooltip {
     max-width: 280px;
+  }
+  @media screen and (max-width: 540px) {
+    span {
+      width: 100%;
+    }
+    .promoCodeInput {
+      width: 100%;
+    }
+    .moreInfo {
+      width: 100%;
+    }
   }
 }
