@@ -27,7 +27,7 @@ const PromoCodeInput = ({ applyPromoCode, promoCode, removePromoCode, showMultip
     }
 
     useEffect(() => {
-        if (isEmptyString(promoCode)) setStatePromoCode('');
+        if (isEmptyString(promoCode)) handlePromoCodeChange(promoCode);
     }, [promoCode])
 
     return (

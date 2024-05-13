@@ -78,6 +78,7 @@ const TicketTypeComponent = ({
             changeForm({ ticketType: updatedCurrentTicket })
             setTicket(updatedCurrentTicket);
         }
+        if (!promoCode) changeForm({promoCode : ''})
     }, [promoCode, originalTicketTypes])
 
     const isPrePaidReservation = useMemo(

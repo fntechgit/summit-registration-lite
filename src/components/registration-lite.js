@@ -159,7 +159,7 @@ const RegistrationLite = (
             ticketQuantity: 1,
             personalInformation: null,
             paymentInformation: null,
-            promoCode: null,
+            promoCode: '',
         },
         errors: []
     });
