@@ -11,7 +11,7 @@
  * limitations under the License.
  **/
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { connect } from "react-redux";
 import PropTypes from 'prop-types';
 import { animated, config, useSpring } from "react-spring";
@@ -174,6 +174,11 @@ const RegistrationLite = (
 
     const { publicKey, provider } = getCurrentProvider(summitData);
 
+    const allowedTicketTypes = ticketTaxesLoaded ? ticketTypes.filter((tt) => (tt.sales_start_date === null && tt.sales_end_date === null) || (nowUtc >= tt.sales_start_date && nowUtc <= tt.sales_end_date)) : [];
+    
+    const noAvailableTickets = useMemo(() => profileData && ticketTaxesLoaded && !ticketTaxesError && allowedTicketTypes.length === 0 && step !== STEP_COMPLETE, [allowedTicketTypes]);
+    const alreadyOwnedTickets = useMemo(() => profileData && ticketTaxesLoaded && !ticketTaxesError && allowedTicketTypes.length > 0 && ownedTickets.length > 0, [ownedTickets]);
+
     useEffect(() => {
         if(profileData)
             loadProfileData(profileData);
@@ -259,8 +264,6 @@ const RegistrationLite = (
     // just dont render
     if(ticketTypes.length === 0 && !requestedTicketTypes && profileData) return null;
 
-    const allowedTicketTypes = ticketTaxesLoaded ? ticketTypes.filter((tt) => (tt.sales_start_date === null && tt.sales_end_date === null) || (nowUtc >= tt.sales_start_date && nowUtc <= tt.sales_end_date)) : [];
-
     return (
         <div id={`${styles.modal}`} className="modal is-active">
             <div className="modal-background"></div>
@@ -276,7 +279,7 @@ const RegistrationLite = (
 
                         {profileData && ticketTaxesError && <TicketTaxesError ticketTaxesErrorMessage={ticketTaxesErrorMessage} retryTicketTaxes={() => handleGetTicketTypesAndTaxes(summitData?.id)} />}
 
-                        {profileData && ticketTaxesLoaded && !ticketTaxesError && allowedTicketTypes.length === 0 && step !== STEP_COMPLETE  && <NoAllowedTickets noAllowedTicketsMessage={noAllowedTicketsMessage} />}
+                        {noAvailableTickets && <NoAllowedTickets noAllowedTicketsMessage={noAllowedTicketsMessage} />}
 
                         {!ticketTaxesError &&
                             <div className={styles.stepsWrapper}>
@@ -311,7 +314,7 @@ const RegistrationLite = (
 
                                 {profileData && step !== STEP_COMPLETE && (
                                     <>
-                                        { ownedTickets.length > 0 &&
+                                        { alreadyOwnedTickets &&
                                             <TicketOwnedComponent ownedTickets={ownedTickets} />}
 
                                         <TicketTypeComponent
