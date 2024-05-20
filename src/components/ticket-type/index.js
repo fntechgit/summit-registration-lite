@@ -78,6 +78,7 @@ const TicketTypeComponent = ({
             changeForm({ ticketType: updatedCurrentTicket })
             setTicket(updatedCurrentTicket);
         }
+        if (!promoCode) changeForm({promoCode : ''})
     }, [promoCode, originalTicketTypes])
 
     const isPrePaidReservation = useMemo(
@@ -88,6 +89,10 @@ const TicketTypeComponent = ({
     const handleTicketChange = (t) => {
         setTicket(t);
         setQuantity(minQuantity);
+    }
+
+    const handlePromoCodeChange = (code) => {
+        changeForm({promoCode: code});
     }
 
     const incrementQuantity = () => setQuantity(quantity + 1);
@@ -202,9 +207,10 @@ const TicketTypeComponent = ({
                                         promoCode={promoCode}
                                         applyPromoCode={applyPromoCode}
                                         showMultipleTicketTexts={showMultipleTicketTexts}
-                                        removePromoCode={removePromoCode} />
+                                        removePromoCode={removePromoCode}
+                                        onPromoCodeChange={handlePromoCodeChange}/>
                                     {promoCodeError &&
-                                        Object.values(promoCodeError).map((er) => (<div className={`${styles.promocodeError} alert alert-danger`}>{er}</div>))
+                                        Object.values(promoCodeError).map((er, index) => (<div key={`error-${index}`} className={`${styles.promocodeError} alert alert-danger`}>{er}</div>))
                                     }
                                 </>
                             }
