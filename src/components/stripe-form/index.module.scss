@@ -39,6 +39,13 @@
         font-size: 16px;
       }
 
+      &:-webkit-autofill, :-webkit-autofill:focus {
+        color: var(--color_input_text_color) !important;
+        background-color: var(--color_input_background_color) !important;
+        -webkit-box-shadow: 0 0 0px 1000px var(--color_input_background_color) inset;
+        -webkit-text-fill-color: var(--color_input_text_color);
+      }
+
       &:focus-visible {
         outline: none;
       }
