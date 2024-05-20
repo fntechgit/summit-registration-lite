@@ -16,7 +16,7 @@
     display: flex;
     align-items: center;
     position: relative;
-    flex: 1;    
+    flex: 1;
     height: 33px;
     width: 50%;
     min-width: 220px;
@@ -48,7 +48,7 @@
         cursor: not-allowed;
       }
       button {
-        color: #fff;        
+        color: #fff;
         font-size: 14px;
         font-style: normal;
         font-weight: 600;
@@ -59,17 +59,14 @@
         border: none;
         background-color: transparent;
       }
-    }    
+    }
     .appliedCodeIcon {
       position: absolute;
       left: 60%;
-    }    
+    }
   }
   .moreInfo {
     display: inline-block;
-  }
-  .moreInfoTooltip {
-    max-width: 280px;
   }
   @media screen and (max-width: 540px) {
     span {
@@ -82,4 +79,8 @@
       width: 100%;
     }
   }
+}
+
+.moreInfoTooltip {
+  max-width: 280px;
 }
