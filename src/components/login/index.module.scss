@@ -58,10 +58,12 @@
 
 .primaryEmailButton {
   background-color: var(--color_input_background_color);
+  border: 1px solid var(--color_input_border_color);
+  color: var(--color_input_text_color);
 }
 
 .buttonDisabled {
-  background-color: var(--color_text_input_hints);
+  background-color: var(--color_secondary_contrast);
 }
 
 .pointerDisabled {
