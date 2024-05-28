@@ -95,7 +95,13 @@ const StripeForm = ({ reservation, payTicket, userProfile, stripeOptions, provid
             backgroundColor: bgColor,
             '::placeholder': {
                 color: hintColor
-            }
+            },
+            ':-webkit-autofill': {
+                color: textColor,
+                backgroundColor: bgColor,
+                "-webkit-text-fill-color": textColor,
+                "-webkit-box-shadow:": `0 0 0px 1000px ${bgColor} inset`
+            },
         },
         invalid: {
             color: '#e5424d',
