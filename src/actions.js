@@ -495,11 +495,12 @@ export const getMyInvitation = (summitId) => async (dispatch, getState, { apiBas
         };
 
         return getRequest(
-            createAction(CLEAR_MY_INVITATION),
+            null,
             createAction(GET_MY_INVITATION),
             `${apiBaseUrl}/api/v1/summits/${summitId}/registration-invitations/me`,
             errorHandler
         )(params)(dispatch).catch((e) => {
+            createAction(CLEAR_MY_INVITATION);
             console.log(e);
         });
     }
