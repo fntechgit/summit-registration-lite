@@ -41,14 +41,16 @@
       align-items: center;
       width: 30%;
       height: 100%;
-      background-color: #818181;
+      background-color: var(--color_input_background_color);
+      border: 1px solid var(--color_input_border_color);
       border-radius: 0px 4px 4px 0px;
       &.noCode {
-        background-color: #CFCFCF;
+        background-color: var(--color_input_background_color_disabled);
+        border: 1px solid var(--color_input_border_color_disabled);        
         cursor: not-allowed;
       }
-      button {
-        color: #fff;
+      button {        
+        color: var(--color_input_text_color);
         font-size: 14px;
         font-style: normal;
         font-weight: 600;
@@ -58,6 +60,9 @@
         height: 100%;
         border: none;
         background-color: transparent;
+        &:disabled {
+          color: var(--color_input_text_color_disabled);
+        }
       }
     }
     .appliedCodeIcon {

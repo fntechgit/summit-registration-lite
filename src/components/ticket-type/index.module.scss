@@ -71,8 +71,8 @@
     height: 36px;
     text-align: center;
     border: 1px solid var(--color_input_border_color);
-    // color: var(--color_input_text_color);
-    // background-color: var(--color_input_background_color);
+    color: var(--color_input_text_color);
+    background-color: var(--color_input_background_color);
   }
 
   input {
@@ -92,11 +92,12 @@
     align-items: center;
 
     &:disabled {
-      &,
+      background-color: var(--color_input_background_color_disabled);
+      border: 1px solid var(--color_input_border_color_disabled);
+      color: var(--color_input_text_color_disabled);
+      cursor: not-allowed;
       &:hover {
-        opacity: 0.65;
-        background: #dedede;
-        border-color: #bebebe;
+        opacity: 0.65;        
       }
     }
   }

@@ -54,28 +54,24 @@
 }
 
 .primaryEmailButton {
-  background-color: var(--color_input_background_color);
-  border: 1px solid var(--color_input_border_color);
-  color: var(--color_input_text_color);
-}
-
-.buttonDisabled {
-  background-color: var(--color_secondary_contrast);
-  color: var(--color_input_text_color_disabled);
-}
-
-.pointerDisabled {
-  pointer-events: none;
-}
-
-.email_login_button {
   display: flex;
   justify-content: space-between;
   padding: 10px 9px;
   width: 100%;
+  background-color: var(--color_input_background_color);
+  border: 1px solid var(--color_input_border_color);
   span {
     padding: 0 0 0 8px;
     margin: 0;
+    color: var(--color_input_text_color);
+  }
+  &:disabled {    
+    cursor: not-allowed;
+    background-color: var(--color_input_background_color_disabled);
+    border: 1px solid var(--color_input_border_color_disabled);
+    span {
+      color: var(--color_input_text_color_disabled);
+    }
   }
 }
 
