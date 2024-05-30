@@ -77,12 +77,16 @@ const StripeForm = ({ reservation, payTicket, userProfile, stripeOptions, provid
     let bgColor = DefaultBGColor;
     let textColor = DefaultTextColor;
     let hintColor = DefaultHintColor;
+    let disabledBgColor = DefaultBGColor;
+    let disabledTextColor = DefaultBGColor; 
 
     if(document && document.documentElement) {
         const documentStyles = getComputedStyle(document.documentElement);
         bgColor = documentStyles.getPropertyValue('--color_input_background_color');
         textColor = documentStyles.getPropertyValue('--color_input_text_color');
         hintColor = documentStyles.getPropertyValue('--color_text_input_hints');
+        disabledBgColor = documentStyles.getPropertyValue('--color_input_background_color_disabled');
+        disabledTextColor = documentStyles.getPropertyValue('--color_input_text_color_disabled');
     }
 
 
@@ -102,6 +106,10 @@ const StripeForm = ({ reservation, payTicket, userProfile, stripeOptions, provid
                 "-webkit-text-fill-color": textColor,
                 "-webkit-box-shadow:": `0 0 0px 1000px ${bgColor} inset`
             },
+            ':disabled': {
+                color: disabledTextColor,
+                backgroundColor: disabledBgColor
+            }
         },
         invalid: {
             color: '#e5424d',
