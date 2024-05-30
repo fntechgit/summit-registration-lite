@@ -18,8 +18,6 @@
 
 .button {
   padding: 10px 30px;
-  background-color: red;
-  color: white;
   font-weight: normal;
   display: inline-flex;
   justify-content: center;
@@ -52,7 +50,6 @@
     display: inline-block;
     font-weight: normal;
     font-size: 14px;
-    color: #e5424d;
   }
 }
 
@@ -64,6 +61,7 @@
 
 .buttonDisabled {
   background-color: var(--color_secondary_contrast);
+  color: var(--color_input_text_color_disabled);
 }
 
 .pointerDisabled {
@@ -74,12 +72,10 @@
   display: flex;
   justify-content: space-between;
   padding: 10px 9px;
-  color: var(--color_primary_contrast);
   width: 100%;
   span {
     padding: 0 0 0 8px;
     margin: 0;
-    color: #fff;
   }
 }
 
