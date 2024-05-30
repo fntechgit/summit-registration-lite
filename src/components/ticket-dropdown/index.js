@@ -18,11 +18,17 @@ import { getTicketCost, getTicketTaxes } from '../../utils/utils';
 
 const TicketDropdownComponent = ({ selectedTicket, ticketTypes, taxTypes, onTicketSelect }) => {
     const [active, setActive] = useState(false);
+    const [currentTicketTypes, setCurrentTicketTypes] = useState([])
 
     const ticketSelect = (ticket) => {
         onTicketSelect(ticket);
         setActive(!active);
     }
+
+    useState(() => {
+        console.log('load ticket types on DDL...')
+        setCurrentTicketTypes(ticketTypes);
+    }, [])
 
     return (
         <div className={`${styles.outerWrapper}`}>
@@ -46,7 +52,7 @@ const TicketDropdownComponent = ({ selectedTicket, ticketTypes, taxTypes, onTick
 
             {active &&
                 <div className={styles.dropdown} data-testid="ticket-list">
-                    {ticketTypes.map(t => {
+                    {currentTicketTypes.map(t => {
                         console.log('TicketDropdownComponent::render');
                         const maxQuantity = getTicketMaxQuantity(t);
                         const isTicketSoldOut = maxQuantity < 1;
