@@ -11,7 +11,8 @@
  * limitations under the License.
  **/
 
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
+import isEqual from 'lodash/isEqual';
 import { getTicketMaxQuantity } from '../../helpers';
 import styles from "./index.module.scss";
 import { getTicketCost, getTicketTaxes } from '../../utils/utils';
@@ -19,16 +20,19 @@ import { getTicketCost, getTicketTaxes } from '../../utils/utils';
 const TicketDropdownComponent = ({ selectedTicket, ticketTypes, taxTypes, onTicketSelect }) => {
     const [active, setActive] = useState(false);
     const [currentTicketTypes, setCurrentTicketTypes] = useState([])
+    const prevTicketTypesRef = useRef([]);
 
     const ticketSelect = (ticket) => {
         onTicketSelect(ticket);
         setActive(!active);
     }
-
-    useState(() => {
-        console.log('load ticket types on DDL...')
-        setCurrentTicketTypes(ticketTypes);
-    }, [])
+    useEffect(() => {
+        const prevTicketTypes = prevTicketTypesRef.current;
+        if (!isEqual(ticketTypes, []) && !isEqual(prevTicketTypes, ticketTypes)) {
+            setCurrentTicketTypes(ticketTypes);
+        }
+        prevTicketTypesRef.current = ticketTypes;
+    }, [ticketTypes]);
 
     return (
         <div className={`${styles.outerWrapper}`}>
