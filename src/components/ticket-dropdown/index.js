@@ -11,18 +11,29 @@
  * limitations under the License.
  **/
 
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
+import isEqual from 'lodash/isEqual';
 import { getTicketMaxQuantity } from '../../helpers';
 import styles from "./index.module.scss";
 import { getTicketCost, getTicketTaxes } from '../../utils/utils';
 
 const TicketDropdownComponent = ({ selectedTicket, ticketTypes, taxTypes, onTicketSelect }) => {
     const [active, setActive] = useState(false);
+    const [currentTicketTypes, setCurrentTicketTypes] = useState([])
+    // ref is used because it doesn't affect the rendering cicle and is only used to check prev values
+    const prevTicketTypesRef = useRef([]);
 
     const ticketSelect = (ticket) => {
         onTicketSelect(ticket);
         setActive(!active);
     }
+    useEffect(() => {
+        const prevTicketTypes = prevTicketTypesRef.current;
+        if (!isEqual(ticketTypes, []) && !isEqual(prevTicketTypes, ticketTypes)) {
+            setCurrentTicketTypes(ticketTypes);
+        }
+        prevTicketTypesRef.current = ticketTypes;
+    }, [ticketTypes]);
 
     return (
         <div className={`${styles.outerWrapper}`}>
@@ -46,7 +57,7 @@ const TicketDropdownComponent = ({ selectedTicket, ticketTypes, taxTypes, onTick
 
             {active &&
                 <div className={styles.dropdown} data-testid="ticket-list">
-                    {ticketTypes.map(t => {
+                    {currentTicketTypes.map(t => {
                         console.log('TicketDropdownComponent::render');
                         const maxQuantity = getTicketMaxQuantity(t);
                         const isTicketSoldOut = maxQuantity < 1;
