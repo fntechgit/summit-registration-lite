@@ -20,6 +20,7 @@ import { getTicketCost, getTicketTaxes } from '../../utils/utils';
 const TicketDropdownComponent = ({ selectedTicket, ticketTypes, taxTypes, onTicketSelect }) => {
     const [active, setActive] = useState(false);
     const [currentTicketTypes, setCurrentTicketTypes] = useState([])
+    // ref is used because it doesn't affect the rendering cicle and is only used to check prev values
     const prevTicketTypesRef = useRef([]);
 
     const ticketSelect = (ticket) => {
