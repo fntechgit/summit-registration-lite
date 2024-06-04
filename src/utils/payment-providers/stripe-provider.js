@@ -23,7 +23,7 @@ export class StripeProvider {
         this.dispatch = dispatch;
     }
 
-    payTicket = ({ elements = null, paymentMethod = null, stripe = null, zipCode = null }) => async (dispatch) => {
+    payTicket = ({ elements = null, paymentMethod = null, stripe = null }) => async (dispatch) => {
 
         const errorHandler = (err, res) => (dispatch, state) => {
             let code = err.status;
@@ -60,7 +60,6 @@ export class StripeProvider {
         let normalizedEntity = {
             billing_address_1: this.userProfile?.address1 || '',
             billing_address_2: this.userProfile?.address2 || '',
-            billing_address_zip_code: zipCode,
             billing_address_city: this.userProfile?.locality || '',
             billing_address_state: this.userProfile?.region || '',
             billing_address_country: this.userProfile?.country || ''
