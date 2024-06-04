@@ -73,7 +73,6 @@ const StripeForm = ({ reservation, payTicket, userProfile, stripeOptions, hidePo
     const stripe = useStripe();
     const elements = useElements();
     const [stripeErrors, setStripeErrors] = useState({});
-    const [selectedPayment, setSelectedPayment] = useState(null);
     const { register, handleSubmit, formState: { errors } } = useForm();
 
     let bgColor = DefaultBGColor;
@@ -147,7 +146,7 @@ const StripeForm = ({ reservation, payTicket, userProfile, stripeOptions, hidePo
             } else {
                 // Send the paymentMethod ID to your server
                 if (paymentMethod) {
-                    payTicket(provider, { elements, paymentMethod, stripe, zipCode: data.zipCode });
+                    payTicket(provider, { elements, paymentMethod, stripe });
                 } else if (error) {
                     if (stripeErrorCodeMap[error.code]) {
                         setStripeErrors({
@@ -172,18 +171,7 @@ const StripeForm = ({ reservation, payTicket, userProfile, stripeOptions, hidePo
 
     return (
         <form className={styles.form} id="payment-form" onSubmit={handleSubmit(onSubmit)}>
-            <PaymentElement options={{ style: stripeStyle }} onChange={(e) => setSelectedPayment(e?.value?.type)} />
-
-            {selectedPayment === 'card' && !hidePostalCode &&
-                <div className={styles.fieldWrapper}>
-                    <div className={styles.inputWrapper}>
-                        <input type="text" placeholder="ZIP Code *" onChange={(e) => setZipCode(e.target.value)} {...register("zipCode", { required: true })} />
-                    </div>
-                    {(errors.zipCode) && (
-                        <div className={styles.fieldError}>This field is required.</div>
-                    )}
-                </div>
-            }
+            <PaymentElement options={{ style: stripeStyle }} />
         </form>
     )
 };
