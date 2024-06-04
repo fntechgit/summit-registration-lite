@@ -73,6 +73,7 @@ const StripeForm = ({ reservation, payTicket, userProfile, stripeOptions, hidePo
     const stripe = useStripe();
     const elements = useElements();
     const [stripeErrors, setStripeErrors] = useState({});
+    const [selectedPayment, setSelectedPayment] = useState(null);
     const { register, handleSubmit, formState: { errors } } = useForm();
 
     let bgColor = DefaultBGColor;
@@ -171,9 +172,9 @@ const StripeForm = ({ reservation, payTicket, userProfile, stripeOptions, hidePo
 
     return (
         <form className={styles.form} id="payment-form" onSubmit={handleSubmit(onSubmit)}>
-            <PaymentElement options={{ style: stripeStyle }} />
+            <PaymentElement options={{ style: stripeStyle }} onChange={(e) => setSelectedPayment(e?.value?.type)} />
 
-            {!hidePostalCode &&
+            {selectedPayment === 'card' && !hidePostalCode &&
                 <div className={styles.fieldWrapper}>
                     <div className={styles.inputWrapper}>
                         <input type="text" placeholder="ZIP Code *" onChange={(e) => setZipCode(e.target.value)} {...register("zipCode", { required: true })} />
@@ -183,7 +184,6 @@ const StripeForm = ({ reservation, payTicket, userProfile, stripeOptions, hidePo
                     )}
                 </div>
             }
-
         </form>
     )
 };
