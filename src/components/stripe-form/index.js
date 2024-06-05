@@ -13,13 +13,8 @@
 
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
-import merge from 'lodash/merge';
-import { DefaultBGColor, DefaultTextColor, DefaultHintColor } from '../../utils/constants';
 
 import {
-    CardNumberElement,
-    CardExpiryElement,
-    CardCvcElement,
     useStripe,
     useElements,
     PaymentElement,
@@ -69,48 +64,11 @@ const stripeErrorCodeMap = {
 };
 
 
-const StripeForm = ({ reservation, payTicket, userProfile, stripeOptions, hidePostalCode, provider }) => {
+const StripeForm = ({ reservation, payTicket, provider }) => {
     const stripe = useStripe();
     const elements = useElements();
     const [stripeErrors, setStripeErrors] = useState({});
-    const { register, handleSubmit, formState: { errors } } = useForm();
-
-    let bgColor = DefaultBGColor;
-    let textColor = DefaultTextColor;
-    let hintColor = DefaultHintColor;
-
-    if (document && document.documentElement) {
-        const documentStyles = getComputedStyle(document.documentElement);
-        bgColor = documentStyles.getPropertyValue('--color_input_background_color');
-        textColor = documentStyles.getPropertyValue('--color_input_text_color');
-        hintColor = documentStyles.getPropertyValue('--color_text_input_hints');
-    }
-
-
-    const stripeStyle = merge({}, {
-        base: {
-            // Add your base input styles here. For example: #d4e5f4
-            color: textColor,
-            fontSize: '16px',
-            //fontFamily: 'inherit',
-            backgroundColor: bgColor,
-            '::placeholder': {
-                color: hintColor
-            },
-            ':-webkit-autofill': {
-                color: textColor,
-                backgroundColor: bgColor,
-                "-webkit-text-fill-color": textColor,
-                "-webkit-box-shadow:": `0 0 0px 1000px ${bgColor} inset`
-            },
-        },
-        invalid: {
-            color: '#e5424d',
-            ':focus': {
-                color: '#3486cd',
-            },
-        },
-    }, stripeOptions?.style);
+    const { register, handleSubmit, formState: { errors } } = useForm();    
 
     const onSubmit = async (data, ev) => {
 
@@ -123,7 +81,7 @@ const StripeForm = ({ reservation, payTicket, userProfile, stripeOptions, hidePo
         }
         const btn = document.getElementById('payment-form-btn');
         if (btn) btn.disabled = true;
-        
+
         // Trigger form validation and wallet collection
         const { error: submitError } = await elements.submit();
         if (submitError) {
@@ -171,7 +129,7 @@ const StripeForm = ({ reservation, payTicket, userProfile, stripeOptions, hidePo
 
     return (
         <form className={styles.form} id="payment-form" onSubmit={handleSubmit(onSubmit)}>
-            <PaymentElement options={{ style: stripeStyle }} />
+            <PaymentElement />
         </form>
     )
 };
