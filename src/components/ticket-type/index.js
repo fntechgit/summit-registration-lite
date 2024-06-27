@@ -23,6 +23,7 @@ import { getTicketMaxQuantity } from '../../helpers';
 import { getTicketCost, getTicketTaxes, isPrePaidOrder  } from '../../utils/utils';
 
 import PromoCodeInput from '../promocode-input';
+import { VIEW_ITEM } from '../../utils/constants';
 
 const TicketTypeComponent = ({
         allowedTicketTypes,
@@ -38,6 +39,7 @@ const TicketTypeComponent = ({
         applyPromoCode,
         removePromoCode,
         promoCode,
+        trackViewItem
     }) => {
     const [ticket, setTicket] = useState(null);
     const [quantity, setQuantity] = useState(1);
@@ -89,6 +91,7 @@ const TicketTypeComponent = ({
     const handleTicketChange = (t) => {
         setTicket(t);
         setQuantity(minQuantity);
+        trackViewItem(t);
     }
 
     const handlePromoCodeChange = (code) => {
