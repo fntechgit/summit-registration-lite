@@ -55,7 +55,7 @@ React component for the summit registration lite widget
 
    **closeWidget**            = method passed that will be called if the user tries to close the widget
 
-   **goToExtraQuestions**     = method passed that will be called by component to redirect to extra questions page. Pass attendeeId 
+   **goToExtraQuestions**     = method passed that will be called by component to redirect to extra questions page. Pass attendeeId
 
    **goToEvent**              = method passed that will be called to redirect the user to the current event
 
@@ -66,6 +66,8 @@ React component for the summit registration lite widget
    **loginWithCode**          = method passed that will be called when the user tries to login with a code
 
    **onPurchaseComplete**     = method passed that will be called after the purchase of a ticket it's completed
+
+   **trackEvent**             = method that tracks a given event.
 
    **handleCompanyError**     = method passed that will be called if the company dropdown can't be fetched
 
@@ -82,7 +84,7 @@ React component for the summit registration lite widget
    **idpLogoDark**            = string for custom src for dark theme logo on otp login
 
    **idpLogoLight**           = string for custom src for light theme logo on otp login
-   
+
    **idpLogoAlt**             = string for custom alt logo on otp login
 
 ## PUBLISH TO NPM:

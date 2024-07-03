@@ -72,3 +72,28 @@ export const getTicketCost = (ticket, quantity = 1) => {
 }
 
 export const isPrePaidTicketType = (ticketType) => ticketType?.sub_type === TICKET_TYPE_SUBTYPE_PREPAID;
+
+export const buildTrackEvent = (data, ticketQuantity = null, promoCode = null) => {
+    const eventData = {
+        currency: data.currency || 'USD',
+        items_array: [
+            {
+                item_id: data.id,
+                item_name: data.name,
+                price: data.cost,
+            }
+        ]
+    };
+
+    if (ticketQuantity) {
+        eventData.value = data.cost * ticketQuantity;
+        eventData.items_array[0].quantity = ticketQuantity;
+    }
+
+    if (promoCode) {
+        eventData.coupon = promoCode;
+        eventData.items_array[0].discount = data.cost - (data.cost_with_applied_discount || 0);
+    }
+
+    return eventData;
+}
