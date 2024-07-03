@@ -23,7 +23,7 @@ const TicketOwnedComponent = ({ ownedTickets}) => {
         const typeName = ownedTicket.type_name;
         // Adds ticket to the end of type name if is not included
         const typeNameSuffix = !typeName.toLowerCase().includes('ticket') ? ' Ticket' : '';        
-        const pluralSuffix = qty > 1 ? 's' : '';
+        const pluralSuffix = typeNameSuffix && qty > 1 ? 's' : '';
         
         return `${acc}${acc ? separator : ''}${qty} ${typeName}${typeNameSuffix}${pluralSuffix}`;
     }, ''), [ownedTickets]);
