@@ -15,10 +15,17 @@ import React, { useMemo } from 'react';
 import styles from "./index.module.scss";
 
 const TicketOwnedComponent = ({ ownedTickets}) => {
+
     const ownedTicketsString = useMemo(() => ownedTickets.reduce((acc, ownedTicket, index) => {
-        return `
-            ${acc}${acc ? `${index+1===ownedTickets.length? ' and ' : ', '}` : ''}
-            ${ownedTicket.qty} ${ownedTicket.type_name}${index === 0 ? !ownedTicket.type_name.toLowerCase().endsWith('ticket') ? ' ticket' : '' : ownedTicket.type_name.toLowerCase().endsWith('ticket') ? '' : ''}${ownedTicket.qty > 1 ? 's' : ''}`;
+        const lastTicket = index + 1 === ownedTickets.length;
+        const separator = acc && lastTicket ? ' and ' : ', ';
+        const qty = ownedTicket.qty;
+        const typeName = ownedTicket.type_name;
+        // Adds ticket to the end of type name if is not included
+        const typeNameSuffix = !typeName.toLowerCase().includes('ticket') ? ' Ticket' : '';        
+        const pluralSuffix = qty > 1 ? 's' : '';
+        
+        return `${acc}${acc ? separator : ''}${qty} ${typeName}${typeNameSuffix}${pluralSuffix}`;
     }, ''), [ownedTickets]);
 
     return (
