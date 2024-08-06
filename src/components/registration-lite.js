@@ -182,7 +182,7 @@ const RegistrationLite = (
 
     const { publicKey, provider } = getCurrentProvider(summitData);
 
-    const allowedTicketTypes = ticketTaxesLoaded ? ticketTypes.filter((tt) => (tt.sales_start_date === null && tt.sales_end_date === null) || (nowUtc >= tt.sales_start_date && nowUtc <= tt.sales_end_date)) : [];
+    const allowedTicketTypes = ticketTaxesLoaded ? ticketTypes.filter((tt) => tt.sub_type === "PrePaid" || (tt.sales_start_date === null && tt.sales_end_date === null) || (nowUtc >= tt.sales_start_date && nowUtc <= tt.sales_end_date)) : [];
     
     const noAvailableTickets = useMemo(() => profileData && ticketTaxesLoaded && !ticketTaxesError && allowedTicketTypes.length === 0 && step !== STEP_COMPLETE, [allowedTicketTypes]);
     const alreadyOwnedTickets = useMemo(() => profileData && ticketTaxesLoaded && !ticketTaxesError && allowedTicketTypes.length > 0 && ownedTickets.length > 0, [ownedTickets, allowedTicketTypes]);
