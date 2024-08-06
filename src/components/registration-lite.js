@@ -65,7 +65,7 @@ import {
     STEP_COMPLETE,
     STEP_PAYMENT,
     STEP_PERSONAL_INFO,
-    STEP_SELECT_TICKET_TYPE, VIEW_ITEM
+    STEP_SELECT_TICKET_TYPE, TICKET_TYPE_SUBTYPE_PREPAID, VIEW_ITEM
 } from '../utils/constants';
 
 let language = getCurrentUserLanguage();
@@ -182,7 +182,7 @@ const RegistrationLite = (
 
     const { publicKey, provider } = getCurrentProvider(summitData);
 
-    const allowedTicketTypes = ticketTaxesLoaded ? ticketTypes.filter((tt) => tt.sub_type === "PrePaid" || (tt.sales_start_date === null && tt.sales_end_date === null) || (nowUtc >= tt.sales_start_date && nowUtc <= tt.sales_end_date)) : [];
+    const allowedTicketTypes = ticketTaxesLoaded ? ticketTypes.filter((tt) => tt.sub_type === TICKET_TYPE_SUBTYPE_PREPAID || (tt.sales_start_date === null && tt.sales_end_date === null) || (nowUtc >= tt.sales_start_date && nowUtc <= tt.sales_end_date)) : [];
     
     const noAvailableTickets = useMemo(() => profileData && ticketTaxesLoaded && !ticketTaxesError && allowedTicketTypes.length === 0 && step !== STEP_COMPLETE, [allowedTicketTypes]);
     const alreadyOwnedTickets = useMemo(() => profileData && ticketTaxesLoaded && !ticketTaxesError && allowedTicketTypes.length > 0 && ownedTickets.length > 0, [ownedTickets, allowedTicketTypes]);
