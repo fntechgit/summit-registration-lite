@@ -104,6 +104,11 @@ const TicketTypeComponent = ({
 
     const promoCodeError = Object.keys(formErrors).length > 0 ? formErrors : null;
 
+    const handleRemovePromoCode = () => {
+        setTicket(null);
+        removePromoCode();
+    }
+
     return (
         <div className={`${styles.outerWrapper} step-wrapper`}>
             <>
@@ -210,7 +215,7 @@ const TicketTypeComponent = ({
                                         promoCode={promoCode}
                                         applyPromoCode={applyPromoCode}
                                         showMultipleTicketTexts={showMultipleTicketTexts}
-                                        removePromoCode={removePromoCode}
+                                        removePromoCode={handleRemovePromoCode}
                                         onPromoCodeChange={handlePromoCodeChange}/>
                                     {promoCodeError &&
                                         Object.values(promoCodeError).map((er, index) => (<div key={`error-${index}`} className={`${styles.promocodeError} alert alert-danger`}>{er}</div>))
