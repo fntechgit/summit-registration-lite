@@ -97,3 +97,44 @@ export const buildTrackEvent = (data, ticketQuantity = null, promoCode = null) =
 
     return eventData;
 }
+
+// Helper function to resolve CSS variables and parse colors
+
+export const parseColor = (input, element = document.documentElement) => {
+    // Check if the input is a CSS variable
+    if (input.startsWith("var(")) { 
+      const cssVarName = input.slice(4, -1).trim(); 
+      input = getComputedStyle(element).getPropertyValue(cssVarName).trim();
+    }
+
+    // Convert the resolved color to RGB
+    const div = document.createElement("div");  
+    div.style.color = input;
+    document.body.appendChild(div);
+    const m = getComputedStyle(div).color.match(/^rgb\s*\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)$/i);
+    document.body.removeChild(div);
+    return m ? [parseInt(m[1]), parseInt(m[2]), parseInt(m[3])] : null;
+}
+  
+
+export const getContrastingTextColor = (bgColor, lightColor, darkColor) => {
+    // Parse the background color to RGB
+    const rgb = parseColor(bgColor);
+
+    // Fallback to a default color if parsing fails
+    if (!rgb) return darkColor; // or lightColor
+  
+    const [r, g, b] = rgb;
+
+    // Calculate luminance 
+    const luminance = [r, g, b].map(channel => {
+      const normalized = channel / 255;
+      return normalized <= 0.03928 
+        ? normalized / 12.92 
+        : Math.pow((normalized + 0.055) / 1.055, 2.4);
+    }).reduce((acc, val, i) => acc + val * [0.2126, 0.7152, 0.0722][i], 0);
+  
+
+    // Return the contrasting color
+    return luminance > 0.179 ? darkColor : lightColor;
+}
