@@ -44,7 +44,7 @@ const LoginComponent = ({
             getLoginCode(email, getPasswordlessCode);
         }
     }
-    
+
     const emailButtonStyles = {
         color: getContrastingTextColor("var(--color_primary)", "var(--color_text_light)", "var(--color_text_dark)")
     };
@@ -60,7 +60,7 @@ const LoginComponent = ({
                             <input placeholder="youremail@example.com" value={email} onChange={e => setEmail(e.target.value)}
                                    onKeyPress={(ev) => ev.key === 'Enter' ? loginCode() : null} data-testid="email-input" />
                         </div>
-                        <div onClick={() => loginCode()} data-testid="email-button" id="email-button" style={emailButtonStyles}
+                        <div onClick={() => loginCode()} data-testid="email-button" style={emailButtonStyles}
                             className={`${styles.button} ${styles.email_login_button} ${email === '' ? `${styles.pointerDisabled} ${styles.buttonDisabled}` : `${styles.primaryEmailButton}`}`}>
                             <EmailRoundedIcon style={{ fontSize: "20px" }} />
                             <span>Email me a single-use code</span>
