@@ -423,7 +423,8 @@ export const getLoginCode = (email, getPasswordlessCode) => async (dispatch, get
             dispatch(createAction(SET_PASSWORDLESS_LENGTH)(res.response))
             resolve(res);
         }, (err) => {
-            reject(err);
+            const errorMessage = err.response?.body?.error || err.message;
+            reject(new Error(errorMessage)); 
         });
     });
 

@@ -32,6 +32,7 @@ const LoginComponent = ({
 
     const [email, setEmail] = useState(initialEmailValue);
     const [emailError, setEmailError] = useState();
+    const [loginError, setLoginError] = useState();
 
     const isValidEmail = (email) => {
         const re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
@@ -42,7 +43,9 @@ const LoginComponent = ({
         let isValid = isValidEmail(email);
         setEmailError(!isValid);
         if (isValid) {
-            getLoginCode(email, getPasswordlessCode);
+            getLoginCode(email, getPasswordlessCode).catch((e) => {
+                setLoginError(e.message);
+            });
         }
     }
     
@@ -68,6 +71,7 @@ const LoginComponent = ({
                             <span></span>
                         </div>
                         {emailError && <span data-testid="email-error">Please enter a valid email address</span>}
+                        {loginError && <span data-testid="login-error">{loginError}</span>}
                         <h2 className={styles.h2Styled}>or</h2>
                     </div>
                     {loginOptions.map((o, index) => {
