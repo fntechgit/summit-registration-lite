@@ -16,6 +16,7 @@ import PropTypes from 'prop-types';
 import EmailRoundedIcon from '@mui/icons-material/EmailRounded';
 
 import styles from "./index.module.scss";
+import { removeWhiteSpaces } from '../../utils/utils';
 
 const LoginComponent = ({
     summitData,
@@ -52,7 +53,7 @@ const LoginComponent = ({
                         {summitData?.secondary_logo && <img className="login-logo" src={`${summitData?.secondary_logo}`} />}
                         <div className={styles.title}>{title}</div>
                         <div className={styles.input}>
-                            <input placeholder="youremail@example.com" value={email} onChange={e => setEmail(e.target.value.replace(/\s+/g, ''))}
+                            <input placeholder="youremail@example.com" value={email} onChange={e => setEmail(removeWhiteSpaces(e.target.value))}
                                    onKeyPress={(ev) => ev.key === 'Enter' ? loginCode() : null} data-testid="email-input" />
                         </div>
                         <div onClick={() => loginCode()} data-testid="email-button"

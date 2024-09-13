@@ -97,3 +97,5 @@ export const buildTrackEvent = (data, ticketQuantity = null, promoCode = null) =
 
     return eventData;
 }
+
+export const removeWhiteSpaces = (value) => value.replace(/\s+/g, '');
