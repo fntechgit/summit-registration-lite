@@ -70,7 +70,7 @@ const LoginComponent = ({
                             <span>Email me a single-use code</span>
                             <span></span>
                         </div>
-                        {!emailError && <span className={styles.error} data-testid="email-error">Please enter a valid email address</span>}
+                        {emailError && <span className={styles.error} data-testid="email-error">Please enter a valid email address</span>}
                         {loginError && <span className={styles.error} data-testid="login-error">{loginError}</span>}
                         <h2 className={styles.h2Styled}>or</h2>
                     </div>
