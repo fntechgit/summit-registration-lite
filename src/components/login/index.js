@@ -56,12 +56,12 @@ const LoginComponent = ({
                             <input placeholder="youremail@example.com" value={email} onChange={e => setEmail(removeWhiteSpaces(e.target.value))}
                                    onKeyPress={(ev) => ev.key === 'Enter' ? loginCode() : null} data-testid="email-input" />
                         </div>
-                        <div onClick={() => loginCode()} data-testid="email-button"
-                            className={`${styles.button} ${styles.email_login_button} ${email === '' ? `${styles.pointerDisabled} ${styles.buttonDisabled}` : `${styles.primaryEmailButton}`}`}>
+                        <button onClick={() => loginCode()} data-testid="email-button" disabled={!email}
+                            className={`${styles.button} ${styles.primaryEmailButton}`}>
                             <EmailRoundedIcon style={{ fontSize: "20px" }} />
                             <span>Email me a single-use code</span>
                             <span></span>
-                        </div>
+                        </button>
                         {emailError && <span data-testid="email-error">Please enter a valid email address</span>}
                         <h2 className={styles.h2Styled}>or</h2>
                     </div>
