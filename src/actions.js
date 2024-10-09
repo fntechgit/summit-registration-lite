@@ -418,11 +418,8 @@ export const goToLogin = () => (dispatch, getState) => {
 
 export const getLoginCode = (email, getPasswordlessCode) => async (dispatch, getState) => {
     dispatch(createAction(SET_PASSWORDLESS_LOGIN)(email));
-
-    const encodeEmail = encodeURIComponent(email);
-
     return new Promise((resolve, reject) => {
-        getPasswordlessCode(encodeEmail).then((res) => {
+        getPasswordlessCode(email).then((res) => {
             dispatch(createAction(SET_PASSWORDLESS_LENGTH)(res.response))
             resolve(res);
         }, (err) => {
