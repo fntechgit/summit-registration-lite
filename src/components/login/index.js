@@ -31,8 +31,8 @@ const LoginComponent = ({
     title }) => {
 
     const [email, setEmail] = useState(initialEmailValue);
-    const [emailError, setEmailError] = useState();
-    const [loginError, setLoginError] = useState();
+    const [emailError, setEmailError] = useState(false);
+    const [loginError, setLoginError] = useState(false);
 
     const isValidEmail = (email) => {
         const re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
@@ -53,6 +53,15 @@ const LoginComponent = ({
         color: getContrastingTextColor(email === "" ? "var(--color_secondary_contrast)" : "var(--color_input_background_color)", "var(--color_text_light)", "var(--color_text_dark)")
     };
 
+    const handleEmailChange = (ev) => {
+        const { target: { value } } = ev;
+        if(!value.length) {
+            setEmailError(false);
+            setLoginError(false);
+        }
+        setEmail(removeWhiteSpaces(value));
+    }
+
     return (
         <div className={`${styles.loginWrapper}`}>
             <>
@@ -61,7 +70,7 @@ const LoginComponent = ({
                         {summitData?.secondary_logo && <img className="login-logo" src={`${summitData?.secondary_logo}`} />}
                         <div className={styles.title}>{title}</div>
                         <div className={styles.input}>
-                            <input placeholder="youremail@example.com" value={email} onChange={e => setEmail(removeWhiteSpaces(e.target.value))}
+                            <input placeholder="youremail@example.com" value={email} onChange={handleEmailChange}
                                    onKeyPress={(ev) => ev.key === 'Enter' ? loginCode() : null} data-testid="email-input" />
                         </div>
                         <div onClick={() => loginCode()} data-testid="email-button" id="email-button" style={emailButtonStyles}
