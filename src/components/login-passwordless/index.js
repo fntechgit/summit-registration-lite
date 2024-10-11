@@ -27,11 +27,13 @@ const PasswordlessLoginComponent = ({
     const [otpCode, setOtpCode] = useState('');
     const [otpError, setOtpError] = useState(false)
     const [codeSent, setCodeSent] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
 
     const tryPasswordlessLogin = (code) => {
         if (code.length === codeLength) {
-            setOtpError(false)
-            passwordlessLogin(otpCode, loginWithCode)
+            setOtpError(false);
+            setIsLoading(true);
+            passwordlessLogin(otpCode, loginWithCode).then(() => setIsLoading(false));
         } else {
             setOtpError(true)
         }
@@ -92,7 +94,7 @@ const PasswordlessLoginComponent = ({
                         </span>
                     )}
                     <div className={styles.verify}>
-                        <div className={`${styles.button} button`} onClick={() => tryPasswordlessLogin(otpCode)} data-testid="verify">Verify Email</div>
+                        <button className={`${styles.button} button`} disabled={isLoading} onClick={() => tryPasswordlessLogin(otpCode)} data-testid="verify">Verify Email</button>
                         <b>or go back and <span className={styles.link} onClick={() => goToLogin()} data-testid="go-back">try another way</span></b>
                     </div>
                 </div>
