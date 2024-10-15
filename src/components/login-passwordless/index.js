@@ -33,7 +33,7 @@ const PasswordlessLoginComponent = ({
         if (code.length === codeLength) {
             setOtpError(false);
             setIsLoading(true);
-            passwordlessLogin(otpCode, loginWithCode).then(() => setIsLoading(false));
+            passwordlessLogin(otpCode, loginWithCode).finally(() => setIsLoading(false));
         } else {
             setOtpError(true)
         }
