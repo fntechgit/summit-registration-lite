@@ -42,6 +42,7 @@ const LoginComponent = ({
     const loginCode = () => {
         let isValid = isValidEmail(email);
         setEmailError(!isValid);
+        setLoginError(false);
         if (isValid) {
             getLoginCode(email, getPasswordlessCode).catch((e) => {
                 setLoginError(e.message);
