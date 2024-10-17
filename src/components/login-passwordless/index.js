@@ -44,6 +44,9 @@ const PasswordlessLoginComponent = ({
             .then(() => {
                 setCodeSent(true);
                 setTimeout(() => setCodeSent(false), 3000);
+            })
+            .catch((err) => {
+                console.log("Error on resend:", err);
             });
     }
 

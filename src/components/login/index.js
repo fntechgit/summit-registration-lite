@@ -43,9 +43,11 @@ const LoginComponent = ({
         let isValid = isValidEmail(email);
         setEmailError(!isValid);
         setLoginError(false);
-        if (isValid) {
-            getLoginCode(email, getPasswordlessCode).catch((e) => {
-                setLoginError(e.message);
+        if (isValid) {                
+            getLoginCode(email, getPasswordlessCode)
+            .catch((err) => {
+                setLoginError(err.message);
+                console.log("Error on send:", err);
             });
         }
     }

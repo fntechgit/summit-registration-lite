@@ -271,6 +271,8 @@ const RegistrationLite = (
     const handleValidatePromocode = (data, onError) => {
         validatePromoCode(data, onError).then(() => {
             trackAddToCart(data);
+        }).catch((e) => {
+            console.log("Validate code error: ", e);
         });
     }
 
