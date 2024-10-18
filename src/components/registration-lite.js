@@ -157,6 +157,7 @@ const RegistrationLite = (
         removePromoCode,
         applyPromoCode,
         validatePromoCode,
+        handleSentryError,
         ...rest
     }) => {
 
@@ -272,7 +273,7 @@ const RegistrationLite = (
         validatePromoCode(data, onError).then(() => {
             trackAddToCart(data);
         }).catch((e) => {
-            console.log("Validate code error: ", e);
+            handleSentryError ? handleSentryError(e) : console.log("Validate code error: ", e);
         });
     }
 
@@ -329,6 +330,7 @@ const RegistrationLite = (
                                         getLoginCode={getLoginCode}
                                         getPasswordlessCode={getPasswordlessCode}
                                         initialEmailValue={loginInitialEmailInputValue}
+                                        handleSentryError={handleSentryError}
                                     />
                                 )}
 
@@ -345,6 +347,7 @@ const RegistrationLite = (
                                         idpLogoLight={idpLogoLight}
                                         idpLogoDark={idpLogoDark}
                                         idpLogoAlt={idpLogoAlt}
+                                        handleSentryError={handleSentryError}
                                     />
                                 )}
 
@@ -531,6 +534,7 @@ RegistrationLite.propTypes = {
     orderCompleteButton: PropTypes.string,
     showCompanyInputDefaultOptions: PropTypes.bool,
     companyDDLOptions2Show: PropTypes.number,
+    handleSentryError: PropTypes.func,
 };
 
 export default connect(mapStateToProps, {

@@ -29,6 +29,7 @@ const filterProps = {
     goToMyOrders: () => console.log('go to my orders'),
     goToEvent: () => console.log('go to event'),
     onPurchaseComplete: (order) => console.log('purchase complete', order),
+    handleSentryError: (error) => console.log("Send error to sentry", error),
     trackEvent: console.log,
     loading: false,
     apiBaseUrl: process.env.API_BASE_URL,

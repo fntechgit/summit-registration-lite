@@ -22,7 +22,7 @@ import FNidLogoDark from '../../assets/FNid_BLK_logo_rgb.svg';
 
 const PasswordlessLoginComponent = ({
         email, codeLength, passwordlessLogin, loginWithCode, codeError, goToLogin,
-        getLoginCode, getPasswordlessCode, idpLogoLight, idpLogoDark, idpLogoAlt }) => {
+        getLoginCode, getPasswordlessCode, idpLogoLight, idpLogoDark, idpLogoAlt, handleSentryError }) => {
 
     const [otpCode, setOtpCode] = useState('');
     const [otpError, setOtpError] = useState(false)
@@ -46,7 +46,7 @@ const PasswordlessLoginComponent = ({
                 setTimeout(() => setCodeSent(false), 3000);
             })
             .catch((err) => {
-                console.log("Error on resend:", err);
+                handleSentryError ? handleSentryError(err) : console.log("Error on resend:", err);                
             });
     }
 

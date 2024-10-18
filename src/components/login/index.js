@@ -28,7 +28,8 @@ const LoginComponent = ({
     getLoginCode,
     getPasswordlessCode,
     initialEmailValue,
-    title }) => {
+    title,
+    handleSentryError }) => {
 
     const [email, setEmail] = useState(initialEmailValue);
     const [emailError, setEmailError] = useState(false);
@@ -46,8 +47,8 @@ const LoginComponent = ({
         if (isValid) {                
             getLoginCode(email, getPasswordlessCode)
             .catch((err) => {
-                setLoginError(err.message);
-                console.log("Error on send:", err);
+                setLoginError(err.message);                
+                handleSentryError ? handleSentryError(err) : console.log("Error on send:", err);
             });
         }
     }
