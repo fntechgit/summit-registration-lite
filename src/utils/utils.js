@@ -2,6 +2,7 @@ import { formatCurrency } from '../helpers';
 import { ORDER_PAYMENT_METHOD_OFFLINE, ORDER_STATUS_PAID, TICKET_TYPE_SUBTYPE_PREPAID } from './constants';
 
 import React from 'react';
+import * as Sentry from "@sentry/react";
 
 /**
  * Copyright 2022 OpenStack Foundation
@@ -141,4 +142,9 @@ export const getContrastingTextColor = (bgColor, lightColor, darkColor) => {
     return luminance > 0.179 ? darkColor : lightColor;
 }
 
-export const isSentryInitialized = () => !!window.SENTRY_DSN;
+const isSentryInitialized = () => !!window.SENTRY_DSN;
+
+export const handleSentryException = (err) => 
+    isSentryInitialized() 
+        ? Sentry.captureException(err)
+        : console.log("Error on registration: ", err);

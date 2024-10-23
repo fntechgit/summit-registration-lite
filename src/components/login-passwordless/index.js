@@ -14,13 +14,12 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import OtpInput from 'react-otp-input';
-import * as Sentry from "@sentry/react";
 
 import styles from "./index.module.scss";
 
 import FNidLogo from '../../assets/FNid_WHT_logo_rgb.svg';
 import FNidLogoDark from '../../assets/FNid_BLK_logo_rgb.svg';
-import { isSentryInitialized } from '../../utils/utils';
+import { handleSentryException } from '../../utils/utils';
 
 const PasswordlessLoginComponent = ({
         email, codeLength, passwordlessLogin, loginWithCode, codeError, goToLogin,
@@ -48,7 +47,7 @@ const PasswordlessLoginComponent = ({
                 setTimeout(() => setCodeSent(false), 3000);
             })
             .catch((err) => {
-                isSentryInitialized() ? Sentry.captureException(err) : console.log("Error on resend:", err);                
+                handleSentryException(err);
             });
     }
 

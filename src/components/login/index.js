@@ -14,8 +14,7 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import EmailRoundedIcon from '@mui/icons-material/EmailRounded';
-import * as Sentry from "@sentry/react";
-import { getContrastingTextColor, isSentryInitialized } from '../../utils/utils'
+import { getContrastingTextColor, handleSentryException } from '../../utils/utils'
 
 import styles from "./index.module.scss";
 import { removeWhiteSpaces } from '../../utils/utils';
@@ -47,8 +46,8 @@ const LoginComponent = ({
         if (isValid) {                
             getLoginCode(email, getPasswordlessCode)
             .catch((err) => {
-                setLoginError(err.message);
-                isSentryInitialized() ? Sentry.captureException(err) : console.log("Error on send:", err);
+                setLoginError(err.message);                
+                handleSentryException(err);
             });
         }
     }
