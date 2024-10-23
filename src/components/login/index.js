@@ -31,7 +31,8 @@ const LoginComponent = ({
     title }) => {
 
     const [email, setEmail] = useState(initialEmailValue);
-    const [emailError, setEmailError] = useState();
+    const [emailError, setEmailError] = useState(false);
+    const [loginError, setLoginError] = useState(false);
 
     const isValidEmail = (email) => {
         const re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
@@ -41,14 +42,26 @@ const LoginComponent = ({
     const loginCode = () => {
         let isValid = isValidEmail(email);
         setEmailError(!isValid);
+        setLoginError(false);
         if (isValid) {
-            getLoginCode(email, getPasswordlessCode);
+            getLoginCode(email, getPasswordlessCode).catch((e) => {
+                setLoginError(e.message);
+            });
         }
     }
     
     const emailButtonStyles = {
         color: getContrastingTextColor(email === "" ? "var(--color_secondary_contrast)" : "var(--color_input_background_color)", "var(--color_text_light)", "var(--color_text_dark)")
     };
+
+    const handleEmailChange = (ev) => {
+        const { target: { value } } = ev;
+        if(!value.length) {
+            setEmailError(false);
+            setLoginError(false);
+        }
+        setEmail(removeWhiteSpaces(value));
+    }
 
     return (
         <div className={`${styles.loginWrapper}`}>
@@ -58,7 +71,7 @@ const LoginComponent = ({
                         {summitData?.secondary_logo && <img className="login-logo" src={`${summitData?.secondary_logo}`} />}
                         <div className={styles.title}>{title}</div>
                         <div className={styles.input}>
-                            <input placeholder="youremail@example.com" value={email} onChange={e => setEmail(removeWhiteSpaces(e.target.value))}
+                            <input placeholder="youremail@example.com" value={email} onChange={handleEmailChange}
                                    onKeyPress={(ev) => ev.key === 'Enter' ? loginCode() : null} data-testid="email-input" />
                         </div>
                         <div onClick={() => loginCode()} data-testid="email-button" id="email-button" style={emailButtonStyles}
@@ -67,7 +80,8 @@ const LoginComponent = ({
                             <span>Email me a single-use code</span>
                             <span></span>
                         </div>
-                        {emailError && <span data-testid="email-error">Please enter a valid email address</span>}
+                        {emailError && <span className={styles.error} data-testid="email-error">Please enter a valid email address</span>}
+                        {loginError && <span className={styles.error} data-testid="login-error">{loginError}</span>}
                         <h2 className={styles.h2Styled}>or</h2>
                     </div>
                     {loginOptions.map((o, index) => {
