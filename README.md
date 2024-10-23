@@ -87,8 +87,6 @@ React component for the summit registration lite widget
 
    **idpLogoAlt**             = string for custom alt logo on otp login
 
-   **handleSentryError**      = method passed that handles errors and sends them to the Sentry instance
-
 ## PUBLISH TO NPM:
 
 1 - yarn build && yarn publish

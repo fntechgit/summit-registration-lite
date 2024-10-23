@@ -14,6 +14,7 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { connect } from "react-redux";
 import PropTypes from 'prop-types';
+import * as Sentry from "@sentry/react";
 import { animated, config, useSpring } from "react-spring";
 import { useMeasure } from "react-use";
 import {
@@ -55,7 +56,7 @@ import ButtonBarComponent from './button-bar';
 import PurchaseComplete from './purchase-complete';
 import PasswordlessLoginComponent from './login-passwordless';
 import TicketOwnedComponent from './ticket-owned';
-import { buildTrackEvent, getCurrentProvider } from '../utils/utils';
+import { buildTrackEvent, getCurrentProvider, isSentryInitialized } from '../utils/utils';
 import NoAllowedTickets from './no-allowed-tickets';
 import TicketTaxesError from './ticket-taxes-error';
 import T from 'i18n-react';
@@ -157,7 +158,6 @@ const RegistrationLite = (
         removePromoCode,
         applyPromoCode,
         validatePromoCode,
-        handleSentryError,
         ...rest
     }) => {
 
@@ -273,7 +273,7 @@ const RegistrationLite = (
         validatePromoCode(data, onError).then(() => {
             trackAddToCart(data);
         }).catch((e) => {
-            handleSentryError ? handleSentryError(e) : console.log("Validate code error: ", e);
+            isSentryInitialized() ? Sentry.captureException(e) : console.log("Validate code error: ", e);
         });
     }
 
@@ -330,7 +330,6 @@ const RegistrationLite = (
                                         getLoginCode={getLoginCode}
                                         getPasswordlessCode={getPasswordlessCode}
                                         initialEmailValue={loginInitialEmailInputValue}
-                                        handleSentryError={handleSentryError}
                                     />
                                 )}
 
@@ -347,7 +346,6 @@ const RegistrationLite = (
                                         idpLogoLight={idpLogoLight}
                                         idpLogoDark={idpLogoDark}
                                         idpLogoAlt={idpLogoAlt}
-                                        handleSentryError={handleSentryError}
                                     />
                                 )}
 
@@ -534,7 +532,6 @@ RegistrationLite.propTypes = {
     orderCompleteButton: PropTypes.string,
     showCompanyInputDefaultOptions: PropTypes.bool,
     companyDDLOptions2Show: PropTypes.number,
-    handleSentryError: PropTypes.func,
 };
 
 export default connect(mapStateToProps, {

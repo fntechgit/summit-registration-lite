@@ -140,3 +140,5 @@ export const getContrastingTextColor = (bgColor, lightColor, darkColor) => {
     // Return the contrasting color
     return luminance > 0.179 ? darkColor : lightColor;
 }
+
+export const isSentryInitialized = () => !!window.SENTRY_DSN;
