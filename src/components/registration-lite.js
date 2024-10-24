@@ -55,7 +55,7 @@ import ButtonBarComponent from './button-bar';
 import PurchaseComplete from './purchase-complete';
 import PasswordlessLoginComponent from './login-passwordless';
 import TicketOwnedComponent from './ticket-owned';
-import { buildTrackEvent, getCurrentProvider } from '../utils/utils';
+import { buildTrackEvent, getCurrentProvider, handleSentryException } from '../utils/utils';
 import NoAllowedTickets from './no-allowed-tickets';
 import TicketTaxesError from './ticket-taxes-error';
 import T from 'i18n-react';
@@ -271,6 +271,8 @@ const RegistrationLite = (
     const handleValidatePromocode = (data, onError) => {
         validatePromoCode(data, onError).then(() => {
             trackAddToCart(data);
+        }).catch((e) => {
+            handleSentryException(e);            
         });
     }
 

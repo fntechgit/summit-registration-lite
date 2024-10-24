@@ -19,6 +19,7 @@ import styles from "./index.module.scss";
 
 import FNidLogo from '../../assets/FNid_WHT_logo_rgb.svg';
 import FNidLogoDark from '../../assets/FNid_BLK_logo_rgb.svg';
+import { handleSentryException } from '../../utils/utils';
 
 const PasswordlessLoginComponent = ({
         email, codeLength, passwordlessLogin, loginWithCode, codeError, goToLogin,
@@ -44,6 +45,9 @@ const PasswordlessLoginComponent = ({
             .then(() => {
                 setCodeSent(true);
                 setTimeout(() => setCodeSent(false), 3000);
+            })
+            .catch((err) => {
+                handleSentryException(err);
             });
     }
 

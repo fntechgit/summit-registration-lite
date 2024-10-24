@@ -14,7 +14,7 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import EmailRoundedIcon from '@mui/icons-material/EmailRounded';
-import { getContrastingTextColor } from '../../utils/utils'
+import { getContrastingTextColor, handleSentryException } from '../../utils/utils'
 
 import styles from "./index.module.scss";
 import { removeWhiteSpaces } from '../../utils/utils';
@@ -43,9 +43,11 @@ const LoginComponent = ({
         let isValid = isValidEmail(email);
         setEmailError(!isValid);
         setLoginError(false);
-        if (isValid) {
-            getLoginCode(email, getPasswordlessCode).catch((e) => {
-                setLoginError(e.message);
+        if (isValid) {                
+            getLoginCode(email, getPasswordlessCode)
+            .catch((err) => {
+                setLoginError(err.message);                
+                handleSentryException(err);
             });
         }
     }
