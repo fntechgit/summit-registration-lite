@@ -6,16 +6,17 @@
   flex-direction: column;
 
   .codeSent {
-    background-color: #fff6d7;
+    background-color: #a5dc86;
     font-size: 16px;
-    color: #767676;
+    color: var(--color_text_dark);
     text-align: center;
-    width: 200px;
+    width: 215px;
     position: absolute;
-    top: 10px;
-    left: calc(50% + 100px);
+    top: 50px;
+    left: calc(50% + 110px);
     height: 50px;
     line-height: 50px;
+    border-radius: 10px;
   }
 
   .innerWrapper {
