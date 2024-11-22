@@ -1,5 +1,5 @@
 .passwordlessWrapper {
-  height: 400px;
+  height: 450px;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -56,7 +56,7 @@
       font-size: 14px;
     }
     .verify {
-      margin-top: 20px;
+      margin-top: 10px;
       .button {
         padding: 10px 30px;
         font-weight: normal;
@@ -81,10 +81,18 @@
     margin: auto 0 0 0;
     font-weight: normal;
     font-size: 14px;
-    span {
+    button {
       color: var(--color_text_dark);
       text-decoration: underline;
       cursor: pointer;
+      display: inline;
+      border: none;
+      background-color: transparent;
+      padding: 0;
+    }
+    .disabled {
+      color: var(--color_text_med);
+      cursor: not-allowed;
     }
   }
 }
