@@ -22,8 +22,8 @@ import FNidLogoDark from '../../assets/FNid_BLK_logo_rgb.svg';
 import { handleSentryException } from '../../utils/utils';
 
 const PasswordlessLoginComponent = ({
-        email, codeLength, passwordlessLogin, loginWithCode, codeError, goToLogin,
-        getLoginCode, getPasswordlessCode, idpLogoLight, idpLogoDark, idpLogoAlt }) => {
+    email, codeLength, passwordlessLogin, loginWithCode, codeError, goToLogin,
+    getLoginCode, getPasswordlessCode, idpLogoLight, idpLogoDark, idpLogoAlt }) => {
 
     const [otpCode, setOtpCode] = useState('');
     const [otpError, setOtpError] = useState(false)
@@ -59,9 +59,6 @@ const PasswordlessLoginComponent = ({
     return (
         <div className={`${styles.passwordlessWrapper} step-wrapper`}>
             <>
-                {codeSent &&
-                <div className={styles.codeSent}>Code has been resent.</div>
-                }
                 <div className={`${styles.innerWrapper}`}>
                     {/* Only one logo is displayed based on data-theme through CSS */}
                     <img src={idpLogoDark || FNidLogoDark} alt={idpLogoAlt || "FNid"} className={`${styles.logo} ${styles.logoDark}`} />
@@ -89,7 +86,7 @@ const PasswordlessLoginComponent = ({
                                 this is to simulate the on key press submit (enter)
                                 @see https://github.com/devfolioco/react-otp-input/issues/98
                             */}
-                            <button style={{display:'none'}} type='submit' />
+                            <button style={{ display: 'none' }} type='submit' />
                         </form>
                     </div>
                     {codeError && (
@@ -97,6 +94,9 @@ const PasswordlessLoginComponent = ({
                             The code you entered it's incorrect. <br /> Please try again.
                         </span>
                     )}
+                    {codeSent &&
+                        <span className={styles.codeSent}>Code has been resent.</span>
+                    }
                     <div className={styles.verify}>
                         <button className={`${styles.button} button`} disabled={isLoading} onClick={() => tryPasswordlessLogin(otpCode)} data-testid="verify">Verify Email</button>
                         <b>or go back and <span className={styles.link} onClick={() => goToLogin()} data-testid="go-back">try another way</span></b>
