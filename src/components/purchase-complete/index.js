@@ -92,6 +92,13 @@ const PurchaseComplete = ({
                 T.translate('purchase_complete_step.order_complete_button')
     );
 
+    let orderCompleteTitle = (
+        rest.hasOwnProperty('orderCompleteTitle') && typeof rest.orderCompleteTitle !== 'undefined' ?
+            rest.orderCompleteTitle
+            :
+            T.translate('purchase_complete_step.title')
+    );
+
     let orderComplete1stParagraph = (
         currentTicket ?
             !attendeeIsSomeoneElse && rest.hasOwnProperty('initialOrderComplete1stParagraph') && typeof rest.initialOrderComplete1stParagraph !== 'undefined' ?
@@ -140,7 +147,7 @@ const PurchaseComplete = ({
                 <i className='fa fa-ticket'></i>
             </div>
             <span className={styles.complete}>
-               {T.translate('purchase_complete_step.title')}
+               {orderCompleteTitle}
             </span>
             {
                 isActive ?

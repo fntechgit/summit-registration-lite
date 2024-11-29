@@ -449,6 +449,7 @@ const RegistrationLite = (
                                         initialOrderComplete1stParagraph={rest.initialOrderComplete1stParagraph}
                                         initialOrderComplete2ndParagraph={rest.initialOrderComplete2ndParagraph}
                                         initialOrderCompleteButton={rest.initialOrderCompleteButton}
+                                        orderCompleteTitle={rest.orderCompleteTitle}
                                         orderComplete1stParagraph={rest.orderComplete1stParagraph}
                                         orderComplete2ndParagraph={rest.orderComplete2ndParagraph}
                                         orderCompleteButton={rest.orderCompleteButton}
@@ -526,6 +527,7 @@ RegistrationLite.propTypes = {
     initialOrderComplete1stParagraph: PropTypes.string,
     initialOrderComplete2ndParagraph: PropTypes.string,
     initialOrderCompleteButton: PropTypes.string,
+    orderCompleteTitle: PropTypes.string,
     orderComplete1stParagraph: PropTypes.string,
     orderComplete2ndParagraph: PropTypes.string,
     orderCompleteButton: PropTypes.string,
