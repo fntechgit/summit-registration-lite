@@ -111,6 +111,7 @@ const RegistrationLite = (
         passwordlessCodeSent,
         passwordlessEmail,
         passwordlessCode,
+        passwordlessCodeLifeTime,
         getPasswordlessCode,
         passwordlessCodeError,
         loginWithCode,
@@ -335,6 +336,7 @@ const RegistrationLite = (
                                 {!profileData && passwordlessCodeSent && (
                                     <PasswordlessLoginComponent
                                         codeLength={passwordlessCode}
+                                        codeLifeTime={passwordlessCodeLifeTime}
                                         email={passwordlessEmail}
                                         passwordlessLogin={passwordlessLogin}
                                         loginWithCode={loginWithCode}
@@ -489,6 +491,7 @@ const mapStateToProps = ({ registrationLiteState }) => ({
     step: registrationLiteState.step,
     passwordlessEmail: registrationLiteState.passwordless.email,
     passwordlessCode: registrationLiteState.passwordless.otp_length,
+    passwordlessCodeLifeTime: registrationLiteState.passwordless.otp_lifetime,
     passwordlessCodeSent: registrationLiteState.passwordless.code_sent,
     passwordlessCodeError: registrationLiteState.passwordless.error,
     nowUtc: registrationLiteState.nowUtc,

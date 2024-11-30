@@ -41,7 +41,7 @@ export const DELETE_RESERVATION_ERROR = 'DELETE_RESERVATION_ERROR';
 export const PAY_RESERVATION = 'PAY_RESERVATION';
 export const CLEAR_RESERVATION = 'CLEAR_RESERVATION';
 export const SET_PASSWORDLESS_LOGIN = 'SET_PASSWORDLESS_LOGIN';
-export const SET_PASSWORDLESS_LENGTH = 'SET_PASSWORDLESS_LENGTH';
+export const SET_PASSWORDLESS_SETTINGS = 'SET_PASSWORDLESS_SETTINGS';
 export const SET_PASSWORDLESS_ERROR = 'SET_PASSWORDLESS_ERROR';
 export const GO_TO_LOGIN = 'GO_TO_LOGIN';
 export const GET_MY_INVITATION = 'GET_MY_INVITATION';
@@ -420,7 +420,7 @@ export const getLoginCode = (email, getPasswordlessCode) => async (dispatch, get
     dispatch(createAction(SET_PASSWORDLESS_LOGIN)(email));
     return new Promise((resolve, reject) => {
         getPasswordlessCode(email).then((res) => {
-            dispatch(createAction(SET_PASSWORDLESS_LENGTH)(res.response))
+            dispatch(createAction(SET_PASSWORDLESS_SETTINGS)(res.response))
             resolve(res);
         }, (err) => {
             const errorMessage = err.response?.body?.error || err.message;
