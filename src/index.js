@@ -21,7 +21,7 @@ import ProfileData from './profile.json';
 
 const filterProps = {
     authUser: (provider) => console.log('login with ', provider),
-    getPasswordlessCode: (email) => Promise.resolve({response: { otp_length: 5}}),
+    getPasswordlessCode: (email) => Promise.resolve({response: { otp_length: 5, otp_lifetime: 600}}),
     loginWithCode: (code) => Promise.reject('error'),
     getAccessToken: () => process.env.ACCESS_TOKEN,
     closeWidget: () => console.log('close widget'),

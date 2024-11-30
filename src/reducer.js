@@ -24,7 +24,7 @@ import {
     GET_TICKET_TYPES,
     GET_TAX_TYPES,
     SET_PASSWORDLESS_LOGIN,
-    SET_PASSWORDLESS_LENGTH,
+    SET_PASSWORDLESS_SETTINGS,
     SET_PASSWORDLESS_ERROR,
     GO_TO_LOGIN,
     GET_MY_INVITATION,
@@ -52,6 +52,7 @@ const DEFAULT_STATE = {
     passwordless: {
         email: null,
         otp_length: 0,
+        otp_lifetime: 0,
         code_sent: false,
         error: false
     },
@@ -128,11 +129,11 @@ const RegistrationLiteReducer = (state = DEFAULT_STATE, action) => {
             return { ...state, passwordless: { ...state.passwordless, code_sent: false, error: false } }
         }
         case SET_PASSWORDLESS_LOGIN: {
-            return { ...state, passwordless: { ...state.passwordless, email: payload, error: false } }
+            return { ...state, passwordless: { ...state.passwordless, email: payload, error: false, otp_lifetime: 0 } }
         }
-        case SET_PASSWORDLESS_LENGTH: {
-            const { otp_length } = payload;
-            return { ...state, passwordless: { ...state.passwordless, otp_length, code_sent: true, error: false } }
+        case SET_PASSWORDLESS_SETTINGS: {
+            const { otp_length, otp_lifetime } = payload;
+            return { ...state, passwordless: { ...state.passwordless, otp_length, otp_lifetime, code_sent: true, error: false } }
         }
         case SET_PASSWORDLESS_ERROR: {
             return { ...state, passwordless: { ...state.passwordless, error: true } }

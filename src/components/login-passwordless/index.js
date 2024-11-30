@@ -14,38 +14,32 @@
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import OtpInput from 'react-otp-input';
+import moment from 'moment-timezone';
 
 import styles from "./index.module.scss";
 
 import FNidLogo from '../../assets/FNid_WHT_logo_rgb.svg';
 import FNidLogoDark from '../../assets/FNid_BLK_logo_rgb.svg';
 import { handleSentryException } from '../../utils/utils';
+import { RESEND_TIME } from '../../utils/constants';
+import useCountdown from '../../utils/hooks/useCountdown';
 
 const PasswordlessLoginComponent = ({
-    email, codeLength, passwordlessLogin, loginWithCode, codeError, goToLogin,
+    email, codeLength, codeLifeTime, passwordlessLogin, loginWithCode, codeError, goToLogin,
     getLoginCode, getPasswordlessCode, idpLogoLight, idpLogoDark, idpLogoAlt }) => {
 
     const [otpCode, setOtpCode] = useState('');
     const [otpError, setOtpError] = useState(false)
     const [codeSent, setCodeSent] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
-    const [countdown, setCountdown] = useState(0);
+    const [resendCountdown, resetResendCountdown] = useCountdown(0);
+    const [lifetimeCountdown, resetLifetimeCountdown] = useCountdown(0);
 
     useEffect(() => {
-        if (countdown > 0) {
-            const timer = setInterval(() => {
-                setCountdown((prevCountdown) => {
-                    if (prevCountdown <= 1) {
-                        clearInterval(timer);
-                        return 0;
-                    }
-                    return prevCountdown - 1;
-                });
-            }, 1000);
-
-            return () => clearInterval(timer);
+        if(codeLifeTime > 0) {
+            resetLifetimeCountdown(codeLifeTime);
         }
-    }, [countdown]);
+    }, [codeLifeTime])
 
     const tryPasswordlessLogin = (code) => {
         if (code.length === codeLength) {
@@ -62,7 +56,7 @@ const PasswordlessLoginComponent = ({
             .then(() => {
                 setCodeSent(true);
                 setTimeout(() => setCodeSent(false), 3000);
-                setCountdown(60);
+                resetResendCountdown(RESEND_TIME);
             })
             .catch((err) => {
                 handleSentryException(err);
@@ -73,6 +67,11 @@ const PasswordlessLoginComponent = ({
         e.preventDefault();
         tryPasswordlessLogin(otpCode);
     };
+
+    const formatDuration = (seconds) => {
+        const duration = moment.duration(seconds, 'seconds');
+        return moment.utc(duration.asMilliseconds()).format('mm:ss');
+      };
 
     return (
         <div className={`${styles.passwordlessWrapper} step-wrapper`}>
@@ -113,12 +112,10 @@ const PasswordlessLoginComponent = ({
                         </span>
                     )}
                     {codeSent &&
-                        <span className={styles.codeSent}>Code has been resent.</span>
+                        <p className={styles.codeSent}>Code has been resent.</p>
                     }
-                    {countdown > 0 &&
-                        <span>
-                            Resend in {countdown} seconds
-                        </span>
+                    {lifetimeCountdown > 0 &&
+                        <p className={styles.codeSent}>Code expires in {formatDuration(lifetimeCountdown)} minutes.</p>
                     }
                     <div className={styles.verify}>
                         <button className={`${styles.button} button`} disabled={isLoading} onClick={() => tryPasswordlessLogin(otpCode)} data-testid="verify">Verify Email</button>
@@ -126,7 +123,15 @@ const PasswordlessLoginComponent = ({
                     </div>
                 </div>
                 <div className={styles.resend}>
-                    Didn’t receive it? Check your spam/junk folder, or <button className={`${styles.link} ${countdown > 0 ? styles.disabled : ''}`} disabled={countdown > 0} onClick={() => resendCode()} data-testid="resend">resend code</button> now.
+                    Didn’t receive it? Check your spam/junk folder, or&nbsp;
+                    <button
+                        className={`${styles.link} ${resendCountdown > 0 ? styles.disabled : ''}`}
+                        disabled={resendCountdown > 0}
+                        onClick={() => resendCode()}
+                        data-testid="resend">
+                        resend code {' '} {resendCountdown > 0 && (<span>({resendCountdown})</span>)}
+                    </button>
+                    &nbsp;now.
                 </div>
             </>
         </div>
