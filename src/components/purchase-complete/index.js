@@ -93,7 +93,8 @@ const PurchaseComplete = ({
     );
 
     let orderCompleteTitle = (
-        rest.hasOwnProperty('orderCompleteTitle') && typeof rest.orderCompleteTitle !== 'undefined' ?
+        rest.hasOwnProperty('orderCompleteTitle') && !isEmptyString(rest.orderCompleteTitle)
+        && typeof rest.orderCompleteTitle !== 'undefined' ?
             rest.orderCompleteTitle
             :
             T.translate('purchase_complete_step.title')
