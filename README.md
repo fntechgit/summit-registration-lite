@@ -32,6 +32,8 @@ React component for the summit registration lite widget
 
    **initialOrderCompleteButton** = string with the text for the button when the user bought his first order
 
+   **orderCompleteTitle** = string with the text for title when the user bought an order
+
    **orderComplete1stParagraph** = string with the text for the first paragraph when the user bought an order
 
    **orderComplete2ndParagraph** = string with the text for the second paragraph when the user bought an order
