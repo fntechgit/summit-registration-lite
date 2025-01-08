@@ -230,7 +230,7 @@ const TicketTypeComponent = ({
                                 </a>
                             }
                             <ReactTooltip id="ticket-quantity-info">
-                                <div className={styles.moreInfoTooltip}>To purchase more than one ticket type, simply place another order after this registration order is complete. Only one ticket type can be chosen per order.</div>
+                                <div className={styles.moreInfoTooltip}>Only one ticket type can be selected per order. To purchase multiple ticket types, please place a separate registration order for each ticket type.</div>
                             </ReactTooltip>
                         </div>
                     </animated.div>

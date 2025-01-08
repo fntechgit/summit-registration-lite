@@ -65,7 +65,7 @@ const PromoCodeInput = ({ applyPromoCode, promoCode, removePromoCode, showMultip
             </div>
             <ReactTooltip id="promo-code-info">
                 <div className={styles.moreInfoTooltip}>
-                    Promo code will be applied to all tickets in this order.  If you wish to utilize more than one promo code, simply place another order after you complete this registration order. Only one promo code can be applied per order.
+                    Only one promo code can be used per order; the code will be applied to all tickets in this order. If you'd like to use multiple promo codes, please place a separate registration order for each promo code.
                 </div>
             </ReactTooltip>
         </>
