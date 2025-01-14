@@ -13,6 +13,7 @@
 
 import React, { useState, useEffect } from 'react';
 import ReactTooltip from 'react-tooltip';
+import T from 'i18n-react';
 import appliedCode from '../../assets/icon-check-circle.svg';
 import styles from "./index.module.scss";
 import { isEmptyString } from '../../utils/utils';
@@ -64,8 +65,8 @@ const PromoCodeInput = ({ applyPromoCode, promoCode, removePromoCode, showMultip
                 }
             </div>
             <ReactTooltip id="promo-code-info">
-                <div className={styles.moreInfoTooltip}>
-                    Only one promo code can be used per order; the code will be applied to all tickets in this order. If you'd like to use multiple promo codes, please place a separate registration order for each promo code.
+                <div className={styles.moreInfoTooltip}>                    
+                    {T.translate("promo_code.promo_code_tooltip")}
                 </div>
             </ReactTooltip>
         </>

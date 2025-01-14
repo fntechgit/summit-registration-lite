@@ -9,5 +9,11 @@
     "initial_order_footer_label": "If you wish to transfer your assigned ticket, close this window and visit the \"My Orders/Tickets\" tab in the top navigation bar. ",
     "footer_assistance_text" : "For further assistance, please email <a href=\"mailto:{supportEmail}\">{supportEmail}</a>",
     "event_will_start_text": "The event will start on {date} at {time} {time_zone_label}"
+  },
+  "ticket_type": {
+    "ticket_quantity_tooltip": "Only one ticket type can be selected per order. To purchase multiple ticket types, please place a separate registration order for each ticket type.",    
+  },
+  "promo_code": {
+    "promo_code_tooltip": "Only one promo code can be used per order; the code will be applied to all tickets in this order. If you'd like to use multiple promo codes, please place a separate registration order for each promo code."
   }
 }

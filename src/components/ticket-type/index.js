@@ -14,6 +14,7 @@ import RawHTML from 'openstack-uicore-foundation/lib/components/raw-html'
 import React, { useState, useEffect, useMemo } from 'react';
 import { useSpring, config, animated } from "react-spring";
 import { useMeasure } from "react-use";
+import T from 'i18n-react';
 import styles from "./index.module.scss";
 import TicketDropdownComponent from '../ticket-dropdown';
 import { isInPersonTicketType } from "../../actions";
@@ -230,7 +231,9 @@ const TicketTypeComponent = ({
                                 </a>
                             }
                             <ReactTooltip id="ticket-quantity-info">
-                                <div className={styles.moreInfoTooltip}>Only one ticket type can be selected per order. To purchase multiple ticket types, please place a separate registration order for each ticket type.</div>
+                                <div className={styles.moreInfoTooltip}>
+                                    {T.translate("ticket_type.ticket_quantity_tooltip")}
+                                </div>
                             </ReactTooltip>
                         </div>
                     </animated.div>
