@@ -141,6 +141,7 @@ const PasswordlessLoginComponent = ({
 PasswordlessLoginComponent.propTypes = {
     email: PropTypes.string.isRequired,
     codeLength: PropTypes.number.isRequired,
+    codeLifeTime: PropTypes.number.isRequired,
     passwordlessLogin: PropTypes.func.isRequired,
     loginWithCode: PropTypes.func,
     codeError: PropTypes.bool,
