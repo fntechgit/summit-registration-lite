@@ -21,27 +21,27 @@ import { isInPersonTicketType } from "../../actions";
 import ReactTooltip from 'react-tooltip';
 import { formatCurrency } from '../../helpers';
 import { getTicketMaxQuantity } from '../../helpers';
-import { getTicketCost, getTicketTaxes, isPrePaidOrder  } from '../../utils/utils';
+import { getTicketCost, getTicketTaxes, isPrePaidOrder } from '../../utils/utils';
 
 import PromoCodeInput from '../promocode-input';
 import { VIEW_ITEM } from '../../utils/constants';
 
 const TicketTypeComponent = ({
-        allowedTicketTypes,
-        originalTicketTypes, // these are the original ones
-        taxTypes,
-        isActive,
-        changeForm,
-        formErrors,
-        reservation,
-        inPersonDisclaimer,
-        showMultipleTicketTexts,
-        allowPromoCodes,
-        applyPromoCode,
-        removePromoCode,
-        promoCode,
-        trackViewItem
-    }) => {
+    allowedTicketTypes,
+    originalTicketTypes, // these are the original ones
+    taxTypes,
+    isActive,
+    changeForm,
+    formErrors,
+    reservation,
+    inPersonDisclaimer,
+    showMultipleTicketTexts,
+    allowPromoCodes,
+    applyPromoCode,
+    removePromoCode,
+    promoCode,
+    trackViewItem
+}) => {
     const [ticket, setTicket] = useState(null);
     const [quantity, setQuantity] = useState(1);
 
@@ -75,13 +75,13 @@ const TicketTypeComponent = ({
         // try to find the updated ticket from the original ticket types collection from api
         // and update the current ticket that exist on component state
         // bc a discount could be applied to the current selected ticket type
-        if(!ticket) return;
+        if (!ticket) return;
         const updatedCurrentTicket = originalTicketTypes.find(t => t?.id === ticket.id);
         if (updatedCurrentTicket) {
             changeForm({ ticketType: updatedCurrentTicket })
             setTicket(updatedCurrentTicket);
         }
-        if (!promoCode) changeForm({promoCode : ''})
+        if (!promoCode) changeForm({ promoCode: '' })
     }, [promoCode, originalTicketTypes])
 
     const isPrePaidReservation = useMemo(
@@ -96,7 +96,7 @@ const TicketTypeComponent = ({
     }
 
     const handlePromoCodeChange = (code) => {
-        changeForm({promoCode: code});
+        changeForm({ promoCode: code });
     }
 
     const incrementQuantity = () => setQuantity(quantity + 1);
@@ -217,7 +217,7 @@ const TicketTypeComponent = ({
                                         applyPromoCode={applyPromoCode}
                                         showMultipleTicketTexts={showMultipleTicketTexts}
                                         removePromoCode={handleRemovePromoCode}
-                                        onPromoCodeChange={handlePromoCodeChange}/>
+                                        onPromoCodeChange={handlePromoCodeChange} />
                                     {promoCodeError &&
                                         Object.values(promoCodeError).map((er, index) => (<div key={`error-${index}`} className={`${styles.promocodeError} alert alert-danger`}>{er}</div>))
                                     }
@@ -230,7 +230,12 @@ const TicketTypeComponent = ({
                                     Need multiple ticket types?
                                 </a>
                             }
-                            <ReactTooltip id="ticket-quantity-info">
+                            <ReactTooltip id="ticket-quantity-info" overridePosition={({ left, top }, _e, _t, node) => {
+                                return {
+                                    top,
+                                    left: typeof node === 'string' ? left : Math.max(left, 0),
+                                };
+                            }}>
                                 <div className={styles.moreInfoTooltip}>
                                     {T.translate("ticket_type.ticket_quantity_tooltip")}
                                 </div>

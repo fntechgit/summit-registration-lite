@@ -16,7 +16,6 @@ import { RegistrationCompanyInput, RadioList } from 'openstack-uicore-foundation
 import { useForm } from 'react-hook-form';
 import { useSpring, config, animated } from "react-spring";
 import { useMeasure } from "react-use";
-import ReactTooltip from 'react-tooltip';
 import { formatErrorMessage } from '../../helpers';
 
 import styles from "./index.module.scss";

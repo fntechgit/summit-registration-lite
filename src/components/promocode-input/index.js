@@ -21,7 +21,7 @@ import { isEmptyString } from '../../utils/utils';
 const PromoCodeInput = ({ applyPromoCode, promoCode, removePromoCode, showMultipleTicketTexts, onPromoCodeChange }) => {
 
     const [statePromoCode, setStatePromoCode] = useState(promoCode);
-    
+
     const handlePromoCodeChange = (value) => {
         onPromoCodeChange(value);
         setStatePromoCode(value);
@@ -64,8 +64,13 @@ const PromoCodeInput = ({ applyPromoCode, promoCode, removePromoCode, showMultip
                     </a>
                 }
             </div>
-            <ReactTooltip id="promo-code-info">
-                <div className={styles.moreInfoTooltip}>                    
+            <ReactTooltip id="promo-code-info" overridePosition={({ left, top }, _e, _t, node) => {
+                return {
+                    top,
+                    left: typeof node === 'string' ? left : Math.max(left, 0),
+                };
+            }}>
+                <div className={styles.moreInfoTooltip}>
                     {T.translate("promo_code.promo_code_tooltip")}
                 </div>
             </ReactTooltip>
