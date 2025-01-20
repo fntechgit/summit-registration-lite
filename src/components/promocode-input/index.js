@@ -16,12 +16,12 @@ import ReactTooltip from 'react-tooltip';
 import T from 'i18n-react';
 import appliedCode from '../../assets/icon-check-circle.svg';
 import styles from "./index.module.scss";
-import { isEmptyString } from '../../utils/utils';
+import { avoidTooltipOverflow, isEmptyString } from '../../utils/utils';
 
 const PromoCodeInput = ({ applyPromoCode, promoCode, removePromoCode, showMultipleTicketTexts, onPromoCodeChange }) => {
 
     const [statePromoCode, setStatePromoCode] = useState(promoCode);
-    
+
     const handlePromoCodeChange = (value) => {
         onPromoCodeChange(value);
         setStatePromoCode(value);
@@ -64,8 +64,8 @@ const PromoCodeInput = ({ applyPromoCode, promoCode, removePromoCode, showMultip
                     </a>
                 }
             </div>
-            <ReactTooltip id="promo-code-info">
-                <div className={styles.moreInfoTooltip}>                    
+            <ReactTooltip id="promo-code-info" overridePosition={avoidTooltipOverflow}>
+                <div className={styles.moreInfoTooltip}>
                     {T.translate("promo_code.promo_code_tooltip")}
                 </div>
             </ReactTooltip>
