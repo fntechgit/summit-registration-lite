@@ -21,7 +21,7 @@ import { isInPersonTicketType } from "../../actions";
 import ReactTooltip from 'react-tooltip';
 import { formatCurrency } from '../../helpers';
 import { getTicketMaxQuantity } from '../../helpers';
-import { getTicketCost, getTicketTaxes, isPrePaidOrder } from '../../utils/utils';
+import { avoidTooltipOverflow, getTicketCost, getTicketTaxes, isPrePaidOrder } from '../../utils/utils';
 
 import PromoCodeInput from '../promocode-input';
 import { VIEW_ITEM } from '../../utils/constants';
@@ -230,12 +230,7 @@ const TicketTypeComponent = ({
                                     Need multiple ticket types?
                                 </a>
                             }
-                            <ReactTooltip id="ticket-quantity-info" overridePosition={({ left, top }, _e, _t, node) => {
-                                return {
-                                    top,
-                                    left: typeof node === 'string' ? left : Math.max(left, 0),
-                                };
-                            }}>
+                            <ReactTooltip id="ticket-quantity-info" overridePosition={avoidTooltipOverflow}>
                                 <div className={styles.moreInfoTooltip}>
                                     {T.translate("ticket_type.ticket_quantity_tooltip")}
                                 </div>

@@ -148,3 +148,10 @@ export const handleSentryException = (err) =>
     isSentryInitialized() 
         ? Sentry.captureException(err)
         : console.log("Error on registration: ", err);
+
+export const avoidTooltipOverflow = ({ left, top }, _e, _t, node) => {
+    return {
+        top,
+        left: typeof node === 'string' ? left : Math.max(left, 0),
+    };
+}
