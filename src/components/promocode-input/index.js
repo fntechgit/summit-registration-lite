@@ -58,10 +58,12 @@ const PromoCodeInput = ({ applyPromoCode, promoCode, removePromoCode, showMultip
                 </div>
 
                 {showMultipleTicketTexts &&
-                    <a className={styles.moreInfo} data-tip data-for="promo-code-info">
-                        <i className="glyphicon glyphicon-info-sign" aria-hidden="true" />{` `}
-                        Have multiple promo codes?
-                    </a>
+                    <div className={styles.moreInfo}>
+                        <a data-tip data-for="promo-code-info">
+                            <i className="glyphicon glyphicon-info-sign" aria-hidden="true" />{` `}
+                            Have multiple promo codes?
+                        </a>
+                    </div>
                 }
             </div>
             <ReactTooltip id="promo-code-info" overridePosition={avoidTooltipOverflow}>
