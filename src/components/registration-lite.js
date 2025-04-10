@@ -146,6 +146,7 @@ const RegistrationLite = (
         loadProfileData,
         closeWidget,
         hasVirtualAccessLevel,
+        hidePostalCode,
         idpLogoLight,
         idpLogoDark,
         idpLogoAlt,
@@ -425,6 +426,7 @@ const RegistrationLite = (
                                                     provider={provider}
                                                     providerKey={publicKey}
                                                     stripeOptions={stripeOptions}
+                                                    hidePostalCode={hidePostalCode}
                                                 />
                                             </div>
                                         </animated.div>
@@ -510,7 +512,8 @@ RegistrationLite.defaultProps = {
     showCompanyInputDefaultOptions: false,
     companyDDLOptions2Show: 25,
     idpLogoLight: null,
-    idpLogoDark: null
+    idpLogoDark: null,
+    hidePostalCode: false
 };
 
 RegistrationLite.propTypes = {
@@ -523,6 +526,7 @@ RegistrationLite.propTypes = {
     completedExtraQuestions: PropTypes.func.isRequired,
     closeWidget:PropTypes.func,
     hasVirtualAccessLevel:PropTypes.bool,
+    hidePostalCode: PropTypes.bool,
     supportEmail: PropTypes.string,
     initialOrderComplete1stParagraph: PropTypes.string,
     initialOrderComplete2ndParagraph: PropTypes.string,

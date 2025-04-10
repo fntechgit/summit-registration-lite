@@ -14,7 +14,7 @@
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import merge from 'lodash/merge';
-import {DefaultBGColor, DefaultTextColor, DefaultHintColor} from '../../utils/constants';
+import { DefaultBGColor, DefaultTextColor, DefaultHintColor } from '../../utils/constants';
 
 import {
     CardNumberElement,
@@ -68,7 +68,7 @@ const stripeErrorCodeMap = {
 };
 
 
-const StripeForm = ({ reservation, payTicket, userProfile, stripeOptions, provider }) => {
+const StripeForm = ({ reservation, payTicket, userProfile, stripeOptions, hidePostalCode, provider }) => {
     const stripe = useStripe();
     const elements = useElements();
     const [stripeErrors, setStripeErrors] = useState({});
@@ -78,7 +78,7 @@ const StripeForm = ({ reservation, payTicket, userProfile, stripeOptions, provid
     let textColor = DefaultTextColor;
     let hintColor = DefaultHintColor;
 
-    if(document && document.documentElement) {
+    if (document && document.documentElement) {
         const documentStyles = getComputedStyle(document.documentElement);
         bgColor = documentStyles.getPropertyValue('--color_input_background_color');
         textColor = documentStyles.getPropertyValue('--color_input_text_color');
@@ -121,7 +121,7 @@ const StripeForm = ({ reservation, payTicket, userProfile, stripeOptions, provid
             return;
         }
         const btn = document.getElementById('payment-form-btn');
-        if(btn) btn.disabled = true;
+        if (btn) btn.disabled = true;
         const cardElement = elements.getElement(CardNumberElement);
         // @see https://stripe.com/docs/js/tokens_sources/create_token?type=cardElement
         const { error, token } = await stripe.createToken(cardElement, {
@@ -136,12 +136,12 @@ const StripeForm = ({ reservation, payTicket, userProfile, stripeOptions, provid
         });
 
         if (token) {
-            cardElement.update({disabled: true})
-            payTicket(provider, { token, stripe, zipCode : data.zipCode });
+            cardElement.update({ disabled: true })
+            payTicket(provider, { token, stripe, zipCode: data.zipCode });
             return;
         }
         if (error) {
-            if(btn) btn.disabled = false;
+            if (btn) btn.disabled = false;
             if (stripeErrorCodeMap[error.code]) {
                 setStripeErrors({
                     [stripeErrorCodeMap[error.code].field]: stripeErrorCodeMap[error.code].message || error.message
@@ -176,14 +176,17 @@ const StripeForm = ({ reservation, payTicket, userProfile, stripeOptions, provid
                 {stripeErrors.cardCvc && <div className={styles.fieldError}>{stripeErrors.cardCvc}</div>}
             </div>
 
-            <div className={styles.fieldWrapper}>
-                <div className={styles.inputWrapper}>
-                    <input type="text" placeholder="ZIP Code *" onChange={(e) => setZipCode(e.target.value)} {...register("zipCode", { required: true })} />
+            {!hidePostalCode &&
+                <div className={styles.fieldWrapper}>
+                    <div className={styles.inputWrapper}>
+                        <input type="text" placeholder="ZIP Code *" onChange={(e) => setZipCode(e.target.value)} {...register("zipCode", { required: true })} />
+                    </div>
+                    {(errors.zipCode) && (
+                        <div className={styles.fieldError}>This field is required.</div>
+                    )}
                 </div>
-                {(errors.zipCode) && (
-                    <div className={styles.fieldError}>This field is required.</div>
-                )}
-            </div>
+            }
+
         </form>
     )
 };

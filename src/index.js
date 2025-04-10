@@ -60,6 +60,7 @@ const filterProps = {
     ticketTaxesErrorMessage: '<span>There was an error getting the information for tickets. Please try again.</span>',
     allowPromoCodes: true,
     showCompanyInput: true,
+    // hidePostalCode: true,
     companyDDLPlaceholder: 'Select a company',
     completedExtraQuestions: (attendeeId) => {
         console.log('evalulate user extra questions...', attendeeId)
