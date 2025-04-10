@@ -130,14 +130,14 @@ const StripeForm = ({ reservation, payTicket, userProfile, stripeOptions, hidePo
             address_line2: userProfile.address2 || '',
             address_city: userProfile.locality || '',
             address_state: userProfile.region || '',
-            address_zip: hidePostalCode ? null : data.zipCode,
+            address_zip: hidePostalCode ? "" : data.zipCode,
             address_country: userProfile.country || '',
             email: userProfile.email,
         });
 
         if (token) {
             cardElement.update({ disabled: true })
-            payTicket(provider, { token, stripe, zipCode: hidePostalCode ? null : data.zipCode });
+            payTicket(provider, { token, stripe, zipCode: hidePostalCode ? "" : data.zipCode });
             return;
         }
         if (error) {
