@@ -103,9 +103,11 @@ export class StripeProvider {
                 redirect: "if_required"
             }
         ).then((result) => {
-            if (result.error) {
+            // error from card payment, paymentIntent from alternative payments            
+            if (result.error || result.paymentIntent?.last_payment_error) {
                 // Reserve error.message in your UI.
-                Swal.fire(result.error.message, "Please retry purchase.", "warning");
+                const errorMsg = result.error?.message || result.paymentIntent?.last_payment_error?.message;
+                Swal.fire(errorMsg, "Please retry purchase.", "warning");
                 this.dispatch(changeStep(1));
                 this.dispatch(removeReservedTicket());
                 this.dispatch(stopWidgetLoading());
@@ -132,6 +134,7 @@ export class StripeProvider {
             }
         })
             .catch(e => {
+                console.log("catch e...", e);
                 this.dispatch(removeReservedTicket());
                 this.dispatch(changeStep(1));
                 this.dispatch(stopWidgetLoading());
