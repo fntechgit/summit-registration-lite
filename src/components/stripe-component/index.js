@@ -110,7 +110,6 @@ const StripeProvider = ({ userProfile, reservation, payTicket, providerKey, prov
                 reservation={reservation}
                 payTicket={payTicket}
                 userProfile={userProfile}
-                stripeOptions={stripeOptions}
                 provider={provider}
                 hidePostalCode={hidePostalCode}
             />

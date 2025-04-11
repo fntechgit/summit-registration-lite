@@ -64,11 +64,11 @@ const stripeErrorCodeMap = {
 };
 
 
-const StripeForm = ({ reservation, payTicket, provider }) => {
+const StripeForm = ({ reservation, payTicket, provider, hidePostalCode }) => {
     const stripe = useStripe();
     const elements = useElements();
     const [stripeErrors, setStripeErrors] = useState({});
-    const { register, handleSubmit, formState: { errors } } = useForm();    
+    const { register, handleSubmit, formState: { errors } } = useForm();
 
     const onSubmit = async (data, ev) => {
 
@@ -127,9 +127,19 @@ const StripeForm = ({ reservation, payTicket, provider }) => {
         }
     };
 
+    const paymentOptions = {
+        fields: {
+            billingDetails: {
+                address: {
+                    postalCode: hidePostalCode ? "never" : "auto"
+                }
+            }
+        }
+    }
+
     return (
         <form className={styles.form} id="payment-form" onSubmit={handleSubmit(onSubmit)}>
-            <PaymentElement />
+            <PaymentElement options={paymentOptions} />
         </form>
     )
 };
