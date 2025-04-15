@@ -11,24 +11,35 @@
  * limitations under the License.
  **/
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import OtpInput from 'react-otp-input';
+import moment from 'moment-timezone';
 
 import styles from "./index.module.scss";
 
 import FNidLogo from '../../assets/FNid_WHT_logo_rgb.svg';
 import FNidLogoDark from '../../assets/FNid_BLK_logo_rgb.svg';
 import { handleSentryException } from '../../utils/utils';
+import { RESEND_TIME } from '../../utils/constants';
+import useCountdown from '../../utils/hooks/useCountdown';
 
 const PasswordlessLoginComponent = ({
-        email, codeLength, passwordlessLogin, loginWithCode, codeError, goToLogin,
-        getLoginCode, getPasswordlessCode, idpLogoLight, idpLogoDark, idpLogoAlt }) => {
+    email, codeLength, codeLifeTime, passwordlessLogin, loginWithCode, codeError, goToLogin,
+    getLoginCode, getPasswordlessCode, idpLogoLight, idpLogoDark, idpLogoAlt }) => {
 
     const [otpCode, setOtpCode] = useState('');
     const [otpError, setOtpError] = useState(false)
     const [codeSent, setCodeSent] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
+    const [resendCountdown, resetResendCountdown] = useCountdown(0);
+    const [lifetimeCountdown, resetLifetimeCountdown] = useCountdown(0);
+
+    useEffect(() => {
+        if(codeLifeTime > 0) {
+            resetLifetimeCountdown(codeLifeTime);
+        }
+    }, [codeLifeTime])
 
     const tryPasswordlessLogin = (code) => {
         if (code.length === codeLength) {
@@ -45,23 +56,26 @@ const PasswordlessLoginComponent = ({
             .then(() => {
                 setCodeSent(true);
                 setTimeout(() => setCodeSent(false), 3000);
+                resetResendCountdown(RESEND_TIME);
             })
             .catch((err) => {
                 handleSentryException(err);
             });
-    }
+    };
 
     const handleSubmit = (e) => {
         e.preventDefault();
         tryPasswordlessLogin(otpCode);
     };
 
+    const formatDuration = (seconds) => {
+        const duration = moment.duration(seconds, 'seconds');
+        return moment.utc(duration.asMilliseconds()).format('mm:ss');
+      };
+
     return (
         <div className={`${styles.passwordlessWrapper} step-wrapper`}>
             <>
-                {codeSent &&
-                <div className={styles.codeSent}>Code has been resent.</div>
-                }
                 <div className={`${styles.innerWrapper}`}>
                     {/* Only one logo is displayed based on data-theme through CSS */}
                     <img src={idpLogoDark || FNidLogoDark} alt={idpLogoAlt || "FNid"} className={`${styles.logo} ${styles.logoDark}`} />
@@ -89,7 +103,7 @@ const PasswordlessLoginComponent = ({
                                 this is to simulate the on key press submit (enter)
                                 @see https://github.com/devfolioco/react-otp-input/issues/98
                             */}
-                            <button style={{display:'none'}} type='submit' />
+                            <button style={{ display: 'none' }} type='submit' />
                         </form>
                     </div>
                     {codeError && (
@@ -97,13 +111,27 @@ const PasswordlessLoginComponent = ({
                             The code you entered it's incorrect. <br /> Please try again.
                         </span>
                     )}
+                    {codeSent &&
+                        <p className={styles.codeSent}>Code has been resent.</p>
+                    }
+                    {lifetimeCountdown > 0 &&
+                        <p className={styles.codeSent}>Code expires in {formatDuration(lifetimeCountdown)} minutes.</p>
+                    }
                     <div className={styles.verify}>
                         <button className={`${styles.button} button`} disabled={isLoading} onClick={() => tryPasswordlessLogin(otpCode)} data-testid="verify">Verify Email</button>
                         <b>or go back and <span className={styles.link} onClick={() => goToLogin()} data-testid="go-back">try another way</span></b>
                     </div>
                 </div>
                 <div className={styles.resend}>
-                    Didn’t receive it? Check your spam/junk folder, or <span className={styles.link} onClick={() => resendCode()} data-testid="resend">resend code</span> now.
+                    Didn’t receive it? Check your spam/junk folder, or&nbsp;
+                    <button
+                        className={`${styles.link} ${resendCountdown > 0 ? styles.disabled : ''}`}
+                        disabled={resendCountdown > 0}
+                        onClick={() => resendCode()}
+                        data-testid="resend">
+                        resend code {' '} {resendCountdown > 0 && (<span>({resendCountdown})</span>)}
+                    </button>
+                    &nbsp;now.
                 </div>
             </>
         </div>
@@ -113,6 +141,7 @@ const PasswordlessLoginComponent = ({
 PasswordlessLoginComponent.propTypes = {
     email: PropTypes.string.isRequired,
     codeLength: PropTypes.number.isRequired,
+    codeLifeTime: PropTypes.number.isRequired,
     passwordlessLogin: PropTypes.func.isRequired,
     loginWithCode: PropTypes.func,
     codeError: PropTypes.bool,
