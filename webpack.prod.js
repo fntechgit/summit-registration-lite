@@ -9,6 +9,7 @@ module.exports = merge(common, {
     entry: {
         'components/login' : './src/components/login',
         'components/login-passwordless' : './src/components/login-passwordless',
+        'utils/constants': './src/utils/constants',
         'index': './src/summit-registration-lite.js',
     },
     plugins: [

@@ -11,19 +11,17 @@
  * limitations under the License.
  **/
 
-import React, { useState, useEffect } from 'react';
-import PropTypes from 'prop-types';
-
+import React from 'react';
 import { useSpring, config, animated } from "react-spring";
 import { useMeasure } from "react-use";
-
 import styles from "./index.module.scss";
 import LawpayForm from '../lawpay-form';
 import StripeProvider from '../stripe-component';
 import { Helmet } from 'react-helmet';
+import { PAYMENT_PROVIDER_LAWPAY, PAYMENT_PROVIDER_STRIPE } from '../../utils/constants';
 
 
-const PaymentComponent = ({ isActive, userProfile, reservation, payTicket, providerKey, provider, stripeOptions, stripeReturnUrl, timestamp, hidePostalCode, onPaymentError }) => {
+const PaymentComponent = ({ isActive, userProfile, reservation, payTicket, providerKey, provider, providerOptions, successfulPaymentReturnUrl, timestamp, hidePostalCode, onError }) => {
 
     const [ref, { height }] = useMeasure();
 
@@ -46,20 +44,20 @@ const PaymentComponent = ({ isActive, userProfile, reservation, payTicket, provi
                     </div>
                     <animated.div style={{ overflow: `${isActive ? '' : 'hidden'}`, ...toggleAnimation }}>
                         <div ref={ref}>
-                            {provider === 'Stripe' &&
+                            {provider === PAYMENT_PROVIDER_STRIPE &&
                                 <StripeProvider
                                     provider={provider}
                                     providerKey={providerKey}
                                     reservation={reservation}
                                     payTicket={payTicket}
                                     userProfile={userProfile}
-                                    stripeOptions={stripeOptions}
-                                    stripeReturnUrl={stripeReturnUrl}
+                                    stripeOptions={providerOptions}
+                                    stripeReturnUrl={successfulPaymentReturnUrl}
                                     hidePostalCode={hidePostalCode}
-                                    onPaymentError={onPaymentError}
+                                    onError={onError}
                                 />
                             }
-                            {provider === 'LawPay' &&
+                            {provider === PAYMENT_PROVIDER_LAWPAY &&
                                 <>
                                     <Helmet>
                                         <script src="https://cdn.affinipay.com/hostedfields/1.1.1/fieldGen_1.1.1.js"></script>
@@ -70,7 +68,9 @@ const PaymentComponent = ({ isActive, userProfile, reservation, payTicket, provi
                                         payTicket={payTicket}
                                         userProfile={userProfile}
                                         providerKey={providerKey}
-                                        timestamp={timestamp} />
+                                        timestamp={timestamp}
+                                        onError={onError}
+                                    />
                                 </>
                             }
                         </div>

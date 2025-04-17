@@ -20,7 +20,7 @@ import StripeForm from '../stripe-form';
 import { DefaultBGColor, DefaultTextColor, DefaultHintColor } from '../../utils/constants';
 
 
-const StripeProvider = ({ userProfile, reservation, payTicket, providerKey, provider, stripeOptions, stripeReturnUrl, hidePostalCode, onPaymentError }) => {
+const StripeProvider = ({ userProfile, reservation, payTicket, providerKey, provider, stripeOptions, stripeReturnUrl, hidePostalCode, onError }) => {
 
     const stripePromise = useMemo(() => loadStripe(providerKey), [providerKey]);
 
@@ -39,10 +39,9 @@ const StripeProvider = ({ userProfile, reservation, payTicket, providerKey, prov
         bgColorDark = documentStyles.getPropertyValue('--color_background_dark');
         hintColor = documentStyles.getPropertyValue('--color_text_input_hints');
         borderColor = documentStyles.getPropertyValue('--color_input_border_color');
+    }
 
-    }    
-
-    const stripeStyle = merge({}, {        
+    const stripeStyle = merge({}, {
         variables: {
             borderRadius: '5px',
             colorBackground: bgColor,
@@ -113,9 +112,9 @@ const StripeProvider = ({ userProfile, reservation, payTicket, providerKey, prov
                 provider={provider}
                 hidePostalCode={hidePostalCode}
                 stripeReturnUrl={stripeReturnUrl}
-                onPaymentError={onPaymentError}
+                onError={onError}
             />
-        </Elements>        
+        </Elements>
         :
         <div>Loading...</div>
     );

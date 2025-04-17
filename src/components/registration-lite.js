@@ -128,7 +128,7 @@ const RegistrationLite = (
         inPersonDisclaimer,
         userProfile,
         handleCompanyError,
-        stripeOptions,
+        providerOptions,
         invitation,
         loginInitialEmailInputValue,
         getMyInvitation,
@@ -148,8 +148,8 @@ const RegistrationLite = (
         closeWidget,
         hasVirtualAccessLevel,
         hidePostalCode,
-        paymentErrorCallback,
-        stripeReturnUrl,
+        onError,
+        successfulPaymentReturnUrl,
         idpLogoLight,
         idpLogoDark,
         idpLogoAlt,
@@ -187,7 +187,7 @@ const RegistrationLite = (
     const { publicKey, provider } = getCurrentProvider(summitData);
 
     const allowedTicketTypes = ticketTaxesLoaded ? ticketTypes.filter((tt) => tt.sub_type === TICKET_TYPE_SUBTYPE_PREPAID || (tt.sales_start_date === null && tt.sales_end_date === null) || (nowUtc >= tt.sales_start_date && nowUtc <= tt.sales_end_date)) : [];
-    
+
     const noAvailableTickets = useMemo(() => profileData && ticketTaxesLoaded && !ticketTaxesError && allowedTicketTypes.length === 0 && step !== STEP_COMPLETE, [allowedTicketTypes]);
     const alreadyOwnedTickets = useMemo(() => profileData && ticketTaxesLoaded && !ticketTaxesError && allowedTicketTypes.length > 0 && ownedTickets.length > 0, [ownedTickets, allowedTicketTypes]);
 
@@ -276,7 +276,7 @@ const RegistrationLite = (
         validatePromoCode(data, onError).then(() => {
             trackAddToCart(data);
         }).catch((e) => {
-            handleSentryException(e);            
+            handleSentryException(e);
         });
     }
 
@@ -429,10 +429,10 @@ const RegistrationLite = (
                                                     timestamp={summitData.timestamp}
                                                     provider={provider}
                                                     providerKey={publicKey}
-                                                    stripeOptions={stripeOptions}
+                                                    providerOptions={providerOptions}
                                                     hidePostalCode={hidePostalCode}
-                                                    onPaymentError={paymentErrorCallback}
-                                                    stripeReturnUrl={stripeReturnUrl}
+                                                    onError={onError}
+                                                    successfulPaymentReturnUrl={successfulPaymentReturnUrl}
                                                 />
                                             </div>
                                         </animated.div>
@@ -514,14 +514,15 @@ RegistrationLite.defaultProps = {
     allowPromoCodes: true,
     companyDDLPlaceholder: 'Select a company',
     authErrorCallback: (error) => { console.log(error) },
-    paymentErrorCallback: (error) => { console.log("payment error : ", error) },
+    onError: (error) => { console.log("payment error : ", error) },
     hasVirtualAccessLevel: false,
     supportEmail : 'support@fntech.com',
     showCompanyInputDefaultOptions: false,
     companyDDLOptions2Show: 25,
     idpLogoLight: null,
     idpLogoDark: null,
-    hidePostalCode: false
+    hidePostalCode: false,
+    successfullPaymentReturnUrl: '',
 };
 
 RegistrationLite.propTypes = {
@@ -529,8 +530,8 @@ RegistrationLite.propTypes = {
     showMultipleTicketTexts: PropTypes.bool,
     showCompanyInput: PropTypes.bool,
     authErrorCallback : PropTypes.func,
-    paymentErrorCallback: PropTypes.func,
-    stripeReturnUrl: PropTypes.string,
+    onError: PropTypes.func,
+    successfulPaymentReturnUrl: PropTypes.string,
     goToMyOrders: PropTypes.func.isRequired,
     goToExtraQuestions: PropTypes.func.isRequired,
     completedExtraQuestions: PropTypes.func.isRequired,

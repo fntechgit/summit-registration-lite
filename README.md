@@ -91,9 +91,11 @@ React component for the summit registration lite widget
 
    **hidePostalCode**         = boolean to show/hide postal code on payment step. Default to false
 
-   **paymentErrorCallback**   = method passed that will handle on client any payment error
+   **onError**                = method passed that will handle on client any error
 
-   **stripeReturnUrl**        = string with the url to return after a payment
+   **successfulPaymentReturnUrl** = string with the url to return after a payment
+
+   **providerOptions** = custom configuration options for provider
 
 ## PUBLISH TO NPM:
 

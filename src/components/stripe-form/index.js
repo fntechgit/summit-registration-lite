@@ -11,7 +11,7 @@
  * limitations under the License.
  **/
 
-import React, { useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import { useForm } from 'react-hook-form';
 
 import {
@@ -20,9 +20,8 @@ import {
     PaymentElement,
 } from '@stripe/react-stripe-js';
 
-import Swal from 'sweetalert2';
-
 import styles from "./index.module.scss";
+import { ERROR_TYPE_PAYMENT } from '../../utils/constants';
 
 const stripeErrorCodeMap = {
     'incomplete_number': {
@@ -64,27 +63,36 @@ const stripeErrorCodeMap = {
 };
 
 
-const StripeForm = ({ reservation, payTicket, provider, hidePostalCode, stripeReturnUrl, onPaymentError }) => {
+const StripeForm = ({ payTicket, provider, hidePostalCode, stripeReturnUrl, onError }) => {
     const stripe = useStripe();
     const elements = useElements();
-    const [stripeErrors, setStripeErrors] = useState({});
+    const [paymentElement, setPaymentElement] = useState(null);
+
+    useEffect(() => {
+        if(elements){
+            setPaymentElement(elements.getElement('payment'));
+        }
+    }, [elements]);
+
     const { register, handleSubmit, formState: { errors } } = useForm();
 
     const onSubmit = async (data, ev) => {
-
-        setStripeErrors({});
 
         if (!stripe || !elements) {
             // Stripe.js has not loaded yet. Make sure to disable
             // form submission until Stripe.js has loaded.
             return;
         }
+
         const btn = document.getElementById('payment-form-btn');
         if (btn) btn.disabled = true;
 
         // Trigger form validation and wallet collection
         const { error: submitError } = await elements.submit();
         if (submitError) {
+            if (btn) btn.disabled = false;
+            console.log(`StripeForm::onSubmit elements.submit error`, submitError);
+            onError({type: ERROR_TYPE_PAYMENT, msg: stripeErrorCodeMap[submitError?.code]?.message || submitError?.message, exception: submitError})
             return;
         }
 
@@ -95,39 +103,27 @@ const StripeForm = ({ reservation, payTicket, provider, hidePostalCode, stripeRe
             });
 
             if (error) {
-                if (stripeErrorCodeMap[error.code]) {
-                    setStripeErrors({
-                        [stripeErrorCodeMap[error.code].field]: stripeErrorCodeMap[error.code].message || error.message
-                    });
-                }
                 if (btn) btn.disabled = false;
-            } else {
-                // Send the paymentMethod ID to your server
-                if (paymentMethod) {
-                    payTicket(provider, { elements, paymentMethod, stripe, stripeReturnUrl, onPaymentError});
-                } else if (error) {
-                    if (stripeErrorCodeMap[error.code]) {
-                        setStripeErrors({
-                            [stripeErrorCodeMap[error.code].field]: stripeErrorCodeMap[error.code].message || error.message
-                        });
-                    } else {
-                        onPaymentError(error.message);
-                    }
-                }
-            }
-        } catch (error) {
-            // setPaymentError('Error processing payment');
-            if (stripeErrorCodeMap[error.code]) {
-                setStripeErrors({
-                    [stripeErrorCodeMap[error.code].field]: stripeErrorCodeMap[error.code].message || error.message
-                });
+                console.log(`StripeForm::onSubmit stripe.createPaymentMethod error`, error);
+                onError({type: ERROR_TYPE_PAYMENT, msg: stripeErrorCodeMap[error?.code]?.message || error.message, exception: error})
+                if(paymentElement) paymentElement.clear();
                 return;
             }
-            onPaymentError(error.message);
+            // Send the paymentMethod ID to your server
+            if (paymentMethod)
+                payTicket(provider, { elements, paymentMethod, stripe, stripeReturnUrl, onError});
+
+        } catch (e) {
+            console.log(`StripeForm::onSubmit general error`, e);
+            onError({type: ERROR_TYPE_PAYMENT, msg: stripeErrorCodeMap[e?.code]?.message || e.message, exception: e})
         }
     };
 
     const paymentOptions = {
+        layout: {
+            type: 'tabs',
+            defaultCollapsed: false,
+        },
         fields: {
             billingDetails: {
                 address: {
