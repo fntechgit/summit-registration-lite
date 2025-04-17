@@ -66,6 +66,7 @@ const filterProps = {
         console.log('evalulate user extra questions...', attendeeId)
         return Promise.resolve(true);
     },
+    stripeReturnUrl: `${window.location.origin}`,
     handleCompanyError: (err) => console.log('catch error company', err)
 };
 

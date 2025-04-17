@@ -64,7 +64,7 @@ const stripeErrorCodeMap = {
 };
 
 
-const StripeForm = ({ reservation, payTicket, provider, hidePostalCode }) => {
+const StripeForm = ({ reservation, payTicket, provider, hidePostalCode, stripeReturnUrl, onPaymentError }) => {
     const stripe = useStripe();
     const elements = useElements();
     const [stripeErrors, setStripeErrors] = useState({});
@@ -104,14 +104,14 @@ const StripeForm = ({ reservation, payTicket, provider, hidePostalCode }) => {
             } else {
                 // Send the paymentMethod ID to your server
                 if (paymentMethod) {
-                    payTicket(provider, { elements, paymentMethod, stripe });
+                    payTicket(provider, { elements, paymentMethod, stripe, stripeReturnUrl, onPaymentError});
                 } else if (error) {
                     if (stripeErrorCodeMap[error.code]) {
                         setStripeErrors({
                             [stripeErrorCodeMap[error.code].field]: stripeErrorCodeMap[error.code].message || error.message
                         });
                     } else {
-                        Swal.fire("Payment error", error.message, "warning");
+                        onPaymentError(error.message);
                     }
                 }
             }
@@ -123,7 +123,7 @@ const StripeForm = ({ reservation, payTicket, provider, hidePostalCode }) => {
                 });
                 return;
             }
-            Swal.fire("Payment error", error.message, "warning");
+            onPaymentError(error.message);
         }
     };
 

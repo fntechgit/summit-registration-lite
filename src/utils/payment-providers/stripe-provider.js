@@ -23,7 +23,7 @@ export class StripeProvider {
         this.dispatch = dispatch;
     }
 
-    payTicket = ({ elements = null, paymentMethod = null, stripe = null }) => async (dispatch) => {
+    payTicket = ({ elements = null, paymentMethod = null, stripe = null, stripeReturnUrl = "", onPaymentError = null }) => async (dispatch) => {
 
         const errorHandler = (err, res) => (dispatch, state) => {
             let code = err.status;
@@ -97,7 +97,7 @@ export class StripeProvider {
                 elements,
                 clientSecret: this.reservation.payment_gateway_client_token,
                 confirmParams: {
-                    return_url: `${window.location.origin}/a/my-tickets/`,
+                    return_url: stripeReturnUrl,
                     payment_method: paymentMethod.id
                 },
                 redirect: "if_required"
@@ -107,8 +107,8 @@ export class StripeProvider {
             if (result.error || result.paymentIntent?.last_payment_error) {
                 // Reserve error.message in your UI.
                 const errorMsg = result.error?.message || result.paymentIntent?.last_payment_error?.message;
-                Swal.fire(errorMsg, "Please retry purchase.", "warning");
-                this.dispatch(changeStep(1));
+                this.dispatch(onPaymentError(errorMsg));
+                this.dispatch(changeStep(STEP_PERSONAL_INFO));
                 this.dispatch(removeReservedTicket());
                 this.dispatch(stopWidgetLoading());
             } else {
@@ -123,7 +123,7 @@ export class StripeProvider {
                     .then((payload) => {
                         this.dispatch(stopWidgetLoading());
                         this.dispatch(createAction(CLEAR_RESERVATION)({}));
-                        this.dispatch(changeStep(3));
+                        this.dispatch(changeStep(STEP_COMPLETE));
                         return (payload);
                     })
                     .catch(e => {
@@ -136,7 +136,7 @@ export class StripeProvider {
             .catch(e => {
                 console.log("catch e...", e);
                 this.dispatch(removeReservedTicket());
-                this.dispatch(changeStep(1));
+                this.dispatch(changeStep(STEP_PERSONAL_INFO));
                 this.dispatch(stopWidgetLoading());
                 return (e);
             });

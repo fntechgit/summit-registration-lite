@@ -20,7 +20,7 @@ import StripeForm from '../stripe-form';
 import { DefaultBGColor, DefaultTextColor, DefaultHintColor } from '../../utils/constants';
 
 
-const StripeProvider = ({ userProfile, reservation, payTicket, providerKey, provider, stripeOptions, hidePostalCode }) => {
+const StripeProvider = ({ userProfile, reservation, payTicket, providerKey, provider, stripeOptions, stripeReturnUrl, hidePostalCode, onPaymentError }) => {
 
     const stripePromise = useMemo(() => loadStripe(providerKey), [providerKey]);
 
@@ -112,6 +112,8 @@ const StripeProvider = ({ userProfile, reservation, payTicket, providerKey, prov
                 userProfile={userProfile}
                 provider={provider}
                 hidePostalCode={hidePostalCode}
+                stripeReturnUrl={stripeReturnUrl}
+                onPaymentError={onPaymentError}
             />
         </Elements>        
         :

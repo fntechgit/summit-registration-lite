@@ -23,7 +23,7 @@ import StripeProvider from '../stripe-component';
 import { Helmet } from 'react-helmet';
 
 
-const PaymentComponent = ({ isActive, userProfile, reservation, payTicket, providerKey, provider, stripeOptions, timestamp, hidePostalCode }) => {
+const PaymentComponent = ({ isActive, userProfile, reservation, payTicket, providerKey, provider, stripeOptions, stripeReturnUrl, timestamp, hidePostalCode, onPaymentError }) => {
 
     const [ref, { height }] = useMeasure();
 
@@ -54,7 +54,9 @@ const PaymentComponent = ({ isActive, userProfile, reservation, payTicket, provi
                                     payTicket={payTicket}
                                     userProfile={userProfile}
                                     stripeOptions={stripeOptions}
+                                    stripeReturnUrl={stripeReturnUrl}
                                     hidePostalCode={hidePostalCode}
+                                    onPaymentError={onPaymentError}
                                 />
                             }
                             {provider === 'LawPay' &&

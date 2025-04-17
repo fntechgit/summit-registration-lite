@@ -148,6 +148,8 @@ const RegistrationLite = (
         closeWidget,
         hasVirtualAccessLevel,
         hidePostalCode,
+        paymentErrorCallback,
+        stripeReturnUrl,
         idpLogoLight,
         idpLogoDark,
         idpLogoAlt,
@@ -429,6 +431,8 @@ const RegistrationLite = (
                                                     providerKey={publicKey}
                                                     stripeOptions={stripeOptions}
                                                     hidePostalCode={hidePostalCode}
+                                                    onPaymentError={paymentErrorCallback}
+                                                    stripeReturnUrl={stripeReturnUrl}
                                                 />
                                             </div>
                                         </animated.div>
@@ -510,6 +514,7 @@ RegistrationLite.defaultProps = {
     allowPromoCodes: true,
     companyDDLPlaceholder: 'Select a company',
     authErrorCallback: (error) => { console.log(error) },
+    paymentErrorCallback: (error) => { console.log("payment error : ", error) },
     hasVirtualAccessLevel: false,
     supportEmail : 'support@fntech.com',
     showCompanyInputDefaultOptions: false,
@@ -524,6 +529,8 @@ RegistrationLite.propTypes = {
     showMultipleTicketTexts: PropTypes.bool,
     showCompanyInput: PropTypes.bool,
     authErrorCallback : PropTypes.func,
+    paymentErrorCallback: PropTypes.func,
+    stripeReturnUrl: PropTypes.string,
     goToMyOrders: PropTypes.func.isRequired,
     goToExtraQuestions: PropTypes.func.isRequired,
     completedExtraQuestions: PropTypes.func.isRequired,
