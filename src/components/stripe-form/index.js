@@ -98,9 +98,23 @@ const StripeForm = ({ payTicket, provider, hidePostalCode, stripeReturnUrl, onEr
 
         try {
             // Create a payment method using PaymentElement
-            const { paymentMethod, error } = await stripe.createPaymentMethod({
+
+            let createPaymentMethodOptions = {
                 elements
-            });
+            }
+
+            // provide info empty
+            if(hidePostalCode){
+                createPaymentMethodOptions = {...createPaymentMethodOptions, params: {
+                        billing_details:{
+                            address: {
+                                postal_code: "",
+                            }
+                        }
+                    }}
+            }
+
+            const { paymentMethod, error } = await stripe.createPaymentMethod(createPaymentMethodOptions);
 
             if (error) {
                 if (btn) btn.disabled = false;
