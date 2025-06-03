@@ -52,7 +52,7 @@ const filterProps = {
         { button_color: '#FFFFFF', font_color: '#00297a', provider_label: 'Continue with Okta', provider_param: 'okta', provider_logo: 'https://cdn.icon-icons.com/icons2/2699/PNG/512/okta_logo_icon_169896.png', provider_logo_size: 19 },
         { button_color: '#2272E7', provider_label: 'Microsoft', provider_param: 'microsoft' },
     ],
-    stripeOptions: {
+    providerOptions: {
         fonts: [{ cssSrc: 'https://fonts.googleapis.com/css2?family=Nunito+Sans:ital,wght@0,400;0,700;1,400;1,700&display=swap' }],
         style: { base: { fontFamily: `'Nunito Sans', sans-serif` } }
     },
@@ -66,6 +66,7 @@ const filterProps = {
         console.log('evalulate user extra questions...', attendeeId)
         return Promise.resolve(true);
     },
+    successfulPaymentReturnUrl: `${window.location.origin}`,
     handleCompanyError: (err) => console.log('catch error company', err)
 };
 

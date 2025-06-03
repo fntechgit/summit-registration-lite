@@ -89,6 +89,14 @@ React component for the summit registration lite widget
 
    **idpLogoAlt**             = string for custom alt logo on otp login
 
+   **hidePostalCode**         = boolean to show/hide postal code on payment step. Default to false
+
+   **onError**                = method passed that will handle on client any error
+
+   **successfulPaymentReturnUrl** = string with the url to return after a payment
+
+   **providerOptions** = custom configuration options for provider
+
 ## PUBLISH TO NPM:
 
 1 - yarn build && yarn publish

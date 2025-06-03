@@ -11,22 +11,17 @@
  * limitations under the License.
  **/
 
-import React, { useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import { useForm } from 'react-hook-form';
-import merge from 'lodash/merge';
-import { DefaultBGColor, DefaultTextColor, DefaultHintColor } from '../../utils/constants';
 
 import {
-    CardNumberElement,
-    CardExpiryElement,
-    CardCvcElement,
     useStripe,
     useElements,
+    PaymentElement,
 } from '@stripe/react-stripe-js';
 
-import Swal from 'sweetalert2';
-
 import styles from "./index.module.scss";
+import { ERROR_TYPE_PAYMENT } from '../../utils/constants';
 
 const stripeErrorCodeMap = {
     'incomplete_number': {
@@ -68,125 +63,93 @@ const stripeErrorCodeMap = {
 };
 
 
-const StripeForm = ({ reservation, payTicket, userProfile, stripeOptions, hidePostalCode, provider }) => {
+const StripeForm = ({ payTicket, provider, hidePostalCode, stripeReturnUrl, onError }) => {
     const stripe = useStripe();
     const elements = useElements();
-    const [stripeErrors, setStripeErrors] = useState({});
+    const [paymentElement, setPaymentElement] = useState(null);
+
+    useEffect(() => {
+        if(elements){
+            setPaymentElement(elements.getElement('payment'));
+        }
+    }, [elements]);
+
     const { register, handleSubmit, formState: { errors } } = useForm();
-
-    let bgColor = DefaultBGColor;
-    let textColor = DefaultTextColor;
-    let hintColor = DefaultHintColor;
-
-    if (document && document.documentElement) {
-        const documentStyles = getComputedStyle(document.documentElement);
-        bgColor = documentStyles.getPropertyValue('--color_input_background_color');
-        textColor = documentStyles.getPropertyValue('--color_input_text_color');
-        hintColor = documentStyles.getPropertyValue('--color_text_input_hints');
-    }
-
-
-    const stripeStyle = merge({}, {
-        base: {
-            // Add your base input styles here. For example: #d4e5f4
-            color: textColor,
-            fontSize: '16px',
-            //fontFamily: 'inherit',
-            backgroundColor: bgColor,
-            '::placeholder': {
-                color: hintColor
-            },
-            ':-webkit-autofill': {
-                color: textColor,
-                backgroundColor: bgColor,
-                "-webkit-text-fill-color": textColor,
-                "-webkit-box-shadow:": `0 0 0px 1000px ${bgColor} inset`
-            },
-        },
-        invalid: {
-            color: '#e5424d',
-            ':focus': {
-                color: '#3486cd',
-            },
-        },
-    }, stripeOptions?.style);
 
     const onSubmit = async (data, ev) => {
 
-        setStripeErrors({});
-
-        if (!stripe) {
+        if (!stripe || !elements) {
             // Stripe.js has not loaded yet. Make sure to disable
             // form submission until Stripe.js has loaded.
             return;
         }
+
         const btn = document.getElementById('payment-form-btn');
         if (btn) btn.disabled = true;
-        const cardElement = elements.getElement(CardNumberElement);
-        // @see https://stripe.com/docs/js/tokens_sources/create_token?type=cardElement
-        const { error, token } = await stripe.createToken(cardElement, {
-            name: `${reservation.owner_first_name} ${reservation.owner_last_name}`,
-            address_line1: userProfile.address1 || '',
-            address_line2: userProfile.address2 || '',
-            address_city: userProfile.locality || '',
-            address_state: userProfile.region || '',
-            address_zip: hidePostalCode ? "" : data.zipCode,
-            address_country: userProfile.country || '',
-            email: userProfile.email,
-        });
 
-        if (token) {
-            cardElement.update({ disabled: true })
-            payTicket(provider, { token, stripe, zipCode: hidePostalCode ? "" : data.zipCode });
+        // Trigger form validation and wallet collection
+        const { error: submitError } = await elements.submit();
+        if (submitError) {
+            if (btn) btn.disabled = false;
+            console.log(`StripeForm::onSubmit elements.submit error`, submitError);
+            onError({type: ERROR_TYPE_PAYMENT, msg: stripeErrorCodeMap[submitError?.code]?.message || submitError?.message, exception: submitError})
             return;
         }
-        if (error) {
-            if (btn) btn.disabled = false;
-            if (stripeErrorCodeMap[error.code]) {
-                setStripeErrors({
-                    [stripeErrorCodeMap[error.code].field]: stripeErrorCodeMap[error.code].message || error.message
-                });
+
+        try {
+            // Create a payment method using PaymentElement
+
+            let createPaymentMethodOptions = {
+                elements
+            }
+
+            // provide info empty
+            if(hidePostalCode){
+                createPaymentMethodOptions = {...createPaymentMethodOptions, params: {
+                        billing_details:{
+                            address: {
+                                postal_code: "",
+                            }
+                        }
+                    }}
+            }
+
+            const { paymentMethod, error } = await stripe.createPaymentMethod(createPaymentMethodOptions);
+
+            if (error) {
+                if (btn) btn.disabled = false;
+                console.log(`StripeForm::onSubmit stripe.createPaymentMethod error`, error);
+                onError({type: ERROR_TYPE_PAYMENT, msg: stripeErrorCodeMap[error?.code]?.message || error.message, exception: error})
+                if(paymentElement) paymentElement.clear();
                 return;
             }
-            Swal.fire("Payment error", error.message, "warning");
+            // Send the paymentMethod ID to your server
+            if (paymentMethod)
+                payTicket(provider, { elements, paymentMethod, stripe, stripeReturnUrl, onError});
+
+        } catch (e) {
+            console.log(`StripeForm::onSubmit general error`, e);
+            onError({type: ERROR_TYPE_PAYMENT, msg: stripeErrorCodeMap[e?.code]?.message || e.message, exception: e})
         }
     };
 
+    const paymentOptions = {
+        layout: {
+            type: 'tabs',
+            defaultCollapsed: false,
+        },
+        fields: {
+            billingDetails: {
+                address: {
+                    postalCode: hidePostalCode ? "never" : "auto"
+                }
+            }
+        }
+    }
+
     return (
         <form className={styles.form} id="payment-form" onSubmit={handleSubmit(onSubmit)}>
-            <div className={styles.fieldWrapper}>
-                <div className={styles.inputWrapper}>
-                    <CardNumberElement options={{ style: stripeStyle, placeholder: '1234 1234 1234 1234 *' }} />
-                    <i className="fa fa-credit-card" />
-                </div>
-                {stripeErrors.cardNumber && <div className={styles.fieldError}>{stripeErrors.cardNumber}</div>}
-            </div>
-
-            <div className={styles.fieldWrapper}>
-                <div className={styles.inputWrapper}>
-                    <CardExpiryElement options={{ style: stripeStyle, placeholder: 'MM / YY *' }} />
-                </div>
-                {stripeErrors.cardExpiry && <div className={styles.fieldError}>{stripeErrors.cardExpiry}</div>}
-            </div>
-
-            <div className={styles.fieldWrapper}>
-                <div className={styles.inputWrapper}>
-                    <CardCvcElement options={{ style: stripeStyle, placeholder: 'CVC *' }} />
-                </div>
-                {stripeErrors.cardCvc && <div className={styles.fieldError}>{stripeErrors.cardCvc}</div>}
-            </div>
-
-            {!hidePostalCode &&
-                <div className={styles.fieldWrapper}>
-                    <div className={styles.inputWrapper}>
-                        <input type="text" placeholder="ZIP Code *" onChange={(e) => setZipCode(e.target.value)} {...register("zipCode", { required: true })} />
-                    </div>
-                    {(errors.zipCode) && (
-                        <div className={styles.fieldError}>This field is required.</div>
-                    )}
-                </div>
-            }
-
+            <PaymentElement options={paymentOptions} />
         </form>
     )
 };

@@ -7,10 +7,8 @@ import {
 import { CLEAR_RESERVATION, PAY_RESERVATION } from '../../actions';
 
 import { changeStep, removeReservedTicket, startWidgetLoading, stopWidgetLoading } from '../../actions';
-
-import Swal from 'sweetalert2';
 import { isFreeOrder, isPrePaidOrder } from '../utils';
-import { STEP_COMPLETE, STEP_PERSONAL_INFO } from '../constants';
+import { ERROR_TYPE_ERROR, ERROR_TYPE_VALIDATION, ERROR_TYPE_PAYMENT, STEP_COMPLETE, STEP_PERSONAL_INFO } from '../constants';
 
 export class StripeProvider {
 
@@ -23,19 +21,19 @@ export class StripeProvider {
         this.dispatch = dispatch;
     }
 
-    payTicket = ({ token = null, stripe = null, zipCode = null }) => async (dispatch) => {
+    payTicket = ({ elements = null, paymentMethod = null, stripe = null, stripeReturnUrl = "", onError = () => {} }) => async (dispatch) => {
 
         const errorHandler = (err, res) => (dispatch, state) => {
             let code = err.status;
             switch (code) {
                 case 404: {
                     let msg = res.body.message;
-                    Swal.fire('Validation Error', msg, 'warning');
+                    onError({type:ERROR_TYPE_VALIDATION, msg: msg, exception: null})
                 }
                     break;
                 case 500: {
                     let msg = res.body.message;
-                    Swal.fire('Validation Error', msg, 'warning');
+                    onError({type: ERROR_TYPE_ERROR, msg: msg, exception: null})
                 }
                     break;
                 default:
@@ -60,7 +58,6 @@ export class StripeProvider {
         let normalizedEntity = {
             billing_address_1: this.userProfile?.address1 || '',
             billing_address_2: this.userProfile?.address2 || '',
-            billing_address_zip_code: zipCode,
             billing_address_city: this.userProfile?.locality || '',
             billing_address_state: this.userProfile?.region || '',
             billing_address_country: this.userProfile?.country || ''
@@ -84,22 +81,33 @@ export class StripeProvider {
                     return (payload);
                 })
                 .catch(e => {
+                    console.log("StripeProvider::payTicket", e);
                     this.dispatch(removeReservedTicket());
                     this.dispatch(changeStep(STEP_PERSONAL_INFO));
                     this.dispatch(stopWidgetLoading());
+                    onError({type: ERROR_TYPE_ERROR, msg: e?.message, exception: e})
                     return (e);
                 });
             // The payment has succeeded. Display a success message.
 
         }
         // regular flow
-        const { id } = token;
-        stripe.confirmCardPayment(
-            this.reservation.payment_gateway_client_token, { payment_method: { card: { token: id } } }
+        stripe.confirmPayment(
+            {
+                elements,
+                clientSecret: this.reservation.payment_gateway_client_token,
+                confirmParams: {
+                    return_url: stripeReturnUrl,
+                    payment_method: paymentMethod.id
+                },
+                redirect: "if_required"
+            }
         ).then((result) => {
-            if (result.error) {
+            // error from card payment, paymentIntent from alternative payments
+            if (result.error || result.paymentIntent?.last_payment_error) {
                 // Reserve error.message in your UI.
-                Swal.fire(result.error.message, 'Please retry purchase.', 'warning');
+                const errorMsg = result.error?.message || result.paymentIntent?.last_payment_error?.message;
+                onError({type: ERROR_TYPE_PAYMENT, msg: errorMsg, exception: result})
                 this.dispatch(changeStep(STEP_PERSONAL_INFO));
                 this.dispatch(removeReservedTicket());
                 this.dispatch(stopWidgetLoading());
@@ -109,7 +117,7 @@ export class StripeProvider {
                     createAction(PAY_RESERVATION),
                     `${this.apiBaseUrl}/api/v1/summits/${this.summitId}/orders/${this.reservation.hash}/checkout`,
                     normalizedEntity,
-                    errorHandler
+                    onError,
                     // entity
                 )(params)(this.dispatch)
                     .then((payload) => {
@@ -120,15 +128,18 @@ export class StripeProvider {
                     })
                     .catch(e => {
                         this.dispatch(stopWidgetLoading());
+                        console.log("StripeProvider::payTicket", e);
+                        onError({type: ERROR_TYPE_ERROR, msg: e?.message, exception: e})
                         return (e);
                     });
-                // The payment has succeeded. Display a success message.
             }
         })
             .catch(e => {
+                console.log("StripeProvider::payTicket", e);
                 this.dispatch(removeReservedTicket());
                 this.dispatch(changeStep(STEP_PERSONAL_INFO));
                 this.dispatch(stopWidgetLoading());
+                onError({type: ERROR_TYPE_ERROR, msg: e?.message, exception: e})
                 return (e);
             });
 

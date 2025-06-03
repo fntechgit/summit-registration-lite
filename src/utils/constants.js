@@ -41,3 +41,12 @@ export const VIEW_ITEM = 'view_item';
 export const ADD_TO_CART = 'add_to_cart';
 export const BEGIN_CHECKOUT = 'begin_checkout';
 export const PURCHASE_COMPLETE = 'purchase_complete';
+// ERRORS
+export const ERROR_TYPE_ERROR= 'error_type_error';
+export const ERROR_TYPE_VALIDATION = 'error_type_validation';
+export const ERROR_TYPE_PAYMENT = 'error_type_payment';
+// PROVIDERS
+
+export const PAYMENT_PROVIDER_STRIPE = 'Stripe';
+export const PAYMENT_PROVIDER_LAWPAY = 'LawPay';
+

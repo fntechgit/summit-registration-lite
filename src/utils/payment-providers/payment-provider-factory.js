@@ -1,5 +1,6 @@
 import {LawPayProvider} from "./lawpay-provider";
 import {StripeProvider} from "./stripe-provider";
+import { PAYMENT_PROVIDER_LAWPAY, PAYMENT_PROVIDER_STRIPE } from '../constants';
 
 export class PaymentProviderFactory {
 
@@ -7,11 +8,11 @@ export class PaymentProviderFactory {
 
         let currentProvider = null;
         switch (provider) {
-            case 'LawPay': {
+            case PAYMENT_PROVIDER_LAWPAY: {
                 currentProvider = new LawPayProvider({...params});
                 break;
             }
-            case 'Stripe': {
+            case PAYMENT_PROVIDER_STRIPE: {
                 currentProvider = new StripeProvider({...params});
                 break;
             }

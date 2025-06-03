@@ -1,13 +1,13 @@
 {
   "name": "summit-registration-lite",
-  "version": "5.0.46",
+  "version": "6.0.0-beta.3",
   "description": "Summit Registration Lite",
   "main": "index.js",
   "scripts": {
     "clean": "find . -name \"dist\" -type d -prune -exec rm -rf '{}' + & find . -name \"node_modules\" -type d -prune -exec rm -rf '{}' + && yarn",
     "build-dev": "./node_modules/.bin/webpack --config webpack.dev.js",
     "build": "./node_modules/.bin/webpack --config webpack.prod.js",
-    "serve": "webpack-dev-server --open --port=8888 --https --config webpack.dev.js",
+    "serve": "webpack-dev-server --open --config webpack.dev.js",
     "copy-extras": "cp -rf package.json README.md dist",
     "publish-package": "yarn build && yarn publish",
     "test": "jest --watch"
@@ -139,8 +139,8 @@
     "@mui/material": "^5.14.18",
     "@react-pdf/renderer": "^3.1.12",
     "@sentry/react": "^8.35.0",
-    "@stripe/react-stripe-js": "^1.4.1",
-    "@stripe/stripe-js": "^1.15.0",
+    "@stripe/react-stripe-js": "^3.6.0",
+    "@stripe/stripe-js": "^7.0.0",
     "i18n-react": "^0.6.4",
     "react-helmet": "^6.1.0",
     "react-hook-form": "^7.6.7",
