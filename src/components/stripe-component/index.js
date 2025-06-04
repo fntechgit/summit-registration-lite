@@ -17,6 +17,7 @@ import { loadStripe } from '@stripe/stripe-js';
 import { Elements } from '@stripe/react-stripe-js';
 import StripeForm from '../stripe-form';
 
+import { isFreeOrder, isPrePaidOrder } from '../../utils/utils';
 import { DefaultBGColor, DefaultTextColor, DefaultHintColor } from '../../utils/constants';
 
 
@@ -103,7 +104,7 @@ const StripeProvider = ({ userProfile, reservation, payTicket, providerKey, prov
     };
 
     return (
-        reservation ?
+        reservation && !isFreeOrder(reservation) && !isPrePaidOrder(reservation) ?
         <Elements stripe={stripePromise} options={options}>
             <StripeForm
                 reservation={reservation}
