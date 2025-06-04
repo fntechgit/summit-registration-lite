@@ -12,7 +12,8 @@
  **/
 
 import React, { useState, useEffect } from 'react';
-import { CompanyInputV2, RadioList } from 'openstack-uicore-foundation/lib/components'
+import { RadioList } from 'openstack-uicore-foundation/lib/components'
+import CompanyInputV2 from 'openstack-uicore-foundation/lib/components/inputs/company-input-v2';
 import { useForm } from 'react-hook-form';
 import { useSpring, config, animated } from "react-spring";
 import { useMeasure } from "react-use";
