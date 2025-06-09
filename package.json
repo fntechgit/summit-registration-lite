@@ -142,6 +142,7 @@
     "@stripe/react-stripe-js": "^3.6.0",
     "@stripe/stripe-js": "^7.0.0",
     "i18n-react": "^0.6.4",
+    "react-content-loader": "^7.0.2",
     "react-helmet": "^6.1.0",
     "react-hook-form": "^7.6.7",
     "react-otp-input": "^2.4.0",
