@@ -14,6 +14,7 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import styles from './index.module.scss';
 import { epochToMomentTimeZone } from 'openstack-uicore-foundation/lib/utils/methods';
+import ContentLoader from 'react-content-loader';
 import { isEmptyString, ticketHasAccessLevel } from '../../utils/utils';
 import { VirtualAccessLevel } from '../../utils/constants';
 import T from 'i18n-react';
@@ -51,17 +52,19 @@ const PurchaseComplete = ({
     }, []);
 
     const [requireExtraQuestions, setRequireExtraQuestions] = useState(null);
-    const isMultiOrder = useMemo(() => checkout?.tickets.length > 1 , [checkout]);
+    const [extraQuestionsLoaded, setExtraQuestonsLoaded] = useState(false);
+    const isMultiOrder = useMemo(() => checkout?.tickets.length > 1, [checkout]);
     const isActive = useMemo(() => summit.start_date <= nowUtc && summit.end_date >= nowUtc, [summit, nowUtc]);
     const currentTicket = useMemo(
         () => isMultiOrder ? checkout?.tickets.find(t => t?.owner?.email === user?.email) : checkout?.tickets.find(t => t?.owner),
         [user]
     );
 
-    useEffect( ()=>{
-         completedExtraQuestions(currentTicket?.owner || null).then((res) => {
-             setRequireExtraQuestions(res);
-         });
+    useEffect(() => {
+        completedExtraQuestions(currentTicket?.owner || null).then((res) => {
+            setRequireExtraQuestions(res);
+            setExtraQuestonsLoaded(true);
+        });
     }, [currentTicket]);
 
     const _hasVirtualAccessLevel = hasVirtualAccessLevel || (currentTicket && ticketHasAccessLevel(currentTicket, VirtualAccessLevel));
@@ -75,13 +78,29 @@ const PurchaseComplete = ({
         time: epochToMomentTimeZone(summit.start_date, summit.time_zone_id).format('hh:mm A')
     };
 
+    if (!extraQuestionsLoaded) return (
+        <ContentLoader
+            speed={2}            
+            width="100%"            
+            height={370}            
+            viewBox="0 0 800 370"
+            preserveAspectRatio="xMidYMin meet"
+        >
+            <circle cx="400" cy="120" r="40" />
+            <rect x="280" y="180" rx="4" ry="4" width="240" height="24" />
+            <rect x="200" y="220" rx="3" ry="3" width="400" height="16" />
+            <rect x="250" y="245" rx="3" ry="3" width="300" height="16" />
+            <rect x="320" y="290" rx="4" ry="4" width="160" height="36" />            
+            <rect x="100" y="340" rx="3" ry="3" width="600" height="14" />
+        </ContentLoader>
+    )
     if (!checkout) return null;
-    if(requireExtraQuestions == null) return null;
+    if (requireExtraQuestions == null) return null;
 
     let orderCompleteButtonText = (
         currentTicket && requireExtraQuestions ?
             rest.hasOwnProperty('initialOrderCompleteButton') && !isEmptyString(rest.initialOrderCompleteButton)
-            && typeof rest.initialOrderCompleteButton !== 'undefined' ?
+                && typeof rest.initialOrderCompleteButton !== 'undefined' ?
                 rest.initialOrderCompleteButton
                 :
                 T.translate('purchase_complete_step.initial_order_complete_button')
@@ -94,7 +113,7 @@ const PurchaseComplete = ({
 
     let orderCompleteTitle = (
         rest.hasOwnProperty('orderCompleteTitle') && !isEmptyString(rest.orderCompleteTitle)
-        && typeof rest.orderCompleteTitle !== 'undefined' ?
+            && typeof rest.orderCompleteTitle !== 'undefined' ?
             rest.orderCompleteTitle
             :
             T.translate('purchase_complete_step.title')
@@ -120,7 +139,7 @@ const PurchaseComplete = ({
     );
 
     let orderComplete2ndParagraph = (
-        currentTicket?
+        currentTicket ?
             rest.hasOwnProperty('initialOrderComplete2ndParagraph') && typeof rest.initialOrderComplete2ndParagraph !== 'undefined' ?
                 rest.initialOrderComplete2ndParagraph
                 :
@@ -148,7 +167,7 @@ const PurchaseComplete = ({
                 <i className='fa fa-ticket'></i>
             </div>
             <span className={styles.complete}>
-               {orderCompleteTitle}
+                {orderCompleteTitle}
             </span>
             {
                 isActive ?
@@ -160,7 +179,7 @@ const PurchaseComplete = ({
                         :
                         (_hasVirtualAccessLevel) ?
                             <CTAButton cta={goToEvent} clear={clearWidgetState}
-                                       close={closeWidget}>{T.translate('purchase_complete_step.access_event_button')}</CTAButton>
+                                close={closeWidget}>{T.translate('purchase_complete_step.access_event_button')}</CTAButton>
                             :
                             <>
                                 <span>{orderComplete1stParagraph}</span>
@@ -168,26 +187,26 @@ const PurchaseComplete = ({
                             </>
                     :
                     <>
-                    <span>
-                        {
-                            T.translate('purchase_complete_step.event_will_start_text', {
-                                date: `${startDateFormatted.date}`,
-                                time: `${startDateFormatted.time}`,
-                                time_zone_label: `${summit.time_zone_label}`
-                            })
-                        }
-                        <br /><br />
-                        {orderComplete1stParagraph}
-                    </span>
+                        <span>
+                            {
+                                T.translate('purchase_complete_step.event_will_start_text', {
+                                    date: `${startDateFormatted.date}`,
+                                    time: `${startDateFormatted.time}`,
+                                    time_zone_label: `${summit.time_zone_label}`
+                                })
+                            }
+                            <br /><br />
+                            {orderComplete1stParagraph}
+                        </span>
                         <div className={styles.actions}>
                             {getCTAButton()}
                         </div>
                     </>
             }
             <span className={styles.footer}>
-                    <RawHTML>
-                        {footerHasTicketText}
-                    </RawHTML>
+                <RawHTML>
+                    {footerHasTicketText}
+                </RawHTML>
             </span>
         </div>
     );
