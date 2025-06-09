@@ -51,6 +51,7 @@ const PurchaseComplete = ({
     }, []);
 
     const [requireExtraQuestions, setRequireExtraQuestions] = useState(null);
+    const [loadingExtraQuestions, setLoadingExtraQuestons] = useState(false);
     const isMultiOrder = useMemo(() => checkout?.tickets.length > 1 , [checkout]);
     const isActive = useMemo(() => summit.start_date <= nowUtc && summit.end_date >= nowUtc, [summit, nowUtc]);
     const currentTicket = useMemo(
@@ -58,9 +59,11 @@ const PurchaseComplete = ({
         [user]
     );
 
-    useEffect( ()=>{
+    useEffect(() => {
+        setLoadingExtraQuestons(true);
          completedExtraQuestions(currentTicket?.owner || null).then((res) => {
              setRequireExtraQuestions(res);
+             setLoadingExtraQuestons(false);
          });
     }, [currentTicket]);
 
@@ -76,7 +79,7 @@ const PurchaseComplete = ({
     };
 
     if (!checkout) return null;
-    if(requireExtraQuestions == null) return null;
+    if(requireExtraQuestions == null && !loadingExtraQuestions) return null;
 
     let orderCompleteButtonText = (
         currentTicket && requireExtraQuestions ?
