@@ -1,6 +1,6 @@
 {
   "name": "summit-registration-lite",
-  "version": "6.0.2",
+  "version": "6.0.3-beta.1",
   "description": "Summit Registration Lite",
   "main": "index.js",
   "scripts": {
@@ -37,6 +37,11 @@
     "@babel/preset-env": "^7.16.11",
     "@babel/preset-flow": "^7.16.7",
     "@babel/preset-react": "^7.16.7",
+    "@emotion/react": "^11.11.4",
+    "@emotion/styled": "^11.11.5",
+    "@mui/icons-material": "^5.14.18",
+    "@mui/material": "^5.15.20",
+    "@mui/utils": "^5.16.8",
     "@react-pdf/renderer": "^3.1.12",
     "@testing-library/jest-dom": "^5.12.0",
     "@testing-library/react": "^11.2.6",
@@ -102,12 +107,7 @@
     "webpack-cli": "^4.9.2",
     "webpack-dev-server": "^4.7.4",
     "webpack-merge": "^5.8.0",
-    "webpack-node-externals": "^3.0.0",
-    "@emotion/react": "^11.11.4",
-    "@emotion/styled": "^11.11.5",
-    "@mui/icons-material": "^5.14.18",
-    "@mui/material": "^5.15.20",
-    "@mui/utils": "^5.16.8"
+    "webpack-node-externals": "^3.0.0"
   },
   "peerDependencies": {
     "awesome-bootstrap-checkbox": "^1.0.1",
