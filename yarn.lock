@@ -1719,7 +1719,7 @@
   resolved "https://registry.yarnpkg.com/@mui/types/-/types-7.2.24.tgz#5eff63129d9c29d80bbf2d2e561bd0690314dec2"
   integrity sha512-3c8tRt/CbWZ+pEg7QpSwbdxOk36EfmhbKf6AGZsD1EcLDLTSZoxxJ86FVtcjxvjuhdyBiWKSTGZFaXCnidO2kw==
 
-"@mui/utils@^5.17.1":
+"@mui/utils@^5.16.8", "@mui/utils@^5.17.1":
   version "5.17.1"
   resolved "https://registry.yarnpkg.com/@mui/utils/-/utils-5.17.1.tgz#72ba4ffa79f7bdf69d67458139390f18484b6e6b"
   integrity sha512-jEZ8FTqInt2WzxDV8bhImWBqeQRD99c/id/fq83H0ER9tFl+sfZlaAoCdznGvbSQQ9ividMxqSV2c7cC1vBcQg==
@@ -7993,10 +7993,10 @@ open@^8.0.9:
     is-docker "^2.1.1"
     is-wsl "^2.2.0"
 
-openstack-uicore-foundation@4.1.55:
-  version "4.1.55"
-  resolved "https://registry.yarnpkg.com/openstack-uicore-foundation/-/openstack-uicore-foundation-4.1.55.tgz#4e95de282732d888109eeb4f4d8ccf73d1d80d8f"
-  integrity sha512-ouzRdQ54NAH006zeHofdYDzCWMuOXHWr+H2on2Dx7n/GavXo1ZrdiyCLZNkWiTWkyte2AmmD+XVguziV5nMHOg==
+openstack-uicore-foundation@4.2.9:
+  version "4.2.9"
+  resolved "https://registry.yarnpkg.com/openstack-uicore-foundation/-/openstack-uicore-foundation-4.2.9.tgz#ed074c519e7ded748507dc127ee5f210b329b49a"
+  integrity sha512-c4FfDgAsBrtcsaDvpNH5Dzu5Ln8MZqD1t2Z/vwyRiv+xKJsiw9X+2VAodDgXUP/fPW/UxAYVk6jVM1CH14w9Pg==
 
 optimize-css-assets-webpack-plugin@^6.0.1:
   version "6.0.1"
