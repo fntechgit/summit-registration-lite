@@ -71,7 +71,7 @@
     "moment": "^2.22.2",
     "moment-timezone": "^0.5.21",
     "node-sass": "^7.0.1",
-    "openstack-uicore-foundation": "4.2.9",
+    "openstack-uicore-foundation": "4.2.10",
     "optimize-css-assets-webpack-plugin": "^6.0.1",
     "path": "^0.12.7",
     "react": "^16.8.4",
