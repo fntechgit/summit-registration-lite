@@ -161,16 +161,20 @@ const PersonalInfoComponent = ({
       height: "100%",
       lineHeight: 36,
       boxSizing: "border-box",
+      fontSize: 16,
     },
     "& .MuiOutlinedInput-input::placeholder": {
-      fontSize: "14px",
+      fontSize: 14,
+    },
+    "& .MuiAutocomplete-option": {
+      fontSize: 16
     },
     "& .MuiAutocomplete-listbox": {
       maxHeight: 120,
     },
     "& .MuiInputLabel-root:not(.MuiInputLabel-shrink)": {
       transform: "translate(12px, 10px)",
-      fontSize: "14px",
+      fontSize: 14,
     },
   }
 
@@ -245,6 +249,13 @@ const PersonalInfoComponent = ({
                         options2Show={companyDDLOptions2Show}
                         disableShrink={true}
                         label={null}
+                        ListboxProps={{
+                          sx: {
+                            '& li.MuiAutocomplete-option': {
+                              fontSize: '16px'
+                            }
+                          }
+                        }}
                       />
                       {companyError && <div className={styles.fieldError} data-testid="company-error">This field is required.</div>}
                     </div>
