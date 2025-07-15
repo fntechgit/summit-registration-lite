@@ -83,7 +83,7 @@ const LoginComponent = ({
                             <span></span>
                         </div>
                         {emailError && <span className={styles.error} data-testid="email-error">Please enter a valid email address</span>}
-                        {loginError && <span className={styles.error} data-testid="login-error">{loginError}</span>}
+                        {loginError && <span className={styles.error} data-testid="login-error" dangerouslySetInnerHTML={{ __html: loginError }} />}
                         <h2 className={styles.h2Styled}>or</h2>
                     </div>
                     {loginOptions.map((o, index) => {
