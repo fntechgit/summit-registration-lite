@@ -107,12 +107,12 @@ const StripeForm = ({ reservation, payTicket, userProfile, provider, hidePostalC
                 ...createPaymentMethodOptions, params: {
                     billing_details: {
                         address: {
-                            city: userProfile.locality || '',
-                            country: userProfile.country || '',
-                            line1: userProfile.address1 || '',
-                            line2: userProfile.address2 || '',
-                            postal_code: userProfile.postal_code || '',
-                            state: userProfile.region || '',
+                            city: userProfile.locality || "",
+                            country: userProfile.country || "",
+                            line1: userProfile.address1 || "",
+                            line2: userProfile.address2 || "",
+                            postal_code: hidePostalCode ? "" : userProfile.postal_code || "",
+                            state: userProfile.region || "",
                         },
                         email: userProfile.email,
                         name: `${reservation.owner_first_name} ${reservation.owner_last_name}`,
