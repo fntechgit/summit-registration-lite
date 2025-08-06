@@ -23,46 +23,6 @@ import {
 import styles from "./index.module.scss";
 import { ERROR_TYPE_PAYMENT } from '../../utils/constants';
 
-const stripeErrorCodeMap = {
-    'incomplete_number': {
-        field: 'cardNumber',
-        message: 'This field is required.'
-    },
-    'incorrect_number': {
-        field: 'cardNumber'
-    },
-    'invalid_number': {
-        field: 'cardNumber'
-    },
-    'card_declined': {
-        field: 'cardNumber'
-    },
-    'incomplete_cvc': {
-        field: 'cardCvc',
-        message: 'This field is required.'
-    },
-    'incorrect_cvc': {
-        field: 'cardCvc'
-    },
-    'invalid_cvc': {
-        field: 'cardCvc'
-    },
-    'incomplete_expiry': {
-        field: 'cardExpiry',
-        message: 'This field is required.'
-    },
-    'invalid_expiry_month': {
-        field: 'cardExpiry'
-    },
-    'invalid_expiry_year': {
-        field: 'cardExpiry'
-    },
-    'expired_card': {
-        field: 'cardExpiry'
-    }
-};
-
-
 const StripeForm = ({ payTicket, provider, hidePostalCode, stripeReturnUrl, onError }) => {
     const stripe = useStripe();
     const elements = useElements();
@@ -92,7 +52,7 @@ const StripeForm = ({ payTicket, provider, hidePostalCode, stripeReturnUrl, onEr
         if (submitError) {
             if (btn) btn.disabled = false;
             console.log(`StripeForm::onSubmit elements.submit error`, submitError);
-            onError({type: ERROR_TYPE_PAYMENT, msg: stripeErrorCodeMap[submitError?.code]?.message || submitError?.message, exception: submitError})
+            onError({type: ERROR_TYPE_PAYMENT, msg: submitError?.message, exception: submitError})
             return;
         }
 
@@ -119,7 +79,7 @@ const StripeForm = ({ payTicket, provider, hidePostalCode, stripeReturnUrl, onEr
             if (error) {
                 if (btn) btn.disabled = false;
                 console.log(`StripeForm::onSubmit stripe.createPaymentMethod error`, error);
-                onError({type: ERROR_TYPE_PAYMENT, msg: stripeErrorCodeMap[error?.code]?.message || error.message, exception: error})
+                onError({type: ERROR_TYPE_PAYMENT, msg: error.message, exception: error})
                 if(paymentElement) paymentElement.clear();
                 return;
             }
@@ -129,7 +89,7 @@ const StripeForm = ({ payTicket, provider, hidePostalCode, stripeReturnUrl, onEr
 
         } catch (e) {
             console.log(`StripeForm::onSubmit general error`, e);
-            onError({type: ERROR_TYPE_PAYMENT, msg: stripeErrorCodeMap[e?.code]?.message || e.message, exception: e})
+            onError({type: ERROR_TYPE_PAYMENT, msg: e.message, exception: e})
         }
     };
 
