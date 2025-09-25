@@ -24,7 +24,7 @@ import { getTicketMaxQuantity } from '../../helpers';
 import { avoidTooltipOverflow, getTicketCost, getTicketTaxes, isPrePaidOrder } from '../../utils/utils';
 
 import PromoCodeInput from '../promocode-input';
-import { VIEW_ITEM } from '../../utils/constants';
+import { TICKET_TYPE_SUBTYPE_PREPAID } from '../../utils/constants';
 
 const TicketTypeComponent = ({
     allowedTicketTypes,
@@ -44,6 +44,7 @@ const TicketTypeComponent = ({
 }) => {
     const [ticket, setTicket] = useState(null);
     const [quantity, setQuantity] = useState(1);
+    const [updatedTicketTypes, setUpdatedTicketTypes] = useState([]);
 
     const minQuantity = 1;
     const maxQuantity = getTicketMaxQuantity(ticket);
@@ -75,13 +76,18 @@ const TicketTypeComponent = ({
         // try to find the updated ticket from the original ticket types collection from api
         // and update the current ticket that exist on component state
         // bc a discount could be applied to the current selected ticket type
-        if (!ticket) return;
-        const updatedCurrentTicket = originalTicketTypes.find(t => t?.id === ticket.id);
-        if (updatedCurrentTicket) {
-            changeForm({ ticketType: updatedCurrentTicket })
-            setTicket(updatedCurrentTicket);
+        const ticketsWithDiscounts = originalTicketTypes.filter(tt => tt.cost_with_applied_discount);
+        const prePaidTickets = originalTicketTypes.filter(tt => tt.sub_type === TICKET_TYPE_SUBTYPE_PREPAID);
+        const affectedTickets = [...ticketsWithDiscounts, ...prePaidTickets];
+        if (affectedTickets.length > 0) {
+            changeForm({ ticketType: null })
+            setTicket(null);
+            setUpdatedTicketTypes(affectedTickets)
         }
-        if (!promoCode) changeForm({ promoCode: '' })
+        if (!promoCode) {
+            changeForm({ promoCode: '' });
+            setUpdatedTicketTypes([])
+        }
     }, [promoCode, originalTicketTypes])
 
     const isPrePaidReservation = useMemo(
@@ -218,6 +224,16 @@ const TicketTypeComponent = ({
                                         showMultipleTicketTexts={showMultipleTicketTexts}
                                         removePromoCode={handleRemovePromoCode}
                                         onPromoCodeChange={handlePromoCodeChange} />
+                                    {updatedTicketTypes.length > 0 &&
+                                        (<div className={`${styles.appliedDiscount} alert alert-success`}>
+                                            Promo Code {promoCode} has unlocked the following tickets types
+                                            <ul>
+                                                {updatedTicketTypes.map((tt) => (
+                                                    <li key={tt.name}>{tt.name}</li>
+                                                ))}
+                                            </ul>
+                                        </div>)
+                                    }
                                     {promoCodeError &&
                                         Object.values(promoCodeError).map((er, index) => (<div key={`error-${index}`} className={`${styles.promocodeError} alert alert-danger`}>{er}</div>))
                                     }
