@@ -44,7 +44,9 @@ const TicketTypeComponent = ({
 }) => {
     const [ticket, setTicket] = useState(null);
     const [quantity, setQuantity] = useState(1);
-    const [updatedTicketTypes, setUpdatedTicketTypes] = useState([]);
+
+    const [ticketsWithDiscounts, setTicketsWithDiscounts] = useState([]);
+    const [prePaidTickets, setPrePaidTickets] = useState([]);
 
     const minQuantity = 1;
     const maxQuantity = getTicketMaxQuantity(ticket);
@@ -76,17 +78,18 @@ const TicketTypeComponent = ({
         // try to find the updated ticket from the original ticket types collection from api
         // and update the current ticket that exist on component state
         // bc a discount could be applied to the current selected ticket type
-        const ticketsWithDiscounts = originalTicketTypes.filter(tt => tt.cost_with_applied_discount);
-        const prePaidTickets = originalTicketTypes.filter(tt => tt.sub_type === TICKET_TYPE_SUBTYPE_PREPAID);
-        const affectedTickets = [...ticketsWithDiscounts, ...prePaidTickets];
-        if (affectedTickets.length > 0) {
+        const ticketTypesWithDiscount = originalTicketTypes.filter(tt => tt.cost_with_applied_discount);
+        const unlockedTickets = originalTicketTypes.filter(tt => tt.sub_type === TICKET_TYPE_SUBTYPE_PREPAID);
+        if (ticketTypesWithDiscount.length > 0 || unlockedTickets.length > 0) {
             changeForm({ ticketType: null })
             setTicket(null);
-            setUpdatedTicketTypes(affectedTickets)
+            setTicketsWithDiscounts(ticketTypesWithDiscount);
+            setPrePaidTickets(unlockedTickets);
         }
         if (!promoCode) {
             changeForm({ promoCode: '' });
-            setUpdatedTicketTypes([])
+            setTicketsWithDiscounts([]);
+            setPrePaidTickets([]);
         }
     }, [promoCode, originalTicketTypes])
 
@@ -224,16 +227,30 @@ const TicketTypeComponent = ({
                                         showMultipleTicketTexts={showMultipleTicketTexts}
                                         removePromoCode={handleRemovePromoCode}
                                         onPromoCodeChange={handlePromoCodeChange} />
-                                    {updatedTicketTypes.length > 0 &&
-                                        (<div className={`${styles.appliedDiscount} alert alert-success`}>
-                                            Promo Code {promoCode} has unlocked the following tickets types
-                                            <ul>
-                                                {updatedTicketTypes.map((tt) => (
-                                                    <li key={tt.name}>{tt.name}</li>
-                                                ))}
-                                            </ul>
-                                        </div>)
-                                    }
+                                    {(prePaidTickets.length > 0 || ticketsWithDiscounts.length > 0) && (
+                                        <div className={`${styles.appliedDiscount} alert alert-success`}>
+                                            {prePaidTickets.length > 0 && (
+                                                <>
+                                                    <p>{T.translate("ticket_type.unlocked_tickets", { promoCode })}</p>
+                                                    <ul>
+                                                        {prePaidTickets.map((tt) => (
+                                                            <li key={`pre-${tt.name}`}>{tt.name}</li>
+                                                        ))}
+                                                    </ul>
+                                                </>
+                                            )}
+                                            {ticketsWithDiscounts.length > 0 && (
+                                                <>
+                                                    <p>{T.translate("ticket_type.discount_tickets", { promoCode })}</p>
+                                                    <ul>
+                                                        {ticketsWithDiscounts.map((tt) => (
+                                                            <li key={`disc-${tt.name}`}>{tt.name}</li>
+                                                        ))}
+                                                    </ul>
+                                                </>
+                                            )}
+                                        </div>
+                                    )}
                                     {promoCodeError &&
                                         Object.values(promoCodeError).map((er, index) => (<div key={`error-${index}`} className={`${styles.promocodeError} alert alert-danger`}>{er}</div>))
                                     }

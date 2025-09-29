@@ -39,7 +39,7 @@
 
 .appliedDiscount {
   margin-top: 10px;
-  &::before {
+  p::before {
     font-family: FontAwesome;
     content: '\f058';
     margin-right: 5px;
