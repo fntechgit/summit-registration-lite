@@ -103,17 +103,20 @@ const StripeForm = ({ reservation, payTicket, userProfile, provider, hidePostalC
                 elements
             }
 
+            let address = {}
+        
+            if (userProfile.locality) address.city = userProfile.locality;
+            if (userProfile.country) address.country = userProfile.country;
+            if (userProfile.address1) address.line1 = userProfile.address1;
+            if (userProfile.address2) address.line2 = userProfile.address2;
+            if (!hidePostalCode && userProfile.postal_code) address.postal_code = userProfile.postal_code;
+            if (userProfile.region) address.state = userProfile.region;
+
             createPaymentMethodOptions = {
                 ...createPaymentMethodOptions, params: {
                     billing_details: {
-                        address: {
-                            city: userProfile.locality || "",
-                            country: userProfile.country || "",
-                            line1: userProfile.address1 || "",
-                            line2: userProfile.address2 || "",
-                            postal_code: hidePostalCode ? "" : userProfile.postal_code || "",
-                            state: userProfile.region || "",
-                        },
+                        // only use address if there's data on it to not send it empty
+                        ...(Object.keys(address).length > 0 && { address }),
                         email: userProfile.email,
                         name: `${reservation.owner_first_name} ${reservation.owner_last_name}`,
                     }
