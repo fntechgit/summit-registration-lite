@@ -104,7 +104,7 @@ const StripeForm = ({ reservation, payTicket, userProfile, provider, hidePostalC
             }
 
             let address = {}
-        
+            // stripe payment payload requires data that's not an empty string
             if (userProfile.locality) address.city = userProfile.locality;
             if (userProfile.country) address.country = userProfile.country;
             if (userProfile.address1) address.line1 = userProfile.address1;
@@ -115,7 +115,7 @@ const StripeForm = ({ reservation, payTicket, userProfile, provider, hidePostalC
             createPaymentMethodOptions = {
                 ...createPaymentMethodOptions, params: {
                     billing_details: {
-                        // only use address if there's data on it to not send it empty
+                        // only pass address parameter if there' data on it to not send it empty
                         ...(Object.keys(address).length > 0 && { address }),
                         email: userProfile.email,
                         name: `${reservation.owner_first_name} ${reservation.owner_last_name}`,
