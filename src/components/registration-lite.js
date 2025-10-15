@@ -18,7 +18,7 @@ import { animated, config, useSpring } from "react-spring";
 import { useMeasure } from "react-use";
 import {
     AUTH_ERROR_MISSING_AUTH_INFO,
-    AUTH_ERROR_MISSING_REFRESH_TOKEN ,
+    AUTH_ERROR_MISSING_REFRESH_TOKEN,
     AUTH_ERROR_REFRESH_TOKEN_REQUEST_ERROR
 } from 'openstack-uicore-foundation/lib/security/constants';
 
@@ -42,7 +42,7 @@ import {
 } from '../actions';
 
 import AjaxLoader from "openstack-uicore-foundation/lib/components/ajaxloader";
-import Clock  from "openstack-uicore-foundation/lib/components/clock";
+import Clock from "openstack-uicore-foundation/lib/components/clock";
 
 import styles from "../styles/general.module.scss";
 import '../styles/styles.scss';
@@ -192,7 +192,7 @@ const RegistrationLite = (
     const alreadyOwnedTickets = useMemo(() => profileData && ticketTaxesLoaded && !ticketTaxesError && allowedTicketTypes.length > 0 && ownedTickets.length > 0, [ownedTickets, allowedTicketTypes]);
 
     useEffect(() => {
-        if(profileData)
+        if (profileData)
             loadProfileData(profileData);
     }, [profileData])
 
@@ -206,13 +206,14 @@ const RegistrationLite = (
 
     useEffect(() => {
         if (summitData && profileData) {
-            if (summitData.invite_only_registration) {
-                getMyInvitation(summitData.id)
-                    .catch(e => console.log(e))
-                    .finally(() => handleGetTicketTypesAndTaxes(summitData.id));
-            } else {
-                handleGetTicketTypesAndTaxes(summitData.id);
-            }
+            const ensureInvitation = () =>
+                summitData.invite_only_registration
+                    ? getMyInvitation(summitData.id)
+                    : Promise.resolve(); // no-op when not invite-only
+
+            ensureInvitation()
+                .catch(e => console.log(e))
+                .finally(() => handleGetTicketTypesAndTaxes(summitData.id));
         }
     }, [summitData, profileData]);
 
@@ -264,10 +265,10 @@ const RegistrationLite = (
             .then()
             .catch((error) => {
                 let { message } = error;
-                if(message && (message.includes(AUTH_ERROR_MISSING_AUTH_INFO) ||
+                if (message && (message.includes(AUTH_ERROR_MISSING_AUTH_INFO) ||
                     message.includes(AUTH_ERROR_MISSING_REFRESH_TOKEN) ||
-                    message.includes(AUTH_ERROR_REFRESH_TOKEN_REQUEST_ERROR))){
-                   // we dont have an access token, init log out process
+                    message.includes(AUTH_ERROR_REFRESH_TOKEN_REQUEST_ERROR))) {
+                    // we dont have an access token, init log out process
                     clearWidgetState();
                     return authErrorCallback(error);
                 }
@@ -308,7 +309,7 @@ const RegistrationLite = (
 
     // if we dont have yet ticket types and we didnt requested so far for them but we are already logged in
     // just dont render
-    if(ticketTypes.length === 0 && !requestedTicketTypes && profileData) return null;
+    if (ticketTypes.length === 0 && !requestedTicketTypes && profileData) return null;
 
     return (
         <div id={`${styles.modal}`} className="modal is-active">
@@ -361,7 +362,7 @@ const RegistrationLite = (
 
                                 {profileData && step !== STEP_COMPLETE && (
                                     <>
-                                        { alreadyOwnedTickets &&
+                                        {alreadyOwnedTickets &&
                                             <TicketOwnedComponent ownedTickets={ownedTickets} />}
 
                                         <TicketTypeComponent
@@ -375,7 +376,7 @@ const RegistrationLite = (
                                             applyPromoCode={applyPromoCode}
                                             removePromoCode={() => {
                                                 setFormErrors({});
-                                                setFormValues({...formValues, promoCode: ""});
+                                                setFormValues({ ...formValues, promoCode: "" });
                                                 removePromoCode()
                                             }}
                                             promoCode={promoCode}
@@ -410,9 +411,9 @@ const RegistrationLite = (
                                                     })
                                                     .catch((error) => {
                                                         let { message } = error;
-                                                        if(message && (message.includes(AUTH_ERROR_MISSING_AUTH_INFO) ||
+                                                        if (message && (message.includes(AUTH_ERROR_MISSING_AUTH_INFO) ||
                                                             message.includes(AUTH_ERROR_MISSING_REFRESH_TOKEN) ||
-                                                            message.includes(AUTH_ERROR_REFRESH_TOKEN_REQUEST_ERROR))){
+                                                            message.includes(AUTH_ERROR_REFRESH_TOKEN_REQUEST_ERROR))) {
                                                             // we dont have an access token, init log out process
                                                             clearWidgetState();
                                                             return authErrorCallback(error);
@@ -526,7 +527,7 @@ RegistrationLite.defaultProps = {
     authErrorCallback: (error) => { console.log(error) },
     onError: (error) => { console.log("payment error : ", error) },
     hasVirtualAccessLevel: false,
-    supportEmail : 'support@fntech.com',
+    supportEmail: 'support@fntech.com',
     showCompanyInputDefaultOptions: false,
     companyDDLOptions2Show: 25,
     idpLogoLight: null,
@@ -539,14 +540,14 @@ RegistrationLite.propTypes = {
     loginInitialEmailInputValue: PropTypes.string,
     showMultipleTicketTexts: PropTypes.bool,
     showCompanyInput: PropTypes.bool,
-    authErrorCallback : PropTypes.func,
+    authErrorCallback: PropTypes.func,
     onError: PropTypes.func,
     successfulPaymentReturnUrl: PropTypes.string,
     goToMyOrders: PropTypes.func.isRequired,
     goToExtraQuestions: PropTypes.func.isRequired,
     completedExtraQuestions: PropTypes.func.isRequired,
-    closeWidget:PropTypes.func,
-    hasVirtualAccessLevel:PropTypes.bool,
+    closeWidget: PropTypes.func,
+    hasVirtualAccessLevel: PropTypes.bool,
     hidePostalCode: PropTypes.bool,
     supportEmail: PropTypes.string,
     initialOrderComplete1stParagraph: PropTypes.string,
