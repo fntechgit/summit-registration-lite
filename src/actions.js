@@ -114,7 +114,9 @@ const getTicketTypes = (summitId) => async (dispatch, getState, { apiBaseUrl, ge
         const { registrationLiteState: {promoCode : currentPromoCode} } = getState();
 
         let params = {
-            expand: 'badge_type,badge_type.access_levels,badge_type.badge_features',
+            fields: "cost,cost_with_applied_discount,currency,currency_symbol,id,max_quantity_per_order,name,quantity_2_sell,quantity_sold,sales_end_date,sales_start_date,sub_type,badge_type,badge_type.access_levels,badge_type,badge_type.access_levels.name",
+            expand: 'badge_type,badge_type.access_levels',
+            relations: "none,badge_type.none",
             access_token: accessToken
         };
 
