@@ -70,7 +70,18 @@ const StripeForm = ({ reservation, payTicket, userProfile, provider, hidePostalC
 
     useEffect(() => {
         if (elements) {
-            setPaymentElement(elements.getElement('payment'));
+            const pe = elements.getElement("payment");
+            setPaymentElement(pe);
+
+            if (pe) {
+                pe.on("ready", () => {
+                    const btn = document.getElementById("payment-form-btn");
+                    if (btn) {
+                        btn.disabled = false;
+                        btn.textContent = "Pay Now";
+                    }
+                });
+            }
         }
     }, [elements]);
 

@@ -38,7 +38,7 @@ const ButtonBarComponent = ({ step, changeStep, onNextStep, formValues, removeRe
                             {step === STEP_SELECT_TICKET_TYPE && <button disabled={!ticketSelectionValid || !promoIsReady} className={`${styles.button} button`} onClick={() => onNextStep({ ...ticketType, ticketQuantity })}>{nextButtonText}</button>}
                             {step === STEP_PERSONAL_INFO && ticketType?.cost === 0 && <button className={`${styles.button} button`} type="submit" form="personal-info-form">Get Ticket</button>}
                             {step === STEP_PERSONAL_INFO && ticketType?.cost > 0 && <button className={`${styles.button} button`} type="submit" form="personal-info-form">Next</button>}
-                            {step === STEP_PAYMENT && <button className={`${styles.button} button`} id="payment-form-btn" type="submit" form="payment-form">Pay Now</button>}
+                            {step === STEP_PAYMENT && <button className={`${styles.button} button`} id="payment-form-btn" type="submit" disabled form="payment-form">Loading</button>}
                         </div>
                     </div>
                 </>
