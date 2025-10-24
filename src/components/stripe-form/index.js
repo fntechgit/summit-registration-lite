@@ -11,7 +11,7 @@
  * limitations under the License.
  **/
 
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 
 import {
@@ -63,13 +63,13 @@ const stripeErrorCodeMap = {
 };
 
 
-const StripeForm = ({ payTicket, provider, hidePostalCode, stripeReturnUrl, onError }) => {
+const StripeForm = ({ reservation, payTicket, userProfile, provider, hidePostalCode, stripeReturnUrl, onError }) => {
     const stripe = useStripe();
     const elements = useElements();
     const [paymentElement, setPaymentElement] = useState(null);
 
     useEffect(() => {
-        if(elements){
+        if (elements) {
             setPaymentElement(elements.getElement('payment'));
         }
     }, [elements]);
@@ -92,7 +92,7 @@ const StripeForm = ({ payTicket, provider, hidePostalCode, stripeReturnUrl, onEr
         if (submitError) {
             if (btn) btn.disabled = false;
             console.log(`StripeForm::onSubmit elements.submit error`, submitError);
-            onError({type: ERROR_TYPE_PAYMENT, msg: stripeErrorCodeMap[submitError?.code]?.message || submitError?.message, exception: submitError})
+            onError({ type: ERROR_TYPE_PAYMENT, msg: stripeErrorCodeMap[submitError?.code]?.message || submitError?.message, exception: submitError })
             return;
         }
 
@@ -103,15 +103,24 @@ const StripeForm = ({ payTicket, provider, hidePostalCode, stripeReturnUrl, onEr
                 elements
             }
 
-            // provide info empty
-            if(hidePostalCode){
-                createPaymentMethodOptions = {...createPaymentMethodOptions, params: {
-                        billing_details:{
-                            address: {
-                                postal_code: "",
-                            }
-                        }
-                    }}
+            let address = {}
+            // stripe payment payload requires data that's not an empty string
+            if (userProfile.locality) address.city = userProfile.locality;
+            if (userProfile.country) address.country = userProfile.country;
+            if (userProfile.address1) address.line1 = userProfile.address1;
+            if (userProfile.address2) address.line2 = userProfile.address2;
+            if (!hidePostalCode && userProfile.postal_code) address.postal_code = userProfile.postal_code;
+            if (userProfile.region) address.state = userProfile.region;
+
+            createPaymentMethodOptions = {
+                ...createPaymentMethodOptions, params: {
+                    billing_details: {
+                        // only pass address parameter if there' data on it to not send it empty
+                        ...(Object.keys(address).length > 0 && { address }),
+                        email: userProfile.email,
+                        name: `${reservation.owner_first_name} ${reservation.owner_last_name}`,
+                    }
+                }
             }
 
             const { paymentMethod, error } = await stripe.createPaymentMethod(createPaymentMethodOptions);
@@ -119,17 +128,17 @@ const StripeForm = ({ payTicket, provider, hidePostalCode, stripeReturnUrl, onEr
             if (error) {
                 if (btn) btn.disabled = false;
                 console.log(`StripeForm::onSubmit stripe.createPaymentMethod error`, error);
-                onError({type: ERROR_TYPE_PAYMENT, msg: stripeErrorCodeMap[error?.code]?.message || error.message, exception: error})
-                if(paymentElement) paymentElement.clear();
+                onError({ type: ERROR_TYPE_PAYMENT, msg: stripeErrorCodeMap[error?.code]?.message || error.message, exception: error })
+                if (paymentElement) paymentElement.clear();
                 return;
             }
             // Send the paymentMethod ID to your server
             if (paymentMethod)
-                payTicket(provider, { elements, paymentMethod, stripe, stripeReturnUrl, onError});
+                payTicket(provider, { elements, paymentMethod, stripe, stripeReturnUrl, onError });
 
         } catch (e) {
             console.log(`StripeForm::onSubmit general error`, e);
-            onError({type: ERROR_TYPE_PAYMENT, msg: stripeErrorCodeMap[e?.code]?.message || e.message, exception: e})
+            onError({ type: ERROR_TYPE_PAYMENT, msg: stripeErrorCodeMap[e?.code]?.message || e.message, exception: e })
         }
     };
 

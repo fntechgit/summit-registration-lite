@@ -142,7 +142,9 @@ const RegistrationLiteReducer = (state = DEFAULT_STATE, action) => {
             const reservation = payload.response;
             return { ...state, reservation }
         }
-        case DELETE_RESERVATION_SUCCESS:
+        case DELETE_RESERVATION_SUCCESS: {
+            return { ...state, reservation: null }
+        }
         case CLEAR_RESERVATION: {
             return { ...state, reservation: null, promoCode: '' }
         }
