@@ -9,19 +9,39 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * RegistrationForm - Core registration form component (NO MODAL)
+ *
+ * This is the main registration form that can be used:
+ * - Directly on a dedicated /register page (no modal)
+ * - Wrapped in a modal by RegistrationLite or RegistrationButton
+ *
+ * Usage for standalone page:
+ * ```jsx
+ * <RegistrationForm
+ *   apiBaseUrl="https://api.summit.com"
+ *   clientId="your-client-id"
+ *   getAccessToken={() => 'your-token'}
+ *   summitData={summitData}
+ *   onPurchaseComplete={(order) => console.log('Done!', order)}
+ *   closeWidget={() => navigate('/')}
+ * />
+ * ```
  **/
 
 import React, { useEffect, useState, useMemo } from 'react';
-import { connect } from "react-redux";
+import { connect, Provider } from "react-redux";
 import PropTypes from 'prop-types';
 import { animated, config, useSpring } from "react-spring";
 import { useMeasure } from "react-use";
+import { PersistGate } from "redux-persist/integration/react";
 import {
     AUTH_ERROR_MISSING_AUTH_INFO,
     AUTH_ERROR_MISSING_REFRESH_TOKEN,
     AUTH_ERROR_REFRESH_TOKEN_REQUEST_ERROR
 } from 'openstack-uicore-foundation/lib/security/constants';
 
+import { getStore, getPersistor } from "../store";
 import {
     changeStep,
     getLoginCode,
@@ -44,7 +64,6 @@ import {
 import AjaxLoader from "openstack-uicore-foundation/lib/components/ajaxloader";
 import Clock from "openstack-uicore-foundation/lib/components/clock";
 
-import styles from "../styles/general.module.scss";
 import '../styles/styles.scss';
 
 import LoginComponent from './login';
@@ -70,10 +89,6 @@ import {
 
 let language = getCurrentUserLanguage();
 
-// language would be something like es-ES or es_ES
-// However we store our files with format es.json or en.json
-// therefore retrieve only the first 2 digits
-
 if (language.length > 2) {
     language = language.split("-")[0];
     language = language.split("_")[0];
@@ -86,7 +101,7 @@ try {
 }
 
 
-const RegistrationLite = (
+const RegistrationFormContent = (
     {
         loadSession,
         setMarketingSettings,
@@ -196,7 +211,6 @@ const RegistrationLite = (
             loadProfileData(profileData);
     }, [profileData])
 
-    // just initial load ( once )
     useEffect(() => {
         loadSession({ ...rest, summitData, profileData });
         if (!profileData) {
@@ -209,16 +223,15 @@ const RegistrationLite = (
             const ensureInvitation = () =>
                 summitData.invite_only_registration
                     ? getMyInvitation(summitData.id)
-                    : Promise.resolve(); // no-op when not invite-only
+                    : Promise.resolve();
 
             ensureInvitation()
                 .catch(e => console.log(e))
                 .finally(() => handleGetTicketTypesAndTaxes(summitData.id));
         }
-    }, [summitData?.id, profileData]);
+    }, [summitData, profileData]);
 
     useEffect(() => {
-        // check if there's personal information data and no ticket data to reset widget
         if (step > STEP_SELECT_TICKET_TYPE && !registrationForm.values?.ticketType && !reservation) {
             changeStep(STEP_SELECT_TICKET_TYPE);
         }
@@ -239,8 +252,6 @@ const RegistrationLite = (
     });
 
     const handleCloseClick = () => {
-        // Reset the step when closed to avoid unexpected behavior from `useEffect`s w/in other steps.
-        // (i.e., recalling `onPurchaseComplete` after a user completes one order, closes the window, and then reopens the registration widget)
         const closeAndClearState = () => {
             changeStep(STEP_SELECT_TICKET_TYPE);
             clearWidgetState();
@@ -248,7 +259,6 @@ const RegistrationLite = (
                 closeWidget();
             }
         }
-        // if there's a reservation on the state, delete it before close the widget
         if (reservation) {
             removeReservedTicket().finally(() => {
                 closeAndClearState()
@@ -268,7 +278,6 @@ const RegistrationLite = (
                 if (message && (message.includes(AUTH_ERROR_MISSING_AUTH_INFO) ||
                     message.includes(AUTH_ERROR_MISSING_REFRESH_TOKEN) ||
                     message.includes(AUTH_ERROR_REFRESH_TOKEN_REQUEST_ERROR))) {
-                    // we dont have an access token, init log out process
                     clearWidgetState();
                     return authErrorCallback(error);
                 }
@@ -313,172 +322,133 @@ const RegistrationLite = (
     if (profileData && !ticketDataLoaded && !ticketDataError) return null;
 
     return (
-        <div id={`${styles.modal}`} className="modal is-active">
-            <div className="modal-background"></div>
-            <div className={`${styles.modalContent} modal-content`}>
-                <AjaxLoader relative={true} color={'#ffffff'} show={widgetLoading || loading} size={80} />
-                <Clock onTick={(timestamp) => updateClock(timestamp)} timezone={summitData.time_zone_id} />
-                <div className={`${styles.outerWrapper} summit-registration-lite`}>
-                    <div className={styles.innerWrapper}>
-                        <div className={styles.title}>
-                            {profileData && <span>{summitData.name}</span>}
-                            <i className="fa fa-close" aria-label="close" onClick={handleCloseClick}></i>
-                        </div>
+        <div className="summit-registration-lite">
+            <AjaxLoader relative={true} color={'#ffffff'} show={widgetLoading || loading} size={80} />
+            <Clock onTick={(timestamp) => updateClock(timestamp)} timezone={summitData.time_zone_id} />
 
-                        {profileData && ticketDataError && <TicketTaxesError ticketTaxesErrorMessage={ticketTaxesErrorMessage} retryTicketTaxes={() => handleGetTicketTypesAndTaxes(summitData?.id)} />}
+            {profileData && ticketDataError && <TicketTaxesError ticketTaxesErrorMessage={ticketTaxesErrorMessage} retryTicketTaxes={() => handleGetTicketTypesAndTaxes(summitData?.id)} />}
 
-                        {noAvailableTickets && <NoAllowedTickets noAllowedTicketsMessage={noAllowedTicketsMessage} />}
+            {noAvailableTickets && <NoAllowedTickets noAllowedTicketsMessage={noAllowedTicketsMessage} />}
 
-                        {!ticketDataError &&
-                            <div className={styles.stepsWrapper}>
-                                {!profileData && !passwordlessCodeSent && (
-                                    <LoginComponent
-                                        summitData={summitData}
-                                        loginOptions={loginOptions}
-                                        allowsNativeAuth={allowsNativeAuth}
-                                        allowsOtpAuth={allowsOtpAuth}
-                                        login={(provider) => rest.authUser(provider)}
-                                        getLoginCode={getLoginCode}
-                                        getPasswordlessCode={getPasswordlessCode}
-                                        initialEmailValue={loginInitialEmailInputValue}
+            {!ticketDataError && (
+                <>
+                    {!profileData && !passwordlessCodeSent && (
+                        <LoginComponent
+                            summitData={summitData}
+                            loginOptions={loginOptions}
+                            allowsNativeAuth={allowsNativeAuth}
+                            allowsOtpAuth={allowsOtpAuth}
+                            login={(provider) => rest.authUser(provider)}
+                            getLoginCode={getLoginCode}
+                            getPasswordlessCode={getPasswordlessCode}
+                            initialEmailValue={loginInitialEmailInputValue}
+                        />
+                    )}
+
+                    {!profileData && passwordlessCodeSent && (
+                        <PasswordlessLoginComponent
+                            codeLength={passwordlessCode}
+                            codeLifeTime={passwordlessCodeLifeTime}
+                            email={passwordlessEmail}
+                            passwordlessLogin={passwordlessLogin}
+                            loginWithCode={loginWithCode}
+                            codeError={passwordlessCodeError}
+                            goToLogin={goToLogin}
+                            getLoginCode={getLoginCode}
+                            getPasswordlessCode={getPasswordlessCode}
+                            idpLogoLight={idpLogoLight}
+                            idpLogoDark={idpLogoDark}
+                            idpLogoAlt={idpLogoAlt}
+                        />
+                    )}
+
+                    {profileData && step !== STEP_COMPLETE && (
+                        <>
+                            {alreadyOwnedTickets &&
+                                <TicketOwnedComponent ownedTickets={ownedTickets} />}
+
+                            <TicketTypeComponent
+                                allowedTicketTypes={allowedTicketTypes}
+                                originalTicketTypes={ticketTypes}
+                                inPersonDisclaimer={inPersonDisclaimer}
+                                taxTypes={taxTypes}
+                                reservation={reservation}
+                                isActive={step === STEP_SELECT_TICKET_TYPE}
+                                allowPromoCodes={allowPromoCodes}
+                                applyPromoCode={applyPromoCode}
+                                removePromoCode={() => {
+                                    setFormErrors({});
+                                    setFormValues({ ...formValues, promoCode: "" });
+                                    removePromoCode()
+                                }}
+                                promoCode={promoCode}
+                                formErrors={formErrors}
+                                changeForm={ticketForm => setFormValues({ ...formValues, ...ticketForm })}
+                                trackViewItem={trackViewItem}
+                                showMultipleTicketTexts={showMultipleTicketTexts}
+                            />
+
+                            <PersonalInfoComponent
+                                isActive={step === STEP_PERSONAL_INFO}
+                                reservation={reservation}
+                                userProfile={profileData}
+                                invitation={invitation}
+                                summitId={summitData.id}
+                                changeForm={(personalInformation) => {
+                                    setFormValues({
+                                        ...registrationForm.values,
+                                        personalInformation
+                                    });
+
+                                    reserveTicket({
+                                        provider,
+                                        personalInformation: personalInformation,
+                                        ticket: registrationForm.values?.ticketType,
+                                        ticketQuantity: registrationForm.values?.ticketQuantity,
+                                    }, {
+                                        onError: (err, res) => setFormErrors(res.body.errors)
+                                    })
+                                        .then(() => {
+                                            trackBeginCheckout(registrationForm.values);
+                                        })
+                                        .catch((error) => {
+                                            let { message } = error;
+                                            if (message && (message.includes(AUTH_ERROR_MISSING_AUTH_INFO) ||
+                                                message.includes(AUTH_ERROR_MISSING_REFRESH_TOKEN) ||
+                                                message.includes(AUTH_ERROR_REFRESH_TOKEN_REQUEST_ERROR))) {
+                                                clearWidgetState();
+                                                return authErrorCallback(error);
+                                            }
+                                        });
+                                }}
+                                handleCompanyError={handleCompanyError}
+                                formValues={formValues}
+                                formErrors={formErrors}
+                                showMultipleTicketTexts={showMultipleTicketTexts}
+                                showCompanyInput={showCompanyInput}
+                                companyDDLPlaceholder={companyDDLPlaceholder}
+                                showCompanyInputDefaultOptions={showCompanyInputDefaultOptions}
+                                companyDDLOptions2Show={companyDDLOptions2Show}
+                            />
+
+                            <animated.div style={{ ...toggleAnimation }}>
+                                <div ref={ref}>
+                                    <PaymentComponent
+                                        isActive={step === STEP_PAYMENT}
+                                        reservation={reservation}
+                                        payTicket={payTicketWithProvider}
+                                        userProfile={profileData}
+                                        timestamp={summitData.timestamp}
+                                        provider={provider}
+                                        providerKey={publicKey}
+                                        providerOptions={providerOptions}
+                                        hidePostalCode={hidePostalCode}
+                                        onError={onError}
+                                        successfulPaymentReturnUrl={successfulPaymentReturnUrl}
                                     />
-                                )}
+                                </div>
+                            </animated.div>
 
-                                {!profileData && passwordlessCodeSent && (
-                                    <PasswordlessLoginComponent
-                                        codeLength={passwordlessCode}
-                                        codeLifeTime={passwordlessCodeLifeTime}
-                                        email={passwordlessEmail}
-                                        passwordlessLogin={passwordlessLogin}
-                                        loginWithCode={loginWithCode}
-                                        codeError={passwordlessCodeError}
-                                        goToLogin={goToLogin}
-                                        getLoginCode={getLoginCode}
-                                        getPasswordlessCode={getPasswordlessCode}
-                                        idpLogoLight={idpLogoLight}
-                                        idpLogoDark={idpLogoDark}
-                                        idpLogoAlt={idpLogoAlt}
-                                    />
-                                )}
-
-                                {profileData && step !== STEP_COMPLETE && (
-                                    <>
-                                        {alreadyOwnedTickets &&
-                                            <TicketOwnedComponent ownedTickets={ownedTickets} />}
-
-                                        <TicketTypeComponent
-                                            allowedTicketTypes={allowedTicketTypes}
-                                            originalTicketTypes={ticketTypes}
-                                            inPersonDisclaimer={inPersonDisclaimer}
-                                            taxTypes={taxTypes}
-                                            reservation={reservation}
-                                            isActive={step === STEP_SELECT_TICKET_TYPE}
-                                            allowPromoCodes={allowPromoCodes}
-                                            applyPromoCode={applyPromoCode}
-                                            removePromoCode={() => {
-                                                setFormErrors({});
-                                                setFormValues({ ...formValues, promoCode: "" });
-                                                removePromoCode()
-                                            }}
-                                            promoCode={promoCode}
-                                            formErrors={formErrors}
-                                            changeForm={ticketForm => setFormValues({ ...formValues, ...ticketForm })}
-                                            trackViewItem={trackViewItem}
-                                            showMultipleTicketTexts={showMultipleTicketTexts}
-                                        />
-
-                                        <PersonalInfoComponent
-                                            isActive={step === STEP_PERSONAL_INFO}
-                                            reservation={reservation}
-                                            userProfile={profileData}
-                                            invitation={invitation}
-                                            summitId={summitData.id}
-                                            changeForm={(personalInformation) => {
-                                                setFormValues({
-                                                    ...registrationForm.values,
-                                                    personalInformation
-                                                });
-
-                                                reserveTicket({
-                                                    provider,
-                                                    personalInformation: personalInformation,
-                                                    ticket: registrationForm.values?.ticketType,
-                                                    ticketQuantity: registrationForm.values?.ticketQuantity,
-                                                }, {
-                                                    onError: (err, res) => setFormErrors(res.body.errors)
-                                                })
-                                                    .then(() => {
-                                                        trackBeginCheckout(registrationForm.values);
-                                                    })
-                                                    .catch((error) => {
-                                                        let { message } = error;
-                                                        if (message && (message.includes(AUTH_ERROR_MISSING_AUTH_INFO) ||
-                                                            message.includes(AUTH_ERROR_MISSING_REFRESH_TOKEN) ||
-                                                            message.includes(AUTH_ERROR_REFRESH_TOKEN_REQUEST_ERROR))) {
-                                                            // we dont have an access token, init log out process
-                                                            clearWidgetState();
-                                                            return authErrorCallback(error);
-                                                        }
-                                                    });
-                                            }}
-                                            handleCompanyError={handleCompanyError}
-                                            formValues={formValues}
-                                            formErrors={formErrors}
-                                            showMultipleTicketTexts={showMultipleTicketTexts}
-                                            showCompanyInput={showCompanyInput}
-                                            companyDDLPlaceholder={companyDDLPlaceholder}
-                                            showCompanyInputDefaultOptions={showCompanyInputDefaultOptions}
-                                            companyDDLOptions2Show={companyDDLOptions2Show}
-                                        />
-
-                                        <animated.div style={{ ...toggleAnimation }}>
-                                            <div ref={ref}>
-                                                <PaymentComponent
-                                                    isActive={step === STEP_PAYMENT}
-                                                    reservation={reservation}
-                                                    payTicket={payTicketWithProvider}
-                                                    userProfile={profileData}
-                                                    timestamp={summitData.timestamp}
-                                                    provider={provider}
-                                                    providerKey={publicKey}
-                                                    providerOptions={providerOptions}
-                                                    hidePostalCode={hidePostalCode}
-                                                    onError={onError}
-                                                    successfulPaymentReturnUrl={successfulPaymentReturnUrl}
-                                                />
-                                            </div>
-                                        </animated.div>
-                                    </>
-                                )}
-
-                                {profileData && step === STEP_COMPLETE && (
-                                    <PurchaseComplete
-                                        checkout={checkout}
-                                        user={profileData}
-                                        summit={summitData}
-                                        onPurchaseComplete={handlePurchaseComplete}
-                                        goToEvent={goToEvent}
-                                        goToMyOrders={goToMyOrders}
-                                        goToExtraQuestions={goToExtraQuestions}
-                                        completedExtraQuestions={completedExtraQuestions}
-                                        nowUtc={nowUtc}
-                                        clearWidgetState={clearWidgetState}
-                                        closeWidget={closeWidget}
-                                        hasVirtualAccessLevel={hasVirtualAccessLevel}
-                                        supportEmail={supportEmail}
-                                        initialOrderComplete1stParagraph={rest.initialOrderComplete1stParagraph}
-                                        initialOrderComplete2ndParagraph={rest.initialOrderComplete2ndParagraph}
-                                        initialOrderCompleteButton={rest.initialOrderCompleteButton}
-                                        orderCompleteTitle={rest.orderCompleteTitle}
-                                        orderComplete1stParagraph={rest.orderComplete1stParagraph}
-                                        orderComplete2ndParagraph={rest.orderComplete2ndParagraph}
-                                        orderCompleteButton={rest.orderCompleteButton}
-                                    />
-                                )}
-                            </div>
-                        }
-
-                        {!ticketDataError && profileData && step !== STEP_COMPLETE && (
                             <ButtonBarComponent
                                 step={step}
                                 inPersonDisclaimer={inPersonDisclaimer}
@@ -490,10 +460,35 @@ const RegistrationLite = (
                                 }}
                                 changeStep={changeStep}
                             />
-                        )}
-                    </div>
-                </div>
-            </div>
+                        </>
+                    )}
+
+                    {profileData && step === STEP_COMPLETE && (
+                        <PurchaseComplete
+                            checkout={checkout}
+                            user={profileData}
+                            summit={summitData}
+                            onPurchaseComplete={handlePurchaseComplete}
+                            goToEvent={goToEvent}
+                            goToMyOrders={goToMyOrders}
+                            goToExtraQuestions={goToExtraQuestions}
+                            completedExtraQuestions={completedExtraQuestions}
+                            nowUtc={nowUtc}
+                            clearWidgetState={clearWidgetState}
+                            closeWidget={closeWidget}
+                            hasVirtualAccessLevel={hasVirtualAccessLevel}
+                            supportEmail={supportEmail}
+                            initialOrderComplete1stParagraph={rest.initialOrderComplete1stParagraph}
+                            initialOrderComplete2ndParagraph={rest.initialOrderComplete2ndParagraph}
+                            initialOrderCompleteButton={rest.initialOrderCompleteButton}
+                            orderCompleteTitle={rest.orderCompleteTitle}
+                            orderComplete1stParagraph={rest.orderComplete1stParagraph}
+                            orderComplete2ndParagraph={rest.orderComplete2ndParagraph}
+                            orderCompleteButton={rest.orderCompleteButton}
+                        />
+                    )}
+                </>
+            )}
         </div>
     );
 }
@@ -517,7 +512,48 @@ const mapStateToProps = ({ registrationLiteState }) => ({
     promoCode: registrationLiteState.promoCode,
 })
 
-RegistrationLite.defaultProps = {
+const ConnectedRegistrationFormContent = connect(mapStateToProps, {
+    loadSession,
+    changeStep,
+    reserveTicket,
+    removeReservedTicket,
+    payTicketWithProvider,
+    getTicketTypesAndTaxes,
+    getLoginCode,
+    passwordlessLogin,
+    goToLogin,
+    getMyInvitation,
+    clearWidgetState,
+    updateClock,
+    loadProfileData,
+    applyPromoCode,
+    removePromoCode,
+    validatePromoCode
+})(RegistrationFormContent);
+
+
+/**
+ * RegistrationForm - Main export with Redux Provider
+ */
+class RegistrationForm extends React.PureComponent {
+
+    constructor(props) {
+        super(props);
+        this.store = getStore(props.clientId, props.apiBaseUrl, props.getAccessToken);
+    }
+
+    render() {
+        return (
+            <Provider store={this.store}>
+                <PersistGate persistor={getPersistor()}>
+                    <ConnectedRegistrationFormContent {...this.props} />
+                </PersistGate>
+            </Provider>
+        );
+    }
+}
+
+RegistrationForm.defaultProps = {
     loginInitialEmailInputValue: '',
     showMultipleTicketTexts: true,
     showCompanyInput: true,
@@ -537,7 +573,10 @@ RegistrationLite.defaultProps = {
     successfullPaymentReturnUrl: '',
 };
 
-RegistrationLite.propTypes = {
+RegistrationForm.propTypes = {
+    apiBaseUrl: PropTypes.string.isRequired,
+    clientId: PropTypes.string.isRequired,
+    getAccessToken: PropTypes.func.isRequired,
     loginInitialEmailInputValue: PropTypes.string,
     showMultipleTicketTexts: PropTypes.bool,
     showCompanyInput: PropTypes.bool,
@@ -562,21 +601,4 @@ RegistrationLite.propTypes = {
     companyDDLOptions2Show: PropTypes.number,
 };
 
-export default connect(mapStateToProps, {
-    loadSession,
-    changeStep,
-    reserveTicket,
-    removeReservedTicket,
-    payTicketWithProvider,
-    getTicketTypesAndTaxes,
-    getLoginCode,
-    passwordlessLogin,
-    goToLogin,
-    getMyInvitation,
-    clearWidgetState,
-    updateClock,
-    loadProfileData,
-    applyPromoCode,
-    removePromoCode,
-    validatePromoCode
-})(RegistrationLite)
+export default RegistrationForm;
