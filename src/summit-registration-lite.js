@@ -12,39 +12,29 @@
  **/
 
 import React from "react";
-import { Provider } from "react-redux";
-import { getStore, getPersistor } from "./store";
-import { PersistGate } from "redux-persist/integration/react";
-import RegistrationLite from "./components/registration-lite";
+import { RegistrationModal, RegistrationLite } from "./components/registration-lite";
 
 // Access token is required to fetch registration company input. For standalone widget use
 if (process.env.NODE_ENV === 'development') {
-    window.API_BASE_URL             = process.env['API_BASE_URL'];
-    
-    if(typeof window !== 'undefined') {
-        window.localStorage.setItem('authInfo', JSON.stringify({accessToken: process.env['ACCESS_TOKEN']}));
+    window.API_BASE_URL = process.env['API_BASE_URL'];
+
+    if (typeof window !== 'undefined') {
+        window.localStorage.setItem('authInfo', JSON.stringify({ accessToken: process.env['ACCESS_TOKEN'] }));
     }
 }
 
-class RegistrationLiteWidget extends React.PureComponent {
+// Legacy exports (backward compatible)
+export { default as LoginComponent } from './components/login';
+export { default as PasswordlessLoginComponent } from './components/login-passwordless';
 
-    constructor(props) {
-        super(props);
-        this.store = getStore(props.clientId, props.apiBaseUrl, props.getAccessToken);
-    }
+// Core form component (no modal)
+export { default as RegistrationForm } from './components/registration-form';
 
-    render() {
-        return (
-            <Provider store={this.store}>
-                <PersistGate persistor={getPersistor()}>
-                    <RegistrationLite {...this.props} />
-                </PersistGate>
-            </Provider>
-        );
-    }
-}
+// Modal component - wraps RegistrationForm in a modal overlay
+export { RegistrationModal };
 
-export {default as LoginComponent} from './components/login';
-export {default as PasswordlessLoginComponent} from './components/login-passwordless';
+// Backward compatibility alias
+export { RegistrationLite };
 
-export default RegistrationLiteWidget;
+// Default export - RegistrationModal (backward compatible)
+export default RegistrationModal;
