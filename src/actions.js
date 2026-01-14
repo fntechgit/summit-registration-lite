@@ -111,16 +111,16 @@ const getTicketTypes = (summitId) => async (dispatch, getState, { apiBaseUrl, ge
     try {
         const accessToken = await getAccessToken();
         // try to get the current promo code
-        const { registrationLiteState: {promoCode : currentPromoCode} } = getState();
+        const { registrationLiteState: { promoCode: currentPromoCode } } = getState();
 
         let params = {
             expand: 'badge_type,badge_type.access_levels,badge_type.badge_features',
             access_token: accessToken
         };
 
-        if(currentPromoCode !== ''){
+        if (currentPromoCode !== '') {
             console.log(`getTicketTypes current promo code is ${currentPromoCode}`)
-            params['filter']= `promo_code==${currentPromoCode}`;
+            params['filter'] = `promo_code==${currentPromoCode}`;
         }
 
         return getRequest(
@@ -172,7 +172,7 @@ export const applyPromoCode = (currentPromoCode) => (dispatch, getState) => {
     try {
         const { registrationLiteState: { settings: { summitId } } } = getState();
         // set the current promo code and get ticket types again
-        dispatch(createAction(SET_CURRENT_PROMO_CODE)({currentPromoCode}));
+        dispatch(createAction(SET_CURRENT_PROMO_CODE)({ currentPromoCode }));
         dispatch(getTicketTypes(summitId));
     } catch (e) {
         return Promise.reject(e);
@@ -254,7 +254,7 @@ export const validatePromoCode = (ticketData, { onError }) => async (dispatch, g
 export const reserveTicket = ({ provider, personalInformation, ticket, ticketQuantity }, { onError }) =>
     async (dispatch, getState, { apiBaseUrl, getAccessToken }) => {
         try {
-            const { registrationLiteState: { settings: { summitId }, promoCode: currentPromoCode  } } = getState();
+            const { registrationLiteState: { settings: { summitId }, promoCode: currentPromoCode } } = getState();
             let { firstName, lastName, email, company, attendee } = personalInformation;
             dispatch(startWidgetLoading());
 
@@ -273,7 +273,10 @@ export const reserveTicket = ({ provider, personalInformation, ticket, ticketQua
 
             let params = {
                 access_token,
-                expand: 'tickets,tickets.owner,tickets.ticket_type,tickets.ticket_type.taxes',
+                
+                fields: "owner_first_name,owner_last_name,owner_email,owner_company,summit_id,id,currency,amount_in_cents,amount,raw_amount_in_cents,discount_amount,discount_amount_in_cents,hash,payment_gateway_client_token,status,payment_method,promo_code,taxes_amount,applied_taxes.id,applied_taxes.name,applied_taxes.amount,tickets.id,tickets.ticket_type_id",
+                relations: "tickets,tickets.none,applied_taxes",
+                expand: 'tickets,applied_taxes',
             };
 
             const normalizedEntity = normalizeReservation({
@@ -310,12 +313,11 @@ export const reserveTicket = ({ provider, personalInformation, ticket, ticketQua
                 // entity
             )(params)(dispatch)
                 .then((payload) => {
-                    let {response : reservation} = payload;
+                    let { response: reservation } = payload;
                     dispatch(stopWidgetLoading());
                     reservation.promo_code = currentPromoCode || null;
 
-                    if(isFreeOrder(reservation) || isPrePaidOrder(reservation))
-                    {
+                    if (isFreeOrder(reservation) || isPrePaidOrder(reservation)) {
                         dispatch(payTicketWithProvider(provider));
                         return (payload)
                     }
@@ -424,7 +426,7 @@ export const getLoginCode = (email, getPasswordlessCode) => async (dispatch, get
             resolve(res);
         }, (err) => {
             const errorMessage = err.response?.body?.error || err.message;
-            reject(new Error(errorMessage)); 
+            reject(new Error(errorMessage));
         });
     });
 
