@@ -175,8 +175,8 @@ const RegistrationLite = (
         errors: []
     });
 
-    const [ticketTaxesError, setTicketTaxesError] = useState(false);
-    const [ticketTaxesLoaded, setTicketTaxesLoaded] = useState(false);
+    const [ticketDataError, setTicketDataError] = useState(false);
+    const [ticketDataLoaded, setTicketDataLoaded] = useState(false);
 
     const { values: formValues, errors: formErrors } = registrationForm;
 
@@ -186,10 +186,10 @@ const RegistrationLite = (
 
     const { publicKey, provider } = getCurrentProvider(summitData);
 
-    const allowedTicketTypes = ticketTaxesLoaded ? ticketTypes.filter((tt) => tt.sub_type === TICKET_TYPE_SUBTYPE_PREPAID || (tt.sales_start_date === null && tt.sales_end_date === null) || (nowUtc >= tt.sales_start_date && nowUtc <= tt.sales_end_date)) : [];
+    const allowedTicketTypes = ticketDataLoaded ? ticketTypes.filter((tt) => tt.sub_type === TICKET_TYPE_SUBTYPE_PREPAID || (tt.sales_start_date === null && tt.sales_end_date === null) || (nowUtc >= tt.sales_start_date && nowUtc <= tt.sales_end_date)) : [];
 
-    const noAvailableTickets = useMemo(() => profileData && ticketTaxesLoaded && !ticketTaxesError && allowedTicketTypes.length === 0 && step !== STEP_COMPLETE, [allowedTicketTypes]);
-    const alreadyOwnedTickets = useMemo(() => profileData && ticketTaxesLoaded && !ticketTaxesError && allowedTicketTypes.length > 0 && ownedTickets.length > 0, [ownedTickets, allowedTicketTypes]);
+    const noAvailableTickets = useMemo(() => profileData && ticketDataLoaded && !ticketDataError && allowedTicketTypes.length === 0 && step !== STEP_COMPLETE, [allowedTicketTypes]);
+    const alreadyOwnedTickets = useMemo(() => profileData && ticketDataLoaded && !ticketDataError && allowedTicketTypes.length > 0 && ownedTickets.length > 0, [ownedTickets, allowedTicketTypes]);
 
     useEffect(() => {
         if (profileData)
@@ -259,8 +259,8 @@ const RegistrationLite = (
     };
 
     const handleGetTicketTypesAndTaxes = (summitId) => {
-        setTicketTaxesError(false);
-        setTicketTaxesLoaded(false);
+        setTicketDataError(false);
+        setTicketDataLoaded(false);
         getTicketTypesAndTaxes(summitId)
             .then()
             .catch((error) => {
@@ -272,10 +272,10 @@ const RegistrationLite = (
                     clearWidgetState();
                     return authErrorCallback(error);
                 }
-                setTicketTaxesError(true);
+                setTicketDataError(true);
             })
             .finally(() => {
-                setTicketTaxesLoaded(true);
+                setTicketDataLoaded(true);
             });
     }
 
@@ -307,9 +307,10 @@ const RegistrationLite = (
         trackEvent(PURCHASE_COMPLETE, { order });
     }
 
-    // if we dont have yet ticket types and we didnt requested so far for them but we are already logged in
-    // just dont render
-    if (ticketTypes.length === 0 && !requestedTicketTypes && profileData) return null;
+    // If user is logged in but ticket data hasn't loaded yet (and no error occurred),
+    // don't render to avoid flash. Uses local state instead of Redux to prevent
+    // race conditions with redux-persist rehydration.
+    if (profileData && !ticketDataLoaded && !ticketDataError) return null;
 
     return (
         <div id={`${styles.modal}`} className="modal is-active">
@@ -324,11 +325,11 @@ const RegistrationLite = (
                             <i className="fa fa-close" aria-label="close" onClick={handleCloseClick}></i>
                         </div>
 
-                        {profileData && ticketTaxesError && <TicketTaxesError ticketTaxesErrorMessage={ticketTaxesErrorMessage} retryTicketTaxes={() => handleGetTicketTypesAndTaxes(summitData?.id)} />}
+                        {profileData && ticketDataError && <TicketTaxesError ticketTaxesErrorMessage={ticketTaxesErrorMessage} retryTicketTaxes={() => handleGetTicketTypesAndTaxes(summitData?.id)} />}
 
                         {noAvailableTickets && <NoAllowedTickets noAllowedTicketsMessage={noAllowedTicketsMessage} />}
 
-                        {!ticketTaxesError &&
+                        {!ticketDataError &&
                             <div className={styles.stepsWrapper}>
                                 {!profileData && !passwordlessCodeSent && (
                                     <LoginComponent
@@ -477,7 +478,7 @@ const RegistrationLite = (
                             </div>
                         }
 
-                        {!ticketTaxesError && profileData && step !== STEP_COMPLETE && (
+                        {!ticketDataError && profileData && step !== STEP_COMPLETE && (
                             <ButtonBarComponent
                                 step={step}
                                 inPersonDisclaimer={inPersonDisclaimer}
