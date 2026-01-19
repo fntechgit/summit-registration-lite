@@ -1,5 +1,5 @@
 /**
- * Copyright 2017 OpenStack Foundation
+ * Copyright 2026 OpenStack Foundation
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -9,9 +9,16 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * summit-registration-form.js - Standalone registration form entry point
+ *
+ * This is the entry point for using the registration form on a dedicated page
+ * (no modal overlay). For modal usage, use summit-registration-modal.js instead.
  **/
 
-export { default as LoginComponent } from './components/login';
-export { default as PasswordlessLoginComponent } from './components/login-passwordless';
+import { withReduxProvider } from './utils/withReduxProvider';
+import RegistrationFormContent from './components/registration-form';
 
-export { default } from './summit-registration-modal';
+const RegistrationForm = withReduxProvider(RegistrationFormContent);
+
+export default RegistrationForm;

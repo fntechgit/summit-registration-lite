@@ -11,15 +11,26 @@
  * limitations under the License.
  **/
 
-import React from 'react';
+import React, { useState } from 'react';
 import ReactDOM from 'react-dom';
-import RegistrationLiteWidget from './summit-registration-lite';
+import RegistrationModal from './summit-registration-modal';
+import RegistrationForm from './summit-registration-form';
 
 import MarketingData from './marketing-data.json';
 import SummitData from './summit-data.json';
 import ProfileData from './profile.json';
 
-const filterProps = {
+// Dev environment setup
+window.API_BASE_URL = process.env.API_BASE_URL;
+window.TIMEINTERVALSINCE1970_API_URL = process.env.TIMEINTERVALSINCE1970_API_URL;
+if (typeof window !== 'undefined') {
+    window.localStorage.setItem('authInfo', JSON.stringify({ accessToken: process.env.ACCESS_TOKEN }));
+}
+
+const DevApp = () => {
+    const [mode, setMode] = useState('modal');
+
+    const filterProps = {
     authUser: (provider) => console.log('login with ', provider),
     getPasswordlessCode: (email) => Promise.resolve({response: { otp_length: 5, otp_lifetime: 600}}),
     loginWithCode: (code) => Promise.reject('error'),
@@ -66,16 +77,47 @@ const filterProps = {
         console.log('evalulate user extra questions...', attendeeId)
         return Promise.resolve(true);
     },
-    successfulPaymentReturnUrl: `${window.location.origin}`,
-    handleCompanyError: (err) => console.log('catch error company', err)
+        successfulPaymentReturnUrl: `${window.location.origin}`,
+        handleCompanyError: (err) => console.log('catch error company', err)
+    };
+
+    const toggleStyle = {
+        display: 'flex',
+        gap: '10px',
+        position: 'fixed',
+        bottom: '20px',
+        right: '20px',
+        zIndex: 99999,
+        backgroundColor: 'white',
+        padding: '10px 15px',
+        borderRadius: '8px',
+        boxShadow: '0 2px 10px rgba(0,0,0,0.3)'
+    };
+
+    const buttonStyle = (isActive) => ({
+        padding: '10px 20px',
+        cursor: 'pointer',
+        backgroundColor: isActive ? '#1EAAA3' : '#f0f0f0',
+        color: isActive ? '#fff' : '#333',
+        border: 'none',
+        borderRadius: '4px',
+        fontWeight: isActive ? 'bold' : 'normal'
+    });
+
+    return (
+        <div style={{ width: '1080px', margin: '0 auto' }}>
+            <div style={toggleStyle}>
+                <button style={buttonStyle(mode === 'modal')} onClick={() => setMode('modal')}>
+                    Modal
+                </button>
+                <button style={buttonStyle(mode === 'form')} onClick={() => setMode('form')}>
+                    Standalone Form
+                </button>
+            </div>
+            {mode === 'modal' && <RegistrationModal {...filterProps} />}
+            {mode === 'form' && <RegistrationForm {...filterProps} />}
+        </div>
+    );
 };
 
-// width 780px or 230px
-
-ReactDOM.render(
-    <div style={{ width: '1080px', margin: '0 auto' }}>
-        {window.TIMEINTERVALSINCE1970_API_URL=process.env.TIMEINTERVALSINCE1970_API_URL}
-        <RegistrationLiteWidget {...filterProps} />
-    </div>,
-    document.querySelector('#root')
-);
+ReactDOM.render(<DevApp />, document.querySelector('#root'));
