@@ -1,5 +1,5 @@
 /**
- * Copyright 2020 OpenStack Foundation
+ * Copyright 2026 OpenStack Foundation
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -10,38 +10,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * RegistrationForm - Core registration form component (NO MODAL)
- *
- * This is the main registration form that can be used:
- * - Directly on a dedicated /register page (no modal)
- * - Wrapped in a modal by RegistrationLite or RegistrationButton
- *
- * Usage for standalone page:
- * ```jsx
- * <RegistrationForm
- *   apiBaseUrl="https://api.summit.com"
- *   clientId="your-client-id"
- *   getAccessToken={() => 'your-token'}
- *   summitData={summitData}
- *   onPurchaseComplete={(order) => console.log('Done!', order)}
- *   closeWidget={() => navigate('/')}
- * />
- * ```
+ * RegistrationForm - Core registration form component
  **/
 
 import React, { useEffect, useState, useMemo } from 'react';
-import { connect, Provider } from "react-redux";
+import { connect } from "react-redux";
 import PropTypes from 'prop-types';
 import { animated, config, useSpring } from "react-spring";
 import { useMeasure } from "react-use";
-import { PersistGate } from "redux-persist/integration/react";
 import {
     AUTH_ERROR_MISSING_AUTH_INFO,
     AUTH_ERROR_MISSING_REFRESH_TOKEN,
     AUTH_ERROR_REFRESH_TOKEN_REQUEST_ERROR
 } from 'openstack-uicore-foundation/lib/security/constants';
 
-import { getStore, getPersistor } from "../store";
 import {
     changeStep,
     getLoginCode,
@@ -59,33 +41,33 @@ import {
     removePromoCode,
     applyPromoCode,
     validatePromoCode
-} from '../actions';
+} from '../../actions';
 
 import AjaxLoader from "openstack-uicore-foundation/lib/components/ajaxloader";
 import Clock from "openstack-uicore-foundation/lib/components/clock";
 
-import '../styles/styles.scss';
+import '../../styles/styles.scss';
 
-import LoginComponent from './login';
-import PaymentComponent from './payment';
-import PersonalInfoComponent from './personal-information';
-import TicketTypeComponent from './ticket-type';
-import ButtonBarComponent from './button-bar';
-import PurchaseComplete from './purchase-complete';
-import PasswordlessLoginComponent from './login-passwordless';
-import TicketOwnedComponent from './ticket-owned';
-import { buildTrackEvent, getCurrentProvider, handleSentryException } from '../utils/utils';
-import NoAllowedTickets from './no-allowed-tickets';
-import TicketTaxesError from './ticket-taxes-error';
+import LoginComponent from '../login';
+import PaymentComponent from '../payment';
+import PersonalInfoComponent from '../personal-information';
+import TicketTypeComponent from '../ticket-type';
+import ButtonBarComponent from '../button-bar';
+import PurchaseComplete from '../purchase-complete';
+import PasswordlessLoginComponent from '../login-passwordless';
+import TicketOwnedComponent from '../ticket-owned';
+import { buildTrackEvent, getCurrentProvider, handleSentryException } from '../../utils/utils';
+import NoAllowedTickets from '../no-allowed-tickets';
+import TicketTaxesError from '../ticket-taxes-error';
 import T from 'i18n-react';
-import { getCurrentUserLanguage } from '../utils/utils';
+import { getCurrentUserLanguage } from '../../utils/utils';
 import {
     ADD_TO_CART, BEGIN_CHECKOUT, PURCHASE_COMPLETE,
     STEP_COMPLETE,
     STEP_PAYMENT,
     STEP_PERSONAL_INFO,
     STEP_SELECT_TICKET_TYPE, TICKET_TYPE_SUBTYPE_PREPAID, VIEW_ITEM
-} from '../utils/constants';
+} from '../../utils/constants';
 
 let language = getCurrentUserLanguage();
 
@@ -95,9 +77,9 @@ if (language.length > 2) {
 }
 
 try {
-    T.setTexts(require(`../i18n/${language}.json`));
+    T.setTexts(require(`../../i18n/${language}.json`));
 } catch (e) {
-    T.setTexts(require(`../i18n/en.json`));
+    T.setTexts(require(`../../i18n/en.json`));
 }
 
 
@@ -512,7 +494,7 @@ const mapStateToProps = ({ registrationLiteState }) => ({
     promoCode: registrationLiteState.promoCode,
 })
 
-const ConnectedRegistrationFormContent = connect(mapStateToProps, {
+const RegistrationForm = connect(mapStateToProps, {
     loadSession,
     changeStep,
     reserveTicket,
@@ -530,28 +512,6 @@ const ConnectedRegistrationFormContent = connect(mapStateToProps, {
     removePromoCode,
     validatePromoCode
 })(RegistrationFormContent);
-
-
-/**
- * RegistrationForm - Main export with Redux Provider
- */
-class RegistrationForm extends React.PureComponent {
-
-    constructor(props) {
-        super(props);
-        this.store = getStore(props.clientId, props.apiBaseUrl, props.getAccessToken);
-    }
-
-    render() {
-        return (
-            <Provider store={this.store}>
-                <PersistGate persistor={getPersistor()}>
-                    <ConnectedRegistrationFormContent {...this.props} />
-                </PersistGate>
-            </Provider>
-        );
-    }
-}
 
 RegistrationForm.defaultProps = {
     loginInitialEmailInputValue: '',

@@ -1,5 +1,5 @@
 /**
- * Copyright 2020 OpenStack Foundation
+ * Copyright 2026 OpenStack Foundation
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -11,17 +11,12 @@
  * limitations under the License.
  *
  * RegistrationModal - Modal wrapper for RegistrationForm
- *
- * This component wraps RegistrationForm in a modal overlay.
- * For standalone/dedicated page usage without modal, use RegistrationForm directly.
- *
- * Also exported as RegistrationLite for backward compatibility.
  **/
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import RegistrationForm from './registration-form';
-import styles from "../styles/general.module.scss";
+import RegistrationForm from '../registration-form';
+import styles from "../../styles/general.module.scss";
 
 const RegistrationModal = ({ summitData, closeWidget, ...props }) => {
     return (
@@ -92,8 +87,4 @@ RegistrationModal.propTypes = {
     companyDDLOptions2Show: PropTypes.number,
 };
 
-// Backward compatibility alias
-const RegistrationLite = RegistrationModal;
-
 export default RegistrationModal;
-export { RegistrationModal, RegistrationLite };
