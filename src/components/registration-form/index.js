@@ -531,7 +531,7 @@ RegistrationForm.defaultProps = {
     idpLogoLight: null,
     idpLogoDark: null,
     hidePostalCode: false,
-    successfullPaymentReturnUrl: '',
+    successfulPaymentReturnUrl: '',
 };
 
 RegistrationForm.propTypes = {
