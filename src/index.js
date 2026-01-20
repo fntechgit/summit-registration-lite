@@ -13,8 +13,8 @@
 
 import React, { useState } from 'react';
 import ReactDOM from 'react-dom';
-import RegistrationModal from './summit-registration-modal';
-import RegistrationForm from './summit-registration-form';
+import RegistrationModal from './components/registration-modal';
+import RegistrationForm from './components/registration-form';
 
 import MarketingData from './marketing-data.json';
 import SummitData from './summit-data.json';
