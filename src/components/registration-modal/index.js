@@ -16,6 +16,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import RegistrationForm from '../registration-form';
+import { withReduxProvider } from '../../utils/withReduxProvider';
 import styles from "../../styles/general.module.scss";
 
 const RegistrationModal = ({ summitData, closeWidget, ...props }) => {
@@ -87,4 +88,4 @@ RegistrationModal.propTypes = {
     companyDDLOptions2Show: PropTypes.number,
 };
 
-export default RegistrationModal;
+export default withReduxProvider(RegistrationModal);

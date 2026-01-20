@@ -16,6 +16,7 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { connect } from "react-redux";
 import PropTypes from 'prop-types';
+import { withReduxProvider } from '../../utils/withReduxProvider';
 import { animated, config, useSpring } from "react-spring";
 import { useMeasure } from "react-use";
 import {
@@ -561,4 +562,4 @@ RegistrationForm.propTypes = {
     companyDDLOptions2Show: PropTypes.number,
 };
 
-export default RegistrationForm;
+export default withReduxProvider(RegistrationForm);

@@ -1,5 +1,5 @@
 /**
- * Copyright 2017 OpenStack Foundation
+ * Copyright 2026 OpenStack Foundation
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -11,7 +11,14 @@
  * limitations under the License.
  **/
 
-export { default as LoginComponent } from './components/login';
-export { default as PasswordlessLoginComponent } from './components/login-passwordless';
+// Login components
+export { default as LoginComponent } from './login';
+export { default as PasswordlessLoginComponent } from './login-passwordless';
 
-export { default } from './summit-registration-modal';
+// Registration components
+export { default as RegistrationModal } from './registration-modal';
+export { default as RegistrationForm } from './registration-form';
+
+// Backward compatibility alias
+import _RegistrationModal from './registration-modal';
+export const RegistrationLite = _RegistrationModal;

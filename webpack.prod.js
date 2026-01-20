@@ -7,12 +7,17 @@ const MiniCssExtractPlugin      = require("mini-css-extract-plugin");
 
 module.exports = merge(common, {
     entry: {
-        'components/login' : './src/components/login',
-        'components/login-passwordless' : './src/components/login-passwordless',
-        'components/registration-modal': './src/summit-registration-modal.js',
-        'components/registration-form': './src/summit-registration-form.js',
+        // Barrel file (all components)
+        'components/index': './src/components/index.js',
+        // Partial exports (individual components)
+        'components/login': './src/components/login',
+        'components/login-passwordless': './src/components/login-passwordless',
+        'components/registration-modal': './src/components/registration-modal',
+        'components/registration-form': './src/components/registration-form',
+        // Utils
         'utils/constants': './src/utils/constants',
-        'index': './src/summit-registration-lite.js',
+        // Main entry (backward compat)
+        'index': './src/components/registration-modal',
     },
     plugins: [
         new CleanWebpackPlugin(),
