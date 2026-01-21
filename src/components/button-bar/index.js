@@ -12,7 +12,7 @@
  **/
 
 import React from 'react';
-
+import T from 'i18n-react';
 import styles from "./index.module.scss";
 import { isInPersonTicketType } from "../../actions";
 import { STEP_COMPLETE, STEP_PAYMENT, STEP_PERSONAL_INFO, STEP_SELECT_TICKET_TYPE } from '../../utils/constants';
@@ -32,13 +32,13 @@ const ButtonBarComponent = ({ step, changeStep, validatePromoCode, onValidateErr
                         </div>
                         <div className={styles.actions}>
                             {/* Back Button */}
-                            {step !== STEP_SELECT_TICKET_TYPE && step !== STEP_PAYMENT && <button className={`${styles.button} button`} onClick={() => changeStep(step - 1)}>&lt; Back</button>}
-                            {step !== STEP_SELECT_TICKET_TYPE && step === STEP_PAYMENT && <button className={`${styles.button} button`} onClick={() => removeReservedTicket()}>&lt; Back</button>}
+                            {step !== STEP_SELECT_TICKET_TYPE && step !== STEP_PAYMENT && <button className={`${styles.button} button`} onClick={() => changeStep(step - 1)}>&lt; {T.translate("bar_button.back")}</button>}
+                            {step !== STEP_SELECT_TICKET_TYPE && step === STEP_PAYMENT && <button className={`${styles.button} button`} onClick={() => removeReservedTicket()}>&lt; {T.translate("bar_button.back")}</button>}
                             {/* Next Button */}
                             {step === STEP_SELECT_TICKET_TYPE && <button disabled={!ticketType} className={`${styles.button} button`} onClick={() => validatePromoCode({ ...ticketType, ticketQuantity, promoCode }, onValidateError)}>{nextButtonText}</button>}
-                            {step === STEP_PERSONAL_INFO && ticketType?.cost === 0 && <button className={`${styles.button} button`} type="submit" form="personal-info-form">Get Ticket</button>}
-                            {step === STEP_PERSONAL_INFO && ticketType?.cost > 0 && <button className={`${styles.button} button`} type="submit" form="personal-info-form">Next</button>}
-                            {step === STEP_PAYMENT && <button className={`${styles.button} button`} id="payment-form-btn" type="submit" form="payment-form">Pay Now</button>}
+                            {step === STEP_PERSONAL_INFO && ticketType?.cost === 0 && <button className={`${styles.button} button`} type="submit" form="personal-info-form">{T.translate("bar_button.get_ticket")}</button>}
+                            {step === STEP_PERSONAL_INFO && ticketType?.cost > 0 && <button className={`${styles.button} button`} type="submit" form="personal-info-form">{T.translate("bar_button.next")}</button>}
+                            {step === STEP_PAYMENT && <button className={`${styles.button} button`} id="payment-form-btn" type="submit" disabled form="payment-form">{T.translate("bar_button.loading")}</button>}
                         </div>
                     </div>
                 </>

@@ -12,6 +12,7 @@
  **/
 
 import React, { useEffect, useState } from 'react';
+import T from 'i18n-react';
 import { useForm } from 'react-hook-form';
 
 import {
@@ -70,7 +71,18 @@ const StripeForm = ({ reservation, payTicket, userProfile, provider, hidePostalC
 
     useEffect(() => {
         if (elements) {
-            setPaymentElement(elements.getElement('payment'));
+            const pe = elements.getElement("payment");
+            setPaymentElement(pe);
+
+            if (pe) {
+                pe.on("ready", () => {
+                    const btn = document.getElementById("payment-form-btn");
+                    if (btn) {
+                        btn.disabled = false;
+                        btn.textContent = T.translate("bar_button.pay_now");
+                    }
+                });
+            }
         }
     }, [elements]);
 
