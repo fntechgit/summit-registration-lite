@@ -12,7 +12,7 @@
  **/
 
 import React from 'react';
-
+import T from 'i18n-react';
 import styles from "./index.module.scss";
 import { isInPersonTicketType } from "../../actions";
 import { STEP_COMPLETE, STEP_PAYMENT, STEP_PERSONAL_INFO, STEP_SELECT_TICKET_TYPE } from '../../utils/constants';
@@ -32,8 +32,8 @@ const ButtonBarComponent = ({ step, changeStep, onNextStep, formValues, removeRe
                         </div>
                         <div className={styles.actions}>
                             {/* Back Button */}
-                            {step !== STEP_SELECT_TICKET_TYPE && step !== STEP_PAYMENT && <button className={`${styles.button} button`} onClick={() => changeStep(step - 1)}>&lt; Back</button>}
-                            {step !== STEP_SELECT_TICKET_TYPE && step === STEP_PAYMENT && <button className={`${styles.button} button`} onClick={() => removeReservedTicket()}>&lt; Back</button>}
+                            {step !== STEP_SELECT_TICKET_TYPE && step !== STEP_PAYMENT && <button className={`${styles.button} button`} onClick={() => changeStep(step - 1)}>&lt; {T.translate("bar_button.back")}</button>}
+                            {step !== STEP_SELECT_TICKET_TYPE && step === STEP_PAYMENT && <button className={`${styles.button} button`} onClick={() => removeReservedTicket()}>&lt; {T.translate("bar_button.back")}</button>}
                             {/* Next Button */}
                             {step === STEP_SELECT_TICKET_TYPE && <button disabled={!ticketSelectionValid || !promoIsReady} className={`${styles.button} button`} onClick={() => onNextStep({ ...ticketType, ticketQuantity })}>{nextButtonText}</button>}
                             {step === STEP_PERSONAL_INFO && ticketType?.cost === 0 && <button className={`${styles.button} button`} type="submit" form="personal-info-form">Get Ticket</button>}

@@ -30,5 +30,12 @@
     "unapplied_code_warning": "You entered a promo code but it hasn't been applied. Make sure to click the 'Apply' button or remove it before continuing.",
     "invalid_code": "Promo code entered is not valid.",
     "validation_error": "An error occurred while validating the promo code."
+  },
+  "bar_button": {
+    "back": "Back",
+    "next": "Next",
+    "get_ticket": "Get Ticket",
+    "pay_now": "Pay Now",
+    "loading": "Loading"
   }
 }
