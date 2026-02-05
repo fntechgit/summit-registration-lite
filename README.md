@@ -103,6 +103,13 @@ React component for the summit registration lite widget
 
 2 - yarn publish-package
 
+## Required external stylesheets
+
+The following stylesheets must be loaded before mounting the widget:
+
+- **Bootstrap 3** — `https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/css/bootstrap.min.css`
+- **Font Awesome 4** — `https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css`
+
 ## IMPORT:
 
 import RegistrationLiteWidget from 'summit-registration-lite/dist';
