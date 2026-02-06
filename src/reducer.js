@@ -35,6 +35,8 @@ import {
     LOAD_PROFILE_DATA,
     SET_CURRENT_PROMO_CODE,
     CLEAR_CURRENT_PROMO_CODE,
+    VALIDATE_PROMO_CODE,
+    VALIDATE_PROMO_CODE_ERROR,
 } from './actions';
 
 import { LOGOUT_USER } from 'openstack-uicore-foundation/lib/security/actions';
@@ -68,12 +70,12 @@ const DEFAULT_STATE = {
         userProfile: null,
     },
     nowUtc: localNowUtc,
-    promoCode: ''
+    promoCode: '',
+    promoCodeAllowsReassign: true
 };
 
 const RegistrationLiteReducer = (state = DEFAULT_STATE, action) => {
     const { type, payload } = action;
-    console.log(action);
     switch (type) {
         case CLEAR_WIDGET_STATE:
         case LOGOUT_USER: {
@@ -146,10 +148,10 @@ const RegistrationLiteReducer = (state = DEFAULT_STATE, action) => {
             return { ...state, reservation: null }
         }
         case CLEAR_RESERVATION: {
-            return { ...state, reservation: null, promoCode: '' }
+            return { ...state, reservation: null, promoCode: '', promoCodeAllowsReassign: true }
         }
         case PAY_RESERVATION: {
-            return { ...state, checkout: payload.response, reservation: null, userProfile: null, invitation: null, promoCode: '' };
+            return { ...state, checkout: payload.response, reservation: null, userProfile: null, invitation: null, promoCode: '', promoCodeAllowsReassign: true };
         }
         case GET_MY_INVITATION: {
             return { ...state, invitation: payload.response };
@@ -162,11 +164,18 @@ const RegistrationLiteReducer = (state = DEFAULT_STATE, action) => {
             return { ...state, nowUtc: timestamp };
         }
         case CLEAR_CURRENT_PROMO_CODE: {
-            return { ...state, promoCode: ''}
+            return { ...state, promoCode: '', promoCodeAllowsReassign: true }
         }
         case SET_CURRENT_PROMO_CODE:{
             const { currentPromoCode } = payload;
-            return { ...state, promoCode: currentPromoCode}
+            return { ...state, promoCode: currentPromoCode }
+        }
+        case VALIDATE_PROMO_CODE: {
+            const { allows_to_reassign } = payload.response;
+            return { ...state, promoCodeAllowsReassign: allows_to_reassign ?? true }
+        }
+        case VALIDATE_PROMO_CODE_ERROR: {
+            return { ...state, promoCodeAllowsReassign: true }
         }
         default: {
             return state;

@@ -39,7 +39,9 @@ const TicketTypeComponent = ({
     allowPromoCodes,
     applyPromoCode,
     removePromoCode,
+    validatePromoCode,
     promoCode,
+    promoCodeAllowsReassign = true,
     trackViewItem
 }) => {
     const [ticket, setTicket] = useState(null);
@@ -89,10 +91,18 @@ const TicketTypeComponent = ({
         [reservation]
     );
 
+    // check if reassignment is allowed by both promo code AND ticket type
+    const ticketTypeAllowsReassign = ticket?.allows_to_reassign !== false;
+    const canReassign = promoCodeAllowsReassign && ticketTypeAllowsReassign;
+
     const handleTicketChange = (t) => {
         setTicket(t);
         setQuantity(minQuantity);
         trackViewItem(t);
+        // Validate promo code if already applied (ticket selected after promo applied)
+        if (promoCode) {
+            validatePromoCode({ id: t.id, ticketQuantity: minQuantity, sub_type: t.sub_type }).catch(() => {});
+        }
     }
 
     const handlePromoCodeChange = (code) => {
@@ -108,6 +118,13 @@ const TicketTypeComponent = ({
     const handleRemovePromoCode = () => {
         setTicket(null);
         removePromoCode();
+    }
+
+    const handleApplyPromoCode = async (code) => {
+        await applyPromoCode(code);
+        if (ticket) {
+            validatePromoCode({ id: ticket.id, ticketQuantity: quantity, sub_type: ticket.sub_type }).catch(() => {});
+        }
     }
 
     return (
@@ -210,19 +227,6 @@ const TicketTypeComponent = ({
                                     </>
                                 )}
                             </div>
-                            {allowPromoCodes &&
-                                <>
-                                    <PromoCodeInput
-                                        promoCode={promoCode}
-                                        applyPromoCode={applyPromoCode}
-                                        showMultipleTicketTexts={showMultipleTicketTexts}
-                                        removePromoCode={handleRemovePromoCode}
-                                        onPromoCodeChange={handlePromoCodeChange} />
-                                    {promoCodeError &&
-                                        Object.values(promoCodeError).map((er, index) => (<div key={`error-${index}`} className={`${styles.promocodeError} alert alert-danger`}>{er}</div>))
-                                    }
-                                </>
-                            }
 
                             {showMultipleTicketTexts &&
                                 <a className={styles.moreInfo} data-tip data-for="ticket-quantity-info">
@@ -235,6 +239,25 @@ const TicketTypeComponent = ({
                                     {T.translate("ticket_type.ticket_quantity_tooltip")}
                                 </div>
                             </ReactTooltip>
+
+                            {allowPromoCodes &&
+                                <>
+                                    <PromoCodeInput
+                                        promoCode={promoCode}
+                                        applyPromoCode={handleApplyPromoCode}
+                                        showMultipleTicketTexts={showMultipleTicketTexts}
+                                        removePromoCode={handleRemovePromoCode}
+                                        onPromoCodeChange={handlePromoCodeChange} />
+                                    {promoCodeError &&
+                                        Object.values(promoCodeError).map((er, index) => (<div key={`error-${index}`} className={`${styles.promocodeError} alert alert-danger`}>{er}</div>))
+                                    }
+                                    {ticket && !canReassign &&
+                                        <div className={styles.nonTransferable}>
+                                            This ticket will be automatically assigned to you and cannot be reassigned.
+                                        </div>
+                                    }
+                                </>
+                            }
                         </div>
                     </animated.div>
 

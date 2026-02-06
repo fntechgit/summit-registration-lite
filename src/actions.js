@@ -53,6 +53,7 @@ export const LOAD_PROFILE_DATA = 'LOAD_PROFILE_DATA';
 export const SET_CURRENT_PROMO_CODE = 'SET_CURRENT_PROMO_CODE';
 export const CLEAR_CURRENT_PROMO_CODE = 'CLEAR_CURRENT_PROMO_CODE';
 export const VALIDATE_PROMO_CODE = 'VALIDATE_PROMO_CODE';
+export const VALIDATE_PROMO_CODE_ERROR = 'VALIDATE_PROMO_CODE_ERROR';
 
 export const startWidgetLoading = createAction(START_WIDGET_LOADING);
 export const stopWidgetLoading = createAction(STOP_WIDGET_LOADING);
@@ -168,15 +169,11 @@ const getTaxesTypes = (summitId) => async (dispatch, getState, { apiBaseUrl, get
     }
 }
 
-export const applyPromoCode = (currentPromoCode) => (dispatch, getState) => {
-    try {
-        const { registrationLiteState: { settings: { summitId } } } = getState();
-        // set the current promo code and get ticket types again
-        dispatch(createAction(SET_CURRENT_PROMO_CODE)({ currentPromoCode }));
-        dispatch(getTicketTypes(summitId));
-    } catch (e) {
-        return Promise.reject(e);
-    }
+export const applyPromoCode = (currentPromoCode) => async (dispatch, getState) => {
+    const { registrationLiteState: { settings: { summitId } } } = getState();
+    // set the current promo code and get ticket types again
+    dispatch(createAction(SET_CURRENT_PROMO_CODE)({ currentPromoCode }));
+    await dispatch(getTicketTypes(summitId));
 }
 
 export const removePromoCode = () => (dispatch, getState) => {
@@ -191,62 +188,38 @@ export const removePromoCode = () => (dispatch, getState) => {
     }
 }
 
-export const validatePromoCode = (ticketData, { onError }) => async (dispatch, getState, { apiBaseUrl, getAccessToken }) => {
-
+/**
+ * Validates promo code for a specific ticket selection.
+ * Stores allows_to_reassign in Redux state.
+ * Returns response or throws error - caller handles UI concerns.
+ */
+export const validatePromoCode = (ticketData) => async (dispatch, getState, { apiBaseUrl, getAccessToken }) => {
     const { registrationLiteState: { settings: { summitId }, promoCode: currentPromoCode } } = getState();
 
-    const { promoCode: formPromoCode } = ticketData;
-
-    if (formPromoCode && !currentPromoCode) {
-        const defaultMessage = `You entered a promo code but it hasn't been applied. Make sure to click the 'Apply' button or remove it before continuing.`;
-        const notAppliedCodeError = { body: { errors: [defaultMessage] } };
-        return onError(null, notAppliedCodeError);
+    // Nothing to validate if no promo code applied
+    if (!summitId || !currentPromoCode) {
+        return null;
     }
 
-    if (summitId && currentPromoCode) {
+    const { ticketQuantity = 1, id, sub_type } = ticketData;
 
-        dispatch(startWidgetLoading());
+    const access_token = await getAccessToken();
 
-        const { ticketQuantity, id, sub_type } = ticketData;
+    let apiUrl = URI(`${apiBaseUrl}/api/v1/summits/${summitId}/promo-codes/${currentPromoCode}/apply`);
+    apiUrl.addQuery('access_token', access_token);
+    apiUrl.addQuery('filter[]', `ticket_type_id==${id}`);
+    apiUrl.addQuery('filter[]', `ticket_type_qty==${ticketQuantity}`);
+    apiUrl.addQuery('filter[]', `ticket_type_subtype==${sub_type}`);
 
-        const access_token = await getAccessToken();
-
-        let apiUrl = URI(`${apiBaseUrl}/api/v1/summits/${summitId}/promo-codes/${currentPromoCode}/apply`);
-        apiUrl.addQuery('access_token', access_token);
-        apiUrl.addQuery('filter[]', `ticket_type_id==${id}`);
-        apiUrl.addQuery('filter[]', `ticket_type_qty==${ticketQuantity}`);
-        apiUrl.addQuery('filter[]', `ticket_type_subtype==${sub_type}`);
-
-        const errorHandler = (err, res) => (dispatch, state) => {
-            if (res && res.statusCode === 404 && onError) return onError(err, res);
-            if (res && res.statusCode === 412 && onError) return onError(err, res);
-            if (res && res.statusCode === 429 && onError) return onError(err, res);
-            if (res && res.statusCode === 500) {
-                const defaultMessage = 'Server Error';
-                const msg = res?.body?.message || defaultMessage;
-                Swal.fire("Server Error", msg, "error");
-                return;
-            }
-            return authErrorHandler(err, res)(dispatch, state);
-        };
-
-        return getRequest(
-            null,
-            createAction(VALIDATE_PROMO_CODE),
-            `${apiUrl}`,
-            errorHandler
-        )({})(dispatch).then((res) => {
-            dispatch(changeStep(STEP_PERSONAL_INFO));
-            dispatch(stopWidgetLoading());
-            return res;
-        }).catch((error) => {
-            dispatch(stopWidgetLoading());
-            return Promise.reject(error);
-        });
-    }
-
-    return dispatch(changeStep(STEP_PERSONAL_INFO));
-
+    return getRequest(
+        null,
+        createAction(VALIDATE_PROMO_CODE),
+        `${apiUrl}`,
+        authErrorHandler
+    )({})(dispatch).catch((e) => {
+        dispatch(createAction(VALIDATE_PROMO_CODE_ERROR)({}));
+        throw e;
+    });
 }
 
 

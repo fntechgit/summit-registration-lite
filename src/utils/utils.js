@@ -2,7 +2,8 @@ import { formatCurrency } from '../helpers';
 import { ORDER_PAYMENT_METHOD_OFFLINE, ORDER_STATUS_PAID, TICKET_TYPE_SUBTYPE_PREPAID } from './constants';
 
 import React from 'react';
-import * as Sentry from "@sentry/react";
+// TODO: Fix Sentry dependency issue
+// import * as Sentry from "@sentry/react";
 
 /**
  * Copyright 2022 OpenStack Foundation
@@ -144,10 +145,9 @@ export const getContrastingTextColor = (bgColor, lightColor, darkColor) => {
 
 const isSentryInitialized = () => !!window.SENTRY_DSN;
 
-export const handleSentryException = (err) => 
-    isSentryInitialized() 
-        ? Sentry.captureException(err)
-        : console.log("Error on registration: ", err);
+// TODO: Fix Sentry dependency issue
+export const handleSentryException = (err) =>
+    console.log("Error on registration: ", err);
 
 export const avoidTooltipOverflow = ({ left, top }, _e, _t, node) => {
     return {
