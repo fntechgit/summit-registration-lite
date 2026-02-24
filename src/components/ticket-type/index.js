@@ -202,7 +202,7 @@ const TicketTypeComponent = ({
                                                 <input className="form-control" aria-label="ticket quanity" name="ticket_quantity" type="text" value={quantity} readOnly={true} disabled={maxQuantity === 0} />
                                                 <span className="input-group-btn">
                                                     <button aria-label="add a ticket" className="btn btn-default" onClick={incrementQuantity} disabled={maxQuantity === 0 || quantity >= maxQuantity}>
-                                                        <i className="glyphicon glyphicon-plus" />
+                                                        <i className="fa fa-plus" />
                                                     </button>
                                                 </span>
                                             </div>
