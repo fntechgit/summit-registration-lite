@@ -41,7 +41,8 @@ const PersonalInfoComponent = ({
   showCompanyInput = true,
   companyDDLPlaceholder,
   showCompanyInputDefaultOptions,
-  companyDDLOptions2Show
+  companyDDLOptions2Show,
+  promoCodeAllowsReassign = true
 }) => {
 
   const initialFirstName = userProfile.given_name || (invitation ? invitation.first_name : '');
@@ -50,8 +51,18 @@ const PersonalInfoComponent = ({
   const [ticketOwnerOption, setTicketOwnerOption] = useState('');
   const [ticketOwnerError, setTicketOwnerError] = useState(false);
 
-  // if there's only one ticket on the order and there is no invitation available, display the radio button to assign the ticket
-  const shouldDisplayTicketAssignment = () => formValues.ticketQuantity === 1 && !invitation && !isPrePaidTicketType(formValues.ticketType);
+  // if there's only one ticket on the order and there is no invitation available, handle ticket assignment
+  const isSingleTicketOrder = () => formValues.ticketQuantity === 1 && !invitation && !isPrePaidTicketType(formValues.ticketType);
+
+  // check if reassignment is allowed by both promo code AND ticket type
+  const ticketTypeAllowsReassign = formValues.ticketType?.allows_to_reassign !== false;
+  const canReassign = promoCodeAllowsReassign && ticketTypeAllowsReassign;
+
+  // show radio options only if reassignment is allowed by both sources
+  const shouldDisplayTicketAssignment = () => isSingleTicketOrder() && canReassign;
+
+  // show notice when ticket is non-transferable (either promo code or ticket type disallows)
+  const isNonTransferable = isSingleTicketOrder() && !canReassign;
 
   const radioListOptions = [
     { label: "Myself", value: TICKET_OWNER_MYSELF },
@@ -101,7 +112,13 @@ const PersonalInfoComponent = ({
       return;
     }
 
-    if (shouldDisplayTicketAssignment()) {
+    if (isNonTransferable) {
+      // auto-assign to purchaser when ticket is non-transferable
+      data = {
+        ...data,
+        attendee: { firstName: personalInfo.firstName, lastName: personalInfo.lastName, email: personalInfo.email }
+      };
+    } else if (shouldDisplayTicketAssignment()) {
       if (!ticketOwnerOption) {
         setTicketOwnerError(true);
         return;
