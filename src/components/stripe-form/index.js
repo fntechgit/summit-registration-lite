@@ -13,7 +13,6 @@
 
 import React, { useCallback, useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
-import T from 'i18n-react';
 import { useForm } from 'react-hook-form';
 
 import {
@@ -68,7 +67,7 @@ const stripeErrorCodeMap = {
 // Slot names are scoped to their shadow root, so widgets on one page don't collide.
 const PAYMENT_SLOT = 'stripe-payment';
 
-const StripeForm = ({ reservation, payTicket, userProfile, provider, hidePostalCode, stripeReturnUrl, onError }) => {
+const StripeForm = ({ reservation, payTicket, userProfile, provider, hidePostalCode, stripeReturnUrl, onError, onStripeReady }) => {
     const stripe = useStripe();
     const elements = useElements();
     const [paymentElement, setPaymentElement] = useState(null);
@@ -89,13 +88,7 @@ const StripeForm = ({ reservation, payTicket, userProfile, provider, hidePostalC
             setPaymentElement(pe);
 
             if (pe) {
-                pe.on("ready", () => {
-                    const btn = document.getElementById("payment-form-btn");
-                    if (btn) {
-                        btn.disabled = false;
-                        btn.textContent = T.translate("bar_button.pay_now");
-                    }
-                });
+                pe.on("ready", () => onStripeReady());
             }
         }
     }, [elements]);

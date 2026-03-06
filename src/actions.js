@@ -56,6 +56,8 @@ export const VALIDATE_PROMO_CODE_SUCCESS = 'VALIDATE_PROMO_CODE_SUCCESS';
 export const DISCOVER_PROMO_CODES = 'DISCOVER_PROMO_CODES';
 export const DISCOVER_PROMO_CODES_SUCCESS = 'DISCOVER_PROMO_CODES_SUCCESS';
 
+export const STRIPE_READY = 'STRIPE_READY';
+
 export const startWidgetLoading = createAction(START_WIDGET_LOADING);
 export const stopWidgetLoading = createAction(STOP_WIDGET_LOADING);
 
@@ -523,3 +525,6 @@ export const getMyInvitation = (summitId) => async (dispatch, getState, { apiBas
     }
 }
 
+export const setStripeReady = () => (dispatch) => {
+    dispatch(createAction(STRIPE_READY)({}));
+};

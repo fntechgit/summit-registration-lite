@@ -43,6 +43,7 @@ import {
     applyPromoCode,
     validatePromoCode,
     discoverPromoCodes,
+    setStripeReady,
     startWidgetLoading,
     stopWidgetLoading
 } from '../../actions';
@@ -169,6 +170,8 @@ const RegistrationFormContent = (
         applyPromoCode,
         validatePromoCode,
         discoverPromoCodes,
+        setStripeReady,
+        stripeReady,
         startWidgetLoading,
         stopWidgetLoading,
         closeHandlerRef,
@@ -508,6 +511,7 @@ const RegistrationFormContent = (
                                         providerOptions={providerOptions}
                                         hidePostalCode={hidePostalCode}
                                         onError={onError}
+                                        onStripeReady={setStripeReady}
                                         successfulPaymentReturnUrl={successfulPaymentReturnUrl}
                                     />
                                 </div>
@@ -521,6 +525,7 @@ const RegistrationFormContent = (
                                 removeReservedTicket={removeReservedTicket}
                                 onNextStep={handleAdvanceFromTicketStep}
                                 changeStep={changeStep}
+                                stripeReady={stripeReady}
                             />
                         </>
                     )}
@@ -569,6 +574,7 @@ const mapStateToProps = ({ registrationLiteState }) => ({
     passwordlessCodeSent: registrationLiteState.passwordless.code_sent,
     passwordlessCodeError: registrationLiteState.passwordless.error,
     promoCode: registrationLiteState.promoCode,
+    stripeReady: registrationLiteState.stripeReady,
     discoveredPromoCodes: registrationLiteState.discoveredPromoCodes,
 })
 
@@ -587,8 +593,9 @@ const RegistrationForm = connect(mapStateToProps, {
     loadProfileData,
     applyPromoCode,
     removePromoCode,
-    validatePromoCode,
     discoverPromoCodes,
+    validatePromoCode,
+    setStripeReady,
     startWidgetLoading,
     stopWidgetLoading
 })(RegistrationFormContent);
