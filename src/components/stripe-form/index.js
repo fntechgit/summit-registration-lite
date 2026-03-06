@@ -64,7 +64,7 @@ const stripeErrorCodeMap = {
 };
 
 
-const StripeForm = ({ reservation, payTicket, userProfile, provider, hidePostalCode, stripeReturnUrl, onError }) => {
+const StripeForm = ({ reservation, payTicket, userProfile, provider, hidePostalCode, stripeReturnUrl, onError, onStripeReady }) => {
     const stripe = useStripe();
     const elements = useElements();
     const [paymentElement, setPaymentElement] = useState(null);
@@ -75,13 +75,7 @@ const StripeForm = ({ reservation, payTicket, userProfile, provider, hidePostalC
             setPaymentElement(pe);
 
             if (pe) {
-                pe.on("ready", () => {
-                    const btn = document.getElementById("payment-form-btn");
-                    if (btn) {
-                        btn.disabled = false;
-                        btn.textContent = T.translate("bar_button.pay_now");
-                    }
-                });
+                pe.on("ready", () => onStripeReady());
             }
         }
     }, [elements]);
