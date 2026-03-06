@@ -38,7 +38,8 @@ import {
     loadProfileData,
     removePromoCode,
     applyPromoCode,
-    validatePromoCode
+    validatePromoCode,
+    setStripeReady
 } from '../actions';
 
 import AjaxLoader from "openstack-uicore-foundation/lib/components/ajaxloader";
@@ -161,6 +162,8 @@ const RegistrationLite = (
         removePromoCode,
         applyPromoCode,
         validatePromoCode,
+        setStripeReady,
+        stripeReady,
         ...rest
     }) => {
 
@@ -443,6 +446,7 @@ const RegistrationLite = (
                                                     providerOptions={providerOptions}
                                                     hidePostalCode={hidePostalCode}
                                                     onError={onError}
+                                                    onStripeReady={setStripeReady}
                                                     successfulPaymentReturnUrl={successfulPaymentReturnUrl}
                                                 />
                                             </div>
@@ -488,6 +492,7 @@ const RegistrationLite = (
                                     onError: (err, res) => setFormErrors(res.body.errors)
                                 }}
                                 changeStep={changeStep}
+                                stripeReady={stripeReady}
                             />
                         )}
                     </div>
@@ -514,6 +519,7 @@ const mapStateToProps = ({ registrationLiteState }) => ({
     passwordlessCodeError: registrationLiteState.passwordless.error,
     nowUtc: registrationLiteState.nowUtc,
     promoCode: registrationLiteState.promoCode,
+    stripeReady: registrationLiteState.stripeReady
 })
 
 RegistrationLite.defaultProps = {
@@ -577,5 +583,6 @@ export default connect(mapStateToProps, {
     loadProfileData,
     applyPromoCode,
     removePromoCode,
-    validatePromoCode
+    validatePromoCode,
+    setStripeReady
 })(RegistrationLite)

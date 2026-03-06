@@ -17,7 +17,7 @@ import styles from "./index.module.scss";
 import { isInPersonTicketType } from "../../actions";
 import { STEP_COMPLETE, STEP_PAYMENT, STEP_PERSONAL_INFO, STEP_SELECT_TICKET_TYPE } from '../../utils/constants';
 
-const ButtonBarComponent = ({ step, changeStep, validatePromoCode, onValidateError, formValues, removeReservedTicket, inPersonDisclaimer }) => {
+const ButtonBarComponent = ({ step, changeStep, validatePromoCode, onValidateError, formValues, removeReservedTicket, inPersonDisclaimer, stripeReady }) => {
     const { ticketType, ticketQuantity, promoCode } = formValues || {};
 
     const nextButtonText = inPersonDisclaimer && ticketType && isInPersonTicketType(ticketType) ? 'Accept' : 'Next';
@@ -38,7 +38,13 @@ const ButtonBarComponent = ({ step, changeStep, validatePromoCode, onValidateErr
                             {step === STEP_SELECT_TICKET_TYPE && <button disabled={!ticketType} className={`${styles.button} button`} onClick={() => validatePromoCode({ ...ticketType, ticketQuantity, promoCode }, onValidateError)}>{nextButtonText}</button>}
                             {step === STEP_PERSONAL_INFO && ticketType?.cost === 0 && <button className={`${styles.button} button`} type="submit" form="personal-info-form">{T.translate("bar_button.get_ticket")}</button>}
                             {step === STEP_PERSONAL_INFO && ticketType?.cost > 0 && <button className={`${styles.button} button`} type="submit" form="personal-info-form">{T.translate("bar_button.next")}</button>}
-                            {step === STEP_PAYMENT && <button className={`${styles.button} button`} id="payment-form-btn" type="submit" disabled form="payment-form">{T.translate("bar_button.loading")}</button>}
+                            {step === STEP_PAYMENT && <button className={`${styles.button} button`} id="payment-form-btn" type="submit" disabled={!stripeReady} form="payment-form">
+                                {stripeReady ?
+                                    T.translate("bar_button.pay_now")
+                                    :
+                                    T.translate("bar_button.loading")
+                                }
+                            </button>}
                         </div>
                     </div>
                 </>
