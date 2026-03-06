@@ -11,7 +11,9 @@
     "event_will_start_text": "The event will start on {date} at {time} {time_zone_label}"
   },
   "ticket_type": {
-    "ticket_quantity_tooltip": "Only one ticket type can be selected per order. To purchase multiple ticket types, please place a separate registration order for each ticket type."
+    "ticket_quantity_tooltip": "Only one ticket type can be selected per order. To purchase multiple ticket types, please place a separate registration order for each ticket type.",
+    "unlocked_tickets": "Promo Code {promoCode} has unlocked the following tickets types",
+    "discount_tickets": "Promo Code {promoCode} has applied discount to the following tickets types"
   },
   "promo_code": {
     "promo_code_tooltip": "Only one promo code can be used per order; the code will be applied to all tickets in this order. If you'd like to use multiple promo codes, please place a separate registration order for each promo code."

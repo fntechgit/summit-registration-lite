@@ -6,7 +6,7 @@
 }
 
 .summary {
-  text-align: right;  
+  text-align: right;
 }
 
 .promoCode {
@@ -37,7 +37,20 @@
   }
 }
 
-.taxes {  
+.appliedDiscount {
+  margin-top: 10px;
+  p::before {
+    font-family: FontAwesome;
+    content: '\f058';
+    margin-right: 5px;
+  }
+  li {
+    list-style: disc;
+    margin: 5px 0px 0px 20px;
+  }
+}
+
+.taxes {
   display: inline-flex;
   abbr {
     overflow: hidden;

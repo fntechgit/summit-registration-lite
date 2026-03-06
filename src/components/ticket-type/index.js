@@ -24,7 +24,7 @@ import { getTicketMaxQuantity } from '../../helpers';
 import { avoidTooltipOverflow, getTicketCost, getTicketTaxes, isPrePaidOrder } from '../../utils/utils';
 
 import PromoCodeInput from '../promocode-input';
-import { VIEW_ITEM } from '../../utils/constants';
+import { TICKET_TYPE_SUBTYPE_PREPAID } from '../../utils/constants';
 
 const TicketTypeComponent = ({
     allowedTicketTypes,
@@ -44,6 +44,9 @@ const TicketTypeComponent = ({
 }) => {
     const [ticket, setTicket] = useState(null);
     const [quantity, setQuantity] = useState(1);
+
+    const [ticketsWithDiscounts, setTicketsWithDiscounts] = useState([]);
+    const [prePaidTickets, setPrePaidTickets] = useState([]);
 
     const minQuantity = 1;
     const maxQuantity = getTicketMaxQuantity(ticket);
@@ -75,13 +78,19 @@ const TicketTypeComponent = ({
         // try to find the updated ticket from the original ticket types collection from api
         // and update the current ticket that exist on component state
         // bc a discount could be applied to the current selected ticket type
-        if (!ticket) return;
-        const updatedCurrentTicket = originalTicketTypes.find(t => t?.id === ticket.id);
-        if (updatedCurrentTicket) {
-            changeForm({ ticketType: updatedCurrentTicket })
-            setTicket(updatedCurrentTicket);
+        const ticketTypesWithDiscount = originalTicketTypes.filter(tt => tt.cost_with_applied_discount);
+        const unlockedTickets = originalTicketTypes.filter(tt => tt.sub_type === TICKET_TYPE_SUBTYPE_PREPAID);
+        if (ticketTypesWithDiscount.length > 0 || unlockedTickets.length > 0) {
+            changeForm({ ticketType: null })
+            setTicket(null);
+            setTicketsWithDiscounts(ticketTypesWithDiscount);
+            setPrePaidTickets(unlockedTickets);
         }
-        if (!promoCode) changeForm({ promoCode: '' })
+        if (!promoCode) {
+            changeForm({ promoCode: '' });
+            setTicketsWithDiscounts([]);
+            setPrePaidTickets([]);
+        }
     }, [promoCode, originalTicketTypes])
 
     const isPrePaidReservation = useMemo(
@@ -218,6 +227,30 @@ const TicketTypeComponent = ({
                                         showMultipleTicketTexts={showMultipleTicketTexts}
                                         removePromoCode={handleRemovePromoCode}
                                         onPromoCodeChange={handlePromoCodeChange} />
+                                    {(prePaidTickets.length > 0 || ticketsWithDiscounts.length > 0) && (
+                                        <div className={`${styles.appliedDiscount} alert alert-success`}>
+                                            {prePaidTickets.length > 0 && (
+                                                <>
+                                                    <p>{T.translate("ticket_type.unlocked_tickets", { promoCode })}</p>
+                                                    <ul>
+                                                        {prePaidTickets.map((tt) => (
+                                                            <li key={`pre-${tt.name}`}>{tt.name}</li>
+                                                        ))}
+                                                    </ul>
+                                                </>
+                                            )}
+                                            {ticketsWithDiscounts.length > 0 && (
+                                                <>
+                                                    <p>{T.translate("ticket_type.discount_tickets", { promoCode })}</p>
+                                                    <ul>
+                                                        {ticketsWithDiscounts.map((tt) => (
+                                                            <li key={`disc-${tt.name}`}>{tt.name}</li>
+                                                        ))}
+                                                    </ul>
+                                                </>
+                                            )}
+                                        </div>
+                                    )}
                                     {promoCodeError &&
                                         Object.values(promoCodeError).map((er, index) => (<div key={`error-${index}`} className={`${styles.promocodeError} alert alert-danger`}>{er}</div>))
                                     }
