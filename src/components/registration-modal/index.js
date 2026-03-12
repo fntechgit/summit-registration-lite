@@ -20,6 +20,8 @@ import { withReduxProvider } from '../../utils/withReduxProvider';
 import styles from "../../styles/general.module.scss";
 
 const RegistrationModal = ({ summitData, closeWidget, ...props }) => {
+    const closeHandlerRef = React.useRef(null);
+
     return (
         <div id={`${styles.modal}`} className="modal is-active">
             <div className="modal-background"></div>
@@ -29,10 +31,10 @@ const RegistrationModal = ({ summitData, closeWidget, ...props }) => {
                         <div className={styles.title}>
                             {props.profileData && <span>{summitData?.name}</span>}
                             {closeWidget && (
-                                <i className="fa fa-close" aria-label="close" onClick={closeWidget}></i>
+                                <i className="fa fa-close" aria-label="close" onClick={() => closeHandlerRef.current()}></i>
                             )}
                         </div>
-                        <RegistrationForm {...props} summitData={summitData} closeWidget={closeWidget} />
+                        <RegistrationForm {...props} summitData={summitData} closeWidget={closeWidget} closeHandlerRef={closeHandlerRef} />
                     </div>
                 </div>
             </div>

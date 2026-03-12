@@ -159,6 +159,7 @@ const RegistrationFormContent = (
         removePromoCode,
         applyPromoCode,
         validatePromoCode,
+        closeHandlerRef,
         ...rest
     }) => {
 
@@ -250,6 +251,13 @@ const RegistrationFormContent = (
             closeAndClearState()
         }
     };
+
+    // Expose close handler to parent via ref so it can trigger cleanup on close
+    useEffect(() => {
+        if (closeHandlerRef) {
+            closeHandlerRef.current = handleCloseClick;
+        }
+    });
 
     const handleGetTicketTypesAndTaxes = (summitId) => {
         setTicketDataError(false);
