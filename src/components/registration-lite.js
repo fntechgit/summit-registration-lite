@@ -215,7 +215,7 @@ const RegistrationLite = (
                 .catch(e => console.log(e))
                 .finally(() => handleGetTicketTypesAndTaxes(summitData.id));
         }
-    }, [summitData, profileData]);
+    }, [summitData?.id, profileData]);
 
     useEffect(() => {
         // check if there's personal information data and no ticket data to reset widget
