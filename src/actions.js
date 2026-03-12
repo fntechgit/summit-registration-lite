@@ -54,6 +54,8 @@ export const SET_CURRENT_PROMO_CODE = 'SET_CURRENT_PROMO_CODE';
 export const CLEAR_CURRENT_PROMO_CODE = 'CLEAR_CURRENT_PROMO_CODE';
 export const VALIDATE_PROMO_CODE = 'VALIDATE_PROMO_CODE';
 
+export const STRIPE_READY = 'STRIPE_READY';
+
 export const startWidgetLoading = createAction(START_WIDGET_LOADING);
 export const stopWidgetLoading = createAction(STOP_WIDGET_LOADING);
 
@@ -513,4 +515,8 @@ export const getMyInvitation = (summitId) => async (dispatch, getState, { apiBas
 
 export const updateClock = (timestamp) => (dispatch) => {
     dispatch(createAction(UPDATE_CLOCK)({ timestamp }));
+};
+
+export const setStripeReady = () => (dispatch) => {
+    dispatch(createAction(STRIPE_READY)({}));
 };

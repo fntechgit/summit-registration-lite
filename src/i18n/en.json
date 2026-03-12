@@ -15,5 +15,12 @@
   },
   "promo_code": {
     "promo_code_tooltip": "Only one promo code can be used per order; the code will be applied to all tickets in this order. If you'd like to use multiple promo codes, please place a separate registration order for each promo code."
+  },
+  "bar_button": {
+    "back": "Back",
+    "next": "Next",
+    "get_ticket": "Get Ticket",
+    "pay_now": "Pay Now",
+    "loading": "Loading"
   }
 }

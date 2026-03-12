@@ -35,6 +35,7 @@ import {
     LOAD_PROFILE_DATA,
     SET_CURRENT_PROMO_CODE,
     CLEAR_CURRENT_PROMO_CODE,
+    STRIPE_READY,
 } from './actions';
 
 import { LOGOUT_USER } from 'openstack-uicore-foundation/lib/security/actions';
@@ -68,7 +69,8 @@ const DEFAULT_STATE = {
         userProfile: null,
     },
     nowUtc: localNowUtc,
-    promoCode: ''
+    promoCode: '',
+    stripeReady: false
 };
 
 const RegistrationLiteReducer = (state = DEFAULT_STATE, action) => {
@@ -117,7 +119,7 @@ const RegistrationLiteReducer = (state = DEFAULT_STATE, action) => {
             };
         }
         case CHANGE_STEP: {
-            return { ...state, step: payload }
+            return { ...state, step: payload, stripeReady: false }
         }
         case GET_TICKET_TYPES: {
             return { ...state, ticketTypes: payload.response.data, requestedTicketTypes: true };
@@ -167,6 +169,9 @@ const RegistrationLiteReducer = (state = DEFAULT_STATE, action) => {
         case SET_CURRENT_PROMO_CODE:{
             const { currentPromoCode } = payload;
             return { ...state, promoCode: currentPromoCode}
+        }
+        case STRIPE_READY: {
+            return { ...state, stripeReady: true }
         }
         default: {
             return state;

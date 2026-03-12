@@ -21,7 +21,7 @@ import { isFreeOrder, isPrePaidOrder } from '../../utils/utils';
 import { DefaultBGColor, DefaultTextColor, DefaultHintColor } from '../../utils/constants';
 
 
-const StripeProvider = ({ userProfile, reservation, payTicket, providerKey, provider, stripeOptions, stripeReturnUrl, hidePostalCode, onError }) => {
+const StripeProvider = ({ userProfile, reservation, payTicket, providerKey, provider, stripeOptions, stripeReturnUrl, hidePostalCode, onError, onStripeReady }) => {
 
     const stripePromise = useMemo(() => loadStripe(providerKey), [providerKey]);
 
@@ -114,6 +114,7 @@ const StripeProvider = ({ userProfile, reservation, payTicket, providerKey, prov
                 hidePostalCode={hidePostalCode}
                 stripeReturnUrl={stripeReturnUrl}
                 onError={onError}
+                onStripeReady={onStripeReady}
             />
         </Elements>
         :
