@@ -263,7 +263,6 @@ const RegistrationFormContent = (
         setTicketDataError(false);
         setTicketDataLoaded(false);
         getTicketTypesAndTaxes(summitId)
-            .then()
             .catch((error) => {
                 let { message } = error;
                 if (message && (message.includes(AUTH_ERROR_MISSING_AUTH_INFO) ||
