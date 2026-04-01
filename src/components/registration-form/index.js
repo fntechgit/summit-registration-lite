@@ -213,7 +213,7 @@ const RegistrationFormContent = (
                 .catch(e => console.log(e))
                 .finally(() => handleGetTicketTypesAndTaxes(summitData.id));
         }
-    }, [summitData, profileData]);
+    }, [summitData?.id, profileData]);
 
     useEffect(() => {
         if (step > STEP_SELECT_TICKET_TYPE && !registrationForm.values?.ticketType && !reservation) {
