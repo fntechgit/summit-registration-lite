@@ -20,7 +20,7 @@ import { withReduxProvider } from '../../utils/withReduxProvider';
 import styles from "../../styles/general.module.scss";
 
 const RegistrationModal = ({ summitData, closeWidget, ...props }) => {
-    const closeHandlerRef = React.useRef(null);
+    const closeHandlerRef = React.useRef(() => {});
 
     return (
         <div id={`${styles.modal}`} className="modal is-active">
