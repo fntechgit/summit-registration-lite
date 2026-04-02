@@ -21,6 +21,7 @@ import { getStore, getPersistor } from "../store";
 export const withReduxProvider = (WrappedComponent) => {
     const WithReduxProvider = (props) => {
         const existingStore = useContext(ReactReduxContext);
+        const storeRef = useRef(null);
 
         // Already inside a Provider (e.g., form rendered within modal)
         // — skip wrapping to avoid double Provider nesting
@@ -28,7 +29,6 @@ export const withReduxProvider = (WrappedComponent) => {
             return <WrappedComponent {...props} />;
         }
 
-        const storeRef = useRef(null);
         if (!storeRef.current) {
             storeRef.current = getStore(props.clientId, props.apiBaseUrl, props.getAccessToken);
         }
