@@ -31,7 +31,10 @@ const RegistrationModal = ({ summitData, closeWidget, ...props }) => {
                         <div className={styles.title}>
                             {props.profileData && <span>{summitData?.name}</span>}
                             {closeWidget && (
-                                <i className="fa fa-close" aria-label="close" onClick={() => closeHandlerRef.current()}></i>
+                                <i className="fa fa-close" aria-label="close" role="button" tabIndex={0}
+                                   onClick={() => closeHandlerRef.current()}
+                                   onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') closeHandlerRef.current(); }}
+                                ></i>
                             )}
                         </div>
                         <RegistrationForm {...props} summitData={summitData} closeWidget={closeWidget} closeHandlerRef={closeHandlerRef} />
