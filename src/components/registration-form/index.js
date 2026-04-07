@@ -186,8 +186,8 @@ const RegistrationFormContent = (
 
     const allowedTicketTypes = ticketDataLoaded ? ticketTypes.filter((tt) => tt.sub_type === TICKET_TYPE_SUBTYPE_PREPAID || (tt.sales_start_date === null && tt.sales_end_date === null) || (nowUtc >= tt.sales_start_date && nowUtc <= tt.sales_end_date)) : [];
 
-    const noAvailableTickets = useMemo(() => profileData && ticketDataLoaded && !ticketDataError && allowedTicketTypes.length === 0 && step !== STEP_COMPLETE, [allowedTicketTypes]);
-    const alreadyOwnedTickets = useMemo(() => profileData && ticketDataLoaded && !ticketDataError && allowedTicketTypes.length > 0 && ownedTickets.length > 0, [ownedTickets, allowedTicketTypes]);
+    const noAvailableTickets = useMemo(() => profileData && ticketDataLoaded && !ticketDataError && allowedTicketTypes.length === 0 && step !== STEP_COMPLETE, [profileData, ticketDataLoaded, ticketDataError, allowedTicketTypes, step]);
+    const alreadyOwnedTickets = useMemo(() => profileData && ticketDataLoaded && !ticketDataError && allowedTicketTypes.length > 0 && ownedTickets.length > 0, [profileData, ticketDataLoaded, ticketDataError, allowedTicketTypes, ownedTickets]);
 
     useEffect(() => {
         if (profileData)
