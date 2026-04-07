@@ -567,4 +567,5 @@ RegistrationForm.propTypes = {
     companyDDLOptions2Show: PropTypes.number,
 };
 
+export { RegistrationForm };
 export default withReduxProvider(RegistrationForm);
