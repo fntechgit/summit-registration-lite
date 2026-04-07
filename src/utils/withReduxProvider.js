@@ -13,34 +13,28 @@
  * HOC to wrap a component with Redux Provider and PersistGate.
  **/
 
-import React, { useContext, useRef } from 'react';
-import { Provider, ReactReduxContext } from "react-redux";
+import React from 'react';
+import { Provider } from "react-redux";
 import { PersistGate } from "redux-persist/integration/react";
 import { getStore, getPersistor } from "../store";
 
 export const withReduxProvider = (WrappedComponent) => {
-    const WithReduxProvider = (props) => {
-        const existingStore = useContext(ReactReduxContext);
-        const storeRef = useRef(null);
-
-        // Already inside a Provider (e.g., form rendered within modal)
-        // — skip wrapping to avoid double Provider nesting
-        if (existingStore) {
-            return <WrappedComponent {...props} />;
+    class WithReduxProvider extends React.PureComponent {
+        constructor(props) {
+            super(props);
+            this.store = getStore(props.clientId, props.apiBaseUrl, props.getAccessToken);
         }
 
-        if (!storeRef.current) {
-            storeRef.current = getStore(props.clientId, props.apiBaseUrl, props.getAccessToken);
+        render() {
+            return (
+                <Provider store={this.store}>
+                    <PersistGate persistor={getPersistor()}>
+                        <WrappedComponent {...this.props} />
+                    </PersistGate>
+                </Provider>
+            );
         }
-
-        return (
-            <Provider store={storeRef.current}>
-                <PersistGate persistor={getPersistor()}>
-                    <WrappedComponent {...props} />
-                </PersistGate>
-            </Provider>
-        );
-    };
+    }
 
     // Copy propTypes and defaultProps from wrapped component
     WithReduxProvider.propTypes = WrappedComponent.propTypes;
