@@ -41,7 +41,9 @@ import {
     loadProfileData,
     removePromoCode,
     applyPromoCode,
-    validatePromoCode
+    validatePromoCode,
+    startWidgetLoading,
+    stopWidgetLoading
 } from '../../actions';
 
 import AjaxLoader from "openstack-uicore-foundation/lib/components/ajaxloader";
@@ -153,11 +155,14 @@ const RegistrationFormContent = (
         showCompanyInputDefaultOptions,
         companyDDLOptions2Show,
         promoCode,
+        promoCodeAllowsReassign,
         hasDiscount,
         getTicketDiscount,
         removePromoCode,
         applyPromoCode,
         validatePromoCode,
+        startWidgetLoading,
+        stopWidgetLoading,
         closeHandlerRef,
         ...rest
     }) => {
@@ -277,12 +282,29 @@ const RegistrationFormContent = (
             });
     }
 
-    const handleValidatePromocode = (data, onError) => {
-        validatePromoCode(data, onError).then(() => {
-            trackAddToCart(data);
-        }).catch((e) => {
-            handleSentryException(e);
-        });
+    const handleValidatePromocode = (data, { onError }) => {
+        // Check if promo code entered but not applied
+        if (data.promoCode && !promoCode) {
+            const errorMsg = `You entered a promo code but it hasn't been applied. Make sure to click the 'Apply' button or remove it before continuing.`;
+            onError(null, { body: { errors: [errorMsg] } });
+            return;
+        }
+
+        startWidgetLoading();
+        validatePromoCode(data)
+            .then(() => {
+                trackAddToCart(data);
+                changeStep(STEP_PERSONAL_INFO);
+            })
+            .catch((e) => {
+                if (e?.res?.body?.errors) {
+                    onError(e, e.res);
+                }
+                handleSentryException(e);
+            })
+            .finally(() => {
+                stopWidgetLoading();
+            });
     }
 
     const trackViewItem = (data) => {
@@ -365,12 +387,14 @@ const RegistrationFormContent = (
                                 isActive={step === STEP_SELECT_TICKET_TYPE}
                                 allowPromoCodes={allowPromoCodes}
                                 applyPromoCode={applyPromoCode}
+                                validatePromoCode={validatePromoCode}
                                 removePromoCode={() => {
                                     setFormErrors({});
                                     setFormValues({ ...formValues, promoCode: "" });
                                     removePromoCode()
                                 }}
                                 promoCode={promoCode}
+                                promoCodeAllowsReassign={promoCodeAllowsReassign}
                                 formErrors={formErrors}
                                 changeForm={ticketForm => setFormValues({ ...formValues, ...ticketForm })}
                                 trackViewItem={trackViewItem}
@@ -418,6 +442,7 @@ const RegistrationFormContent = (
                                 companyDDLPlaceholder={companyDDLPlaceholder}
                                 showCompanyInputDefaultOptions={showCompanyInputDefaultOptions}
                                 companyDDLOptions2Show={companyDDLOptions2Show}
+                                promoCodeAllowsReassign={promoCodeAllowsReassign}
                             />
 
                             <animated.div style={{ ...toggleAnimation }}>
@@ -498,6 +523,7 @@ const mapStateToProps = ({ registrationLiteState }) => ({
     passwordlessCodeError: registrationLiteState.passwordless.error,
     nowUtc: registrationLiteState.nowUtc,
     promoCode: registrationLiteState.promoCode,
+    promoCodeAllowsReassign: registrationLiteState.promoCodeAllowsReassign,
 })
 
 const RegistrationForm = connect(mapStateToProps, {
@@ -516,7 +542,9 @@ const RegistrationForm = connect(mapStateToProps, {
     loadProfileData,
     applyPromoCode,
     removePromoCode,
-    validatePromoCode
+    validatePromoCode,
+    startWidgetLoading,
+    stopWidgetLoading
 })(RegistrationFormContent);
 
 RegistrationForm.defaultProps = {
