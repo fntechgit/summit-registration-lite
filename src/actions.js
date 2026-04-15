@@ -211,11 +211,21 @@ export const validatePromoCode = (ticketData) => async (dispatch, getState, { ap
     apiUrl.addQuery('filter[]', `ticket_type_qty==${ticketQuantity}`);
     apiUrl.addQuery('filter[]', `ticket_type_subtype==${sub_type}`);
 
+    const errorHandler = (err, res) => (dispatch, state) => {
+        // 404: promo code or ticket type not found
+        // 412: promo code invalid for this ticket type/qty
+        // 429: rate limited
+        // All three are user-actionable - let them bubble up to the caller
+        // for inline error display instead of authErrorHandler modal dialogs
+        if (res && [404, 412, 429].includes(res.statusCode)) return;
+        return authErrorHandler(err, res)(dispatch, state);
+    };
+
     return getRequest(
         null,
         createAction(VALIDATE_PROMO_CODE),
         `${apiUrl}`,
-        authErrorHandler
+        errorHandler
     )({})(dispatch).catch((e) => {
         dispatch(createAction(VALIDATE_PROMO_CODE_ERROR)({}));
         throw e;

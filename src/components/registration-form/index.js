@@ -297,8 +297,12 @@ const RegistrationFormContent = (
                 changeStep(STEP_PERSONAL_INFO);
             })
             .catch((e) => {
-                if (e?.res?.body?.errors) {
-                    onError(e, e.res);
+                if (e?.res?.body) {
+                    // 412: body has { errors: [...] }
+                    // 404: body has { message: "..." }
+                    // normalize to errors array for inline display
+                    const errors = e.res.body.errors || [e.res.body.message || 'An error occurred'];
+                    onError(e, { ...e.res, body: { errors } });
                 }
                 handleSentryException(e);
             })
