@@ -254,12 +254,12 @@ const TicketTypeComponent = ({
                                     {promoCodeError &&
                                         Object.values(promoCodeError).map((er, index) => (<div key={`error-${index}`} className={`${styles.promocodeError} alert alert-danger`}>{er}</div>))
                                     }
-                                    {ticket && !canReassign &&
-                                        <div className={styles.nonTransferable}>
-                                            This ticket will be automatically assigned to you and cannot be reassigned.
-                                        </div>
-                                    }
                                 </>
+                            }
+                            {ticket && !canReassign &&
+                                <div className={styles.nonTransferable}>
+                                    This ticket will be automatically assigned to you and cannot be reassigned.
+                                </div>
                             }
                         </div>
                     </animated.div>
