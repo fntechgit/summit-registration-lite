@@ -168,14 +168,14 @@ const RegistrationLiteReducer = (state = DEFAULT_STATE, action) => {
         }
         case SET_CURRENT_PROMO_CODE:{
             const { currentPromoCode } = payload;
-            return { ...state, promoCode: currentPromoCode, promoCodeAllowsReassign: true }
+            return { ...state, promoCode: currentPromoCode, promoCodeAllowsReassign: false }
         }
         case VALIDATE_PROMO_CODE: {
             const { allows_to_reassign } = payload.response;
             return { ...state, promoCodeAllowsReassign: allows_to_reassign ?? true }
         }
         case VALIDATE_PROMO_CODE_ERROR: {
-            return { ...state, promoCodeAllowsReassign: true }
+            return { ...state, promoCodeAllowsReassign: false }
         }
         default: {
             return state;
