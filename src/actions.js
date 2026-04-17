@@ -171,9 +171,13 @@ const getTaxesTypes = (summitId) => async (dispatch, getState, { apiBaseUrl, get
 
 export const applyPromoCode = (currentPromoCode) => async (dispatch, getState) => {
     const { registrationLiteState: { settings: { summitId } } } = getState();
-    // set the current promo code and get ticket types again
-    dispatch(createAction(SET_CURRENT_PROMO_CODE)({ currentPromoCode }));
-    await dispatch(getTicketTypes(summitId));
+    try {
+        dispatch(createAction(SET_CURRENT_PROMO_CODE)({ currentPromoCode }));
+        await dispatch(getTicketTypes(summitId));
+    } catch (e) {
+        dispatch(createAction(CLEAR_CURRENT_PROMO_CODE)({}));
+        throw e;
+    }
 }
 
 export const removePromoCode = () => (dispatch, getState) => {
