@@ -214,10 +214,12 @@ export const validatePromoCode = (ticketData) => async (dispatch, getState, { ap
     const errorHandler = (err, res) => (dispatch, state) => {
         // 404: promo code or ticket type not found
         // 412: promo code invalid for this ticket type/qty
-        // 429: rate limited
-        // User-actionable errors: reset reassignment state and bubble up
-        // to the caller for inline display
-        if (res && [404, 412, 429].includes(res.statusCode)) {
+        if (res && [404, 412].includes(res.statusCode)) {
+            dispatch(removePromoCode());
+            return;
+        }
+        // 429: rate limited, keep code applied
+        if (res && res.statusCode === 429) {
             dispatch(createAction(VALIDATE_PROMO_CODE_ERROR)({}));
             return;
         }
