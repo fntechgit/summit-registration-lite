@@ -155,6 +155,8 @@ const RegistrationFormContent = (
         showCompanyInputDefaultOptions,
         companyDDLOptions2Show,
         promoCode,
+        promoCodeVerified,
+        promoCodeValidating,
         promoCodeAllowsReassign,
         hasDiscount,
         getTicketDiscount,
@@ -227,7 +229,7 @@ const RegistrationFormContent = (
 
     useEffect(() => {
         setFormErrors([]);
-    }, [step])
+    }, [step, promoCode])
 
     const [ref, { height }] = useMeasure();
 
@@ -282,6 +284,20 @@ const RegistrationFormContent = (
             });
     }
 
+    const handlePromoCodeValidation = async (ticketData) => {
+        try {
+            await validatePromoCode(ticketData);
+            return true;
+        } catch (e) {
+            if (e?.res?.body) {
+                const errors = e.res.body.errors || [e.res.body.message || 'An error occurred'];
+                setFormErrors(errors);
+            }
+            handleSentryException(e);
+            return false;
+        }
+    }
+
     const handleValidatePromocode = (data, { onError }) => {
         // Check if promo code entered but not applied
         if (data.promoCode && !promoCode) {
@@ -291,20 +307,12 @@ const RegistrationFormContent = (
         }
 
         startWidgetLoading();
-        validatePromoCode(data)
-            .then(() => {
-                trackAddToCart(data);
-                changeStep(STEP_PERSONAL_INFO);
-            })
-            .catch((e) => {
-                if (e?.res?.body) {
-                    // 412: body has { errors: [...] }
-                    // 404: body has { message: "..." }
-                    // normalize to errors array for inline display
-                    const errors = e.res.body.errors || [e.res.body.message || 'An error occurred'];
-                    onError(e, { ...e.res, body: { errors } });
+        handlePromoCodeValidation(data)
+            .then((valid) => {
+                if (valid) {
+                    trackAddToCart(data);
+                    changeStep(STEP_PERSONAL_INFO);
                 }
-                handleSentryException(e);
             })
             .finally(() => {
                 stopWidgetLoading();
@@ -391,13 +399,15 @@ const RegistrationFormContent = (
                                 isActive={step === STEP_SELECT_TICKET_TYPE}
                                 allowPromoCodes={allowPromoCodes}
                                 applyPromoCode={applyPromoCode}
-                                validatePromoCode={validatePromoCode}
+                                validatePromoCode={handlePromoCodeValidation}
                                 removePromoCode={() => {
                                     setFormErrors({});
                                     setFormValues({ ...formValues, promoCode: "" });
                                     removePromoCode()
                                 }}
                                 promoCode={promoCode}
+                                promoCodeVerified={promoCodeVerified}
+                                promoCodeValidating={promoCodeValidating}
                                 promoCodeAllowsReassign={promoCodeAllowsReassign}
                                 formErrors={formErrors}
                                 changeForm={ticketForm => setFormValues({ ...formValues, ...ticketForm })}
@@ -471,6 +481,9 @@ const RegistrationFormContent = (
                                 step={step}
                                 inPersonDisclaimer={inPersonDisclaimer}
                                 formValues={formValues}
+                                promoCode={promoCode}
+                                promoCodeVerified={promoCodeVerified}
+                                promoCodeValidating={promoCodeValidating}
                                 removeReservedTicket={removeReservedTicket}
                                 validatePromoCode={handleValidatePromocode}
                                 onValidateError={{
@@ -527,6 +540,8 @@ const mapStateToProps = ({ registrationLiteState }) => ({
     passwordlessCodeError: registrationLiteState.passwordless.error,
     nowUtc: registrationLiteState.nowUtc,
     promoCode: registrationLiteState.promoCode,
+    promoCodeVerified: registrationLiteState.promoCodeVerified,
+    promoCodeValidating: registrationLiteState.promoCodeValidating,
     promoCodeAllowsReassign: registrationLiteState.promoCodeAllowsReassign,
 })
 

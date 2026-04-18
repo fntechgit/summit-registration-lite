@@ -27,15 +27,6 @@
   color: red;
 }
 
-.promocodeError {
-  margin-top: 10px;
-  color: red;
-  &::before {
-    font-family: FontAwesome;
-    content: '\f071';
-    margin-right: 5px;
-  }
-}
 
 .taxes {  
   display: inline-flex;
@@ -126,14 +117,6 @@
   max-width: 280px;
 }
 
-.nonTransferable {
-  margin-top: 10px;
-  padding: 10px 12px;
-  background-color: #f0f7ff;
-  border: 1px solid #b8daff;
-  border-radius: 4px;
-  font-size: 13px;
-}
 
 .inPersonDisclaimer {
   margin-top: 15px;

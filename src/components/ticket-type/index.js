@@ -21,9 +21,10 @@ import { isInPersonTicketType } from "../../actions";
 import ReactTooltip from 'react-tooltip';
 import { formatCurrency } from '../../helpers';
 import { getTicketMaxQuantity } from '../../helpers';
-import { avoidTooltipOverflow, getTicketCost, getTicketTaxes, isPrePaidOrder } from '../../utils/utils';
+import { avoidTooltipOverflow, getTicketCost, getTicketTaxes, isPrePaidOrder, handleSentryException } from '../../utils/utils';
 
 import PromoCodeInput from '../promocode-input';
+import PromoCodeNotice from '../promo-code-notice';
 import { VIEW_ITEM } from '../../utils/constants';
 
 const TicketTypeComponent = ({
@@ -41,6 +42,8 @@ const TicketTypeComponent = ({
     removePromoCode,
     validatePromoCode,
     promoCode,
+    promoCodeVerified,
+    promoCodeValidating,
     promoCodeAllowsReassign = true,
     trackViewItem
 }) => {
@@ -82,6 +85,9 @@ const TicketTypeComponent = ({
         if (updatedCurrentTicket) {
             changeForm({ ticketType: updatedCurrentTicket })
             setTicket(updatedCurrentTicket);
+        } else {
+            setTicket(null);
+            setQuantity(minQuantity);
         }
         if (!promoCode) changeForm({ promoCode: '' })
     }, [promoCode, originalTicketTypes])
@@ -99,11 +105,8 @@ const TicketTypeComponent = ({
         setTicket(t);
         setQuantity(minQuantity);
         trackViewItem(t);
-        // Validate promo code if already applied (ticket selected after promo applied)
         if (promoCode) {
-            validatePromoCode({ id: t.id, ticketQuantity: minQuantity, sub_type: t.sub_type }).catch((e) => {
-                console.log('Promo code validation failed for ticket change:', e);
-            });
+            validatePromoCode({ id: t.id, ticketQuantity: minQuantity, sub_type: t.sub_type });
         }
     }
 
@@ -118,16 +121,18 @@ const TicketTypeComponent = ({
     const promoCodeError = Object.keys(formErrors).length > 0 ? formErrors : null;
 
     const handleRemovePromoCode = () => {
-        setTicket(null);
         removePromoCode();
     }
 
     const handleApplyPromoCode = async (code) => {
-        await applyPromoCode(code);
+        try {
+            await applyPromoCode(code);
+        } catch (e) {
+            handleSentryException(e);
+            return;
+        }
         if (ticket) {
-            validatePromoCode({ id: ticket.id, ticketQuantity: quantity, sub_type: ticket.sub_type }).catch((e) => {
-                console.log('Promo code validation failed after apply:', e);
-            });
+            await validatePromoCode({ id: ticket.id, ticketQuantity: quantity, sub_type: ticket.sub_type });
         }
     }
 
@@ -136,12 +141,18 @@ const TicketTypeComponent = ({
             <>
                 <div className={styles.innerWrapper}>
                     <div className={styles.title} >
-                        <span>
-                            Ticket
+                        <span style={isActive ? { display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' } : {}}>
+                            <span>Ticket</span>
+                            {isActive && showMultipleTicketTexts &&
+                                <a className={styles.moreInfo} data-tip data-for="ticket-quantity-info" style={{ margin: 0 }}>
+                                    <i className="glyphicon glyphicon-info-sign" aria-hidden="true" />{` `}
+                                    Need multiple ticket types?
+                                </a>
+                            }
                         </span>
                         <div className={styles.summary}>
                             <span>
-                                {ticket && (
+                                {!isActive && ticket && (
                                     <>
                                         {`${ticket.name} (${quantity}): `}
                                         <>
@@ -195,7 +206,6 @@ const TicketTypeComponent = ({
                                     </>
                                 )}
 
-                                {!ticket && <>No ticket selected</>}
                             </span>
                         </div>
                     </div>
@@ -231,12 +241,6 @@ const TicketTypeComponent = ({
                                     </>
                                 )}
                             </div>
-                            {showMultipleTicketTexts &&
-                                <a className={styles.moreInfo} data-tip data-for="ticket-quantity-info">
-                                    <i className="glyphicon glyphicon-info-sign" aria-hidden="true" />{` `}
-                                    Need multiple ticket types?
-                                </a>
-                            }
                             <ReactTooltip id="ticket-quantity-info" overridePosition={avoidTooltipOverflow}>
                                 <div className={styles.moreInfoTooltip}>
                                     {T.translate("ticket_type.ticket_quantity_tooltip")}
@@ -247,19 +251,22 @@ const TicketTypeComponent = ({
                                 <>
                                     <PromoCodeInput
                                         promoCode={promoCode}
+                                        promoCodeVerified={promoCodeVerified}
+                                        promoCodeValidating={promoCodeValidating}
                                         applyPromoCode={handleApplyPromoCode}
                                         showMultipleTicketTexts={showMultipleTicketTexts}
                                         removePromoCode={handleRemovePromoCode}
                                         onPromoCodeChange={handlePromoCodeChange} />
-                                    {promoCodeError &&
-                                        Object.values(promoCodeError).map((er, index) => (<div key={`error-${index}`} className={`${styles.promocodeError} alert alert-danger`}>{er}</div>))
-                                    }
                                 </>
                             }
+                            {promoCodeError &&
+                                <PromoCodeNotice message={Object.values(promoCodeError).join(' ')} variant="error" />
+                            }
                             {ticket && !canReassign &&
-                                <div className={styles.nonTransferable}>
-                                    This ticket will be automatically assigned to you and cannot be reassigned.
-                                </div>
+                                <PromoCodeNotice
+                                    message="This ticket will be automatically assigned to you and cannot be reassigned."
+                                    variant="info"
+                                />
                             }
                         </div>
                     </animated.div>

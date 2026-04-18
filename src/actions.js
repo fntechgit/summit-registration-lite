@@ -53,6 +53,7 @@ export const LOAD_PROFILE_DATA = 'LOAD_PROFILE_DATA';
 export const SET_CURRENT_PROMO_CODE = 'SET_CURRENT_PROMO_CODE';
 export const CLEAR_CURRENT_PROMO_CODE = 'CLEAR_CURRENT_PROMO_CODE';
 export const VALIDATE_PROMO_CODE = 'VALIDATE_PROMO_CODE';
+export const VALIDATE_PROMO_CODE_SUCCESS = 'VALIDATE_PROMO_CODE_SUCCESS';
 export const VALIDATE_PROMO_CODE_ERROR = 'VALIDATE_PROMO_CODE_ERROR';
 
 export const startWidgetLoading = createAction(START_WIDGET_LOADING);
@@ -69,6 +70,17 @@ export const loadProfileData = (profileData) => (dispatch) => {
 export const clearWidgetState = () => (dispatch) => {
     dispatch(createAction(CLEAR_WIDGET_STATE)({}));
 }
+
+const promoCodeErrorHandler = (err, res) => (dispatch, state) => {
+    // 404: promo code or ticket type not found
+    // 412: promo code invalid for this ticket type/qty
+    // 429: rate limited
+    if (res && [404, 412, 429].includes(res.statusCode)) {
+        dispatch(createAction(VALIDATE_PROMO_CODE_ERROR)({}));
+        return;
+    }
+    return authErrorHandler(err, res)(dispatch, state);
+};
 
 const customErrorHandler = (err, res) => (dispatch, state) => {
     if (err.timeout) {
@@ -215,26 +227,11 @@ export const validatePromoCode = (ticketData) => async (dispatch, getState, { ap
     apiUrl.addQuery('filter[]', `ticket_type_qty==${ticketQuantity}`);
     apiUrl.addQuery('filter[]', `ticket_type_subtype==${sub_type}`);
 
-    const errorHandler = (err, res) => (dispatch, state) => {
-        // 404: promo code or ticket type not found
-        // 412: promo code invalid for this ticket type/qty
-        if (res && [404, 412].includes(res.statusCode)) {
-            dispatch(removePromoCode());
-            return;
-        }
-        // 429: rate limited, keep code applied
-        if (res && res.statusCode === 429) {
-            dispatch(createAction(VALIDATE_PROMO_CODE_ERROR)({}));
-            return;
-        }
-        return authErrorHandler(err, res)(dispatch, state);
-    };
-
     return getRequest(
-        null,
         createAction(VALIDATE_PROMO_CODE),
+        createAction(VALIDATE_PROMO_CODE_SUCCESS),
         `${apiUrl}`,
-        errorHandler
+        promoCodeErrorHandler
     )({})(dispatch);
 }
 

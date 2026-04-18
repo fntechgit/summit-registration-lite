@@ -14,11 +14,10 @@
 import React, { useState, useEffect } from 'react';
 import ReactTooltip from 'react-tooltip';
 import T from 'i18n-react';
-import appliedCode from '../../assets/icon-check-circle.svg';
 import styles from "./index.module.scss";
 import { avoidTooltipOverflow, isEmptyString } from '../../utils/utils';
 
-const PromoCodeInput = ({ applyPromoCode, promoCode, removePromoCode, showMultipleTicketTexts, onPromoCodeChange }) => {
+const PromoCodeInput = ({ label, applyPromoCode, promoCode, promoCodeVerified, promoCodeValidating, removePromoCode, showMultipleTicketTexts, onPromoCodeChange }) => {
 
     const [statePromoCode, setStatePromoCode] = useState(promoCode);
 
@@ -34,7 +33,15 @@ const PromoCodeInput = ({ applyPromoCode, promoCode, removePromoCode, showMultip
     return (
         <>
             <div className={styles.promoCodeWrapper}>
-                <span>Do you have a promo code?</span>
+                <span style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span>{label || 'Do you have a promo code?'}</span>
+                    {showMultipleTicketTexts &&
+                        <a data-tip data-for="promo-code-info" className={styles.moreInfo} style={{ margin: 0 }}>
+                            <i className="glyphicon glyphicon-info-sign" aria-hidden="true" />{` `}
+                            Have multiple promo codes?
+                        </a>
+                    }
+                </span>
                 <div className={styles.promoCodeInput}>
                     <input className={`${promoCode ? styles.promoCodeActive : ''}`}
                         type="text"
@@ -47,7 +54,9 @@ const PromoCodeInput = ({ applyPromoCode, promoCode, removePromoCode, showMultip
                         }}
                         readOnly={!isEmptyString(promoCode)} />
 
-                    {promoCode && <img src={appliedCode} className={styles.appliedCodeIcon} />}
+                    {promoCodeValidating && <span className={`${styles.statusIcon} ${styles.spinner}`} />}
+                    {!promoCodeValidating && promoCodeVerified === true && <span className={`${styles.statusIcon} ${styles.valid}`}>✓</span>}
+                    {!promoCodeValidating && promoCodeVerified === false && <span className={`${styles.statusIcon} ${styles.invalid}`}>✕</span>}
                     <div className={`${styles.codeButtonWrapper} ${statePromoCode ? '' : styles.noCode}`}>
                         {promoCode !== '' ?
                             <button onClick={() => removePromoCode()}>Remove</button>
@@ -57,14 +66,6 @@ const PromoCodeInput = ({ applyPromoCode, promoCode, removePromoCode, showMultip
                     </div>
                 </div>
 
-                {showMultipleTicketTexts &&
-                    <div className={styles.moreInfo}>
-                        <a data-tip data-for="promo-code-info">
-                            <i className="glyphicon glyphicon-info-sign" aria-hidden="true" />{` `}
-                            Have multiple promo codes?
-                        </a>
-                    </div>
-                }
             </div>
             <ReactTooltip id="promo-code-info" overridePosition={avoidTooltipOverflow}>
                 <div className={styles.moreInfoTooltip}>
