@@ -23,12 +23,35 @@ import ProfileData from './profile.json';
 // Dev environment setup
 window.API_BASE_URL = process.env.API_BASE_URL;
 window.TIMEINTERVALSINCE1970_API_URL = process.env.TIMEINTERVALSINCE1970_API_URL;
+// Point IDP to self so expired token redirects stay on localhost
+// instead of looping on undefined OAuth URLs
+window.IDP_BASE_URL = `${window.location.origin}`;
+window.OAUTH2_CLIENT_ID = 'dev';
+window.SCOPES = 'openid';
 if (typeof window !== 'undefined') {
     window.localStorage.setItem('authInfo', JSON.stringify({ accessToken: process.env.ACCESS_TOKEN }));
 }
 
 const DevApp = () => {
     const [mode, setMode] = useState('modal');
+
+    if (window.location.pathname.includes('/oauth2/')) {
+        return (
+            <div style={{ padding: '40px', textAlign: 'center', fontFamily: 'Arial, sans-serif' }}>
+                <h2 style={{ color: '#d32f2f' }}>Session Expired</h2>
+                <p>The access token is no longer valid. To continue testing:</p>
+                <ol style={{ textAlign: 'left', maxWidth: '500px', margin: '20px auto', lineHeight: '1.8' }}>
+                    <li>Open <a href="https://qa-fnvirtual.netlify.app/a/" target="_blank" rel="noreferrer">QA site</a> and log in</li>
+                    <li>Copy the access token from any API request in the network tab</li>
+                    <li>Update <code>ACCESS_TOKEN</code> in <code>.env</code></li>
+                    <li>Restart the dev server</li>
+                </ol>
+                <button onClick={() => window.location.href = '/'} style={{ padding: '10px 20px', cursor: 'pointer', marginTop: '10px' }}>
+                    Back to Widget
+                </button>
+            </div>
+        );
+    }
 
     const filterProps = {
     authUser: (provider) => console.log('login with ', provider),
