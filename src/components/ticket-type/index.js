@@ -241,7 +241,7 @@ const TicketTypeComponent = ({
                                     </>
                                 )}
                             </div>
-                            <ReactTooltip id="ticket-quantity-info" overridePosition={avoidTooltipOverflow}>
+                            <ReactTooltip id="ticket-quantity-info" place="bottom" overridePosition={avoidTooltipOverflow}>
                                 <div className={styles.moreInfoTooltip}>
                                     {T.translate("ticket_type.ticket_quantity_tooltip")}
                                 </div>

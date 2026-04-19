@@ -67,7 +67,7 @@ const PromoCodeInput = ({ label, applyPromoCode, promoCode, promoCodeVerified, p
                 </div>
 
             </div>
-            <ReactTooltip id="promo-code-info" overridePosition={avoidTooltipOverflow}>
+            <ReactTooltip id="promo-code-info" place="bottom" overridePosition={avoidTooltipOverflow}>
                 <div className={styles.moreInfoTooltip}>
                     {T.translate("promo_code.promo_code_tooltip")}
                 </div>
