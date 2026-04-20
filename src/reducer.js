@@ -38,6 +38,7 @@ import {
     VALIDATE_PROMO_CODE,
     VALIDATE_PROMO_CODE_SUCCESS,
     VALIDATE_PROMO_CODE_ERROR,
+    VALIDATE_PROMO_CODE_RATE_LIMITED,
 } from './actions';
 
 import { LOGOUT_USER } from 'openstack-uicore-foundation/lib/security/actions';
@@ -185,6 +186,9 @@ const RegistrationLiteReducer = (state = DEFAULT_STATE, action) => {
         }
         case VALIDATE_PROMO_CODE_ERROR: {
             return { ...state, promoCodeVerified: false, promoCodeValidating: false, promoCodeAllowsReassign: true }
+        }
+        case VALIDATE_PROMO_CODE_RATE_LIMITED: {
+            return { ...state, promoCodeValidating: false }
         }
         default: {
             return state;

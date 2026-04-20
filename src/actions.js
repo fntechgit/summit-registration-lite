@@ -55,6 +55,7 @@ export const CLEAR_CURRENT_PROMO_CODE = 'CLEAR_CURRENT_PROMO_CODE';
 export const VALIDATE_PROMO_CODE = 'VALIDATE_PROMO_CODE';
 export const VALIDATE_PROMO_CODE_SUCCESS = 'VALIDATE_PROMO_CODE_SUCCESS';
 export const VALIDATE_PROMO_CODE_ERROR = 'VALIDATE_PROMO_CODE_ERROR';
+export const VALIDATE_PROMO_CODE_RATE_LIMITED = 'VALIDATE_PROMO_CODE_RATE_LIMITED';
 
 export const startWidgetLoading = createAction(START_WIDGET_LOADING);
 export const stopWidgetLoading = createAction(STOP_WIDGET_LOADING);
@@ -74,9 +75,13 @@ export const clearWidgetState = () => (dispatch) => {
 const promoCodeErrorHandler = (err, res) => (dispatch, state) => {
     // 404: promo code or ticket type not found
     // 412: promo code invalid for this ticket type/qty
-    // 429: rate limited
-    if (res && [404, 412, 429].includes(res.statusCode)) {
+    if (res && [404, 412].includes(res.statusCode)) {
         dispatch(createAction(VALIDATE_PROMO_CODE_ERROR)({}));
+        return;
+    }
+    // 429: rate limited - transient, preserve current promo state
+    if (res && res.statusCode === 429) {
+        dispatch(createAction(VALIDATE_PROMO_CODE_RATE_LIMITED)({}));
         return;
     }
     return authErrorHandler(err, res)(dispatch, state);
