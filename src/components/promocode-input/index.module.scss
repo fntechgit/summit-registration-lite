@@ -1,25 +1,20 @@
 .promoCodeWrapper {
   padding-top: 16px;
   display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  flex-wrap: wrap;
-  gap: 15px;
+  flex-direction: column;
+  gap: 8px;
   span {
     color: var(--color_text_dark);
     font-size: 14px;
     font-weight: 600;
     line-height: 140%; /* 19.6px */
-    width: 30%;
   }
   .promoCodeInput {
     display: flex;
     align-items: center;
     position: relative;
-    flex: 1;
-    height: 33px;
-    width: 50%;
-    min-width: 220px;
+    height: 36px;
+    max-width: 400px;
     input {
       display: inline-flex;
       padding: 13px 8px;
@@ -27,13 +22,16 @@
       height: 100%;
       color: var(--color_input_text_color);
       background-color: var(--color_input_background_color);
-      border: 1.5px solid var(--color_input_border_color);
-      border-radius: 4px 0px 0px 4px;
+      border: 1px solid var(--color_input_border_color);
+      border-right: none;
+      border-radius: 5px 0px 0px 5px;
       &.promoCodeActive {
         padding-right: 25px;
         text-overflow: ellipsis;
         overflow: hidden;
         white-space: nowrap;
+        color: var(--color_gray_dark);
+        background-color: var(--color_gray_lighter);
       }
     }
     .codeButtonWrapper {
@@ -42,7 +40,7 @@
       width: 30%;
       height: 100%;
       background-color: #818181;
-      border-radius: 0px 4px 4px 0px;
+      border-radius: 0px 5px 5px 0px;
       &.noCode {
         background-color: #CFCFCF;
         cursor: not-allowed;
@@ -60,23 +58,40 @@
         background-color: transparent;
       }
     }
-    .appliedCodeIcon {
+    .statusIcon {
       position: absolute;
-      left: 60%;
+      right: 32%;
+      font-size: 16px;
+      font-weight: bold;
+      line-height: 1;
+    }
+    .valid {
+      color: #92CD76;
+    }
+    .invalid {
+      color: #d32f2f;
+    }
+    .spinner {
+      width: 16px;
+      height: 16px;
+      border: 2px solid var(--color_gray_light);
+      border-top-color: var(--color_primary);
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+      font-size: 0;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
     }
   }
   .moreInfo {
     display: inline-block;
+    margin-top: -4px;
+    font-size: 12px;
   }
   @media screen and (max-width: 540px) {
-    span {
-      width: 100%;
-    }
     .promoCodeInput {
-      width: 100%;
-    }
-    .moreInfo {
-      width: 100%;
+      max-width: 100%;
     }
   }
 }

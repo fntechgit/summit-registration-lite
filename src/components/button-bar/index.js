@@ -17,8 +17,8 @@ import styles from "./index.module.scss";
 import { isInPersonTicketType } from "../../actions";
 import { STEP_COMPLETE, STEP_PAYMENT, STEP_PERSONAL_INFO, STEP_SELECT_TICKET_TYPE } from '../../utils/constants';
 
-const ButtonBarComponent = ({ step, changeStep, validatePromoCode, onValidateError, formValues, removeReservedTicket, inPersonDisclaimer }) => {
-    const { ticketType, ticketQuantity, promoCode } = formValues || {};
+const ButtonBarComponent = ({ step, changeStep, validatePromoCode, onValidateError, formValues, removeReservedTicket, inPersonDisclaimer, promoCode, promoCodeVerified, promoCodeValidating }) => {
+    const { ticketType, ticketQuantity, promoCode: formPromoCode } = formValues || {};
 
     const nextButtonText = inPersonDisclaimer && ticketType && isInPersonTicketType(ticketType) ? 'Accept' : 'Next';
 
@@ -35,7 +35,7 @@ const ButtonBarComponent = ({ step, changeStep, validatePromoCode, onValidateErr
                             {step !== STEP_SELECT_TICKET_TYPE && step !== STEP_PAYMENT && <button className={`${styles.button} button`} onClick={() => changeStep(step - 1)}>&lt; Back</button>}
                             {step !== STEP_SELECT_TICKET_TYPE && step === STEP_PAYMENT && <button className={`${styles.button} button`} onClick={() => removeReservedTicket()}>&lt; Back</button>}
                             {/* Next Button */}
-                            {step === STEP_SELECT_TICKET_TYPE && <button disabled={!ticketType} className={`${styles.button} button`} onClick={() => validatePromoCode({ ...ticketType, ticketQuantity, promoCode }, onValidateError)}>{nextButtonText}</button>}
+                            {step === STEP_SELECT_TICKET_TYPE && <button disabled={!ticketType || promoCodeValidating || (promoCode && promoCodeVerified !== true)} className={`${styles.button} button`} onClick={() => validatePromoCode({ ...ticketType, ticketQuantity, promoCode: formPromoCode }, onValidateError)}>{nextButtonText}</button>}
                             {step === STEP_PERSONAL_INFO && ticketType?.cost === 0 && <button className={`${styles.button} button`} type="submit" form="personal-info-form">Get Ticket</button>}
                             {step === STEP_PERSONAL_INFO && ticketType?.cost > 0 && <button className={`${styles.button} button`} type="submit" form="personal-info-form">Next</button>}
                             {step === STEP_PAYMENT && <button className={`${styles.button} button`} id="payment-form-btn" type="submit" form="payment-form">Pay Now</button>}

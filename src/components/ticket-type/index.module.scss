@@ -1,6 +1,5 @@
 .title {
   font-weight: bold;
-  cursor: pointer;
   display: flex;
   justify-content: space-between;
 }
@@ -27,15 +26,6 @@
   color: red;
 }
 
-.promocodeError {
-  margin-top: 10px;
-  color: red;
-  &::before {
-    font-family: FontAwesome;
-    content: '\f071';
-    margin-right: 5px;
-  }
-}
 
 .taxes {  
   display: inline-flex;
@@ -118,12 +108,14 @@
 
 .moreInfo {
   display: inline-block;
-  margin-top: 10px;
+  margin-top: 4px;
+  font-size: 12px;
 }
 
 .moreInfoTooltip {
   max-width: 280px;
 }
+
 
 .inPersonDisclaimer {
   margin-top: 15px;

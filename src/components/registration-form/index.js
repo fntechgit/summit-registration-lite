@@ -41,7 +41,9 @@ import {
     loadProfileData,
     removePromoCode,
     applyPromoCode,
-    validatePromoCode
+    validatePromoCode,
+    startWidgetLoading,
+    stopWidgetLoading
 } from '../../actions';
 
 import AjaxLoader from "openstack-uicore-foundation/lib/components/ajaxloader";
@@ -153,11 +155,16 @@ const RegistrationFormContent = (
         showCompanyInputDefaultOptions,
         companyDDLOptions2Show,
         promoCode,
+        promoCodeVerified,
+        promoCodeValidating,
+        promoCodeAllowsReassign,
         hasDiscount,
         getTicketDiscount,
         removePromoCode,
         applyPromoCode,
         validatePromoCode,
+        startWidgetLoading,
+        stopWidgetLoading,
         closeHandlerRef,
         ...rest
     }) => {
@@ -222,7 +229,7 @@ const RegistrationFormContent = (
 
     useEffect(() => {
         setFormErrors([]);
-    }, [step])
+    }, [step, promoCode])
 
     const [ref, { height }] = useMeasure();
 
@@ -277,12 +284,39 @@ const RegistrationFormContent = (
             });
     }
 
-    const handleValidatePromocode = (data, onError) => {
-        validatePromoCode(data, onError).then(() => {
-            trackAddToCart(data);
-        }).catch((e) => {
+    const handlePromoCodeValidation = async (ticketData) => {
+        try {
+            await validatePromoCode(ticketData);
+            return true;
+        } catch (e) {
+            if (e?.res?.body) {
+                const errors = e.res.body.errors || [e.res.body.message || 'An error occurred'];
+                setFormErrors(errors);
+            }
             handleSentryException(e);
-        });
+            return false;
+        }
+    }
+
+    const handleValidatePromocode = (data, { onError }) => {
+        // Check if promo code entered but not applied
+        if (data.promoCode && !promoCode) {
+            const errorMsg = `You entered a promo code but it hasn't been applied. Make sure to click the 'Apply' button or remove it before continuing.`;
+            onError(null, { body: { errors: [errorMsg] } });
+            return;
+        }
+
+        startWidgetLoading();
+        handlePromoCodeValidation(data)
+            .then((valid) => {
+                if (valid) {
+                    trackAddToCart(data);
+                    changeStep(STEP_PERSONAL_INFO);
+                }
+            })
+            .finally(() => {
+                stopWidgetLoading();
+            });
     }
 
     const trackViewItem = (data) => {
@@ -365,12 +399,16 @@ const RegistrationFormContent = (
                                 isActive={step === STEP_SELECT_TICKET_TYPE}
                                 allowPromoCodes={allowPromoCodes}
                                 applyPromoCode={applyPromoCode}
+                                validatePromoCode={handlePromoCodeValidation}
                                 removePromoCode={() => {
                                     setFormErrors({});
                                     setFormValues({ ...formValues, promoCode: "" });
                                     removePromoCode()
                                 }}
                                 promoCode={promoCode}
+                                promoCodeVerified={promoCodeVerified}
+                                promoCodeValidating={promoCodeValidating}
+                                promoCodeAllowsReassign={promoCodeAllowsReassign}
                                 formErrors={formErrors}
                                 changeForm={ticketForm => setFormValues({ ...formValues, ...ticketForm })}
                                 trackViewItem={trackViewItem}
@@ -418,6 +456,7 @@ const RegistrationFormContent = (
                                 companyDDLPlaceholder={companyDDLPlaceholder}
                                 showCompanyInputDefaultOptions={showCompanyInputDefaultOptions}
                                 companyDDLOptions2Show={companyDDLOptions2Show}
+                                promoCodeAllowsReassign={promoCodeAllowsReassign}
                             />
 
                             <animated.div style={{ ...toggleAnimation }}>
@@ -442,6 +481,9 @@ const RegistrationFormContent = (
                                 step={step}
                                 inPersonDisclaimer={inPersonDisclaimer}
                                 formValues={formValues}
+                                promoCode={promoCode}
+                                promoCodeVerified={promoCodeVerified}
+                                promoCodeValidating={promoCodeValidating}
                                 removeReservedTicket={removeReservedTicket}
                                 validatePromoCode={handleValidatePromocode}
                                 onValidateError={{
@@ -498,6 +540,9 @@ const mapStateToProps = ({ registrationLiteState }) => ({
     passwordlessCodeError: registrationLiteState.passwordless.error,
     nowUtc: registrationLiteState.nowUtc,
     promoCode: registrationLiteState.promoCode,
+    promoCodeVerified: registrationLiteState.promoCodeVerified,
+    promoCodeValidating: registrationLiteState.promoCodeValidating,
+    promoCodeAllowsReassign: registrationLiteState.promoCodeAllowsReassign,
 })
 
 const RegistrationForm = connect(mapStateToProps, {
@@ -516,7 +561,9 @@ const RegistrationForm = connect(mapStateToProps, {
     loadProfileData,
     applyPromoCode,
     removePromoCode,
-    validatePromoCode
+    validatePromoCode,
+    startWidgetLoading,
+    stopWidgetLoading
 })(RegistrationFormContent);
 
 RegistrationForm.defaultProps = {

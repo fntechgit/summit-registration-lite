@@ -1,6 +1,5 @@
 .title {
   font-weight: bold;
-  cursor: pointer;
   display: flex;
   justify-content: space-between;
 
@@ -20,14 +19,29 @@
     margin-bottom: 5px;
     &Radio{
       width: 100%;
+      margin-top: 10px;
       margin-bottom: 10px;
       label {
         display: inline-block;
         margin-bottom: 5px;
+        font-weight: 600;
+        font-size: 14px;
+        color: var(--color_text_dark);
       }
-      // adjust radio button circles
+      // radio options container
       > div > div {
-        padding-left: 0px !important;
+        padding-top: 4px;
+        padding-left: 5px !important;
+        margin-left: 0 !important;
+        margin-right: 16px;
+        float: none !important;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        .form-check-label {
+          font-weight: normal;
+          font-size: 14px;
+        }
       }
     }
   }
@@ -87,6 +101,8 @@
     >div {
       display: flex;
       flex-direction: row;
+      flex-wrap: wrap;
+      align-items: center;
     }
   }
 
