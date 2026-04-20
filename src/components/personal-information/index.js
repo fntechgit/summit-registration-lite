@@ -116,7 +116,7 @@ const PersonalInfoComponent = ({
       // auto-assign to purchaser when ticket is non-transferable
       data = {
         ...data,
-        attendee: { firstName: personalInfo.firstName, lastName: personalInfo.lastName, email: personalInfo.email }
+        attendee: { firstName: data.firstName, lastName: data.lastName, email: data.email }
       };
     } else if (shouldDisplayTicketAssignment) {
       if (!ticketOwnerOption) {
