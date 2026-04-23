@@ -319,6 +319,71 @@ describe('onTicketSelected', () => {
             expect.objectContaining({ id: 1, ticketQuantity: 1 })
         );
     });
+
+    it('shows error and resets wasAutoApplied when discovered code re-validation fails', async () => {
+        const validatePromoCode = jest.fn(() => Promise.reject({
+            res: { body: { errors: ['Code expired'] } }
+        }));
+        const props = createDefaultProps({
+            discoveredPromoCodes: mockDiscoveredCodes,
+            promoCode: 'AUTO1',
+            promoCodeVerified: true,
+            validatePromoCode,
+        });
+        const { result, rerender } = renderHook((p) => usePromoCode(p), { initialProps: props });
+
+        // Simulate auto-applied state
+        await act(async () => {
+            await result.current.onTicketSelected(mockTicketQualifying);
+        });
+
+        // Re-render with applied state
+        rerender({ ...props, promoCode: 'AUTO1', promoCodeVerified: true });
+
+        // Switch to another qualifying ticket, validation fails
+        await act(async () => {
+            await result.current.onTicketSelected(mockTicketQualifying);
+        });
+        expect(result.current.validationError).toBe('Code expired');
+        expect(result.current.wasAutoApplied).toBe(false);
+    });
+
+    it('shows error when auto-apply validation fails', async () => {
+        const applyPromoCode = jest.fn(() => Promise.resolve());
+        const validatePromoCode = jest.fn(() => Promise.reject({
+            res: { body: { errors: ['Quantity exceeded'] } }
+        }));
+        const { result } = renderHook(() =>
+            usePromoCode(createDefaultProps({
+                discoveredPromoCodes: mockDiscoveredCodes,
+                applyPromoCode,
+                validatePromoCode,
+            }))
+        );
+
+        await act(async () => {
+            await result.current.onTicketSelected(mockTicketQualifying);
+        });
+        expect(result.current.validationError).toBe('Quantity exceeded');
+        expect(result.current.wasAutoApplied).toBe(false);
+    });
+
+    it('shows error when manual code re-validation fails on ticket switch', async () => {
+        const validatePromoCode = jest.fn(() => Promise.reject({
+            res: { body: { errors: ['Not valid for this ticket type'] } }
+        }));
+        const props = createDefaultProps({
+            promoCode: 'MANUAL',
+            promoCodeVerified: true,
+            validatePromoCode,
+        });
+        const { result } = renderHook(() => usePromoCode(props));
+
+        await act(async () => {
+            await result.current.onTicketSelected(mockTicketQualifying);
+        });
+        expect(result.current.validationError).toBe('Not valid for this ticket type');
+    });
 });
 
 // ── onApply ──
@@ -488,6 +553,30 @@ describe('onInputChange', () => {
             result.current.onInputChange('test');
         });
         expect(onFormPromoCodeChange).toHaveBeenCalledWith('test');
+    });
+
+    it('dismisses suggestion when input is cleared', async () => {
+        const { result } = renderHook(() =>
+            usePromoCode(createDefaultProps({
+                discoveredPromoCodes: [{ code: 'S1', auto_apply: false, allowed_ticket_types: [{ id: 1 }] }],
+            }))
+        );
+
+        await act(async () => {
+            await result.current.onTicketSelected(mockTicketQualifying);
+        });
+        expect(result.current.status).toBe(PROMO_STATUS.SUGGESTED);
+
+        // Type exact discovered code then clear
+        act(() => {
+            result.current.onInputChange('S1');
+        });
+        expect(result.current.status).toBe(PROMO_STATUS.SUGGESTED);
+
+        act(() => {
+            result.current.onInputChange('');
+        });
+        expect(result.current.status).toBe(PROMO_STATUS.IDLE);
     });
 });
 
