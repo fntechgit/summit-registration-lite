@@ -313,7 +313,7 @@ const RegistrationFormContent = (
 
     const handleAdvanceFromTicketStep = (data) => {
         if (formValues?.promoCode && !promoCode) {
-            promo.setValidationError("You entered a promo code but it hasn't been applied. Make sure to click the 'Apply' button or remove it before continuing.");
+            promo.setValidationError(T.translate('promo_code.unapplied_code_warning'));
             return;
         }
         trackAddToCart(data);

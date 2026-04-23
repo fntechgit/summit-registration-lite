@@ -38,17 +38,17 @@ const PromoCodeInput = ({ promoStatus, promoCode, suggestedCode, wasAutoApplied,
     const label = useMemo(() => {
         switch (promoStatus) {
             case PROMO_STATUS.VALID:
-                if (wasAutoApplied) return 'Following promo code was automatically applied:';
-                return 'Applied promo code:';
+                if (wasAutoApplied) return T.translate('promo_code.auto_applied_label');
+                return T.translate('promo_code.applied_label');
             case PROMO_STATUS.APPLYING:
             case PROMO_STATUS.VALIDATING:
-                if (wasAutoApplied) return 'Following promo code was automatically applied:';
-                if (promoCode === suggestedCode) return 'You qualify for the following promo code:';
+                if (wasAutoApplied) return T.translate('promo_code.auto_applied_label');
+                if (promoCode === suggestedCode) return T.translate('promo_code.suggestion_label');
                 return undefined;
             case PROMO_STATUS.INVALID:
                 return undefined;
             case PROMO_STATUS.SUGGESTED:
-                return 'You qualify for the following promo code:';
+                return T.translate('promo_code.suggestion_label');
             default:
                 return undefined;
         }
@@ -63,7 +63,7 @@ const PromoCodeInput = ({ promoStatus, promoCode, suggestedCode, wasAutoApplied,
         <>
             <div className={styles.promoCodeWrapper}>
                 <span style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <span>{label || 'Do you have a promo code?'}</span>
+                    <span>{label || T.translate('promo_code.default_label')}</span>
                     {showMultipleTicketTexts &&
                         <a data-tip data-for="promo-code-info" className={styles.moreInfo} style={{ margin: 0 }}>
                             <i className="glyphicon glyphicon-info-sign" aria-hidden="true" />{` `}

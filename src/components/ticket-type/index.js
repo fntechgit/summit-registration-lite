@@ -244,13 +244,13 @@ const TicketTypeComponent = ({
                             }
                             {ticket && promo.perAccountLimit != null &&
                                 <PromoCodeNotice
-                                    message={`Promo code limits ${promo.perAccountLimit} ${promo.perAccountLimit === 1 ? 'ticket' : 'tickets'} per account.`}
+                                    message={T.translate('promo_code.per_account_limit', { limit: promo.perAccountLimit, unit: promo.perAccountLimit === 1 ? 'ticket' : 'tickets' })}
                                     variant="info"
                                 />
                             }
                             {ticket && !canReassign &&
                                 <PromoCodeNotice
-                                    message="This ticket will be automatically assigned to you and cannot be reassigned."
+                                    message={T.translate('promo_code.non_transferable')}
                                     variant="info"
                                 />
                             }
