@@ -86,6 +86,17 @@ const usePromoCode = ({
 
     // --- Actions ---
 
+    const onRevalidate = useCallback(async (ticket, quantity) => {
+        setValidationError(null);
+        try {
+            await validatePromoCode({ id: ticket.id, ticketQuantity: quantity, sub_type: ticket.sub_type });
+            return true;
+        } catch (e) {
+            handleValidationError(e);
+            return false;
+        }
+    }, [validatePromoCode, handleValidationError]);
+
     const onTicketSelected = useCallback(async (ticket) => {
         const qualifies = discoveredPromoCode && isCodeValidForTicket(ticket);
         setSuggestionActive(qualifies);
@@ -94,11 +105,7 @@ const usePromoCode = ({
 
         // Manual (non-discovered) code is applied: re-validate for new ticket
         if (isApplied && !isDiscoveredCode) {
-            try {
-                await validatePromoCode({ id: ticket.id, ticketQuantity: 1, sub_type: ticket.sub_type });
-            } catch (e) {
-                handleValidationError(e);
-            }
+            await onRevalidate(ticket, 1);
             return;
         }
 
@@ -110,7 +117,8 @@ const usePromoCode = ({
                 setWasAutoApplied(false);
                 removePromoCode();
             } else {
-                await validatePromoCode({ id: ticket.id, ticketQuantity: 1, sub_type: ticket.sub_type });
+                const valid = await onRevalidate(ticket, 1);
+                if (!valid) setWasAutoApplied(false);
             }
             return;
         }
@@ -120,14 +128,15 @@ const usePromoCode = ({
             try {
                 setWasAutoApplied(true);
                 await applyPromoCode(discoveredPromoCode.code);
-                await validatePromoCode({ id: ticket.id, ticketQuantity: 1, sub_type: ticket.sub_type });
+                const valid = await onRevalidate(ticket, 1);
+                if (!valid) setWasAutoApplied(false);
             } catch (e) {
                 setWasAutoApplied(false);
             }
         }
     }, [discoveredPromoCode, isApplied, isDiscoveredCode, userRemovedAutoApply,
         isCodeValidForTicket, applyPromoCode,
-        removePromoCode, validatePromoCode, handleValidationError]);
+        removePromoCode, onRevalidate]);
 
     const onApply = useCallback(async (code, ticket, quantity) => {
         setValidationError(null);
@@ -138,13 +147,9 @@ const usePromoCode = ({
             return;
         }
         if (ticket) {
-            try {
-                await validatePromoCode({ id: ticket.id, ticketQuantity: quantity, sub_type: ticket.sub_type });
-            } catch (e) {
-                handleValidationError(e);
-            }
+            await onRevalidate(ticket, quantity);
         }
-    }, [applyPromoCode, validatePromoCode, clearFormErrors, handleValidationError]);
+    }, [applyPromoCode, onRevalidate, clearFormErrors]);
 
     const onRemove = useCallback(() => {
         if (wasAutoApplied) setUserRemovedAutoApply(true);
@@ -158,17 +163,6 @@ const usePromoCode = ({
 
         removePromoCode();
     }, [wasAutoApplied, removePromoCode, clearFormErrors, onFormPromoCodeChange]);
-
-    const onRevalidate = useCallback(async (ticket, quantity) => {
-        setValidationError(null);
-        try {
-            await validatePromoCode({ id: ticket.id, ticketQuantity: quantity, sub_type: ticket.sub_type });
-            return true;
-        } catch (e) {
-            handleValidationError(e);
-            return false;
-        }
-    }, [validatePromoCode, handleValidationError]);
 
     const onInputChange = useCallback((value) => {
         setValidationError(null);
