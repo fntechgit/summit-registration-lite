@@ -1,6 +1,9 @@
 import { renderHook, act } from '@testing-library/react-hooks';
+import T from 'i18n-react';
 import usePromoCode from '../usePromoCode';
 import { PROMO_STATUS } from '../../utils/constants';
+
+T.setTexts(require('../../i18n/en.json'));
 
 const mockDiscoveredCodes = [
     {
@@ -285,22 +288,25 @@ describe('onTicketSelected', () => {
         expect(removePromoCode).toHaveBeenCalled();
     });
 
-    it('re-validates discovered code when switching between qualifying tickets', async () => {
+    it('removes discovered code when ticket is not in allowed list', async () => {
         const validatePromoCode = jest.fn(() => Promise.resolve());
+        const removePromoCode = jest.fn();
         const ticket2 = { id: 2, sub_type: 'Regular' };
         const props = createDefaultProps({
             discoveredPromoCodes: mockDiscoveredCodes,
             promoCode: 'AUTO1',
             promoCodeVerified: true,
             validatePromoCode,
+            removePromoCode,
         });
         const { result } = renderHook(() => usePromoCode(props));
 
         await act(async () => {
             await result.current.onTicketSelected(ticket2);
         });
-        // AUTO1 is only valid for ticket 1, not ticket 2
-        // So it should remove, not re-validate
+        // AUTO1 allowed_ticket_types is [{ id: 1 }], ticket2 has id: 2
+        expect(removePromoCode).toHaveBeenCalled();
+        expect(validatePromoCode).not.toHaveBeenCalled();
     });
 
     it('re-validates manual code when switching tickets', async () => {
@@ -595,7 +601,7 @@ describe('validationError', () => {
         await act(async () => {
             await result.current.onApply('XYZ', mockTicketQualifying, 1);
         });
-        expect(result.current.validationError).toBe('Promo code entered is not valid.');
+        expect(result.current.validationError).toBe(T.translate('promo_code.invalid_code'));
     });
 
     it('passes through other error messages', async () => {
