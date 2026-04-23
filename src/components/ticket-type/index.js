@@ -50,8 +50,8 @@ const TicketTypeComponent = ({
 
     // Clamp quantity when max changes (e.g. per-account limit kicks in after auto-apply)
     useEffect(() => {
-        if (maxQuantity > 0 && quantity > maxQuantity) {
-            setQuantity(maxQuantity);
+        if (quantity > maxQuantity) {
+            setQuantity(Math.max(maxQuantity, minQuantity));
         }
     }, [maxQuantity]);
 
