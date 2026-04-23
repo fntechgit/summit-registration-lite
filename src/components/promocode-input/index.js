@@ -11,24 +11,53 @@
  * limitations under the License.
  **/
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import ReactTooltip from 'react-tooltip';
 import T from 'i18n-react';
 import styles from "./index.module.scss";
-import { avoidTooltipOverflow, isEmptyString } from '../../utils/utils';
+import { avoidTooltipOverflow } from '../../utils/utils';
+import { PROMO_STATUS } from '../../utils/constants';
 
-const PromoCodeInput = ({ label, applyPromoCode, promoCode, promoCodeVerified, promoCodeValidating, removePromoCode, showMultipleTicketTexts, onPromoCodeChange }) => {
+const PromoCodeInput = ({ promoStatus, promoCode, suggestedCode, wasAutoApplied, onApply, onRemove, onInputChange, showMultipleTicketTexts }) => {
 
-    const [statePromoCode, setStatePromoCode] = useState(promoCode);
-
-    const handlePromoCodeChange = (value) => {
-        onPromoCodeChange(value);
-        setStatePromoCode(value);
-    }
+    const [userTypedValue, setUserTypedValue] = useState('');
 
     useEffect(() => {
-        if (isEmptyString(promoCode)) handlePromoCodeChange(promoCode);
-    }, [promoCode])
+        if (!promoCode) setUserTypedValue('');
+    }, [promoCode]);
+
+    const isApplied = promoStatus === PROMO_STATUS.APPLYING || promoStatus === PROMO_STATUS.VALIDATING
+        || promoStatus === PROMO_STATUS.VALID || promoStatus === PROMO_STATUS.INVALID;
+
+    const inputValue = useMemo(() => {
+        if (promoCode) return promoCode;
+        if (promoStatus === PROMO_STATUS.SUGGESTED) return suggestedCode || '';
+        return userTypedValue;
+    }, [promoCode, promoStatus, suggestedCode, userTypedValue]);
+
+    const label = useMemo(() => {
+        switch (promoStatus) {
+            case PROMO_STATUS.VALID:
+                if (wasAutoApplied) return 'Following promo code was automatically applied:';
+                return 'Applied promo code:';
+            case PROMO_STATUS.APPLYING:
+            case PROMO_STATUS.VALIDATING:
+                if (wasAutoApplied) return 'Following promo code was automatically applied:';
+                if (promoCode === suggestedCode) return 'You qualify for the following promo code:';
+                return undefined;
+            case PROMO_STATUS.INVALID:
+                return undefined;
+            case PROMO_STATUS.SUGGESTED:
+                return 'You qualify for the following promo code:';
+            default:
+                return undefined;
+        }
+    }, [promoStatus, wasAutoApplied]);
+
+    const handleInputChange = (value) => {
+        setUserTypedValue(value);
+        onInputChange(value);
+    };
 
     return (
         <>
@@ -43,25 +72,24 @@ const PromoCodeInput = ({ label, applyPromoCode, promoCode, promoCodeVerified, p
                     }
                 </span>
                 <div className={styles.promoCodeInput}>
-                    <input className={`${promoCode ? styles.promoCodeActive : ''}`}
+                    <input className={`${isApplied ? styles.promoCodeActive : ''}`}
                         type="text"
-                        value={statePromoCode}
-                        onChange={(ev) => handlePromoCodeChange(ev.target.value)}
+                        value={inputValue}
+                        onChange={(ev) => handleInputChange(ev.target.value)}
                         placeholder="Enter your promo code"
                         onKeyDown={(e) => {
-                            if (e.key === "Enter")
-                                applyPromoCode(statePromoCode)
+                            if (e.key === "Enter") onApply(inputValue)
                         }}
-                        readOnly={!isEmptyString(promoCode)} />
+                        readOnly={isApplied} />
 
-                    {promoCodeValidating && <span className={`${styles.statusIcon} ${styles.spinner}`} />}
-                    {!promoCodeValidating && promoCodeVerified === true && <span className={`${styles.statusIcon} ${styles.valid}`}>✓</span>}
-                    {!promoCodeValidating && promoCodeVerified === false && <span className={`${styles.statusIcon} ${styles.invalid}`}>✕</span>}
-                    <div className={`${styles.codeButtonWrapper} ${statePromoCode ? '' : styles.noCode}`}>
-                        {promoCode !== '' ?
-                            <button onClick={() => removePromoCode()}>Remove</button>
+                    {(promoStatus === PROMO_STATUS.APPLYING || promoStatus === PROMO_STATUS.VALIDATING) && <span className={`${styles.statusIcon} ${styles.spinner}`} />}
+                    {promoStatus === PROMO_STATUS.VALID && <span className={`${styles.statusIcon} ${styles.valid}`}>✓</span>}
+                    {promoStatus === PROMO_STATUS.INVALID && <span className={`${styles.statusIcon} ${styles.invalid}`}>✕</span>}
+                    <div className={`${styles.codeButtonWrapper} ${inputValue ? '' : styles.noCode}`}>
+                        {isApplied ?
+                            <button onClick={onRemove}>Remove</button>
                             :
-                            <button disabled={!statePromoCode} onClick={() => applyPromoCode(statePromoCode)}>Apply</button>
+                            <button disabled={!inputValue} onClick={() => onApply(inputValue)}>Apply</button>
                         }
                     </div>
                 </div>

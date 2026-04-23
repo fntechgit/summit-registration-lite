@@ -39,6 +39,7 @@ import {
     VALIDATE_PROMO_CODE_SUCCESS,
     VALIDATE_PROMO_CODE_ERROR,
     VALIDATE_PROMO_CODE_RATE_LIMITED,
+    DISCOVER_PROMO_CODES_SUCCESS,
 } from './actions';
 
 import { LOGOUT_USER } from 'openstack-uicore-foundation/lib/security/actions';
@@ -75,7 +76,8 @@ const DEFAULT_STATE = {
     promoCode: '',
     promoCodeVerified: null,
     promoCodeValidating: false,
-    promoCodeAllowsReassign: true
+    promoCodeAllowsReassign: true,
+    discoveredPromoCodes: [],
 };
 
 const RegistrationLiteReducer = (state = DEFAULT_STATE, action) => {
@@ -108,6 +110,7 @@ const RegistrationLiteReducer = (state = DEFAULT_STATE, action) => {
                 promoCode: '',
                 promoCodeVerified: null,
                 promoCodeAllowsReassign: true,
+                discoveredPromoCodes: [],
                 passwordless: { ...DEFAULT_STATE.passwordless },
                 settings: {
                     ...DEFAULT_STATE.settings,
@@ -155,10 +158,10 @@ const RegistrationLiteReducer = (state = DEFAULT_STATE, action) => {
             return { ...state, reservation: null }
         }
         case CLEAR_RESERVATION: {
-            return { ...state, reservation: null, promoCode: '', promoCodeVerified: null, promoCodeValidating: false, promoCodeAllowsReassign: true }
+            return { ...state, reservation: null, promoCode: '', promoCodeVerified: null, promoCodeValidating: false, promoCodeAllowsReassign: true, discoveredPromoCodes: [] }
         }
         case PAY_RESERVATION: {
-            return { ...state, checkout: payload.response, reservation: null, userProfile: null, invitation: null, promoCode: '', promoCodeVerified: null, promoCodeValidating: false, promoCodeAllowsReassign: true };
+            return { ...state, checkout: payload.response, reservation: null, userProfile: null, invitation: null, promoCode: '', promoCodeVerified: null, promoCodeValidating: false, promoCodeAllowsReassign: true, discoveredPromoCodes: [] };
         }
         case GET_MY_INVITATION: {
             return { ...state, invitation: payload.response };
@@ -189,6 +192,9 @@ const RegistrationLiteReducer = (state = DEFAULT_STATE, action) => {
         }
         case VALIDATE_PROMO_CODE_RATE_LIMITED: {
             return { ...state, promoCodeValidating: false }
+        }
+        case DISCOVER_PROMO_CODES_SUCCESS: {
+            return { ...state, discoveredPromoCodes: payload.response?.data || [] }
         }
         default: {
             return state;

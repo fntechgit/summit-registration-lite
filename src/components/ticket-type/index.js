@@ -21,7 +21,7 @@ import { isInPersonTicketType } from "../../actions";
 import ReactTooltip from 'react-tooltip';
 import { formatCurrency } from '../../helpers';
 import { getTicketMaxQuantity } from '../../helpers';
-import { avoidTooltipOverflow, getTicketCost, getTicketTaxes, isPrePaidOrder, handleSentryException } from '../../utils/utils';
+import { avoidTooltipOverflow, getTicketCost, getTicketTaxes, isPrePaidOrder } from '../../utils/utils';
 
 import PromoCodeInput from '../promocode-input';
 import PromoCodeNotice from '../promo-code-notice';
@@ -33,17 +33,12 @@ const TicketTypeComponent = ({
     taxTypes,
     isActive,
     changeForm,
-    formErrors,
     reservation,
     inPersonDisclaimer,
     showMultipleTicketTexts,
     allowPromoCodes,
-    applyPromoCode,
-    removePromoCode,
-    validatePromoCode,
+    promo,
     promoCode,
-    promoCodeVerified,
-    promoCodeValidating,
     promoCodeAllowsReassign = true,
     trackViewItem
 }) => {
@@ -51,7 +46,14 @@ const TicketTypeComponent = ({
     const [quantity, setQuantity] = useState(1);
 
     const minQuantity = 1;
-    const maxQuantity = getTicketMaxQuantity(ticket);
+    const maxQuantity = getTicketMaxQuantity(ticket, promo.activeDiscoveredCode?.remaining_quantity_per_account);
+
+    // Clamp quantity when max changes (e.g. per-account limit kicks in after auto-apply)
+    useEffect(() => {
+        if (maxQuantity > 0 && quantity > maxQuantity) {
+            setQuantity(maxQuantity);
+        }
+    }, [maxQuantity]);
 
     const [ref, { height }] = useMeasure();
 
@@ -76,10 +78,8 @@ const TicketTypeComponent = ({
     }, [ticket, quantity])
 
     useEffect(() => {
-        // if the promo code had changed ( set or not set)
-        // try to find the updated ticket from the original ticket types collection from api
-        // and update the current ticket that exist on component state
-        // bc a discount could be applied to the current selected ticket type
+        // When promo code changes, the API returns updated ticket types with/without discount.
+        // Sync the selected ticket with the refreshed data.
         if (!ticket) return;
         const updatedCurrentTicket = originalTicketTypes.find(t => t?.id === ticket.id);
         if (updatedCurrentTicket) {
@@ -89,7 +89,6 @@ const TicketTypeComponent = ({
             setTicket(null);
             setQuantity(minQuantity);
         }
-        if (!promoCode) changeForm({ promoCode: '' })
     }, [promoCode, originalTicketTypes])
 
     const isPrePaidReservation = useMemo(
@@ -101,39 +100,19 @@ const TicketTypeComponent = ({
     const ticketTypeAllowsReassign = ticket?.allows_to_reassign !== false;
     const canReassign = promoCodeAllowsReassign && ticketTypeAllowsReassign;
 
-    const handleTicketChange = (t) => {
+    const handleTicketChange = async (t) => {
         setTicket(t);
         setQuantity(minQuantity);
         trackViewItem(t);
-        if (promoCode) {
-            validatePromoCode({ id: t.id, ticketQuantity: minQuantity, sub_type: t.sub_type });
-        }
-    }
-
-    const handlePromoCodeChange = (code) => {
-        changeForm({ promoCode: code });
+        await promo.onTicketSelected(t);
     }
 
     const incrementQuantity = () => setQuantity(quantity + 1);
 
     const decrementQuantity = () => setQuantity(quantity - 1);
 
-    const promoCodeError = Object.keys(formErrors).length > 0 ? formErrors : null;
-
-    const handleRemovePromoCode = () => {
-        removePromoCode();
-    }
-
     const handleApplyPromoCode = async (code) => {
-        try {
-            await applyPromoCode(code);
-        } catch (e) {
-            handleSentryException(e);
-            return;
-        }
-        if (ticket) {
-            await validatePromoCode({ id: ticket.id, ticketQuantity: quantity, sub_type: ticket.sub_type });
-        }
+        await promo.onApply(code, ticket, quantity);
     }
 
     return (
@@ -250,17 +229,24 @@ const TicketTypeComponent = ({
                             {allowPromoCodes &&
                                 <>
                                     <PromoCodeInput
+                                        promoStatus={promo.status}
                                         promoCode={promoCode}
-                                        promoCodeVerified={promoCodeVerified}
-                                        promoCodeValidating={promoCodeValidating}
-                                        applyPromoCode={handleApplyPromoCode}
-                                        showMultipleTicketTexts={showMultipleTicketTexts}
-                                        removePromoCode={handleRemovePromoCode}
-                                        onPromoCodeChange={handlePromoCodeChange} />
+                                        suggestedCode={promo.suggestedCode}
+                                        wasAutoApplied={promo.wasAutoApplied}
+                                        onInputChange={promo.onInputChange}
+                                        onApply={handleApplyPromoCode}
+                                        onRemove={promo.onRemove}
+                                        showMultipleTicketTexts={showMultipleTicketTexts} />
                                 </>
                             }
-                            {promoCodeError &&
-                                <PromoCodeNotice message={Object.values(promoCodeError).join(' ')} variant="error" />
+                            {promo.validationError &&
+                                <PromoCodeNotice message={promo.validationError} variant="error" />
+                            }
+                            {ticket && promo.perAccountLimit != null &&
+                                <PromoCodeNotice
+                                    message={`Promo code limits ${promo.perAccountLimit} ${promo.perAccountLimit === 1 ? 'ticket' : 'tickets'} per account.`}
+                                    variant="info"
+                                />
                             }
                             {ticket && !canReassign &&
                                 <PromoCodeNotice
