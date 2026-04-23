@@ -54,6 +54,8 @@ const PromoCodeInput = ({ promoStatus, promoCode, suggestedCode, wasAutoApplied,
         }
     }, [promoStatus, wasAutoApplied]);
 
+    const canApply = !isApplied && !!inputValue;
+
     const handleInputChange = (value) => {
         setUserTypedValue(value);
         onInputChange(value);
@@ -78,7 +80,7 @@ const PromoCodeInput = ({ promoStatus, promoCode, suggestedCode, wasAutoApplied,
                         onChange={(ev) => handleInputChange(ev.target.value)}
                         placeholder="Enter your promo code"
                         onKeyDown={(e) => {
-                            if (e.key === "Enter") onApply(inputValue)
+                            if (e.key === "Enter" && canApply) onApply(inputValue)
                         }}
                         readOnly={isApplied} />
 
@@ -89,7 +91,7 @@ const PromoCodeInput = ({ promoStatus, promoCode, suggestedCode, wasAutoApplied,
                         {isApplied ?
                             <button onClick={onRemove}>Remove</button>
                             :
-                            <button disabled={!inputValue} onClick={() => onApply(inputValue)}>Apply</button>
+                            <button disabled={!canApply} onClick={() => onApply(inputValue)}>Apply</button>
                         }
                     </div>
                 </div>
