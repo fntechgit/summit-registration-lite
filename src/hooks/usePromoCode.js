@@ -166,7 +166,7 @@ const usePromoCode = ({
 
     const onInputChange = useCallback((value) => {
         setValidationError(null);
-        if (value) setSuggestionDismissed(value !== discoveredPromoCode?.code);
+        setSuggestionDismissed(value !== discoveredPromoCode?.code);
         onFormPromoCodeChange(value);
     }, [discoveredPromoCode, onFormPromoCodeChange]);
 
