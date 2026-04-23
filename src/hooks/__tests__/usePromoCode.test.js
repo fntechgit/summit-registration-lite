@@ -9,6 +9,7 @@ const mockDiscoveredCodes = [
         allowed_ticket_types: [{ id: 1 }, { id: 2 }],
         quantity_per_account: 3,
         remaining_quantity_per_account: 2,
+        quantity_available: 10,
         allows_to_reassign: true,
     },
     {
@@ -17,6 +18,7 @@ const mockDiscoveredCodes = [
         allowed_ticket_types: [{ id: 1 }],
         quantity_per_account: 5,
         remaining_quantity_per_account: 4,
+        quantity_available: 100,
         allows_to_reassign: false,
     },
 ];
@@ -529,5 +531,223 @@ describe('validationError', () => {
             result.current.setValidationError('custom error');
         });
         expect(result.current.validationError).toBe('custom error');
+    });
+});
+
+// ── isDiscoveredCode ──
+
+describe('isDiscoveredCode', () => {
+    it('true when applied code matches discovered code', () => {
+        const { result } = renderHook(() =>
+            usePromoCode(createDefaultProps({
+                discoveredPromoCodes: mockDiscoveredCodes,
+                promoCode: 'AUTO1',
+                promoCodeVerified: true,
+            }))
+        );
+        expect(result.current.isDiscoveredCode).toBe(true);
+    });
+
+    it('false when applied code does not match discovered code', () => {
+        const { result } = renderHook(() =>
+            usePromoCode(createDefaultProps({
+                discoveredPromoCodes: mockDiscoveredCodes,
+                promoCode: 'MANUAL',
+                promoCodeVerified: true,
+            }))
+        );
+        expect(result.current.isDiscoveredCode).toBe(false);
+    });
+
+    it('false when no code applied', () => {
+        const { result } = renderHook(() =>
+            usePromoCode(createDefaultProps({ discoveredPromoCodes: mockDiscoveredCodes }))
+        );
+        expect(result.current.isDiscoveredCode).toBe(false);
+    });
+
+    it('false when no discovered codes', () => {
+        const { result } = renderHook(() =>
+            usePromoCode(createDefaultProps({ promoCode: 'CODE', promoCodeVerified: true }))
+        );
+        expect(result.current.isDiscoveredCode).toBe(false);
+    });
+});
+
+// ── maxQuantityFromPromo ──
+
+describe('maxQuantityFromPromo', () => {
+    it('returns tightest cap from remaining_quantity_per_account and quantity_available', () => {
+        const { result } = renderHook(() =>
+            usePromoCode(createDefaultProps({
+                discoveredPromoCodes: mockDiscoveredCodes,
+                promoCode: 'AUTO1',
+                promoCodeVerified: true,
+            }))
+        );
+        // remaining_quantity_per_account=4, quantity_available=100 → min is 4
+        expect(result.current.maxQuantityFromPromo).toBe(4);
+    });
+
+    it('uses quantity_available when it is tighter', () => {
+        const codes = [{
+            code: 'LIMITED',
+            auto_apply: true,
+            allowed_ticket_types: [],
+            quantity_per_account: 10,
+            remaining_quantity_per_account: 8,
+            quantity_available: 3,
+        }];
+        const { result } = renderHook(() =>
+            usePromoCode(createDefaultProps({
+                discoveredPromoCodes: codes,
+                promoCode: 'LIMITED',
+                promoCodeVerified: true,
+            }))
+        );
+        // remaining=8, quantity_available=3 → min is 3
+        expect(result.current.maxQuantityFromPromo).toBe(3);
+    });
+
+    it('null when no active discovered code', () => {
+        const { result } = renderHook(() =>
+            usePromoCode(createDefaultProps({ promoCode: 'MANUAL', promoCodeVerified: true }))
+        );
+        expect(result.current.maxQuantityFromPromo).toBeNull();
+    });
+
+    it('null when code not verified', () => {
+        const { result } = renderHook(() =>
+            usePromoCode(createDefaultProps({
+                discoveredPromoCodes: mockDiscoveredCodes,
+                promoCode: 'AUTO1',
+                promoCodeVerified: null,
+            }))
+        );
+        expect(result.current.maxQuantityFromPromo).toBeNull();
+    });
+
+    it('uses only remaining_quantity_per_account when quantity_available is 0 (unlimited)', () => {
+        const codes = [{
+            code: 'UNLIM',
+            auto_apply: true,
+            allowed_ticket_types: [],
+            quantity_per_account: 5,
+            remaining_quantity_per_account: 3,
+            quantity_available: 0,
+        }];
+        const { result } = renderHook(() =>
+            usePromoCode(createDefaultProps({
+                discoveredPromoCodes: codes,
+                promoCode: 'UNLIM',
+                promoCodeVerified: true,
+            }))
+        );
+        expect(result.current.maxQuantityFromPromo).toBe(3);
+    });
+
+    it('uses only quantity_available when remaining_quantity_per_account is null', () => {
+        const codes = [{
+            code: 'NOACCOUNTLIMIT',
+            auto_apply: true,
+            allowed_ticket_types: [],
+            quantity_per_account: 0,
+            remaining_quantity_per_account: null,
+            quantity_available: 5,
+        }];
+        const { result } = renderHook(() =>
+            usePromoCode(createDefaultProps({
+                discoveredPromoCodes: codes,
+                promoCode: 'NOACCOUNTLIMIT',
+                promoCodeVerified: true,
+            }))
+        );
+        expect(result.current.maxQuantityFromPromo).toBe(5);
+    });
+
+    it('null when both limits are unlimited', () => {
+        const codes = [{
+            code: 'ALLFREE',
+            auto_apply: true,
+            allowed_ticket_types: [],
+            quantity_per_account: 0,
+            remaining_quantity_per_account: null,
+            quantity_available: 0,
+        }];
+        const { result } = renderHook(() =>
+            usePromoCode(createDefaultProps({
+                discoveredPromoCodes: codes,
+                promoCode: 'ALLFREE',
+                promoCodeVerified: true,
+            }))
+        );
+        expect(result.current.maxQuantityFromPromo).toBeNull();
+    });
+});
+
+// ── onRevalidate ──
+
+describe('onRevalidate', () => {
+    it('returns true on successful validation', async () => {
+        const validatePromoCode = jest.fn(() => Promise.resolve());
+        const { result } = renderHook(() =>
+            usePromoCode(createDefaultProps({ validatePromoCode }))
+        );
+
+        let valid;
+        await act(async () => {
+            valid = await result.current.onRevalidate(mockTicketQualifying, 3);
+        });
+        expect(valid).toBe(true);
+        expect(validatePromoCode).toHaveBeenCalledWith(
+            expect.objectContaining({ id: 1, ticketQuantity: 3, sub_type: 'Regular' })
+        );
+    });
+
+    it('returns false and sets validationError on failure', async () => {
+        const validatePromoCode = jest.fn(() => Promise.reject({
+            res: { body: { errors: ['Promo code X can not be applied more than 3 times.'] } }
+        }));
+        const { result } = renderHook(() =>
+            usePromoCode(createDefaultProps({ validatePromoCode }))
+        );
+
+        let valid;
+        await act(async () => {
+            valid = await result.current.onRevalidate(mockTicketQualifying, 5);
+        });
+        expect(valid).toBe(false);
+        expect(result.current.validationError).toBe('Promo code X can not be applied more than 3 times.');
+    });
+
+    it('clears previous validationError before validating', async () => {
+        const validatePromoCode = jest.fn(() => Promise.resolve());
+        const { result } = renderHook(() =>
+            usePromoCode(createDefaultProps({ validatePromoCode }))
+        );
+
+        // Set an error first
+        act(() => {
+            result.current.setValidationError('old error');
+        });
+        expect(result.current.validationError).toBe('old error');
+
+        await act(async () => {
+            await result.current.onRevalidate(mockTicketQualifying, 1);
+        });
+        expect(result.current.validationError).toBeNull();
+    });
+
+    it('passes correct ticket data to validatePromoCode', async () => {
+        const validatePromoCode = jest.fn(() => Promise.resolve());
+        const ticket = { id: 42, sub_type: 'PrePaid' };
+        const { result } = renderHook(() =>
+            usePromoCode(createDefaultProps({ validatePromoCode }))
+        );
+
+        await act(async () => {
+            await result.current.onRevalidate(ticket, 7);
+        });
+        expect(validatePromoCode).toHaveBeenCalledWith({ id: 42, ticketQuantity: 7, sub_type: 'PrePaid' });
     });
 });

@@ -68,7 +68,7 @@ import TicketTaxesError from '../ticket-taxes-error';
 import T from 'i18n-react';
 import { getCurrentUserLanguage } from '../../utils/utils';
 import {
-    ADD_TO_CART, BEGIN_CHECKOUT, PURCHASE_COMPLETE,
+    ADD_TO_CART, BEGIN_CHECKOUT, PURCHASE_COMPLETE, PROMO_STATUS,
     STEP_COMPLETE,
     STEP_PAYMENT,
     STEP_PERSONAL_INFO,
@@ -311,10 +311,17 @@ const RegistrationFormContent = (
             });
     }
 
-    const handleAdvanceFromTicketStep = (data) => {
-        if (formValues?.promoCode && !promoCode) {
+    const handleAdvanceFromTicketStep = async (data) => {
+        if (formValues?.promoCode && !promoCode && promo.status !== PROMO_STATUS.SUGGESTED) {
             promo.setValidationError(T.translate('promo_code.unapplied_code_warning'));
             return;
+        }
+        // Re-validate manual codes with final quantity before advancing
+        if (promoCode && !promo.isDiscoveredCode) {
+            startWidgetLoading();
+            const valid = await promo.onRevalidate(formValues.ticketType, data.ticketQuantity);
+            stopWidgetLoading();
+            if (!valid) return;
         }
         trackAddToCart(data);
         changeStep(STEP_PERSONAL_INFO);

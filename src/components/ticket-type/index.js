@@ -46,7 +46,7 @@ const TicketTypeComponent = ({
     const [quantity, setQuantity] = useState(1);
 
     const minQuantity = 1;
-    const maxQuantity = getTicketMaxQuantity(ticket, promo.activeDiscoveredCode?.remaining_quantity_per_account);
+    const maxQuantity = getTicketMaxQuantity(ticket, promo.maxQuantityFromPromo);
 
     // Clamp quantity when max changes (e.g. per-account limit kicks in after auto-apply)
     useEffect(() => {

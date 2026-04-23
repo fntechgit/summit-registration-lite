@@ -48,6 +48,17 @@ const usePromoCode = ({
     const perAccountLimit = activeDiscoveredCode?.quantity_per_account > 0
         ? activeDiscoveredCode.remaining_quantity_per_account : null;
 
+    // Tightest promo-code-level quantity cap for the stepper (discovered codes only)
+    const maxQuantityFromPromo = useMemo(() => {
+        if (!activeDiscoveredCode) return null;
+        const caps = [];
+        if (activeDiscoveredCode.remaining_quantity_per_account != null)
+            caps.push(activeDiscoveredCode.remaining_quantity_per_account);
+        if (activeDiscoveredCode.quantity_available > 0)
+            caps.push(activeDiscoveredCode.quantity_available);
+        return caps.length > 0 ? Math.min(...caps) : null;
+    }, [activeDiscoveredCode]);
+
     const isReady = status === PROMO_STATUS.IDLE
         || status === PROMO_STATUS.SUGGESTED
         || status === PROMO_STATUS.VALID;
@@ -148,6 +159,17 @@ const usePromoCode = ({
         removePromoCode();
     }, [wasAutoApplied, removePromoCode, clearFormErrors, onFormPromoCodeChange]);
 
+    const onRevalidate = useCallback(async (ticket, quantity) => {
+        setValidationError(null);
+        try {
+            await validatePromoCode({ id: ticket.id, ticketQuantity: quantity, sub_type: ticket.sub_type });
+            return true;
+        } catch (e) {
+            handleValidationError(e);
+            return false;
+        }
+    }, [validatePromoCode, handleValidationError]);
+
     const onInputChange = useCallback((value) => {
         setValidationError(null);
         if (value) setSuggestionDismissed(value !== discoveredPromoCode?.code);
@@ -157,14 +179,17 @@ const usePromoCode = ({
     return {
         status,
         isReady,
+        isDiscoveredCode,
         validationError,
         suggestedCode,
         wasAutoApplied,
         activeDiscoveredCode,
+        maxQuantityFromPromo,
         perAccountLimit,
         onTicketSelected,
         onApply,
         onRemove,
+        onRevalidate,
         onInputChange,
         setValidationError,
     };
