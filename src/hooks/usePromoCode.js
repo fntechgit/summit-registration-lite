@@ -1,4 +1,5 @@
 import { useState, useCallback, useMemo } from 'react';
+import T from 'i18n-react';
 import { PROMO_STATUS } from '../utils/constants';
 
 const usePromoCode = ({
@@ -76,11 +77,13 @@ const usePromoCode = ({
 
     const handleValidationError = useCallback((e) => {
         if (e?.res?.body) {
-            const errors = e.res.body.errors || [e.res.body.message || 'An error occurred'];
+            const errors = e.res.body.errors || [e.res.body.message || T.translate('promo_code.validation_error')];
             const msg = typeof errors[0] === 'string' && /is not a valid code/i.test(errors[0])
-                ? 'Promo code entered is not valid.'
+                ? T.translate('promo_code.invalid_code')
                 : errors[0];
             setValidationError(msg);
+        } else {
+            setValidationError(T.translate('promo_code.validation_error'));
         }
     }, []);
 

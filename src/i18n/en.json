@@ -21,6 +21,8 @@
     "suggestion_label": "You qualify for the following promo code:",
     "per_account_limit": "Promo code limits {limit} {unit} per account.",
     "non_transferable": "This ticket will be automatically assigned to you and cannot be reassigned.",
-    "unapplied_code_warning": "You entered a promo code but it hasn't been applied. Make sure to click the 'Apply' button or remove it before continuing."
+    "unapplied_code_warning": "You entered a promo code but it hasn't been applied. Make sure to click the 'Apply' button or remove it before continuing.",
+    "invalid_code": "Promo code entered is not valid.",
+    "validation_error": "An error occurred while validating the promo code."
   }
 }
