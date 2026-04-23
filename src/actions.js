@@ -119,6 +119,7 @@ export const discoverPromoCodes = (summitId) => async (dispatch, getState, { api
         )({ access_token: accessToken })(dispatch);
     } catch (e) {
         console.log(e);
+        return null;
     }
 }
 
