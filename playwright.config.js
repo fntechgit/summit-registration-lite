@@ -7,6 +7,20 @@ module.exports = defineConfig({
         baseURL: 'https://localhost:8888',
         ignoreHTTPSErrors: true,
     },
-    // Dev server must be running: yarn serve
-    webServer: null,
+    projects: [
+        {
+            name: 'chromium',
+            use: { browserName: 'chromium' },
+        },
+    ],
+    reporter: process.env.CI
+        ? [['html', { open: 'never' }], ['list']]
+        : [['list']],
+    webServer: {
+        command: 'yarn serve',
+        url: 'https://localhost:8888',
+        ignoreHTTPSErrors: true,
+        reuseExistingServer: !process.env.CI,
+        timeout: 120000,
+    },
 });

@@ -10,7 +10,9 @@
     "serve": "webpack-dev-server --open --config webpack.dev.js",
     "copy-extras": "cp -rf package.json README.md dist",
     "publish-package": "yarn build && yarn publish",
-    "test": "jest --watch"
+    "test": "jest --watch",
+    "test:ci": "jest --ci",
+    "test:e2e": "npx playwright test"
   },
   "author": "santipalenque@gmail.com",
   "license": "Apache-2.0",
@@ -25,6 +27,10 @@
     },
     "setupFilesAfterEnv": [
       "<rootDir>/jest-setup.js"
+    ],
+    "testPathIgnorePatterns": [
+      "<rootDir>/node_modules/",
+      "<rootDir>/e2e/"
     ],
     "transformIgnorePatterns": [
       "<rootDir>/node_modules/(?!react-dnd|dnd-core|@react-dnd)"
@@ -72,7 +78,7 @@
     "mini-css-extract-plugin": "^2.6.0",
     "moment": "^2.22.2",
     "moment-timezone": "^0.5.21",
-    "node-sass": "^7.0.1",
+    "sass": "^1.77.0",
     "openstack-uicore-foundation": "4.2.14",
     "optimize-css-assets-webpack-plugin": "^6.0.1",
     "path": "^0.12.7",
