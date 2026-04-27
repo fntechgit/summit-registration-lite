@@ -14,20 +14,21 @@ const mockOptions = [
 ];
 
 const mockCallBack = jest.fn();
+const mockGetLoginCode = jest.fn(() => Promise.resolve());
 
 // Note: running cleanup fterEach is done automatically for you in @testing-library/react@9.0.0 or higher
 // unmount and cleanup DOM after the test is finished.
 afterEach(cleanup);
 
 it('LoginComponent renders the right quantity of providers', () => {
-    const { getAllByTestId } = render(<LoginComponent loginOptions={mockOptions} getLoginCode={mockCallBack} login={mockCallBack} />);
+    const { getAllByTestId } = render(<LoginComponent loginOptions={mockOptions} getLoginCode={mockGetLoginCode} login={mockCallBack} />);
 
     const buttons = getAllByTestId('login-button');
     expect(buttons.length).toBe(mockOptions.length);
 });
 
 it('LoginComponent triggers login function on button click', () => {
-    const { getAllByTestId } = render(<LoginComponent loginOptions={mockOptions} getLoginCode={mockCallBack} login={mockCallBack} />);
+    const { getAllByTestId } = render(<LoginComponent loginOptions={mockOptions} getLoginCode={mockGetLoginCode} login={mockCallBack} />);
 
     const buttons = getAllByTestId('login-button');
     expect(buttons.length).toBeGreaterThan(0);
@@ -36,7 +37,7 @@ it('LoginComponent triggers login function on button click', () => {
 });
 
 it('LoginComponent should evaluate the email before sending the code', () => {
-    const { getByTestId, getByText } = render(<LoginComponent loginOptions={mockOptions} getLoginCode={mockCallBack} login={mockCallBack} />);
+    const { getByTestId, getByText } = render(<LoginComponent loginOptions={mockOptions} getLoginCode={mockGetLoginCode} login={mockCallBack} />);
 
     const emailInput = getByTestId('email-input');
     const button = getByTestId('email-button');
@@ -46,6 +47,6 @@ it('LoginComponent should evaluate the email before sending the code', () => {
     fireEvent.change(emailInput, { target: { value: 'test@email.com' } })
     fireEvent.click(button);    
     const noEmailError = screen.queryByText('Please enter a valid email adress');
-    expect(noEmailError).toBeFalsy();    
-    expect(mockCallBack.mock.calls.length).toEqual(2);
+    expect(noEmailError).toBeFalsy();
+    expect(mockGetLoginCode).toHaveBeenCalledTimes(1);
 });

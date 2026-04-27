@@ -26,16 +26,16 @@ const mockCallBack = jest.fn();
 afterEach(cleanup);
 
 it('TicketDropdownComponent renders the right quantity of tickets', () => {
-    const { getByTestId } = render(<TicketDropdownComponent ticketTypes={mockTicketTypes} onTicketSelect={mockCallBack} />);
+    const { getByTestId } = render(<TicketDropdownComponent ticketTypes={mockTicketTypes} taxTypes={[]} onTicketSelect={mockCallBack} />);
 
     const ticketDropDown = getByTestId('ticket-dropdown');
     fireEvent.click(ticketDropDown);
-    const ticketList = getByTestId('ticket-list');    
+    const ticketList = getByTestId('ticket-list');
     expect(ticketList.children.length).toBe(mockTicketTypes.length);
 });
 
 it('TicketDropdownComponent select a ticket after clicking it', () => {
-    const { getByTestId } = render(<TicketDropdownComponent ticketTypes={mockTicketTypes} onTicketSelect={mockCallBack} />);
+    const { getByTestId } = render(<TicketDropdownComponent ticketTypes={mockTicketTypes} taxTypes={[]} onTicketSelect={mockCallBack} />);
 
     const ticketDropDown = getByTestId('ticket-dropdown');
     fireEvent.click(ticketDropDown);
@@ -45,7 +45,7 @@ it('TicketDropdownComponent select a ticket after clicking it', () => {
 });
 
 it('TicketDropdownComponent shows a selected ticket', () => {
-    const { getByTestId } = render(<TicketDropdownComponent selectedTicket={mockTicketTypes[0]} ticketTypes={mockTicketTypes} onTicketSelect={mockCallBack} />);
+    const { getByTestId } = render(<TicketDropdownComponent selectedTicket={mockTicketTypes[0]} ticketTypes={mockTicketTypes} taxTypes={[]} onTicketSelect={mockCallBack} />);
     
     const selectedTicket = getByTestId('selected-ticket');
     expect(selectedTicket).toBeTruthy();

@@ -29,6 +29,9 @@ const mockLoadProfileData = jest.fn();
 const mockApplyPromoCode = jest.fn();
 const mockRemovePromoCode = jest.fn();
 const mockValidatePromoCode = jest.fn();
+const mockDiscoverPromoCodes = jest.fn();
+const mockStartWidgetLoading = jest.fn();
+const mockStopWidgetLoading = jest.fn();
 
 jest.mock('../../../actions', () => ({
     changeStep: (...args) => {
@@ -93,6 +96,18 @@ jest.mock('../../../actions', () => ({
     },
     validatePromoCode: (...args) => {
         mockValidatePromoCode(...args);
+        return { type: 'NOOP' };
+    },
+    discoverPromoCodes: (...args) => () => {
+        mockDiscoverPromoCodes(...args);
+        return Promise.resolve();
+    },
+    startWidgetLoading: (...args) => {
+        mockStartWidgetLoading(...args);
+        return { type: 'NOOP' };
+    },
+    stopWidgetLoading: (...args) => {
+        mockStopWidgetLoading(...args);
         return { type: 'NOOP' };
     },
 }));
@@ -168,6 +183,10 @@ const defaultReduxState = {
         },
         nowUtc: 1000000,
         promoCode: '',
+        promoCodeVerified: null,
+        promoCodeValidating: false,
+        promoCodeAllowsReassign: true,
+        discoveredPromoCodes: [],
         requestedTicketTypes: false,
     },
 };

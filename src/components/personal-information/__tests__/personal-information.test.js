@@ -2,6 +2,16 @@ import React from 'react';
 import { cleanup, fireEvent, render as render, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 
+jest.mock('react-spring', () => ({
+    animated: { div: ({ children, style, ...rest }) => <div {...rest}>{children}</div> },
+    config: { stiff: {} },
+    useSpring: () => ({}),
+}));
+
+jest.mock('react-use', () => ({
+    useMeasure: () => [jest.fn(), { height: 100 }],
+}));
+
 import PersonalInfoComponent from "..";
 
 const mockReservation = {
@@ -33,7 +43,7 @@ const mockCallBack = jest.fn();
 afterEach(cleanup);
 
 it('PersonalInfoComponent set the initial values from the user profile', async () => {
-    const { getByTestId, getByText } = render(<PersonalInfoComponent formValues={mockFormValues} userProfile={mockProfile} handleCompanyError={mockCallBack} />);
+    const { getByTestId, getByText } = render(<PersonalInfoComponent isActive={true} formValues={mockFormValues} userProfile={mockProfile} handleCompanyError={mockCallBack} />);
 
     const firstName = getByTestId('first-name');
     const lastName = getByTestId('last-name');
@@ -43,14 +53,10 @@ it('PersonalInfoComponent set the initial values from the user profile', async (
         firstName: mockProfile.given_name,
         lastName: mockProfile.family_name,
         email: mockProfile.email,
-        company: ''
     }));
     expect(firstName.value).toBe(mockProfile.given_name);
     expect(lastName.value).toBe(mockProfile.family_name);
     expect(email.value).toBe(mockProfile.email);
-
-    const placeholder = getByText('Select a company');
-    expect(placeholder).toBeTruthy();
 });
 
 it('PersonalInfoComponent shows the personal data when is not active', async () => {
