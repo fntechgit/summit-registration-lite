@@ -148,6 +148,50 @@ it('PersonalInfoComponent checks that company input field is hidden when `showCo
     });
 });
 
+it('does not crash when company is null on submit', async () => {
+    const { getByTestId } = render(
+        <PersonalInfoComponent
+            isActive={true}
+            formValues={mockFormValues}
+            userProfile={mockProfile}
+            handleCompanyError={mockCallBack}
+            changeForm={mockSubmit}
+            summitId={13}
+        />
+    );
+
+    // Simulate CompanyInputV2 clearing company to null
+    const companyInput = getByTestId('company');
+    fireEvent.change(companyInput, { target: { value: null } });
+
+    const form = getByTestId('personal-form');
+    fireEvent.submit(form);
+
+    await waitFor(() => {
+        const companyError = getByTestId('company-error');
+        expect(companyError).toBeTruthy();
+    });
+
+    expect(mockSubmit).not.toHaveBeenCalled();
+});
+
+it('does not crash when company is null in summary display', () => {
+    const { getByTestId } = render(
+        <PersonalInfoComponent
+            isActive={false}
+            formValues={mockFormValues}
+            userProfile={mockProfile}
+            handleCompanyError={mockCallBack}
+        />
+    );
+
+    const personalInfo = getByTestId('personal-info');
+    expect(personalInfo).toBeTruthy();
+    expect(personalInfo.firstElementChild.innerHTML).toBe(
+        `${mockProfile.given_name} ${mockProfile.family_name}`
+    );
+});
+
 // it('PersonalInfoComponent set the fields if there is a reservation', async () => {
 
 //     const { getByTestId } = render(<PersonalInfoComponent isActive={true} userProfile={mockProfile} reservation={mockReservation} />);
