@@ -107,7 +107,7 @@ const PersonalInfoComponent = ({
   };
 
   const onSubmit = (data) => {
-    if (!personalInfo.company.name && showCompanyInput) {
+    if (!personalInfo.company?.name && showCompanyInput) {
       setCompanyError(true);
       return;
     }
@@ -204,7 +204,7 @@ const PersonalInfoComponent = ({
             {!isActive &&
               <div data-testid="personal-info">
                 <span>
-                  {`${personalInfo.firstName} ${personalInfo.lastName}${personalInfo.company.name ? ` - ${personalInfo.company.name}` : ''}`}
+                  {`${personalInfo.firstName} ${personalInfo.lastName}${personalInfo.company?.name ? ` - ${personalInfo.company.name}` : ''}`}
                 </span>
                 <br />
                 <span>
