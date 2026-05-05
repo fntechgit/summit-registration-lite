@@ -192,6 +192,37 @@ it('does not crash when company is null in summary display', () => {
     );
 });
 
+it('shows company validation error when reservation has no owner_company', async () => {
+    const reservationNoCompany = {
+        owner_first_name: 'Reservation Name',
+        owner_last_name: 'Reservation Last Name',
+        owner_email: 'reservation@email.com',
+        owner_company: '',
+    };
+
+    const { getByTestId } = render(
+        <PersonalInfoComponent
+            isActive={true}
+            formValues={mockFormValues}
+            userProfile={mockProfile}
+            handleCompanyError={mockCallBack}
+            changeForm={mockSubmit}
+            reservation={reservationNoCompany}
+            summitId={13}
+        />
+    );
+
+    const form = getByTestId('personal-form');
+    fireEvent.submit(form);
+
+    await waitFor(() => {
+        const companyError = getByTestId('company-error');
+        expect(companyError).toBeTruthy();
+    });
+
+    expect(mockSubmit).not.toHaveBeenCalled();
+});
+
 // it('PersonalInfoComponent set the fields if there is a reservation', async () => {
 
 //     const { getByTestId } = render(<PersonalInfoComponent isActive={true} userProfile={mockProfile} reservation={mockReservation} />);
