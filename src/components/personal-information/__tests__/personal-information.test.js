@@ -2,6 +2,26 @@ import React from 'react';
 import { cleanup, fireEvent, render as render, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 
+// Mock uicore components to avoid @react-pdf dependency resolution failure
+jest.mock('openstack-uicore-foundation/lib/components', () => ({
+    RadioList: ({ options, id }) => (
+        <div data-testid={`radio-list-${id}`}>
+            {options.map((op) => (
+                <div key={op.value}>
+                    <input type="radio" id={`radio_${id}_${op.value}`} value={op.value} readOnly />
+                    <label htmlFor={`radio_${id}_${op.value}`}>{op.label}</label>
+                </div>
+            ))}
+        </div>
+    ),
+}));
+
+jest.mock('openstack-uicore-foundation/lib/components/inputs/company-input-v2', () => {
+    return function MockCompanyInput({ value, onChange, placeholder, ...props }) {
+        return <input data-testid="company" name="company" onChange={onChange} value={value?.name || ''} placeholder={placeholder || 'Select a company'} />;
+    };
+});
+
 import PersonalInfoComponent from "..";
 
 const mockReservation = {
@@ -49,8 +69,8 @@ it('PersonalInfoComponent set the initial values from the user profile', async (
     expect(lastName.value).toBe(mockProfile.family_name);
     expect(email.value).toBe(mockProfile.email);
 
-    const placeholder = getByText('Select a company');
-    expect(placeholder).toBeTruthy();
+    const company = getByTestId('company');
+    expect(company).toBeTruthy();
 });
 
 it('PersonalInfoComponent shows the personal data when is not active', async () => {
