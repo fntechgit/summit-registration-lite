@@ -94,7 +94,7 @@ const PersonalInfoComponent = ({
         firstName: reservation.owner_first_name ? reservation.owner_first_name : personalInfo.firstName,
         lastName: reservation.owner_last_name ? reservation.owner_last_name : personalInfo.lastName,
         email: reservation.owner_email ? reservation.owner_email : personalInfo.email,
-        company: { id: null, name: reservation.owner_company ? reservation.owner_company : personalInfo.company },
+        company: { id: null, name: reservation.owner_company || personalInfo.company?.name || '' },
       });
     }
   }, []);
@@ -107,7 +107,7 @@ const PersonalInfoComponent = ({
   };
 
   const onSubmit = (data) => {
-    if (!personalInfo.company.name && showCompanyInput) {
+    if (!personalInfo.company?.name && showCompanyInput) {
       setCompanyError(true);
       return;
     }
@@ -204,7 +204,7 @@ const PersonalInfoComponent = ({
             {!isActive &&
               <div data-testid="personal-info">
                 <span>
-                  {`${personalInfo.firstName} ${personalInfo.lastName}${personalInfo.company.name ? ` - ${personalInfo.company.name}` : ''}`}
+                  {`${personalInfo.firstName} ${personalInfo.lastName}${personalInfo.company?.name ? ` - ${personalInfo.company.name}` : ''}`}
                 </span>
                 <br />
                 <span>
