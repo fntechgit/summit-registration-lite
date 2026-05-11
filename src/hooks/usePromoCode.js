@@ -126,8 +126,8 @@ const usePromoCode = ({
             return;
         }
 
-        // No code applied, ticket qualifies, auto-apply configured
-        if (!isApplied && qualifies && discoveredPromoCode.auto_apply && !userRemovedAutoApply) {
+        // No code applied, ticket qualifies, auto-apply configured, single code only
+        if (!isApplied && qualifies && discoveredPromoCode.auto_apply && !userRemovedAutoApply && discoveredPromoCodes.length === 1) {
             try {
                 setWasAutoApplied(true);
                 await applyPromoCode(discoveredPromoCode.code);

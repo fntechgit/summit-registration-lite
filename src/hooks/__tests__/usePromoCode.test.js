@@ -219,12 +219,13 @@ describe('onTicketSelected', () => {
         expect(result.current.status).toBe(PROMO_STATUS.IDLE);
     });
 
-    it('auto-applies when qualifying + auto_apply + not removed before', async () => {
+    it('auto-applies when single code + qualifying + auto_apply', async () => {
+        const singleCode = [mockDiscoveredCodes[1]]; // AUTO1 only
         const applyPromoCode = jest.fn(() => Promise.resolve());
         const validatePromoCode = jest.fn(() => Promise.resolve());
         const { result } = renderHook(() =>
             usePromoCode(createDefaultProps({
-                discoveredPromoCodes: mockDiscoveredCodes,
+                discoveredPromoCodes: singleCode,
                 applyPromoCode,
                 validatePromoCode,
             }))
@@ -237,10 +238,26 @@ describe('onTicketSelected', () => {
         expect(result.current.wasAutoApplied).toBe(true);
     });
 
+    it('does not auto-apply when multiple codes are returned', async () => {
+        const applyPromoCode = jest.fn(() => Promise.resolve());
+        const { result } = renderHook(() =>
+            usePromoCode(createDefaultProps({
+                discoveredPromoCodes: mockDiscoveredCodes,
+                applyPromoCode,
+            }))
+        );
+        await act(async () => {
+            await result.current.onTicketSelected(mockTicketQualifying);
+        });
+        expect(applyPromoCode).not.toHaveBeenCalled();
+        expect(result.current.wasAutoApplied).toBe(false);
+    });
+
     it('does not auto-apply after user removed auto-applied code', async () => {
+        const singleCode = [mockDiscoveredCodes[1]]; // AUTO1 only
         const applyPromoCode = jest.fn(() => Promise.resolve());
         const props = createDefaultProps({
-            discoveredPromoCodes: mockDiscoveredCodes,
+            discoveredPromoCodes: singleCode,
             applyPromoCode,
         });
         const { result, rerender } = renderHook((p) => usePromoCode(p), { initialProps: props });
@@ -355,13 +372,14 @@ describe('onTicketSelected', () => {
     });
 
     it('shows error when auto-apply validation fails', async () => {
+        const singleCode = [mockDiscoveredCodes[1]]; // AUTO1 only
         const applyPromoCode = jest.fn(() => Promise.resolve());
         const validatePromoCode = jest.fn(() => Promise.reject({
             res: { body: { errors: ['Quantity exceeded'] } }
         }));
         const { result } = renderHook(() =>
             usePromoCode(createDefaultProps({
-                discoveredPromoCodes: mockDiscoveredCodes,
+                discoveredPromoCodes: singleCode,
                 applyPromoCode,
                 validatePromoCode,
             }))
@@ -446,7 +464,8 @@ describe('onApply', () => {
 
 describe('onRemove', () => {
     it('tracks auto-apply removal', async () => {
-        const props = createDefaultProps({ discoveredPromoCodes: mockDiscoveredCodes });
+        const singleCode = [mockDiscoveredCodes[1]]; // AUTO1 only
+        const props = createDefaultProps({ discoveredPromoCodes: singleCode });
         const { result, rerender } = renderHook((p) => usePromoCode(p), { initialProps: props });
 
         // Auto-apply
