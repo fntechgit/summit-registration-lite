@@ -11,25 +11,25 @@ const {
 
 // ── Helpers ──
 
-const setupRoutes = (page, { discovery = [], tickets = [], taxes = [], validation = null } = {}) => {
+const setupRoutes = async (page, { discovery = [], tickets = [], taxes = [], validation = null } = {}) => {
     // Discovery endpoint
-    page.route('**/promo-codes/all/discover*', route =>
+    await page.route('**/promo-codes/all/discover*', route =>
         route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(discoveryResponse(discovery)) })
     );
 
     // Ticket types (with or without promo filter)
-    page.route('**/ticket-types/allowed*', route =>
+    await page.route('**/ticket-types/allowed*', route =>
         route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(ticketTypesResponse(tickets)) })
     );
 
     // Tax types
-    page.route('**/tax-types*', route =>
+    await page.route('**/tax-types*', route =>
         route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(taxTypesResponse(taxes)) })
     );
 
     // Validation endpoint (if provided)
     if (validation) {
-        page.route('**/promo-codes/*/apply*', route => {
+        await page.route('**/promo-codes/*/apply*', route => {
             if (typeof validation === 'function') {
                 validation(route);
             } else {
@@ -52,7 +52,7 @@ const selectTicket = async (page, ticketName) => {
 
 test.describe('no discovery codes', () => {
     test('shows default promo code UI', async ({ page }) => {
-        setupRoutes(page, {
+        await setupRoutes(page, {
             tickets: [ticketType()],
             discovery: [],
         });
@@ -61,7 +61,7 @@ test.describe('no discovery codes', () => {
     });
 
     test('manual code entry still works', async ({ page }) => {
-        setupRoutes(page, {
+        await setupRoutes(page, {
             tickets: [ticketType()],
             discovery: [],
             validation: { status: 200, body: validationResponse() },
@@ -78,7 +78,7 @@ test.describe('suggestion flow (auto_apply: false)', () => {
     const suggestCode = discoveredCode({ auto_apply: false, code: 'SUGGEST50' });
 
     test('shows suggestion when qualifying ticket selected', async ({ page }) => {
-        setupRoutes(page, {
+        await setupRoutes(page, {
             tickets: [ticketType()],
             discovery: [suggestCode],
         });
@@ -90,7 +90,7 @@ test.describe('suggestion flow (auto_apply: false)', () => {
 
     test('no suggestion for non-qualifying ticket', async ({ page }) => {
         const nonQualifyingTicket = ticketType({ id: 999, name: 'Standard Ticket' });
-        setupRoutes(page, {
+        await setupRoutes(page, {
             tickets: [nonQualifyingTicket],
             discovery: [suggestCode],
         });
@@ -101,7 +101,7 @@ test.describe('suggestion flow (auto_apply: false)', () => {
     });
 
     test('suggestion clears when user edits input', async ({ page }) => {
-        setupRoutes(page, {
+        await setupRoutes(page, {
             tickets: [ticketType()],
             discovery: [suggestCode],
         });
@@ -113,7 +113,7 @@ test.describe('suggestion flow (auto_apply: false)', () => {
     });
 
     test('suggestion re-appears when user types discovered code back', async ({ page }) => {
-        setupRoutes(page, {
+        await setupRoutes(page, {
             tickets: [ticketType()],
             discovery: [suggestCode],
         });
@@ -130,7 +130,7 @@ test.describe('auto-apply flow (auto_apply: true)', () => {
     const autoCode = discoveredCode({ auto_apply: true, code: 'AUTO100' });
 
     test('auto-applies when qualifying ticket selected', async ({ page }) => {
-        setupRoutes(page, {
+        await setupRoutes(page, {
             tickets: [ticketType()],
             discovery: [autoCode],
             validation: { status: 200, body: validationResponse() },
@@ -142,7 +142,7 @@ test.describe('auto-apply flow (auto_apply: true)', () => {
     });
 
     test('shows suggestion after removing auto-applied code', async ({ page }) => {
-        setupRoutes(page, {
+        await setupRoutes(page, {
             tickets: [ticketType()],
             discovery: [autoCode],
             validation: { status: 200, body: validationResponse() },
@@ -156,7 +156,7 @@ test.describe('auto-apply flow (auto_apply: true)', () => {
 
     test('does not auto-apply for non-qualifying ticket', async ({ page }) => {
         const nonQualifyingTicket = ticketType({ id: 999, name: 'Standard Ticket' });
-        setupRoutes(page, {
+        await setupRoutes(page, {
             tickets: [nonQualifyingTicket],
             discovery: [autoCode],
         });
@@ -169,7 +169,7 @@ test.describe('auto-apply flow (auto_apply: true)', () => {
 test.describe('per-account limit', () => {
     test('shows limit notice when code has quantity_per_account', async ({ page }) => {
         const limitedCode = discoveredCode({ auto_apply: true, quantity_per_account: 2, remaining_quantity_per_account: 2 });
-        setupRoutes(page, {
+        await setupRoutes(page, {
             tickets: [ticketType()],
             discovery: [limitedCode],
             validation: { status: 200, body: validationResponse() },
@@ -181,7 +181,7 @@ test.describe('per-account limit', () => {
 
     test('no limit notice when quantity_per_account is 0', async ({ page }) => {
         const unlimitedCode = discoveredCode({ auto_apply: true, quantity_per_account: 0, remaining_quantity_per_account: null });
-        setupRoutes(page, {
+        await setupRoutes(page, {
             tickets: [ticketType()],
             discovery: [unlimitedCode],
             validation: { status: 200, body: validationResponse() },
@@ -193,7 +193,7 @@ test.describe('per-account limit', () => {
 
     test('singular ticket text for limit of 1', async ({ page }) => {
         const singleCode = discoveredCode({ auto_apply: true, quantity_per_account: 1, remaining_quantity_per_account: 1 });
-        setupRoutes(page, {
+        await setupRoutes(page, {
             tickets: [ticketType()],
             discovery: [singleCode],
             validation: { status: 200, body: validationResponse() },
@@ -207,7 +207,7 @@ test.describe('per-account limit', () => {
 test.describe('non-transferable notice', () => {
     test('shows notice when allows_to_reassign is false', async ({ page }) => {
         const nonTransferableCode = discoveredCode({ auto_apply: true, allows_to_reassign: false });
-        setupRoutes(page, {
+        await setupRoutes(page, {
             tickets: [ticketType()],
             discovery: [nonTransferableCode],
             validation: { status: 200, body: validationResponse({ allows_to_reassign: false }) },
@@ -220,7 +220,7 @@ test.describe('non-transferable notice', () => {
 
 test.describe('validation errors', () => {
     test('shows error for invalid code', async ({ page }) => {
-        setupRoutes(page, {
+        await setupRoutes(page, {
             tickets: [ticketType()],
             discovery: [],
             validation: { status: 412, body: validationError('The Promo Code "BAD" is not a valid code.') },
@@ -233,7 +233,7 @@ test.describe('validation errors', () => {
     });
 
     test('shows error for wrong ticket type', async ({ page }) => {
-        setupRoutes(page, {
+        await setupRoutes(page, {
             tickets: [ticketType()],
             discovery: [],
             validation: { status: 412, body: validationError('Promo code XYZ can not be applied to Ticket Type Early Bird Ticket.') },
@@ -246,7 +246,7 @@ test.describe('validation errors', () => {
     });
 
     test('error clears when user types', async ({ page }) => {
-        setupRoutes(page, {
+        await setupRoutes(page, {
             tickets: [ticketType()],
             discovery: [],
             validation: { status: 412, body: validationError('The Promo Code "BAD" is not a valid code.') },
@@ -264,7 +264,7 @@ test.describe('validation errors', () => {
 
 test.describe('no tickets available', () => {
     test('shows no tickets message', async ({ page }) => {
-        setupRoutes(page, {
+        await setupRoutes(page, {
             tickets: [],
             discovery: [discoveredCode()],
         });
@@ -279,7 +279,7 @@ test.describe('ticket switching with applied code', () => {
         const nonQualifying = ticketType({ id: 999, name: 'Standard Ticket' });
         const code = discoveredCode({ auto_apply: true, allowed_ticket_types: [188] });
 
-        setupRoutes(page, {
+        await setupRoutes(page, {
             tickets: [qualifying, nonQualifying],
             discovery: [code],
             validation: { status: 200, body: validationResponse() },
@@ -298,7 +298,7 @@ test.describe('ticket switching with applied code', () => {
         const nonQualifying = ticketType({ id: 999, name: 'Standard Ticket' });
         const code = discoveredCode({ auto_apply: true, allowed_ticket_types: [188] });
 
-        setupRoutes(page, {
+        await setupRoutes(page, {
             tickets: [qualifying, nonQualifying],
             discovery: [code],
             validation: { status: 200, body: validationResponse() },
