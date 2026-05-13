@@ -30,7 +30,7 @@
         text-overflow: ellipsis;
         overflow: hidden;
         white-space: nowrap;
-        color: var(--color_gray_dark);
+        color: var(--color_gray_dark, #333);
         background-color: var(--color_gray_lighter);
       }
     }
