@@ -29,7 +29,7 @@ const TicketDropdownComponent = ({ selectedTicket, ticketTypes, taxTypes, onTick
     }
     useEffect(() => {
         const prevTicketTypes = prevTicketTypesRef.current;
-        if (!isEqual(ticketTypes, []) && !isEqual(prevTicketTypes, ticketTypes)) {
+        if (!isEqual(prevTicketTypes, ticketTypes)) {
             setCurrentTicketTypes(ticketTypes);
         }
         prevTicketTypesRef.current = ticketTypes;
