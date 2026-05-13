@@ -256,6 +256,8 @@ const RegistrationFormContent = (
         validatePromoCode,
         onFormPromoCodeChange: handleFormPromoCodeChange,
         clearFormErrors: handleClearFormErrors,
+        ticketDataLoaded: ticketDataLoaded && !ticketDataError,
+        hasTickets: allowedTicketTypes.length > 0,
     });
 
     const [ref, { height }] = useMeasure();
@@ -358,8 +360,6 @@ const RegistrationFormContent = (
             <Clock onTick={(timestamp) => updateClock(timestamp)} timezone={summitData.time_zone_id} />
 
             {profileData && ticketDataError && <TicketTaxesError ticketTaxesErrorMessage={ticketTaxesErrorMessage} retryTicketTaxes={() => handleGetTicketTypesAndTaxes(summitData?.id)} />}
-
-            {noAvailableTickets && <NoAllowedTickets noAllowedTicketsMessage={noAllowedTicketsMessage} />}
 
             {!ticketDataError && (
                 <>

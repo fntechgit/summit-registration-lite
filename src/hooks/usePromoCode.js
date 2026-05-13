@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo, useEffect } from 'react';
 import T from 'i18n-react';
 import { PROMO_STATUS } from '../utils/constants';
 
@@ -12,6 +12,8 @@ const usePromoCode = ({
     validatePromoCode,
     onFormPromoCodeChange,
     clearFormErrors,
+    ticketDataLoaded = false,
+    hasTickets = false,
 }) => {
     const [userRemovedAutoApply, setUserRemovedAutoApply] = useState(false);
     const [wasAutoApplied, setWasAutoApplied] = useState(false);
@@ -141,6 +143,24 @@ const usePromoCode = ({
         isCodeValidForTicket, applyPromoCode,
         removePromoCode, onRevalidate]);
 
+    // Early auto-apply: when no tickets are available and a single auto_apply code
+    // was discovered, apply it so the API returns WithPromoCode ticket types.
+    // userRemovedAutoApply prevents re-apply after removal. isApplied prevents
+    // re-fire while the code is active (including Redux persist).
+    useEffect(() => {
+        if (userRemovedAutoApply) return;
+        if (!ticketDataLoaded || hasTickets) return;
+        if (!discoveredPromoCode?.auto_apply) return;
+        if (isApplied) return;
+        if (discoveredPromoCodes.length !== 1) return;
+
+        setWasAutoApplied(true);
+        applyPromoCode(discoveredPromoCode.code).catch(() => {
+            setWasAutoApplied(false);
+            setUserRemovedAutoApply(true);
+        });
+    }, [userRemovedAutoApply, ticketDataLoaded, hasTickets, discoveredPromoCode, discoveredPromoCodes, isApplied]);
+
     const onApply = useCallback(async (code, ticket, quantity) => {
         setValidationError(null);
         clearFormErrors();
@@ -155,17 +175,18 @@ const usePromoCode = ({
     }, [applyPromoCode, onRevalidate, clearFormErrors]);
 
     const onRemove = useCallback(() => {
-        if (wasAutoApplied) setUserRemovedAutoApply(true);
+        if (wasAutoApplied || isDiscoveredCode) setUserRemovedAutoApply(true);
 
         setWasAutoApplied(false);
         setValidationError(null);
         setSuggestionDismissed(false);
+        if (discoveredPromoCode) setSuggestionActive(true);
 
         clearFormErrors();
         onFormPromoCodeChange('');
 
         removePromoCode();
-    }, [wasAutoApplied, removePromoCode, clearFormErrors, onFormPromoCodeChange]);
+    }, [wasAutoApplied, isDiscoveredCode, discoveredPromoCode, removePromoCode, clearFormErrors, onFormPromoCodeChange]);
 
     const onInputChange = useCallback((value) => {
         setValidationError(null);
