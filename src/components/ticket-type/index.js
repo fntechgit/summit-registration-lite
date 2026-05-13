@@ -80,7 +80,13 @@ const TicketTypeComponent = ({
     useEffect(() => {
         // When promo code changes, the API returns updated ticket types with/without discount.
         // Sync the selected ticket with the refreshed data.
-        if (!ticket) return;
+        if (!ticket) {
+            // Auto-select if only one ticket type available after promo code applied
+            if (promoCode && originalTicketTypes.length === 1) {
+                handleTicketChange(originalTicketTypes[0]);
+            }
+            return;
+        }
         const updatedCurrentTicket = originalTicketTypes.find(t => t?.id === ticket.id);
         if (updatedCurrentTicket) {
             changeForm({ ticketType: updatedCurrentTicket })
@@ -90,6 +96,8 @@ const TicketTypeComponent = ({
             setQuantity(minQuantity);
         }
     }, [promoCode, originalTicketTypes])
+
+    const showTicketSelector = allowedTicketTypes.length > 0 || !!promoCode;
 
     const isPrePaidReservation = useMemo(
         () => reservation ? isPrePaidOrder(reservation) : false,
@@ -191,35 +199,42 @@ const TicketTypeComponent = ({
 
                     <animated.div style={{ overflow: 'hidden', ...toggleAnimation }}>
                         <div ref={ref}>
-                            <div className={styles.form}>
-                                <div className={styles.dropdown}>
-                                    <TicketDropdownComponent selectedTicket={ticket}
-                                        ticketTypes={allowedTicketTypes}
-                                        taxTypes={taxTypes}
-                                        onTicketSelect={handleTicketChange}
-                                    />
-                                </div>
+                            {showTicketSelector && (
+                                <div className={styles.form}>
+                                    <div className={styles.dropdown}>
+                                        <TicketDropdownComponent selectedTicket={ticket}
+                                            ticketTypes={allowedTicketTypes}
+                                            taxTypes={taxTypes}
+                                            onTicketSelect={handleTicketChange}
+                                        />
+                                    </div>
 
-                                {ticket && (
-                                    <>
-                                        <div className={styles.quantity}>
-                                            <div className="input-group">
-                                                <span className="input-group-btn">
-                                                    <button aria-label="remove a ticket" className="btn btn-default" onClick={decrementQuantity} disabled={maxQuantity === 0 || quantity === minQuantity}>
-                                                        <i className="fa fa-minus"></i>
-                                                    </button>
-                                                </span>
-                                                <input className="form-control" aria-label="ticket quanity" name="ticket_quantity" type="text" value={quantity} readOnly={true} disabled={maxQuantity === 0} />
-                                                <span className="input-group-btn">
-                                                    <button aria-label="add a ticket" className="btn btn-default" onClick={incrementQuantity} disabled={maxQuantity === 0 || quantity >= maxQuantity}>
-                                                        <i className="fa fa-plus" />
-                                                    </button>
-                                                </span>
+                                    {ticket && (
+                                        <>
+                                            <div className={styles.quantity}>
+                                                <div className="input-group">
+                                                    <span className="input-group-btn">
+                                                        <button aria-label="remove a ticket" className="btn btn-default" onClick={decrementQuantity} disabled={maxQuantity === 0 || quantity === minQuantity}>
+                                                            <i className="fa fa-minus"></i>
+                                                        </button>
+                                                    </span>
+                                                    <input className="form-control" aria-label="ticket quanity" name="ticket_quantity" type="text" value={quantity} readOnly={true} disabled={maxQuantity === 0} />
+                                                    <span className="input-group-btn">
+                                                        <button aria-label="add a ticket" className="btn btn-default" onClick={incrementQuantity} disabled={maxQuantity === 0 || quantity >= maxQuantity}>
+                                                            <i className="fa fa-plus" />
+                                                        </button>
+                                                    </span>
+                                                </div>
                                             </div>
-                                        </div>
-                                    </>
-                                )}
-                            </div>
+                                        </>
+                                    )}
+                                </div>
+                            )}
+                            {!showTicketSelector && (
+                                <div className={`alert alert-info`} style={{ fontSize: 14, marginTop: 10, marginBottom: 0 }}>
+                                    {T.translate("ticket_type.no_tickets_available")}
+                                </div>
+                            )}
                             <ReactTooltip id="ticket-quantity-info" place="bottom" overridePosition={avoidTooltipOverflow}>
                                 <div className={styles.moreInfoTooltip}>
                                     {T.translate("ticket_type.ticket_quantity_tooltip")}
