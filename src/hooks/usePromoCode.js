@@ -20,6 +20,7 @@ const usePromoCode = ({
     const [suggestionActive, setSuggestionActive] = useState(false);
     const [suggestionDismissed, setSuggestionDismissed] = useState(false);
     const [validationError, setValidationError] = useState(null);
+    const [applyingCode, setApplyingCode] = useState(false);
 
     // Pick first auto_apply code, or first code if none has auto_apply
     const discoveredPromoCode = useMemo(() => {
@@ -36,10 +37,12 @@ const usePromoCode = ({
         if (isApplied && promoCodeValidating) return PROMO_STATUS.VALIDATING;
         if (isApplied && promoCodeVerified === true) return PROMO_STATUS.VALID;
         if (isApplied && promoCodeVerified === false) return PROMO_STATUS.INVALID;
+        // Applied but no tickets returned and not currently applying: code is invalid
+        if (isApplied && !applyingCode && ticketDataLoaded && !hasTickets) return PROMO_STATUS.INVALID;
         if (isApplied && promoCodeVerified === null) return PROMO_STATUS.APPLYING;
         if (!isApplied && suggestionActive && !suggestionDismissed) return PROMO_STATUS.SUGGESTED;
         return PROMO_STATUS.IDLE;
-    }, [isApplied, promoCodeVerified, promoCodeValidating, suggestionActive, suggestionDismissed]);
+    }, [isApplied, promoCodeVerified, promoCodeValidating, suggestionActive, suggestionDismissed, applyingCode, ticketDataLoaded, hasTickets]);
 
     // --- Derived values ---
 
@@ -155,23 +158,43 @@ const usePromoCode = ({
         if (discoveredPromoCodes.length !== 1) return;
 
         setWasAutoApplied(true);
-        applyPromoCode(discoveredPromoCode.code).catch(() => {
-            setWasAutoApplied(false);
-            setUserRemovedAutoApply(true);
-        });
+        setApplyingCode(true);
+        applyPromoCode(discoveredPromoCode.code)
+            .catch(() => {
+                setWasAutoApplied(false);
+                setUserRemovedAutoApply(true);
+            })
+            .finally(() => setApplyingCode(false));
     }, [userRemovedAutoApply, ticketDataLoaded, hasTickets, discoveredPromoCode, discoveredPromoCodes, isApplied]);
+
+    // Surface invalid-code error when an applied code yields zero tickets.
+    // Required because onRevalidate (the validation endpoint) only runs when a
+    // ticket is selected — invalid codes in the no-tickets scenario would otherwise
+    // sit in APPLYING state silently. applyingCode suppresses the check during the
+    // apply transition to avoid flashing the error before tickets reload.
+    useEffect(() => {
+        if (applyingCode || !isApplied || !ticketDataLoaded) return;
+        const msg = T.translate('promo_code.invalid_code');
+        setValidationError(prev => {
+            if (!hasTickets) return msg;
+            return prev === msg ? null : prev;
+        });
+    }, [isApplied, ticketDataLoaded, hasTickets, applyingCode]);
 
     const onApply = useCallback(async (code, ticket, quantity) => {
         setValidationError(null);
         clearFormErrors();
+        setApplyingCode(true);
         try {
             await applyPromoCode(code);
         } catch (e) {
+            setApplyingCode(false);
             return;
         }
         if (ticket) {
             await onRevalidate(ticket, quantity);
         }
+        setApplyingCode(false);
     }, [applyPromoCode, onRevalidate, clearFormErrors]);
 
     const onRemove = useCallback(() => {
