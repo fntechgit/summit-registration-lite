@@ -331,8 +331,12 @@ const RegistrationFormContent = (
         // Re-validate manual codes with final quantity before advancing
         if (promoCode && !promo.isDiscoveredCode) {
             startWidgetLoading();
-            const valid = await promo.onRevalidate(formValues.ticketType, data.ticketQuantity);
-            stopWidgetLoading();
+            let valid = false;
+            try {
+                valid = await promo.onRevalidate(formValues.ticketType, data.ticketQuantity);
+            } finally {
+                stopWidgetLoading();
+            }
             if (!valid) return;
         }
         trackAddToCart(data);
