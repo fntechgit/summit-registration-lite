@@ -19,6 +19,7 @@
     "default_label": "Do you have a promo code?",
     "auto_applied_label": "Following promo code was automatically applied:",
     "applied_label": "Applied promo code:",
+    "applying_label": "Applying promo code...",
     "suggestion_label": "You qualify for the following promo code:",
     "per_account_limit": "Promo code limits {limit} {unit} per account.",
     "non_transferable": "This ticket will be automatically assigned to you and cannot be reassigned.",

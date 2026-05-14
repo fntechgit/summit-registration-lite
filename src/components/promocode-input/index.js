@@ -43,7 +43,7 @@ const PromoCodeInput = ({ promoStatus, promoCode, suggestedCode, wasAutoApplied,
             case PROMO_STATUS.APPLYING:
             case PROMO_STATUS.VALIDATING:
                 if (wasAutoApplied) return T.translate('promo_code.auto_applied_label');
-                return T.translate('promo_code.applied_label');
+                return T.translate('promo_code.applying_label');
             case PROMO_STATUS.INVALID:
                 return undefined;
             case PROMO_STATUS.SUGGESTED:
@@ -83,8 +83,8 @@ const PromoCodeInput = ({ promoStatus, promoCode, suggestedCode, wasAutoApplied,
                         }}
                         readOnly={isApplied} />
 
-                    {promoStatus === PROMO_STATUS.VALIDATING && <span className={`${styles.statusIcon} ${styles.spinner}`} />}
-                    {(promoStatus === PROMO_STATUS.VALID || promoStatus === PROMO_STATUS.APPLYING) && <span className={`${styles.statusIcon} ${styles.valid}`}>✓</span>}
+                    {(promoStatus === PROMO_STATUS.VALIDATING || promoStatus === PROMO_STATUS.APPLYING) && <span className={`${styles.statusIcon} ${styles.spinner}`} />}
+                    {promoStatus === PROMO_STATUS.VALID && <span className={`${styles.statusIcon} ${styles.valid}`}>✓</span>}
                     {promoStatus === PROMO_STATUS.INVALID && <span className={`${styles.statusIcon} ${styles.invalid}`}>✕</span>}
                     <div className={`${styles.codeButtonWrapper} ${inputValue ? '' : styles.noCode}`}>
                         {isApplied ?
