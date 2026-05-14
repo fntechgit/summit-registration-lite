@@ -37,7 +37,7 @@ const TicketTypeComponent = ({
     inPersonDisclaimer,
     showMultipleTicketTexts,
     allowPromoCodes,
-    promo,
+    promo = {},
     promoCode,
     promoCodeAllowsReassign = true,
     trackViewItem,
@@ -54,7 +54,7 @@ const TicketTypeComponent = ({
         if (quantity > maxQuantity) {
             setQuantity(Math.max(maxQuantity, minQuantity));
         }
-    }, [maxQuantity]);
+    }, [maxQuantity, quantity]);
 
     const [ref, { height }] = useMeasure();
 
