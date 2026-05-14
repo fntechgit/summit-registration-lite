@@ -269,7 +269,7 @@ test.describe('no tickets available', () => {
             discovery: [discoveredCode()],
         });
         await page.goto('/');
-        await expect(page.locator('text=no tickets available')).toBeVisible();
+        await expect(page.locator('text=no tickets currently available')).toBeVisible();
     });
 });
 
