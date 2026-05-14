@@ -115,6 +115,31 @@ const usePromoCode = ({
         }
     }, [validatePromoCode, handleValidationError]);
 
+    // Shared auto-apply flow. Caller is responsible for the gating conditions
+    // (auto_apply / single code / not already applied / not user-removed) so each
+    // call site keeps its own trigger logic. Returns true if the code was applied
+    // and (if a ticket was passed) successfully revalidated.
+    const tryAutoApply = useCallback(async (ticket) => {
+        setWasAutoApplied(true);
+        setApplyingCode(true);
+        try {
+            await applyPromoCode(discoveredPromoCode.code);
+            if (ticket) {
+                const valid = await onRevalidate(ticket, 1);
+                if (!valid) {
+                    setWasAutoApplied(false);
+                    return false;
+                }
+            }
+            return true;
+        } catch {
+            setWasAutoApplied(false);
+            return false;
+        } finally {
+            setApplyingCode(false);
+        }
+    }, [discoveredPromoCode, applyPromoCode, onRevalidate]);
+
     const onTicketSelected = useCallback(async (ticket) => {
         const qualifies = discoveredPromoCode && isCodeValidForTicket(ticket);
         setSuggestionActive(qualifies);
@@ -143,39 +168,24 @@ const usePromoCode = ({
 
         // No code applied, ticket qualifies, auto-apply configured, single code only
         if (!isApplied && qualifies && discoveredPromoCode.auto_apply && !userRemovedAutoApply && discoveredPromoCodes.length === 1) {
-            try {
-                setWasAutoApplied(true);
-                await applyPromoCode(discoveredPromoCode.code);
-                const valid = await onRevalidate(ticket, 1);
-                if (!valid) setWasAutoApplied(false);
-            } catch (e) {
-                setWasAutoApplied(false);
-            }
+            await tryAutoApply(ticket);
         }
-    }, [discoveredPromoCode, isApplied, isDiscoveredCode, userRemovedAutoApply,
-        isCodeValidForTicket, applyPromoCode,
-        removePromoCode, onRevalidate]);
+    }, [discoveredPromoCode, isApplied, isDiscoveredCode, userRemovedAutoApply, discoveredPromoCodes,
+        isCodeValidForTicket, removePromoCode, onRevalidate, tryAutoApply]);
 
     // Early auto-apply: when no tickets are available and a single auto_apply code
     // was discovered, apply it so the API returns WithPromoCode ticket types.
-    // userRemovedAutoApply prevents re-apply after removal. isApplied prevents
-    // re-fire while the code is active (including Redux persist).
+    // On failure, mark as removed to prevent re-fire loops.
     useEffect(() => {
-        if (userRemovedAutoApply) return;
+        if (userRemovedAutoApply || isApplied) return;
         if (!ticketDataLoaded || hasTickets) return;
         if (!discoveredPromoCode?.auto_apply) return;
-        if (isApplied) return;
         if (discoveredPromoCodes.length !== 1) return;
 
-        setWasAutoApplied(true);
-        setApplyingCode(true);
-        applyPromoCode(discoveredPromoCode.code)
-            .catch(() => {
-                setWasAutoApplied(false);
-                setUserRemovedAutoApply(true);
-            })
-            .finally(() => setApplyingCode(false));
-    }, [userRemovedAutoApply, ticketDataLoaded, hasTickets, discoveredPromoCode, discoveredPromoCodes, isApplied]);
+        tryAutoApply(null).then(success => {
+            if (!success) setUserRemovedAutoApply(true);
+        });
+    }, [userRemovedAutoApply, ticketDataLoaded, hasTickets, discoveredPromoCode, discoveredPromoCodes, isApplied, tryAutoApply]);
 
     const onApply = useCallback(async (code, ticket, quantity) => {
         setManualError(null);
