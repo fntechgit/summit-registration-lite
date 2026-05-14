@@ -733,14 +733,14 @@ describe('maxQuantityFromPromo', () => {
         expect(result.current.maxQuantityFromPromo).toBeNull();
     });
 
-    it('uses only remaining_quantity_per_account when quantity_available is 0 (unlimited)', () => {
+    it('uses only remaining_quantity_per_account when quantity_available is null (unlimited)', () => {
         const codes = [{
             code: 'UNLIM',
             auto_apply: true,
             allowed_ticket_types: [],
             quantity_per_account: 5,
             remaining_quantity_per_account: 3,
-            quantity_available: 0,
+            quantity_available: null,
         }];
         const { result } = renderHook(() =>
             usePromoCode(createDefaultProps({
@@ -750,6 +750,25 @@ describe('maxQuantityFromPromo', () => {
             }))
         );
         expect(result.current.maxQuantityFromPromo).toBe(3);
+    });
+
+    it('caps at 0 when quantity_available is 0 (sold out)', () => {
+        const codes = [{
+            code: 'SOLDOUT',
+            auto_apply: true,
+            allowed_ticket_types: [],
+            quantity_per_account: 5,
+            remaining_quantity_per_account: 3,
+            quantity_available: 0,
+        }];
+        const { result } = renderHook(() =>
+            usePromoCode(createDefaultProps({
+                discoveredPromoCodes: codes,
+                promoCode: 'SOLDOUT',
+                promoCodeVerified: true,
+            }))
+        );
+        expect(result.current.maxQuantityFromPromo).toBe(0);
     });
 
     it('uses only quantity_available when remaining_quantity_per_account is null', () => {
@@ -778,7 +797,7 @@ describe('maxQuantityFromPromo', () => {
             allowed_ticket_types: [],
             quantity_per_account: 0,
             remaining_quantity_per_account: null,
-            quantity_available: 0,
+            quantity_available: null,
         }];
         const { result } = renderHook(() =>
             usePromoCode(createDefaultProps({

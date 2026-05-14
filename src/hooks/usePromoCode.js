@@ -64,13 +64,15 @@ const usePromoCode = ({
     const perAccountLimit = activeDiscoveredCode?.quantity_per_account > 0
         ? activeDiscoveredCode.remaining_quantity_per_account : null;
 
-    // Tightest promo-code-level quantity cap for the stepper (discovered codes only)
+    // Tightest promo-code-level quantity cap for the stepper (discovered codes only).
+    // Both cap sources use `!= null` so a value of 0 (sold-out / no remaining) caps the
+    // stepper at 0 instead of being silently ignored.
     const maxQuantityFromPromo = useMemo(() => {
         if (!activeDiscoveredCode) return null;
         const caps = [];
         if (activeDiscoveredCode.remaining_quantity_per_account != null)
             caps.push(activeDiscoveredCode.remaining_quantity_per_account);
-        if (activeDiscoveredCode.quantity_available > 0)
+        if (activeDiscoveredCode.quantity_available != null)
             caps.push(activeDiscoveredCode.quantity_available);
         return caps.length > 0 ? Math.min(...caps) : null;
     }, [activeDiscoveredCode]);
@@ -93,9 +95,11 @@ const usePromoCode = ({
     const handleValidationError = useCallback((e) => {
         if (e?.res?.body) {
             const errors = e.res.body.errors || [e.res.body.message || T.translate('promo_code.validation_error')];
-            const msg = typeof errors[0] === 'string' && /is not a valid code/i.test(errors[0])
+            const first = errors[0];
+            const firstStr = typeof first === 'string' ? first : first?.message ?? String(first);
+            const msg = /is not a valid code/i.test(firstStr)
                 ? T.translate('promo_code.invalid_code')
-                : errors[0];
+                : firstStr;
             setManualError(msg);
         } else {
             setManualError(T.translate('promo_code.validation_error'));

@@ -261,7 +261,12 @@ const TicketTypeComponent = ({
                             }
                             {ticket && promo.perAccountLimit != null &&
                                 <PromoCodeNotice
-                                    message={T.translate('promo_code.per_account_limit', { limit: promo.perAccountLimit, unit: promo.perAccountLimit === 1 ? 'ticket' : 'tickets' })}
+                                    message={T.translate(
+                                        promo.perAccountLimit === 1
+                                            ? 'promo_code.per_account_limit_one'
+                                            : 'promo_code.per_account_limit_other',
+                                        { limit: promo.perAccountLimit }
+                                    )}
                                     variant="info"
                                 />
                             }
