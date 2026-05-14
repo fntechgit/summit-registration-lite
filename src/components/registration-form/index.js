@@ -187,6 +187,7 @@ const RegistrationFormContent = (
 
     const [ticketDataError, setTicketDataError] = useState(false);
     const [ticketDataLoaded, setTicketDataLoaded] = useState(false);
+    const [unappliedCodeWarning, setUnappliedCodeWarning] = useState(null);
 
     const { values: formValues, errors: formErrors } = registrationForm;
 
@@ -260,6 +261,14 @@ const RegistrationFormContent = (
         hasTickets: allowedTicketTypes.length > 0,
     });
 
+    // Clear the unapplied-code warning once the condition that would have raised it
+    // no longer holds (input cleared, code applied, or a suggestion is showing).
+    useEffect(() => {
+        if (!formValues?.promoCode || promoCode || promo.status === PROMO_STATUS.SUGGESTED) {
+            setUnappliedCodeWarning(null);
+        }
+    }, [formValues?.promoCode, promoCode, promo.status])
+
     const [ref, { height }] = useMeasure();
 
     const toggleAnimation = useSpring({
@@ -315,7 +324,7 @@ const RegistrationFormContent = (
 
     const handleAdvanceFromTicketStep = async (data) => {
         if (formValues?.promoCode && !promoCode && promo.status !== PROMO_STATUS.SUGGESTED) {
-            promo.setValidationError(T.translate('promo_code.unapplied_code_warning'));
+            setUnappliedCodeWarning(T.translate('promo_code.unapplied_code_warning'));
             return;
         }
         // Re-validate manual codes with final quantity before advancing
@@ -406,7 +415,7 @@ const RegistrationFormContent = (
                                 reservation={reservation}
                                 isActive={step === STEP_SELECT_TICKET_TYPE}
                                 allowPromoCodes={allowPromoCodes}
-                                promo={promo}
+                                promo={{ ...promo, validationError: unappliedCodeWarning ?? promo.validationError }}
                                 promoCode={promoCode}
                                 promoCodeAllowsReassign={promoCodeAllowsReassign}
                                 changeForm={mergeFormValues}

@@ -238,7 +238,6 @@ const usePromoCode = ({
         onRemove,
         onRevalidate,
         onInputChange,
-        setValidationError: setManualError,
     };
 };
 

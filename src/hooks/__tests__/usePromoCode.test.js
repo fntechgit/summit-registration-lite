@@ -638,14 +638,6 @@ describe('validationError', () => {
         expect(result.current.validationError).toBe('Promo code XYZ can not be applied to Ticket Type Standard.');
     });
 
-    it('setValidationError exposed for external use', () => {
-        const { result } = renderHook(() => usePromoCode(createDefaultProps()));
-
-        act(() => {
-            result.current.setValidationError('custom error');
-        });
-        expect(result.current.validationError).toBe('custom error');
-    });
 });
 
 // ── isDiscoveredCode ──
@@ -835,17 +827,20 @@ describe('onRevalidate', () => {
     });
 
     it('clears previous validationError before validating', async () => {
-        const validatePromoCode = jest.fn(() => Promise.resolve());
+        const validatePromoCode = jest.fn()
+            .mockRejectedValueOnce({ res: { body: { errors: ['old error'] } } })
+            .mockResolvedValueOnce();
         const { result } = renderHook(() =>
             usePromoCode(createDefaultProps({ validatePromoCode }))
         );
 
-        // Set an error first
-        act(() => {
-            result.current.setValidationError('old error');
+        // First call fails, leaving an error in state
+        await act(async () => {
+            await result.current.onRevalidate(mockTicketQualifying, 1);
         });
         expect(result.current.validationError).toBe('old error');
 
+        // Second call succeeds — should clear the previous error
         await act(async () => {
             await result.current.onRevalidate(mockTicketQualifying, 1);
         });
