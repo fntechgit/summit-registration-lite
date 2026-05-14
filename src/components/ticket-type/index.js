@@ -231,9 +231,10 @@ const TicketTypeComponent = ({
                                 </div>
                             )}
                             {!showTicketSelector && (
-                                <div className={`alert alert-info`} style={{ fontSize: 14, marginTop: 10, marginBottom: 0 }}>
-                                    {T.translate("ticket_type.no_tickets_available")}
-                                </div>
+                                <PromoCodeNotice
+                                    message={T.translate("ticket_type.no_tickets_available")}
+                                    variant="info"
+                                />
                             )}
                             <ReactTooltip id="ticket-quantity-info" place="bottom" overridePosition={avoidTooltipOverflow}>
                                 <div className={styles.moreInfoTooltip}>
