@@ -137,6 +137,7 @@ const RegistrationFormContent = (
         getMyInvitation,
         showMultipleTicketTexts,
         noAllowedTicketsMessage,
+        noTicketsAvailableMessage,
         ticketTaxesErrorMessage,
         authErrorCallback,
         clearWidgetState,
@@ -421,6 +422,7 @@ const RegistrationFormContent = (
                                 changeForm={mergeFormValues}
                                 trackViewItem={trackViewItem}
                                 showMultipleTicketTexts={showMultipleTicketTexts}
+                                noTicketsAvailableMessage={noTicketsAvailableMessage}
                             />
 
                             <PersonalInfoComponent

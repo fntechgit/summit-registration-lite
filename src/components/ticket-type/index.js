@@ -40,7 +40,8 @@ const TicketTypeComponent = ({
     promo,
     promoCode,
     promoCodeAllowsReassign = true,
-    trackViewItem
+    trackViewItem,
+    noTicketsAvailableMessage,
 }) => {
     const [ticket, setTicket] = useState(null);
     const [quantity, setQuantity] = useState(1);
@@ -232,7 +233,7 @@ const TicketTypeComponent = ({
                             )}
                             {!showTicketSelector && (
                                 <PromoCodeNotice
-                                    message={T.translate("ticket_type.no_tickets_available")}
+                                    message={noTicketsAvailableMessage || T.translate("ticket_type.no_tickets_available")}
                                     variant="info"
                                 />
                             )}
