@@ -15,6 +15,8 @@ const usePromoCode = ({
     ticketDataLoaded = false,
     hasTickets = false,
 }) => {
+    // Per-session lock: once the user removes (or auto-apply fails for) a
+    // discovered code, don't re-apply it on this widget mount. Never reset.
     const [userRemovedAutoApply, setUserRemovedAutoApply] = useState(false);
     const [wasAutoApplied, setWasAutoApplied] = useState(false);
     const [suggestionActive, setSuggestionActive] = useState(false);
@@ -123,6 +125,13 @@ const usePromoCode = ({
     // (auto_apply / single code / not already applied / not user-removed) so each
     // call site keeps its own trigger logic. Returns true if the code was applied
     // and (if a ticket was passed) successfully revalidated.
+    //
+    // Note on concurrency: the two call sites (early-auto-apply effect and
+    // onTicketSelected's auto-apply branch) operate on disjoint states by design
+    // (the effect requires `!hasTickets`, the branch requires a selected ticket),
+    // so a true concurrent invocation is unreachable in practice. If a future
+    // change makes that overlap possible, gate this body with a ref-tracked
+    // in-flight flag rather than `applyingCode` (which is captured stale here).
     const tryAutoApply = useCallback(async (ticket) => {
         setWasAutoApplied(true);
         setApplyingCode(true);
@@ -136,13 +145,14 @@ const usePromoCode = ({
                 }
             }
             return true;
-        } catch {
+        } catch (e) {
             setWasAutoApplied(false);
+            handleValidationError(e);
             return false;
         } finally {
             setApplyingCode(false);
         }
-    }, [discoveredPromoCode, applyPromoCode, onRevalidate]);
+    }, [discoveredPromoCode, applyPromoCode, onRevalidate, handleValidationError]);
 
     const onTicketSelected = useCallback(async (ticket) => {
         const qualifies = discoveredPromoCode && isCodeValidForTicket(ticket);

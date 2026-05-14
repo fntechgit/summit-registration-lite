@@ -879,3 +879,126 @@ describe('onRevalidate', () => {
         expect(validatePromoCode).toHaveBeenCalledWith({ id: 42, ticketQuantity: 7, sub_type: 'PrePaid' });
     });
 });
+
+// ── Early auto-apply (no-tickets-available scenario) ──
+
+describe('early auto-apply', () => {
+    const singleAutoApplyCode = [{
+        code: 'AUTO1',
+        auto_apply: true,
+        allowed_ticket_types: [{ id: 1 }],
+        quantity_per_account: 5,
+        remaining_quantity_per_account: 4,
+        quantity_available: 100,
+    }];
+
+    const flushPromises = () => new Promise(resolve => setImmediate(resolve));
+
+    it('fires applyPromoCode when ticket data loaded with no tickets and a single auto_apply code', async () => {
+        // After applyPromoCode resolves, simulate the Redux state update by
+        // re-rendering with promoCode set (the real flow does this via dispatch).
+        // Without it, the effect would re-fire on every render in this isolated test.
+        const applyPromoCode = jest.fn(() => Promise.resolve());
+        const baseProps = createDefaultProps({
+            discoveredPromoCodes: singleAutoApplyCode,
+            applyPromoCode,
+            ticketDataLoaded: true,
+            hasTickets: false,
+        });
+        const { rerender } = renderHook((props) => usePromoCode(props), { initialProps: baseProps });
+        await act(async () => { await flushPromises(); });
+        rerender({ ...baseProps, promoCode: 'AUTO1' });
+        expect(applyPromoCode).toHaveBeenCalledWith('AUTO1');
+    });
+
+    it('does not fire when tickets are already available', async () => {
+        const applyPromoCode = jest.fn(() => Promise.resolve());
+        renderHook(() =>
+            usePromoCode(createDefaultProps({
+                discoveredPromoCodes: singleAutoApplyCode,
+                applyPromoCode,
+                ticketDataLoaded: true,
+                hasTickets: true,
+            }))
+        );
+        await act(async () => { await flushPromises(); });
+        expect(applyPromoCode).not.toHaveBeenCalled();
+    });
+
+    it('does not fire when ticket data is still loading', async () => {
+        const applyPromoCode = jest.fn(() => Promise.resolve());
+        renderHook(() =>
+            usePromoCode(createDefaultProps({
+                discoveredPromoCodes: singleAutoApplyCode,
+                applyPromoCode,
+                ticketDataLoaded: false,
+                hasTickets: false,
+            }))
+        );
+        await act(async () => { await flushPromises(); });
+        expect(applyPromoCode).not.toHaveBeenCalled();
+    });
+
+    it('does not fire when more than one code is discovered', async () => {
+        const applyPromoCode = jest.fn(() => Promise.resolve());
+        const codes = [
+            ...singleAutoApplyCode,
+            { code: 'AUTO2', auto_apply: true, allowed_ticket_types: [] },
+        ];
+        renderHook(() =>
+            usePromoCode(createDefaultProps({
+                discoveredPromoCodes: codes,
+                applyPromoCode,
+                ticketDataLoaded: true,
+                hasTickets: false,
+            }))
+        );
+        await act(async () => { await flushPromises(); });
+        expect(applyPromoCode).not.toHaveBeenCalled();
+    });
+
+    it('surfaces an error via handleValidationError when applyPromoCode rejects', async () => {
+        const apiError = { res: { body: { errors: ['discovery code failed'] } } };
+        const applyPromoCode = jest.fn(() => Promise.reject(apiError));
+        const { result } = renderHook(() =>
+            usePromoCode(createDefaultProps({
+                discoveredPromoCodes: singleAutoApplyCode,
+                applyPromoCode,
+                ticketDataLoaded: true,
+                hasTickets: false,
+            }))
+        );
+        await act(async () => { await flushPromises(); });
+        expect(applyPromoCode).toHaveBeenCalledWith('AUTO1');
+        expect(result.current.validationError).toBe('discovery code failed');
+    });
+});
+
+// ── INVALID status when applied code yields no tickets ──
+
+describe('status: INVALID without ticket', () => {
+    it('flips applied code with no tickets and ticketDataLoaded to INVALID', () => {
+        const { result } = renderHook(() =>
+            usePromoCode(createDefaultProps({
+                promoCode: 'BAD',
+                promoCodeVerified: null,
+                ticketDataLoaded: true,
+                hasTickets: false,
+            }))
+        );
+        expect(result.current.status).toBe(PROMO_STATUS.INVALID);
+        expect(result.current.validationError).toBe(T.translate('promo_code.invalid_code'));
+    });
+
+    it('stays APPLYING while ticket data is still loading', () => {
+        const { result } = renderHook(() =>
+            usePromoCode(createDefaultProps({
+                promoCode: 'PENDING',
+                promoCodeVerified: null,
+                ticketDataLoaded: false,
+                hasTickets: false,
+            }))
+        );
+        expect(result.current.status).toBe(PROMO_STATUS.APPLYING);
+    });
+});

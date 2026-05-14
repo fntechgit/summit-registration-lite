@@ -26,7 +26,9 @@ const PromoCodeInput = ({ promoStatus, promoCode, suggestedCode, wasAutoApplied,
         if (!promoCode) setUserTypedValue('');
     }, [promoCode]);
 
-    const isApplied = promoStatus === PROMO_STATUS.APPLYING || promoStatus === PROMO_STATUS.VALIDATING
+    // Lock the input + show Remove (instead of Apply) whenever a code is in flight
+    // or has settled (valid or invalid). The user must explicitly Remove to edit again.
+    const isLocked = promoStatus === PROMO_STATUS.APPLYING || promoStatus === PROMO_STATUS.VALIDATING
         || promoStatus === PROMO_STATUS.VALID || promoStatus === PROMO_STATUS.INVALID;
 
     const inputValue = useMemo(() => {
@@ -53,7 +55,7 @@ const PromoCodeInput = ({ promoStatus, promoCode, suggestedCode, wasAutoApplied,
         }
     }, [promoStatus, wasAutoApplied]);
 
-    const canApply = !isApplied && !!inputValue;
+    const canApply = !isLocked && !!inputValue;
 
     const handleInputChange = (value) => {
         setUserTypedValue(value);
@@ -73,7 +75,7 @@ const PromoCodeInput = ({ promoStatus, promoCode, suggestedCode, wasAutoApplied,
                     }
                 </span>
                 <div className={styles.promoCodeInput}>
-                    <input className={`${isApplied ? styles.promoCodeActive : ''}`}
+                    <input className={`${isLocked ? styles.promoCodeActive : ''}`}
                         type="text"
                         value={inputValue}
                         onChange={(ev) => handleInputChange(ev.target.value)}
@@ -81,13 +83,13 @@ const PromoCodeInput = ({ promoStatus, promoCode, suggestedCode, wasAutoApplied,
                         onKeyDown={(e) => {
                             if (e.key === "Enter" && canApply) onApply(inputValue)
                         }}
-                        readOnly={isApplied} />
+                        readOnly={isLocked} />
 
                     {(promoStatus === PROMO_STATUS.VALIDATING || promoStatus === PROMO_STATUS.APPLYING) && <span className={`${styles.statusIcon} ${styles.spinner}`} />}
                     {promoStatus === PROMO_STATUS.VALID && <span className={`${styles.statusIcon} ${styles.valid}`}>✓</span>}
                     {promoStatus === PROMO_STATUS.INVALID && <span className={`${styles.statusIcon} ${styles.invalid}`}>✕</span>}
                     <div className={`${styles.codeButtonWrapper} ${inputValue ? '' : styles.noCode}`}>
-                        {isApplied ?
+                        {isLocked ?
                             <button onClick={onRemove}>Remove</button>
                             :
                             <button disabled={!canApply} onClick={() => onApply(inputValue)}>Apply</button>
