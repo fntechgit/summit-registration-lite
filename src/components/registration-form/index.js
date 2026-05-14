@@ -235,7 +235,7 @@ const RegistrationFormContent = (
 
     useEffect(() => {
         setFormErrors([]);
-    }, [step, promoCode])
+    }, [step])
 
     // Discovery: fetch qualifying promo codes after auth
     useEffect(() => {
