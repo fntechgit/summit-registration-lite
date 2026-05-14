@@ -97,7 +97,7 @@ const TicketTypeComponent = ({
         }
     }, [promoCode, originalTicketTypes])
 
-    const showTicketSelector = allowedTicketTypes.length > 0 || !!promoCode;
+    const showTicketSelector = allowedTicketTypes.length > 0;
 
     const isPrePaidReservation = useMemo(
         () => reservation ? isPrePaidOrder(reservation) : false,
