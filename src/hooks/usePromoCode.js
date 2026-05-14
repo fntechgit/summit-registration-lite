@@ -14,6 +14,11 @@ const usePromoCode = ({
     clearFormErrors,
     ticketDataLoaded = false,
     hasTickets = false,
+    // Optional caller-provided message that takes precedence over the hook's
+    // own error sources. Used by the form to surface step-level warnings
+    // (e.g. "you typed a code but didn't click Apply") through the same
+    // notice the hook drives.
+    errorOverride = null,
 }) => {
     // Per-session lock: once the user removes (or auto-apply fails for) a
     // discovered code, don't re-apply it on this widget mount. Never reset.
@@ -52,8 +57,9 @@ const usePromoCode = ({
     }, [isApplied, promoCodeVerified, promoCodeValidating, suggestionActive, suggestionDismissed, applyingCode, ticketDataLoaded, hasTickets]);
 
     // Single source of truth for the error shown to the user.
-    // Manual/API errors override the generic status-derived "invalid code" message.
-    const validationError = manualError
+    // Precedence: caller-provided override > manual/API error > status-derived "invalid code".
+    const validationError = errorOverride
+        ?? manualError
         ?? (status === PROMO_STATUS.INVALID ? T.translate('promo_code.invalid_code') : null);
 
     // --- Derived values ---
@@ -238,20 +244,23 @@ const usePromoCode = ({
     }, [discoveredPromoCode, onFormPromoCodeChange]);
 
     return {
-        status,
-        isReady,
-        isDiscoveredCode,
-        validationError,
-        suggestedCode,
-        wasAutoApplied,
-        activeDiscoveredCode,
-        maxQuantityFromPromo,
-        perAccountLimit,
-        onTicketSelected,
-        onApply,
-        onRemove,
-        onRevalidate,
-        onInputChange,
+        state: {
+            status,
+            isReady,
+            isDiscoveredCode,
+            validationError,
+            suggestedCode,
+            wasAutoApplied,
+            maxQuantityFromPromo,
+            perAccountLimit,
+        },
+        actions: {
+            onTicketSelected,
+            onApply,
+            onRemove,
+            onRevalidate,
+            onInputChange,
+        },
     };
 };
 
