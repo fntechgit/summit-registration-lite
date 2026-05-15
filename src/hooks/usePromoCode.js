@@ -3,22 +3,26 @@ import T from 'i18n-react';
 import { PROMO_STATUS } from '../utils/constants';
 
 const usePromoCode = ({
+    // Redux state
     discoveredPromoCodes,
     promoCode,
     promoCodeVerified,
     promoCodeValidating,
+
+    // Redux dispatchers
     applyPromoCode,
     removePromoCode,
     validatePromoCode,
-    onFormPromoCodeChange,
-    clearFormErrors,
+
+    // Form integration
     ticketDataLoaded = false,
     hasTickets = false,
+    setFormPromoCode,
 }) => {
     // Per-session lock: once the user removes (or auto-apply fails for) a
     // discovered code, don't re-apply it on this widget mount. Never reset.
     const [userRemovedAutoApply, setUserRemovedAutoApply] = useState(false);
-    const [wasAutoApplied, setWasAutoApplied] = useState(false);
+    const [isAutoApplied, setIsAutoApplied] = useState(false);
     const [suggestionActive, setSuggestionActive] = useState(false);
     const [suggestionDismissed, setSuggestionDismissed] = useState(false);
     // Error written by handleValidationError (API) or the form (unapplied-code warning).
@@ -51,8 +55,9 @@ const usePromoCode = ({
         return PROMO_STATUS.IDLE;
     }, [isApplied, promoCodeVerified, promoCodeValidating, suggestionActive, suggestionDismissed, applyingCode, ticketDataLoaded, hasTickets]);
 
-    // Single source of truth for the error shown to the user.
-    // Manual/API errors override the generic status-derived "invalid code" message.
+    // Hook's own validation error. Composed from the in-flight API error (if any)
+    // and the status-derived "invalid code" message when status is INVALID.
+    // Consumers may layer their own warning on top before display.
     const validationError = manualError
         ?? (status === PROMO_STATUS.INVALID ? T.translate('promo_code.invalid_code') : null);
 
@@ -79,6 +84,8 @@ const usePromoCode = ({
         return caps.length > 0 ? Math.min(...caps) : null;
     }, [activeDiscoveredCode]);
 
+    // True when the user can safely advance from the ticket step
+    // (no in-flight promo apply/validate and no INVALID state to block on).
     const isReady = status === PROMO_STATUS.IDLE
         || status === PROMO_STATUS.SUGGESTED
         || status === PROMO_STATUS.VALID;
@@ -133,20 +140,20 @@ const usePromoCode = ({
     // change makes that overlap possible, gate this body with a ref-tracked
     // in-flight flag rather than `applyingCode` (which is captured stale here).
     const tryAutoApply = useCallback(async (ticket) => {
-        setWasAutoApplied(true);
+        setIsAutoApplied(true);
         setApplyingCode(true);
         try {
             await applyPromoCode(discoveredPromoCode.code);
             if (ticket) {
                 const valid = await onRevalidate(ticket, 1);
                 if (!valid) {
-                    setWasAutoApplied(false);
+                    setIsAutoApplied(false);
                     return false;
                 }
             }
             return true;
         } catch (e) {
-            setWasAutoApplied(false);
+            setIsAutoApplied(false);
             handleValidationError(e);
             return false;
         } finally {
@@ -171,11 +178,11 @@ const usePromoCode = ({
         // Discovered code is currently applied
         if (isDiscoveredCode) {
             if (!qualifies) {
-                setWasAutoApplied(false);
+                setIsAutoApplied(false);
                 removePromoCode();
             } else {
                 const valid = await onRevalidate(ticket, 1);
-                if (!valid) setWasAutoApplied(false);
+                if (!valid) setIsAutoApplied(false);
             }
             return;
         }
@@ -203,7 +210,6 @@ const usePromoCode = ({
 
     const onApply = useCallback(async (code, ticket, quantity) => {
         setManualError(null);
-        clearFormErrors();
         setApplyingCode(true);
         try {
             await applyPromoCode(code);
@@ -215,43 +221,53 @@ const usePromoCode = ({
             await onRevalidate(ticket, quantity);
         }
         setApplyingCode(false);
-    }, [applyPromoCode, onRevalidate, clearFormErrors]);
+    }, [applyPromoCode, onRevalidate]);
 
     const onRemove = useCallback(() => {
-        if (wasAutoApplied || isDiscoveredCode) setUserRemovedAutoApply(true);
+        if (isAutoApplied || isDiscoveredCode) setUserRemovedAutoApply(true);
 
-        setWasAutoApplied(false);
+        setIsAutoApplied(false);
         setManualError(null);
         setSuggestionDismissed(false);
         if (discoveredPromoCode) setSuggestionActive(true);
 
-        clearFormErrors();
-        onFormPromoCodeChange('');
+        setFormPromoCode('');
 
         removePromoCode();
-    }, [wasAutoApplied, isDiscoveredCode, discoveredPromoCode, removePromoCode, clearFormErrors, onFormPromoCodeChange]);
+    }, [isAutoApplied, isDiscoveredCode, discoveredPromoCode, removePromoCode, setFormPromoCode]);
 
     const onInputChange = useCallback((value) => {
         setManualError(null);
         setSuggestionDismissed(value !== discoveredPromoCode?.code);
-        onFormPromoCodeChange(value);
-    }, [discoveredPromoCode, onFormPromoCodeChange]);
+        setFormPromoCode(value);
+    }, [discoveredPromoCode, setFormPromoCode]);
 
     return {
-        status,
-        isReady,
-        isDiscoveredCode,
-        validationError,
-        suggestedCode,
-        wasAutoApplied,
-        activeDiscoveredCode,
-        maxQuantityFromPromo,
-        perAccountLimit,
-        onTicketSelected,
-        onApply,
-        onRemove,
-        onRevalidate,
-        onInputChange,
+        state: {
+            // Status (what's happening with the applied/suggested code)
+            status,
+            isReady,
+            validationError,
+
+            // Applied code origin
+            isDiscoveredCode,
+            isAutoApplied,
+
+            // Discovery / suggestion
+            suggestedCode,
+
+            // Quantity caps from the active discovered code
+            maxQuantityFromPromo,
+            perAccountLimit,
+        },
+        actions: {
+            // Ordered by lifecycle: input → apply → ticket change → revalidate → remove
+            onInputChange,
+            onApply,
+            onTicketSelected,
+            onRevalidate,
+            onRemove,
+        },
     };
 };
 

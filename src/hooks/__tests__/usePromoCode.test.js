@@ -37,8 +37,7 @@ const createDefaultProps = (overrides = {}) => ({
     applyPromoCode: jest.fn(() => Promise.resolve()),
     removePromoCode: jest.fn(),
     validatePromoCode: jest.fn(() => Promise.resolve()),
-    onFormPromoCodeChange: jest.fn(),
-    clearFormErrors: jest.fn(),
+    setFormPromoCode: jest.fn(),
     ...overrides,
 });
 
@@ -49,7 +48,7 @@ describe('discovery selection', () => {
         const { result } = renderHook(() =>
             usePromoCode(createDefaultProps({ discoveredPromoCodes: mockDiscoveredCodes }))
         );
-        expect(result.current.suggestedCode).toBe('AUTO1');
+        expect(result.current.state.suggestedCode).toBe('AUTO1');
     });
 
     it('falls back to first code when none has auto_apply', () => {
@@ -57,14 +56,14 @@ describe('discovery selection', () => {
         const { result } = renderHook(() =>
             usePromoCode(createDefaultProps({ discoveredPromoCodes: codes }))
         );
-        expect(result.current.suggestedCode).toBe('A');
+        expect(result.current.state.suggestedCode).toBe('A');
     });
 
     it('returns null for empty array', () => {
         const { result } = renderHook(() =>
             usePromoCode(createDefaultProps({ discoveredPromoCodes: [] }))
         );
-        expect(result.current.suggestedCode).toBeNull();
+        expect(result.current.state.suggestedCode).toBeNull();
     });
 });
 
@@ -73,35 +72,35 @@ describe('discovery selection', () => {
 describe('status derivation', () => {
     it('returns IDLE when no code and no suggestion', () => {
         const { result } = renderHook(() => usePromoCode(createDefaultProps()));
-        expect(result.current.status).toBe(PROMO_STATUS.IDLE);
+        expect(result.current.state.status).toBe(PROMO_STATUS.IDLE);
     });
 
     it('returns APPLYING when code applied and promoCodeVerified is null', () => {
         const { result } = renderHook(() =>
             usePromoCode(createDefaultProps({ promoCode: 'CODE', promoCodeVerified: null }))
         );
-        expect(result.current.status).toBe(PROMO_STATUS.APPLYING);
+        expect(result.current.state.status).toBe(PROMO_STATUS.APPLYING);
     });
 
     it('returns VALIDATING when code applied and promoCodeValidating is true', () => {
         const { result } = renderHook(() =>
             usePromoCode(createDefaultProps({ promoCode: 'CODE', promoCodeValidating: true }))
         );
-        expect(result.current.status).toBe(PROMO_STATUS.VALIDATING);
+        expect(result.current.state.status).toBe(PROMO_STATUS.VALIDATING);
     });
 
     it('returns VALID when code applied and promoCodeVerified is true', () => {
         const { result } = renderHook(() =>
             usePromoCode(createDefaultProps({ promoCode: 'CODE', promoCodeVerified: true }))
         );
-        expect(result.current.status).toBe(PROMO_STATUS.VALID);
+        expect(result.current.state.status).toBe(PROMO_STATUS.VALID);
     });
 
     it('returns INVALID when code applied and promoCodeVerified is false', () => {
         const { result } = renderHook(() =>
             usePromoCode(createDefaultProps({ promoCode: 'CODE', promoCodeVerified: false }))
         );
-        expect(result.current.status).toBe(PROMO_STATUS.INVALID);
+        expect(result.current.state.status).toBe(PROMO_STATUS.INVALID);
     });
 
     it('returns SUGGESTED after selecting qualifying ticket with discovered codes', async () => {
@@ -109,9 +108,9 @@ describe('status derivation', () => {
             usePromoCode(createDefaultProps({ discoveredPromoCodes: [{ code: 'S1', auto_apply: false, allowed_ticket_types: [{ id: 1 }] }] }))
         );
         await act(async () => {
-            await result.current.onTicketSelected(mockTicketQualifying);
+            await result.current.actions.onTicketSelected(mockTicketQualifying);
         });
-        expect(result.current.status).toBe(PROMO_STATUS.SUGGESTED);
+        expect(result.current.state.status).toBe(PROMO_STATUS.SUGGESTED);
     });
 
     it('returns IDLE when suggestion dismissed by user input', async () => {
@@ -119,14 +118,14 @@ describe('status derivation', () => {
             usePromoCode(createDefaultProps({ discoveredPromoCodes: [{ code: 'S1', auto_apply: false, allowed_ticket_types: [{ id: 1 }] }] }))
         );
         await act(async () => {
-            await result.current.onTicketSelected(mockTicketQualifying);
+            await result.current.actions.onTicketSelected(mockTicketQualifying);
         });
-        expect(result.current.status).toBe(PROMO_STATUS.SUGGESTED);
+        expect(result.current.state.status).toBe(PROMO_STATUS.SUGGESTED);
 
         act(() => {
-            result.current.onInputChange('different');
+            result.current.actions.onInputChange('different');
         });
-        expect(result.current.status).toBe(PROMO_STATUS.IDLE);
+        expect(result.current.state.status).toBe(PROMO_STATUS.IDLE);
     });
 });
 
@@ -135,35 +134,35 @@ describe('status derivation', () => {
 describe('derived values', () => {
     it('isReady true for IDLE', () => {
         const { result } = renderHook(() => usePromoCode(createDefaultProps()));
-        expect(result.current.isReady).toBe(true);
+        expect(result.current.state.isReady).toBe(true);
     });
 
     it('isReady true for VALID', () => {
         const { result } = renderHook(() =>
             usePromoCode(createDefaultProps({ promoCode: 'CODE', promoCodeVerified: true }))
         );
-        expect(result.current.isReady).toBe(true);
+        expect(result.current.state.isReady).toBe(true);
     });
 
     it('isReady false for APPLYING', () => {
         const { result } = renderHook(() =>
             usePromoCode(createDefaultProps({ promoCode: 'CODE', promoCodeVerified: null }))
         );
-        expect(result.current.isReady).toBe(false);
+        expect(result.current.state.isReady).toBe(false);
     });
 
     it('isReady false for VALIDATING', () => {
         const { result } = renderHook(() =>
             usePromoCode(createDefaultProps({ promoCode: 'CODE', promoCodeValidating: true }))
         );
-        expect(result.current.isReady).toBe(false);
+        expect(result.current.state.isReady).toBe(false);
     });
 
     it('isReady false for INVALID', () => {
         const { result } = renderHook(() =>
             usePromoCode(createDefaultProps({ promoCode: 'CODE', promoCodeVerified: false }))
         );
-        expect(result.current.isReady).toBe(false);
+        expect(result.current.state.isReady).toBe(false);
     });
 
     it('perAccountLimit from active discovered code when valid', () => {
@@ -174,14 +173,14 @@ describe('derived values', () => {
                 promoCodeVerified: true,
             }))
         );
-        expect(result.current.perAccountLimit).toBe(4);
+        expect(result.current.state.perAccountLimit).toBe(4);
     });
 
     it('perAccountLimit null when no active discovered code', () => {
         const { result } = renderHook(() =>
             usePromoCode(createDefaultProps({ promoCode: 'MANUAL', promoCodeVerified: true }))
         );
-        expect(result.current.perAccountLimit).toBeNull();
+        expect(result.current.state.perAccountLimit).toBeNull();
     });
 
     it('perAccountLimit null when code not verified', () => {
@@ -192,7 +191,7 @@ describe('derived values', () => {
                 promoCodeVerified: null,
             }))
         );
-        expect(result.current.perAccountLimit).toBeNull();
+        expect(result.current.state.perAccountLimit).toBeNull();
     });
 });
 
@@ -204,9 +203,9 @@ describe('onTicketSelected', () => {
             usePromoCode(createDefaultProps({ discoveredPromoCodes: [{ code: 'S1', auto_apply: false, allowed_ticket_types: [{ id: 1 }] }] }))
         );
         await act(async () => {
-            await result.current.onTicketSelected(mockTicketQualifying);
+            await result.current.actions.onTicketSelected(mockTicketQualifying);
         });
-        expect(result.current.status).toBe(PROMO_STATUS.SUGGESTED);
+        expect(result.current.state.status).toBe(PROMO_STATUS.SUGGESTED);
     });
 
     it('does not suggest for non-qualifying ticket', async () => {
@@ -214,9 +213,9 @@ describe('onTicketSelected', () => {
             usePromoCode(createDefaultProps({ discoveredPromoCodes: [{ code: 'S1', auto_apply: false, allowed_ticket_types: [{ id: 1 }] }] }))
         );
         await act(async () => {
-            await result.current.onTicketSelected(mockTicketNonQualifying);
+            await result.current.actions.onTicketSelected(mockTicketNonQualifying);
         });
-        expect(result.current.status).toBe(PROMO_STATUS.IDLE);
+        expect(result.current.state.status).toBe(PROMO_STATUS.IDLE);
     });
 
     it('auto-applies when single code + qualifying + auto_apply', async () => {
@@ -231,11 +230,11 @@ describe('onTicketSelected', () => {
             }))
         );
         await act(async () => {
-            await result.current.onTicketSelected(mockTicketQualifying);
+            await result.current.actions.onTicketSelected(mockTicketQualifying);
         });
         expect(applyPromoCode).toHaveBeenCalledWith('AUTO1');
         expect(validatePromoCode).toHaveBeenCalled();
-        expect(result.current.wasAutoApplied).toBe(true);
+        expect(result.current.state.isAutoApplied).toBe(true);
     });
 
     it('does not auto-apply when multiple codes are returned', async () => {
@@ -247,10 +246,10 @@ describe('onTicketSelected', () => {
             }))
         );
         await act(async () => {
-            await result.current.onTicketSelected(mockTicketQualifying);
+            await result.current.actions.onTicketSelected(mockTicketQualifying);
         });
         expect(applyPromoCode).not.toHaveBeenCalled();
-        expect(result.current.wasAutoApplied).toBe(false);
+        expect(result.current.state.isAutoApplied).toBe(false);
     });
 
     it('does not auto-apply after user removed auto-applied code', async () => {
@@ -264,7 +263,7 @@ describe('onTicketSelected', () => {
 
         // First: auto-apply
         await act(async () => {
-            await result.current.onTicketSelected(mockTicketQualifying);
+            await result.current.actions.onTicketSelected(mockTicketQualifying);
         });
         expect(applyPromoCode).toHaveBeenCalledTimes(1);
 
@@ -273,7 +272,7 @@ describe('onTicketSelected', () => {
 
         // Remove
         act(() => {
-            result.current.onRemove();
+            result.current.actions.onRemove();
         });
 
         // Clear promoCode (simulate Redux update)
@@ -282,11 +281,11 @@ describe('onTicketSelected', () => {
 
         // Re-select same ticket - should NOT auto-apply
         await act(async () => {
-            await result.current.onTicketSelected(mockTicketQualifying);
+            await result.current.actions.onTicketSelected(mockTicketQualifying);
         });
         expect(applyPromoCode).not.toHaveBeenCalled();
         // But suggestion should show
-        expect(result.current.status).toBe(PROMO_STATUS.SUGGESTED);
+        expect(result.current.state.status).toBe(PROMO_STATUS.SUGGESTED);
     });
 
     it('removes discovered code when switching to non-qualifying ticket', async () => {
@@ -300,7 +299,7 @@ describe('onTicketSelected', () => {
         const { result } = renderHook(() => usePromoCode(props));
 
         await act(async () => {
-            await result.current.onTicketSelected(mockTicketNonQualifying);
+            await result.current.actions.onTicketSelected(mockTicketNonQualifying);
         });
         expect(removePromoCode).toHaveBeenCalled();
     });
@@ -319,7 +318,7 @@ describe('onTicketSelected', () => {
         const { result } = renderHook(() => usePromoCode(props));
 
         await act(async () => {
-            await result.current.onTicketSelected(ticket2);
+            await result.current.actions.onTicketSelected(ticket2);
         });
         // AUTO1 allowed_ticket_types is [{ id: 1 }], ticket2 has id: 2
         expect(removePromoCode).toHaveBeenCalled();
@@ -336,14 +335,14 @@ describe('onTicketSelected', () => {
         const { result } = renderHook(() => usePromoCode(props));
 
         await act(async () => {
-            await result.current.onTicketSelected(mockTicketQualifying);
+            await result.current.actions.onTicketSelected(mockTicketQualifying);
         });
         expect(validatePromoCode).toHaveBeenCalledWith(
             expect.objectContaining({ id: 1, ticketQuantity: 1 })
         );
     });
 
-    it('shows error and resets wasAutoApplied when discovered code re-validation fails', async () => {
+    it('shows error and resets isAutoApplied when discovered code re-validation fails', async () => {
         const validatePromoCode = jest.fn(() => Promise.reject({
             res: { body: { errors: ['Code expired'] } }
         }));
@@ -357,7 +356,7 @@ describe('onTicketSelected', () => {
 
         // Simulate auto-applied state
         await act(async () => {
-            await result.current.onTicketSelected(mockTicketQualifying);
+            await result.current.actions.onTicketSelected(mockTicketQualifying);
         });
 
         // Re-render with applied state
@@ -365,10 +364,10 @@ describe('onTicketSelected', () => {
 
         // Switch to another qualifying ticket, validation fails
         await act(async () => {
-            await result.current.onTicketSelected(mockTicketQualifying);
+            await result.current.actions.onTicketSelected(mockTicketQualifying);
         });
-        expect(result.current.validationError).toBe('Code expired');
-        expect(result.current.wasAutoApplied).toBe(false);
+        expect(result.current.state.validationError).toBe('Code expired');
+        expect(result.current.state.isAutoApplied).toBe(false);
     });
 
     it('shows error when auto-apply validation fails', async () => {
@@ -386,10 +385,10 @@ describe('onTicketSelected', () => {
         );
 
         await act(async () => {
-            await result.current.onTicketSelected(mockTicketQualifying);
+            await result.current.actions.onTicketSelected(mockTicketQualifying);
         });
-        expect(result.current.validationError).toBe('Quantity exceeded');
-        expect(result.current.wasAutoApplied).toBe(false);
+        expect(result.current.state.validationError).toBe('Quantity exceeded');
+        expect(result.current.state.isAutoApplied).toBe(false);
     });
 
     it('shows error when manual code re-validation fails on ticket switch', async () => {
@@ -404,27 +403,25 @@ describe('onTicketSelected', () => {
         const { result } = renderHook(() => usePromoCode(props));
 
         await act(async () => {
-            await result.current.onTicketSelected(mockTicketQualifying);
+            await result.current.actions.onTicketSelected(mockTicketQualifying);
         });
-        expect(result.current.validationError).toBe('Not valid for this ticket type');
+        expect(result.current.state.validationError).toBe('Not valid for this ticket type');
     });
 });
 
 // ── onApply ──
 
 describe('onApply', () => {
-    it('clears errors and calls applyPromoCode then validatePromoCode', async () => {
+    it('calls applyPromoCode then validatePromoCode', async () => {
         const applyPromoCode = jest.fn(() => Promise.resolve());
         const validatePromoCode = jest.fn(() => Promise.resolve());
-        const clearFormErrors = jest.fn();
         const { result } = renderHook(() =>
-            usePromoCode(createDefaultProps({ applyPromoCode, validatePromoCode, clearFormErrors }))
+            usePromoCode(createDefaultProps({ applyPromoCode, validatePromoCode }))
         );
 
         await act(async () => {
-            await result.current.onApply('CODE', mockTicketQualifying, 1);
+            await result.current.actions.onApply('CODE', mockTicketQualifying, 1);
         });
-        expect(clearFormErrors).toHaveBeenCalled();
         expect(applyPromoCode).toHaveBeenCalledWith('CODE');
         expect(validatePromoCode).toHaveBeenCalledWith(
             expect.objectContaining({ id: 1, ticketQuantity: 1 })
@@ -439,7 +436,7 @@ describe('onApply', () => {
         );
 
         await act(async () => {
-            await result.current.onApply('CODE', mockTicketQualifying, 1);
+            await result.current.actions.onApply('CODE', mockTicketQualifying, 1);
         });
         expect(validatePromoCode).not.toHaveBeenCalled();
     });
@@ -454,9 +451,9 @@ describe('onApply', () => {
         );
 
         await act(async () => {
-            await result.current.onApply('CODE', mockTicketQualifying, 1);
+            await result.current.actions.onApply('CODE', mockTicketQualifying, 1);
         });
-        expect(result.current.validationError).toBe('Some validation error');
+        expect(result.current.state.validationError).toBe('Some validation error');
     });
 });
 
@@ -470,35 +467,33 @@ describe('onRemove', () => {
 
         // Auto-apply
         await act(async () => {
-            await result.current.onTicketSelected(mockTicketQualifying);
+            await result.current.actions.onTicketSelected(mockTicketQualifying);
         });
-        expect(result.current.wasAutoApplied).toBe(true);
+        expect(result.current.state.isAutoApplied).toBe(true);
 
         // Simulate applied state
         rerender({ ...props, promoCode: 'AUTO1', promoCodeVerified: true });
 
         // Remove
         act(() => {
-            result.current.onRemove();
+            result.current.actions.onRemove();
         });
 
-        expect(result.current.wasAutoApplied).toBe(false);
+        expect(result.current.state.isAutoApplied).toBe(false);
     });
 
-    it('clears validationError and form state', () => {
-        const clearFormErrors = jest.fn();
-        const onFormPromoCodeChange = jest.fn();
+    it('clears the form promo code and removes the applied code', () => {
+        const setFormPromoCode = jest.fn();
         const removePromoCode = jest.fn();
         const { result } = renderHook(() =>
-            usePromoCode(createDefaultProps({ clearFormErrors, onFormPromoCodeChange, removePromoCode }))
+            usePromoCode(createDefaultProps({ setFormPromoCode, removePromoCode }))
         );
 
         act(() => {
-            result.current.onRemove();
+            result.current.actions.onRemove();
         });
 
-        expect(clearFormErrors).toHaveBeenCalled();
-        expect(onFormPromoCodeChange).toHaveBeenCalledWith('');
+        expect(setFormPromoCode).toHaveBeenCalledWith('');
         expect(removePromoCode).toHaveBeenCalled();
     });
 });
@@ -517,15 +512,15 @@ describe('onInputChange', () => {
 
         // Set an error first
         await act(async () => {
-            await result.current.onApply('CODE', mockTicketQualifying, 1);
+            await result.current.actions.onApply('CODE', mockTicketQualifying, 1);
         });
-        expect(result.current.validationError).toBe('error');
+        expect(result.current.state.validationError).toBe('error');
 
         // Type clears it
         act(() => {
-            result.current.onInputChange('new');
+            result.current.actions.onInputChange('new');
         });
-        expect(result.current.validationError).toBeNull();
+        expect(result.current.state.validationError).toBeNull();
     });
 
     it('dismisses suggestion when value differs from discovered code', async () => {
@@ -536,14 +531,14 @@ describe('onInputChange', () => {
         );
 
         await act(async () => {
-            await result.current.onTicketSelected(mockTicketQualifying);
+            await result.current.actions.onTicketSelected(mockTicketQualifying);
         });
-        expect(result.current.status).toBe(PROMO_STATUS.SUGGESTED);
+        expect(result.current.state.status).toBe(PROMO_STATUS.SUGGESTED);
 
         act(() => {
-            result.current.onInputChange('different');
+            result.current.actions.onInputChange('different');
         });
-        expect(result.current.status).toBe(PROMO_STATUS.IDLE);
+        expect(result.current.state.status).toBe(PROMO_STATUS.IDLE);
     });
 
     it('restores suggestion when value matches discovered code', async () => {
@@ -554,30 +549,30 @@ describe('onInputChange', () => {
         );
 
         await act(async () => {
-            await result.current.onTicketSelected(mockTicketQualifying);
+            await result.current.actions.onTicketSelected(mockTicketQualifying);
         });
 
         act(() => {
-            result.current.onInputChange('different');
+            result.current.actions.onInputChange('different');
         });
-        expect(result.current.status).toBe(PROMO_STATUS.IDLE);
+        expect(result.current.state.status).toBe(PROMO_STATUS.IDLE);
 
         act(() => {
-            result.current.onInputChange('S1');
+            result.current.actions.onInputChange('S1');
         });
-        expect(result.current.status).toBe(PROMO_STATUS.SUGGESTED);
+        expect(result.current.state.status).toBe(PROMO_STATUS.SUGGESTED);
     });
 
-    it('calls onFormPromoCodeChange', () => {
-        const onFormPromoCodeChange = jest.fn();
+    it('calls setFormPromoCode', () => {
+        const setFormPromoCode = jest.fn();
         const { result } = renderHook(() =>
-            usePromoCode(createDefaultProps({ onFormPromoCodeChange }))
+            usePromoCode(createDefaultProps({ setFormPromoCode }))
         );
 
         act(() => {
-            result.current.onInputChange('test');
+            result.current.actions.onInputChange('test');
         });
-        expect(onFormPromoCodeChange).toHaveBeenCalledWith('test');
+        expect(setFormPromoCode).toHaveBeenCalledWith('test');
     });
 
     it('dismisses suggestion when input is cleared', async () => {
@@ -588,20 +583,20 @@ describe('onInputChange', () => {
         );
 
         await act(async () => {
-            await result.current.onTicketSelected(mockTicketQualifying);
+            await result.current.actions.onTicketSelected(mockTicketQualifying);
         });
-        expect(result.current.status).toBe(PROMO_STATUS.SUGGESTED);
+        expect(result.current.state.status).toBe(PROMO_STATUS.SUGGESTED);
 
         // Type exact discovered code then clear
         act(() => {
-            result.current.onInputChange('S1');
+            result.current.actions.onInputChange('S1');
         });
-        expect(result.current.status).toBe(PROMO_STATUS.SUGGESTED);
+        expect(result.current.state.status).toBe(PROMO_STATUS.SUGGESTED);
 
         act(() => {
-            result.current.onInputChange('');
+            result.current.actions.onInputChange('');
         });
-        expect(result.current.status).toBe(PROMO_STATUS.IDLE);
+        expect(result.current.state.status).toBe(PROMO_STATUS.IDLE);
     });
 });
 
@@ -618,9 +613,9 @@ describe('validationError', () => {
         );
 
         await act(async () => {
-            await result.current.onApply('XYZ', mockTicketQualifying, 1);
+            await result.current.actions.onApply('XYZ', mockTicketQualifying, 1);
         });
-        expect(result.current.validationError).toBe(T.translate('promo_code.invalid_code'));
+        expect(result.current.state.validationError).toBe(T.translate('promo_code.invalid_code'));
     });
 
     it('passes through other error messages', async () => {
@@ -633,9 +628,9 @@ describe('validationError', () => {
         );
 
         await act(async () => {
-            await result.current.onApply('XYZ', mockTicketQualifying, 1);
+            await result.current.actions.onApply('XYZ', mockTicketQualifying, 1);
         });
-        expect(result.current.validationError).toBe('Promo code XYZ can not be applied to Ticket Type Standard.');
+        expect(result.current.state.validationError).toBe('Promo code XYZ can not be applied to Ticket Type Standard.');
     });
 
 });
@@ -651,7 +646,7 @@ describe('isDiscoveredCode', () => {
                 promoCodeVerified: true,
             }))
         );
-        expect(result.current.isDiscoveredCode).toBe(true);
+        expect(result.current.state.isDiscoveredCode).toBe(true);
     });
 
     it('false when applied code does not match discovered code', () => {
@@ -662,21 +657,21 @@ describe('isDiscoveredCode', () => {
                 promoCodeVerified: true,
             }))
         );
-        expect(result.current.isDiscoveredCode).toBe(false);
+        expect(result.current.state.isDiscoveredCode).toBe(false);
     });
 
     it('false when no code applied', () => {
         const { result } = renderHook(() =>
             usePromoCode(createDefaultProps({ discoveredPromoCodes: mockDiscoveredCodes }))
         );
-        expect(result.current.isDiscoveredCode).toBe(false);
+        expect(result.current.state.isDiscoveredCode).toBe(false);
     });
 
     it('false when no discovered codes', () => {
         const { result } = renderHook(() =>
             usePromoCode(createDefaultProps({ promoCode: 'CODE', promoCodeVerified: true }))
         );
-        expect(result.current.isDiscoveredCode).toBe(false);
+        expect(result.current.state.isDiscoveredCode).toBe(false);
     });
 });
 
@@ -692,7 +687,7 @@ describe('maxQuantityFromPromo', () => {
             }))
         );
         // remaining_quantity_per_account=4, quantity_available=100 → min is 4
-        expect(result.current.maxQuantityFromPromo).toBe(4);
+        expect(result.current.state.maxQuantityFromPromo).toBe(4);
     });
 
     it('uses quantity_available when it is tighter', () => {
@@ -712,14 +707,14 @@ describe('maxQuantityFromPromo', () => {
             }))
         );
         // remaining=8, quantity_available=3 → min is 3
-        expect(result.current.maxQuantityFromPromo).toBe(3);
+        expect(result.current.state.maxQuantityFromPromo).toBe(3);
     });
 
     it('null when no active discovered code', () => {
         const { result } = renderHook(() =>
             usePromoCode(createDefaultProps({ promoCode: 'MANUAL', promoCodeVerified: true }))
         );
-        expect(result.current.maxQuantityFromPromo).toBeNull();
+        expect(result.current.state.maxQuantityFromPromo).toBeNull();
     });
 
     it('null when code not verified', () => {
@@ -730,7 +725,7 @@ describe('maxQuantityFromPromo', () => {
                 promoCodeVerified: null,
             }))
         );
-        expect(result.current.maxQuantityFromPromo).toBeNull();
+        expect(result.current.state.maxQuantityFromPromo).toBeNull();
     });
 
     it('uses only remaining_quantity_per_account when quantity_available is null (unlimited)', () => {
@@ -749,7 +744,7 @@ describe('maxQuantityFromPromo', () => {
                 promoCodeVerified: true,
             }))
         );
-        expect(result.current.maxQuantityFromPromo).toBe(3);
+        expect(result.current.state.maxQuantityFromPromo).toBe(3);
     });
 
     it('caps at 0 when quantity_available is 0 (sold out)', () => {
@@ -768,7 +763,7 @@ describe('maxQuantityFromPromo', () => {
                 promoCodeVerified: true,
             }))
         );
-        expect(result.current.maxQuantityFromPromo).toBe(0);
+        expect(result.current.state.maxQuantityFromPromo).toBe(0);
     });
 
     it('uses only quantity_available when remaining_quantity_per_account is null', () => {
@@ -787,7 +782,7 @@ describe('maxQuantityFromPromo', () => {
                 promoCodeVerified: true,
             }))
         );
-        expect(result.current.maxQuantityFromPromo).toBe(5);
+        expect(result.current.state.maxQuantityFromPromo).toBe(5);
     });
 
     it('null when both limits are unlimited', () => {
@@ -806,7 +801,7 @@ describe('maxQuantityFromPromo', () => {
                 promoCodeVerified: true,
             }))
         );
-        expect(result.current.maxQuantityFromPromo).toBeNull();
+        expect(result.current.state.maxQuantityFromPromo).toBeNull();
     });
 });
 
@@ -821,7 +816,7 @@ describe('onRevalidate', () => {
 
         let valid;
         await act(async () => {
-            valid = await result.current.onRevalidate(mockTicketQualifying, 3);
+            valid = await result.current.actions.onRevalidate(mockTicketQualifying, 3);
         });
         expect(valid).toBe(true);
         expect(validatePromoCode).toHaveBeenCalledWith(
@@ -839,10 +834,10 @@ describe('onRevalidate', () => {
 
         let valid;
         await act(async () => {
-            valid = await result.current.onRevalidate(mockTicketQualifying, 5);
+            valid = await result.current.actions.onRevalidate(mockTicketQualifying, 5);
         });
         expect(valid).toBe(false);
-        expect(result.current.validationError).toBe('Promo code X can not be applied more than 3 times.');
+        expect(result.current.state.validationError).toBe('Promo code X can not be applied more than 3 times.');
     });
 
     it('clears previous validationError before validating', async () => {
@@ -855,15 +850,15 @@ describe('onRevalidate', () => {
 
         // First call fails, leaving an error in state
         await act(async () => {
-            await result.current.onRevalidate(mockTicketQualifying, 1);
+            await result.current.actions.onRevalidate(mockTicketQualifying, 1);
         });
-        expect(result.current.validationError).toBe('old error');
+        expect(result.current.state.validationError).toBe('old error');
 
         // Second call succeeds — should clear the previous error
         await act(async () => {
-            await result.current.onRevalidate(mockTicketQualifying, 1);
+            await result.current.actions.onRevalidate(mockTicketQualifying, 1);
         });
-        expect(result.current.validationError).toBeNull();
+        expect(result.current.state.validationError).toBeNull();
     });
 
     it('passes correct ticket data to validatePromoCode', async () => {
@@ -874,7 +869,7 @@ describe('onRevalidate', () => {
         );
 
         await act(async () => {
-            await result.current.onRevalidate(ticket, 7);
+            await result.current.actions.onRevalidate(ticket, 7);
         });
         expect(validatePromoCode).toHaveBeenCalledWith({ id: 42, ticketQuantity: 7, sub_type: 'PrePaid' });
     });
@@ -970,7 +965,7 @@ describe('early auto-apply', () => {
         );
         await act(async () => { await flushPromises(); });
         expect(applyPromoCode).toHaveBeenCalledWith('AUTO1');
-        expect(result.current.validationError).toBe('discovery code failed');
+        expect(result.current.state.validationError).toBe('discovery code failed');
     });
 });
 
@@ -986,8 +981,8 @@ describe('status: INVALID without ticket', () => {
                 hasTickets: false,
             }))
         );
-        expect(result.current.status).toBe(PROMO_STATUS.INVALID);
-        expect(result.current.validationError).toBe(T.translate('promo_code.invalid_code'));
+        expect(result.current.state.status).toBe(PROMO_STATUS.INVALID);
+        expect(result.current.state.validationError).toBe(T.translate('promo_code.invalid_code'));
     });
 
     it('stays APPLYING while ticket data is still loading', () => {
@@ -999,6 +994,6 @@ describe('status: INVALID without ticket', () => {
                 hasTickets: false,
             }))
         );
-        expect(result.current.status).toBe(PROMO_STATUS.APPLYING);
+        expect(result.current.state.status).toBe(PROMO_STATUS.APPLYING);
     });
 });

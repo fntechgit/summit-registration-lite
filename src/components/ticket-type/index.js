@@ -38,16 +38,19 @@ const TicketTypeComponent = ({
     showMultipleTicketTexts,
     allowPromoCodes,
     promo = {},
+    validationError,
     promoCode,
     promoCodeAllowsReassign = true,
     trackViewItem,
     noTicketsAvailableMessage,
 }) => {
+    const { state: promoState = {}, actions: promoActions = {} } = promo;
+
     const [ticket, setTicket] = useState(null);
     const [quantity, setQuantity] = useState(1);
 
     const minQuantity = 1;
-    const maxQuantity = getTicketMaxQuantity(ticket, promo.maxQuantityFromPromo);
+    const maxQuantity = getTicketMaxQuantity(ticket, promoState.maxQuantityFromPromo);
 
     // Clamp quantity when max changes (e.g. per-account limit kicks in after auto-apply)
     useEffect(() => {
@@ -113,7 +116,7 @@ const TicketTypeComponent = ({
         setTicket(t);
         setQuantity(minQuantity);
         trackViewItem(t);
-        await promo.onTicketSelected(t);
+        await promoActions.onTicketSelected(t);
     }
 
     const incrementQuantity = () => setQuantity(quantity + 1);
@@ -121,7 +124,7 @@ const TicketTypeComponent = ({
     const decrementQuantity = () => setQuantity(quantity - 1);
 
     const handleApplyPromoCode = async (code) => {
-        await promo.onApply(code, ticket, quantity);
+        await promoActions.onApply(code, ticket, quantity);
     }
 
     return (
@@ -246,26 +249,26 @@ const TicketTypeComponent = ({
                             {allowPromoCodes &&
                                 <>
                                     <PromoCodeInput
-                                        promoStatus={promo.status}
+                                        promoStatus={promoState.status}
                                         promoCode={promoCode}
-                                        suggestedCode={promo.suggestedCode}
-                                        wasAutoApplied={promo.wasAutoApplied}
-                                        onInputChange={promo.onInputChange}
+                                        suggestedCode={promoState.suggestedCode}
+                                        isAutoApplied={promoState.isAutoApplied}
+                                        onInputChange={promoActions.onInputChange}
                                         onApply={handleApplyPromoCode}
-                                        onRemove={promo.onRemove}
+                                        onRemove={promoActions.onRemove}
                                         showMultipleTicketTexts={showMultipleTicketTexts} />
                                 </>
                             }
-                            {promo.validationError &&
-                                <PromoCodeNotice message={promo.validationError} variant="error" />
+                            {validationError &&
+                                <PromoCodeNotice message={validationError} variant="error" />
                             }
-                            {ticket && promo.perAccountLimit != null &&
+                            {ticket && promoState.perAccountLimit != null &&
                                 <PromoCodeNotice
                                     message={T.translate(
-                                        promo.perAccountLimit === 1
+                                        promoState.perAccountLimit === 1
                                             ? 'promo_code.per_account_limit_one'
                                             : 'promo_code.per_account_limit_other',
-                                        { limit: promo.perAccountLimit }
+                                        { limit: promoState.perAccountLimit }
                                     )}
                                     variant="info"
                                 />

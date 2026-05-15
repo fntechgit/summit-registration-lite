@@ -246,7 +246,6 @@ const RegistrationFormContent = (
     }, [profileData, summitData?.id]);
 
     const handleFormPromoCodeChange = useCallback((code) => mergeFormValues({ promoCode: code }), [mergeFormValues]);
-    const handleClearFormErrors = useCallback(() => setFormErrors([]), [setFormErrors]);
 
     const promo = usePromoCode({
         discoveredPromoCodes,
@@ -256,19 +255,25 @@ const RegistrationFormContent = (
         applyPromoCode,
         removePromoCode,
         validatePromoCode,
-        onFormPromoCodeChange: handleFormPromoCodeChange,
-        clearFormErrors: handleClearFormErrors,
+        setFormPromoCode: handleFormPromoCodeChange,
         ticketDataLoaded: ticketDataLoaded && !ticketDataError,
         hasTickets: allowedTicketTypes.length > 0,
     });
 
+    // Local destructure for readability at call sites.
+    const { state: promoState, actions: promoActions } = promo;
+
+    // Error rendered in the promo notice slot — form-level warning layered on top
+    // of the hook's own validation error (API rejection or status-derived).
+    const ticketStepError = unappliedCodeWarning ?? promoState.validationError;
+
     // Clear the unapplied-code warning once the condition that would have raised it
     // no longer holds (input cleared, code applied, or a suggestion is showing).
     useEffect(() => {
-        if (!formValues?.promoCode || promoCode || promo.status === PROMO_STATUS.SUGGESTED) {
+        if (!formValues?.promoCode || promoCode || promoState.status === PROMO_STATUS.SUGGESTED) {
             setUnappliedCodeWarning(null);
         }
-    }, [formValues?.promoCode, promoCode, promo.status])
+    }, [formValues?.promoCode, promoCode, promoState.status])
 
     const [ref, { height }] = useMeasure();
 
@@ -324,16 +329,16 @@ const RegistrationFormContent = (
     }
 
     const handleAdvanceFromTicketStep = async (data) => {
-        if (formValues?.promoCode && !promoCode && promo.status !== PROMO_STATUS.SUGGESTED) {
+        if (formValues?.promoCode && !promoCode && promoState.status !== PROMO_STATUS.SUGGESTED) {
             setUnappliedCodeWarning(T.translate('promo_code.unapplied_code_warning'));
             return;
         }
         // Re-validate manual codes with final quantity before advancing
-        if (promoCode && !promo.isDiscoveredCode) {
+        if (promoCode && !promoState.isDiscoveredCode) {
             startWidgetLoading();
             let valid = false;
             try {
-                valid = await promo.onRevalidate(formValues.ticketType, data.ticketQuantity);
+                valid = await promoActions.onRevalidate(formValues.ticketType, data.ticketQuantity);
             } finally {
                 stopWidgetLoading();
             }
@@ -420,7 +425,8 @@ const RegistrationFormContent = (
                                 reservation={reservation}
                                 isActive={step === STEP_SELECT_TICKET_TYPE}
                                 allowPromoCodes={allowPromoCodes}
-                                promo={{ ...promo, validationError: unappliedCodeWarning ?? promo.validationError }}
+                                promo={promo}
+                                validationError={ticketStepError}
                                 promoCode={promoCode}
                                 promoCodeAllowsReassign={promoCodeAllowsReassign}
                                 changeForm={mergeFormValues}
@@ -492,7 +498,7 @@ const RegistrationFormContent = (
                                 step={step}
                                 inPersonDisclaimer={inPersonDisclaimer}
                                 formValues={formValues}
-                                promoIsReady={promo.isReady}
+                                promoIsReady={promoState.isReady}
                                 removeReservedTicket={removeReservedTicket}
                                 onNextStep={handleAdvanceFromTicketStep}
                                 changeStep={changeStep}

@@ -18,7 +18,7 @@ import styles from "./index.module.scss";
 import { avoidTooltipOverflow } from '../../utils/utils';
 import { PROMO_STATUS } from '../../utils/constants';
 
-const PromoCodeInput = ({ promoStatus, promoCode, suggestedCode, wasAutoApplied, onApply, onRemove, onInputChange, showMultipleTicketTexts }) => {
+const PromoCodeInput = ({ promoStatus, promoCode, suggestedCode, isAutoApplied, onApply, onRemove, onInputChange, showMultipleTicketTexts }) => {
 
     const [userTypedValue, setUserTypedValue] = useState('');
 
@@ -40,11 +40,11 @@ const PromoCodeInput = ({ promoStatus, promoCode, suggestedCode, wasAutoApplied,
     const label = useMemo(() => {
         switch (promoStatus) {
             case PROMO_STATUS.VALID:
-                if (wasAutoApplied) return T.translate('promo_code.auto_applied_label');
+                if (isAutoApplied) return T.translate('promo_code.auto_applied_label');
                 return T.translate('promo_code.applied_label');
             case PROMO_STATUS.APPLYING:
             case PROMO_STATUS.VALIDATING:
-                if (wasAutoApplied) return T.translate('promo_code.auto_applied_label');
+                if (isAutoApplied) return T.translate('promo_code.auto_applied_label');
                 return T.translate('promo_code.applying_label');
             case PROMO_STATUS.INVALID:
                 return undefined;
@@ -53,7 +53,7 @@ const PromoCodeInput = ({ promoStatus, promoCode, suggestedCode, wasAutoApplied,
             default:
                 return undefined;
         }
-    }, [promoStatus, wasAutoApplied]);
+    }, [promoStatus, isAutoApplied]);
 
     const canApply = !isLocked && !!inputValue;
 
