@@ -24,7 +24,7 @@ import { getTicketMaxQuantity } from '../../helpers';
 import { avoidTooltipOverflow, getTicketCost, getTicketTaxes, isPrePaidOrder } from '../../utils/utils';
 
 import PromoCodeInput from '../promocode-input';
-import PromoCodeNotice from '../promo-code-notice';
+import TicketNotice from '../ticket-notice';
 import { VIEW_ITEM } from '../../utils/constants';
 
 const TicketTypeComponent = ({
@@ -111,6 +111,42 @@ const TicketTypeComponent = ({
     // check if reassignment is allowed by both promo code AND ticket type
     const ticketTypeAllowsReassign = ticket?.allows_to_reassign !== false;
     const canReassign = promoCodeAllowsReassign && ticketTypeAllowsReassign;
+
+    // Per-order cap is interesting only when it's tighter than what inventory
+    // would otherwise allow (i.e. the binding constraint on the stepper).
+    const ticketPerOrderLimit = useMemo(() => {
+        if (!ticket) return null;
+        const cap = ticket.max_quantity_per_order;
+        const inventory = (ticket.quantity_2_sell ?? Number.MAX_SAFE_INTEGER) - (ticket.quantity_sold ?? 0);
+        return cap != null && cap > 0 && cap < inventory ? cap : null;
+    }, [ticket]);
+
+    // Messages composed for the info notice (stacked in display order):
+    // (1) promo per-account cap, (2) ticket-type per-order cap, (3) non-transferable.
+    const infoMessage = useMemo(() => {
+        if (!ticket) return [];
+        const lines = [];
+        if (promoState.perAccountLimit != null) {
+            lines.push(T.translate(
+                promoState.perAccountLimit === 1
+                    ? 'promo_code.per_account_limit_one'
+                    : 'promo_code.per_account_limit_other',
+                { limit: promoState.perAccountLimit }
+            ));
+        }
+        if (ticketPerOrderLimit != null) {
+            lines.push(T.translate(
+                ticketPerOrderLimit === 1
+                    ? 'ticket_type.max_per_order_one'
+                    : 'ticket_type.max_per_order_other',
+                { limit: ticketPerOrderLimit }
+            ));
+        }
+        if (!canReassign) {
+            lines.push(T.translate('promo_code.non_transferable'));
+        }
+        return lines;
+    }, [ticket, promoState.perAccountLimit, ticketPerOrderLimit, canReassign]);
 
     const handleTicketChange = async (t) => {
         setTicket(t);
@@ -235,7 +271,7 @@ const TicketTypeComponent = ({
                                 </div>
                             )}
                             {!showTicketSelector && (
-                                <PromoCodeNotice
+                                <TicketNotice
                                     message={noTicketsAvailableMessage || T.translate("ticket_type.no_tickets_available")}
                                     variant="info"
                                 />
@@ -259,26 +295,8 @@ const TicketTypeComponent = ({
                                         showMultipleTicketTexts={showMultipleTicketTexts} />
                                 </>
                             }
-                            {validationError &&
-                                <PromoCodeNotice message={validationError} variant="error" />
-                            }
-                            {ticket && promoState.perAccountLimit != null &&
-                                <PromoCodeNotice
-                                    message={T.translate(
-                                        promoState.perAccountLimit === 1
-                                            ? 'promo_code.per_account_limit_one'
-                                            : 'promo_code.per_account_limit_other',
-                                        { limit: promoState.perAccountLimit }
-                                    )}
-                                    variant="info"
-                                />
-                            }
-                            {ticket && !canReassign &&
-                                <PromoCodeNotice
-                                    message={T.translate('promo_code.non_transferable')}
-                                    variant="info"
-                                />
-                            }
+                            <TicketNotice message={validationError} variant="error" />
+                            <TicketNotice message={infoMessage} variant="info" />
                         </div>
                     </animated.div>
 
