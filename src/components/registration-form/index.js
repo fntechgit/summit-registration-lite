@@ -246,7 +246,6 @@ const RegistrationFormContent = (
     }, [profileData, summitData?.id]);
 
     const handleFormPromoCodeChange = useCallback((code) => mergeFormValues({ promoCode: code }), [mergeFormValues]);
-    const handleClearFormErrors = useCallback(() => setFormErrors([]), [setFormErrors]);
 
     const promo = usePromoCode({
         discoveredPromoCodes,
@@ -257,7 +256,6 @@ const RegistrationFormContent = (
         removePromoCode,
         validatePromoCode,
         setFormPromoCode: handleFormPromoCodeChange,
-        clearFormErrors: handleClearFormErrors,
         ticketDataLoaded: ticketDataLoaded && !ticketDataError,
         hasTickets: allowedTicketTypes.length > 0,
     });

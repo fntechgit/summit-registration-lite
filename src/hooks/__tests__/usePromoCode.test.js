@@ -38,7 +38,6 @@ const createDefaultProps = (overrides = {}) => ({
     removePromoCode: jest.fn(),
     validatePromoCode: jest.fn(() => Promise.resolve()),
     setFormPromoCode: jest.fn(),
-    clearFormErrors: jest.fn(),
     ...overrides,
 });
 
@@ -413,18 +412,16 @@ describe('onTicketSelected', () => {
 // ── onApply ──
 
 describe('onApply', () => {
-    it('clears errors and calls applyPromoCode then validatePromoCode', async () => {
+    it('calls applyPromoCode then validatePromoCode', async () => {
         const applyPromoCode = jest.fn(() => Promise.resolve());
         const validatePromoCode = jest.fn(() => Promise.resolve());
-        const clearFormErrors = jest.fn();
         const { result } = renderHook(() =>
-            usePromoCode(createDefaultProps({ applyPromoCode, validatePromoCode, clearFormErrors }))
+            usePromoCode(createDefaultProps({ applyPromoCode, validatePromoCode }))
         );
 
         await act(async () => {
             await result.current.actions.onApply('CODE', mockTicketQualifying, 1);
         });
-        expect(clearFormErrors).toHaveBeenCalled();
         expect(applyPromoCode).toHaveBeenCalledWith('CODE');
         expect(validatePromoCode).toHaveBeenCalledWith(
             expect.objectContaining({ id: 1, ticketQuantity: 1 })
@@ -485,19 +482,17 @@ describe('onRemove', () => {
         expect(result.current.state.isAutoApplied).toBe(false);
     });
 
-    it('clears validationError and form state', () => {
-        const clearFormErrors = jest.fn();
+    it('clears the form promo code and removes the applied code', () => {
         const setFormPromoCode = jest.fn();
         const removePromoCode = jest.fn();
         const { result } = renderHook(() =>
-            usePromoCode(createDefaultProps({ clearFormErrors, setFormPromoCode, removePromoCode }))
+            usePromoCode(createDefaultProps({ setFormPromoCode, removePromoCode }))
         );
 
         act(() => {
             result.current.actions.onRemove();
         });
 
-        expect(clearFormErrors).toHaveBeenCalled();
         expect(setFormPromoCode).toHaveBeenCalledWith('');
         expect(removePromoCode).toHaveBeenCalled();
     });

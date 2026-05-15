@@ -18,7 +18,6 @@ const usePromoCode = ({
     ticketDataLoaded = false,
     hasTickets = false,
     setFormPromoCode,
-    clearFormErrors,
 }) => {
     // Per-session lock: once the user removes (or auto-apply fails for) a
     // discovered code, don't re-apply it on this widget mount. Never reset.
@@ -211,7 +210,6 @@ const usePromoCode = ({
 
     const onApply = useCallback(async (code, ticket, quantity) => {
         setManualError(null);
-        clearFormErrors();
         setApplyingCode(true);
         try {
             await applyPromoCode(code);
@@ -223,7 +221,7 @@ const usePromoCode = ({
             await onRevalidate(ticket, quantity);
         }
         setApplyingCode(false);
-    }, [applyPromoCode, onRevalidate, clearFormErrors]);
+    }, [applyPromoCode, onRevalidate]);
 
     const onRemove = useCallback(() => {
         if (isAutoApplied || isDiscoveredCode) setUserRemovedAutoApply(true);
@@ -233,11 +231,10 @@ const usePromoCode = ({
         setSuggestionDismissed(false);
         if (discoveredPromoCode) setSuggestionActive(true);
 
-        clearFormErrors();
         setFormPromoCode('');
 
         removePromoCode();
-    }, [isAutoApplied, isDiscoveredCode, discoveredPromoCode, removePromoCode, clearFormErrors, setFormPromoCode]);
+    }, [isAutoApplied, isDiscoveredCode, discoveredPromoCode, removePromoCode, setFormPromoCode]);
 
     const onInputChange = useCallback((value) => {
         setManualError(null);
