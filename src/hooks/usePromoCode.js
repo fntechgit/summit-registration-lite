@@ -3,17 +3,22 @@ import T from 'i18n-react';
 import { PROMO_STATUS } from '../utils/constants';
 
 const usePromoCode = ({
+    // Redux state
     discoveredPromoCodes,
     promoCode,
     promoCodeVerified,
     promoCodeValidating,
+
+    // Redux dispatchers
     applyPromoCode,
     removePromoCode,
     validatePromoCode,
-    onFormPromoCodeChange,
-    clearFormErrors,
+
+    // Form integration
     ticketDataLoaded = false,
     hasTickets = false,
+    setFormPromoCode,
+    clearFormErrors,
 }) => {
     // Per-session lock: once the user removes (or auto-apply fails for) a
     // discovered code, don't re-apply it on this widget mount. Never reset.
@@ -229,16 +234,16 @@ const usePromoCode = ({
         if (discoveredPromoCode) setSuggestionActive(true);
 
         clearFormErrors();
-        onFormPromoCodeChange('');
+        setFormPromoCode('');
 
         removePromoCode();
-    }, [isAutoApplied, isDiscoveredCode, discoveredPromoCode, removePromoCode, clearFormErrors, onFormPromoCodeChange]);
+    }, [isAutoApplied, isDiscoveredCode, discoveredPromoCode, removePromoCode, clearFormErrors, setFormPromoCode]);
 
     const onInputChange = useCallback((value) => {
         setManualError(null);
         setSuggestionDismissed(value !== discoveredPromoCode?.code);
-        onFormPromoCodeChange(value);
-    }, [discoveredPromoCode, onFormPromoCodeChange]);
+        setFormPromoCode(value);
+    }, [discoveredPromoCode, setFormPromoCode]);
 
     return {
         state: {

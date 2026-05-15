@@ -37,7 +37,7 @@ const createDefaultProps = (overrides = {}) => ({
     applyPromoCode: jest.fn(() => Promise.resolve()),
     removePromoCode: jest.fn(),
     validatePromoCode: jest.fn(() => Promise.resolve()),
-    onFormPromoCodeChange: jest.fn(),
+    setFormPromoCode: jest.fn(),
     clearFormErrors: jest.fn(),
     ...overrides,
 });
@@ -487,10 +487,10 @@ describe('onRemove', () => {
 
     it('clears validationError and form state', () => {
         const clearFormErrors = jest.fn();
-        const onFormPromoCodeChange = jest.fn();
+        const setFormPromoCode = jest.fn();
         const removePromoCode = jest.fn();
         const { result } = renderHook(() =>
-            usePromoCode(createDefaultProps({ clearFormErrors, onFormPromoCodeChange, removePromoCode }))
+            usePromoCode(createDefaultProps({ clearFormErrors, setFormPromoCode, removePromoCode }))
         );
 
         act(() => {
@@ -498,7 +498,7 @@ describe('onRemove', () => {
         });
 
         expect(clearFormErrors).toHaveBeenCalled();
-        expect(onFormPromoCodeChange).toHaveBeenCalledWith('');
+        expect(setFormPromoCode).toHaveBeenCalledWith('');
         expect(removePromoCode).toHaveBeenCalled();
     });
 });
@@ -568,16 +568,16 @@ describe('onInputChange', () => {
         expect(result.current.state.status).toBe(PROMO_STATUS.SUGGESTED);
     });
 
-    it('calls onFormPromoCodeChange', () => {
-        const onFormPromoCodeChange = jest.fn();
+    it('calls setFormPromoCode', () => {
+        const setFormPromoCode = jest.fn();
         const { result } = renderHook(() =>
-            usePromoCode(createDefaultProps({ onFormPromoCodeChange }))
+            usePromoCode(createDefaultProps({ setFormPromoCode }))
         );
 
         act(() => {
             result.current.actions.onInputChange('test');
         });
-        expect(onFormPromoCodeChange).toHaveBeenCalledWith('test');
+        expect(setFormPromoCode).toHaveBeenCalledWith('test');
     });
 
     it('dismisses suggestion when input is cleared', async () => {

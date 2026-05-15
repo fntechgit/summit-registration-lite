@@ -256,7 +256,7 @@ const RegistrationFormContent = (
         applyPromoCode,
         removePromoCode,
         validatePromoCode,
-        onFormPromoCodeChange: handleFormPromoCodeChange,
+        setFormPromoCode: handleFormPromoCodeChange,
         clearFormErrors: handleClearFormErrors,
         ticketDataLoaded: ticketDataLoaded && !ticketDataError,
         hasTickets: allowedTicketTypes.length > 0,
