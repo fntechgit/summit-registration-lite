@@ -38,6 +38,7 @@ const TicketTypeComponent = ({
     showMultipleTicketTexts,
     allowPromoCodes,
     promo = {},
+    validationError,
     promoCode,
     promoCodeAllowsReassign = true,
     trackViewItem,
@@ -251,15 +252,15 @@ const TicketTypeComponent = ({
                                         promoStatus={promoState.status}
                                         promoCode={promoCode}
                                         suggestedCode={promoState.suggestedCode}
-                                        wasAutoApplied={promoState.wasAutoApplied}
+                                        isAutoApplied={promoState.isAutoApplied}
                                         onInputChange={promoActions.onInputChange}
                                         onApply={handleApplyPromoCode}
                                         onRemove={promoActions.onRemove}
                                         showMultipleTicketTexts={showMultipleTicketTexts} />
                                 </>
                             }
-                            {promoState.validationError &&
-                                <PromoCodeNotice message={promoState.validationError} variant="error" />
+                            {validationError &&
+                                <PromoCodeNotice message={validationError} variant="error" />
                             }
                             {ticket && promoState.perAccountLimit != null &&
                                 <PromoCodeNotice

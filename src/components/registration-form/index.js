@@ -260,11 +260,14 @@ const RegistrationFormContent = (
         clearFormErrors: handleClearFormErrors,
         ticketDataLoaded: ticketDataLoaded && !ticketDataError,
         hasTickets: allowedTicketTypes.length > 0,
-        errorOverride: unappliedCodeWarning,
     });
 
     // Local destructure for readability at call sites.
     const { state: promoState, actions: promoActions } = promo;
+
+    // Error rendered in the promo notice slot — form-level warning layered on top
+    // of the hook's own validation error (API rejection or status-derived).
+    const ticketStepError = unappliedCodeWarning ?? promoState.validationError;
 
     // Clear the unapplied-code warning once the condition that would have raised it
     // no longer holds (input cleared, code applied, or a suggestion is showing).
@@ -425,6 +428,7 @@ const RegistrationFormContent = (
                                 isActive={step === STEP_SELECT_TICKET_TYPE}
                                 allowPromoCodes={allowPromoCodes}
                                 promo={promo}
+                                validationError={ticketStepError}
                                 promoCode={promoCode}
                                 promoCodeAllowsReassign={promoCodeAllowsReassign}
                                 changeForm={mergeFormValues}

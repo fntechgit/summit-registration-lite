@@ -235,7 +235,7 @@ describe('onTicketSelected', () => {
         });
         expect(applyPromoCode).toHaveBeenCalledWith('AUTO1');
         expect(validatePromoCode).toHaveBeenCalled();
-        expect(result.current.state.wasAutoApplied).toBe(true);
+        expect(result.current.state.isAutoApplied).toBe(true);
     });
 
     it('does not auto-apply when multiple codes are returned', async () => {
@@ -250,7 +250,7 @@ describe('onTicketSelected', () => {
             await result.current.actions.onTicketSelected(mockTicketQualifying);
         });
         expect(applyPromoCode).not.toHaveBeenCalled();
-        expect(result.current.state.wasAutoApplied).toBe(false);
+        expect(result.current.state.isAutoApplied).toBe(false);
     });
 
     it('does not auto-apply after user removed auto-applied code', async () => {
@@ -343,7 +343,7 @@ describe('onTicketSelected', () => {
         );
     });
 
-    it('shows error and resets wasAutoApplied when discovered code re-validation fails', async () => {
+    it('shows error and resets isAutoApplied when discovered code re-validation fails', async () => {
         const validatePromoCode = jest.fn(() => Promise.reject({
             res: { body: { errors: ['Code expired'] } }
         }));
@@ -368,7 +368,7 @@ describe('onTicketSelected', () => {
             await result.current.actions.onTicketSelected(mockTicketQualifying);
         });
         expect(result.current.state.validationError).toBe('Code expired');
-        expect(result.current.state.wasAutoApplied).toBe(false);
+        expect(result.current.state.isAutoApplied).toBe(false);
     });
 
     it('shows error when auto-apply validation fails', async () => {
@@ -389,7 +389,7 @@ describe('onTicketSelected', () => {
             await result.current.actions.onTicketSelected(mockTicketQualifying);
         });
         expect(result.current.state.validationError).toBe('Quantity exceeded');
-        expect(result.current.state.wasAutoApplied).toBe(false);
+        expect(result.current.state.isAutoApplied).toBe(false);
     });
 
     it('shows error when manual code re-validation fails on ticket switch', async () => {
@@ -472,7 +472,7 @@ describe('onRemove', () => {
         await act(async () => {
             await result.current.actions.onTicketSelected(mockTicketQualifying);
         });
-        expect(result.current.state.wasAutoApplied).toBe(true);
+        expect(result.current.state.isAutoApplied).toBe(true);
 
         // Simulate applied state
         rerender({ ...props, promoCode: 'AUTO1', promoCodeVerified: true });
@@ -482,7 +482,7 @@ describe('onRemove', () => {
             result.current.actions.onRemove();
         });
 
-        expect(result.current.state.wasAutoApplied).toBe(false);
+        expect(result.current.state.isAutoApplied).toBe(false);
     });
 
     it('clears validationError and form state', () => {
