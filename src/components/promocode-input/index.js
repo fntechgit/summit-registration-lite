@@ -11,30 +11,62 @@
  * limitations under the License.
  **/
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import ReactTooltip from 'react-tooltip';
 import T from 'i18n-react';
 import styles from "./index.module.scss";
-import { avoidTooltipOverflow, isEmptyString } from '../../utils/utils';
+import { avoidTooltipOverflow } from '../../utils/utils';
+import { PROMO_STATUS } from '../../utils/constants';
 
-const PromoCodeInput = ({ label, applyPromoCode, promoCode, promoCodeVerified, promoCodeValidating, removePromoCode, showMultipleTicketTexts, onPromoCodeChange }) => {
+const PromoCodeInput = ({ promoStatus, promoCode, suggestedCode, isAutoApplied, onApply, onRemove, onInputChange, showMultipleTicketTexts }) => {
 
-    const [statePromoCode, setStatePromoCode] = useState(promoCode);
-
-    const handlePromoCodeChange = (value) => {
-        onPromoCodeChange(value);
-        setStatePromoCode(value);
-    }
+    const [userTypedValue, setUserTypedValue] = useState('');
 
     useEffect(() => {
-        if (isEmptyString(promoCode)) handlePromoCodeChange(promoCode);
-    }, [promoCode])
+        if (!promoCode) setUserTypedValue('');
+    }, [promoCode]);
+
+    // Lock the input + show Remove (instead of Apply) whenever a code is in flight
+    // or has settled (valid or invalid). The user must explicitly Remove to edit again.
+    const isLocked = promoStatus === PROMO_STATUS.APPLYING || promoStatus === PROMO_STATUS.VALIDATING
+        || promoStatus === PROMO_STATUS.VALID || promoStatus === PROMO_STATUS.INVALID;
+
+    const inputValue = useMemo(() => {
+        if (promoCode) return promoCode;
+        if (promoStatus === PROMO_STATUS.SUGGESTED) return suggestedCode || '';
+        return userTypedValue;
+    }, [promoCode, promoStatus, suggestedCode, userTypedValue]);
+
+    const label = useMemo(() => {
+        switch (promoStatus) {
+            case PROMO_STATUS.VALID:
+                if (isAutoApplied) return T.translate('promo_code.auto_applied_label');
+                return T.translate('promo_code.applied_label');
+            case PROMO_STATUS.APPLYING:
+            case PROMO_STATUS.VALIDATING:
+                if (isAutoApplied) return T.translate('promo_code.auto_applied_label');
+                return T.translate('promo_code.applying_label');
+            case PROMO_STATUS.INVALID:
+                return undefined;
+            case PROMO_STATUS.SUGGESTED:
+                return T.translate('promo_code.suggestion_label');
+            default:
+                return undefined;
+        }
+    }, [promoStatus, isAutoApplied]);
+
+    const canApply = !isLocked && !!inputValue;
+
+    const handleInputChange = (value) => {
+        setUserTypedValue(value);
+        onInputChange(value);
+    };
 
     return (
         <>
             <div className={styles.promoCodeWrapper}>
                 <span style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <span>{label || 'Do you have a promo code?'}</span>
+                    <span>{label || T.translate('promo_code.default_label')}</span>
                     {showMultipleTicketTexts &&
                         <a data-tip data-for="promo-code-info" className={styles.moreInfo} style={{ margin: 0 }}>
                             <i className="glyphicon glyphicon-info-sign" aria-hidden="true" />{` `}
@@ -43,25 +75,24 @@ const PromoCodeInput = ({ label, applyPromoCode, promoCode, promoCodeVerified, p
                     }
                 </span>
                 <div className={styles.promoCodeInput}>
-                    <input className={`${promoCode ? styles.promoCodeActive : ''}`}
+                    <input className={`${isLocked ? styles.promoCodeActive : ''}`}
                         type="text"
-                        value={statePromoCode}
-                        onChange={(ev) => handlePromoCodeChange(ev.target.value)}
+                        value={inputValue}
+                        onChange={(ev) => handleInputChange(ev.target.value)}
                         placeholder="Enter your promo code"
                         onKeyDown={(e) => {
-                            if (e.key === "Enter")
-                                applyPromoCode(statePromoCode)
+                            if (e.key === "Enter" && canApply) onApply(inputValue)
                         }}
-                        readOnly={!isEmptyString(promoCode)} />
+                        readOnly={isLocked} />
 
-                    {promoCodeValidating && <span className={`${styles.statusIcon} ${styles.spinner}`} />}
-                    {!promoCodeValidating && promoCodeVerified === true && <span className={`${styles.statusIcon} ${styles.valid}`}>✓</span>}
-                    {!promoCodeValidating && promoCodeVerified === false && <span className={`${styles.statusIcon} ${styles.invalid}`}>✕</span>}
-                    <div className={`${styles.codeButtonWrapper} ${statePromoCode ? '' : styles.noCode}`}>
-                        {promoCode !== '' ?
-                            <button onClick={() => removePromoCode()}>Remove</button>
+                    {(promoStatus === PROMO_STATUS.VALIDATING || promoStatus === PROMO_STATUS.APPLYING) && <span className={`${styles.statusIcon} ${styles.spinner}`} />}
+                    {promoStatus === PROMO_STATUS.VALID && <span className={`${styles.statusIcon} ${styles.valid}`}>✓</span>}
+                    {promoStatus === PROMO_STATUS.INVALID && <span className={`${styles.statusIcon} ${styles.invalid}`}>✕</span>}
+                    <div className={`${styles.codeButtonWrapper} ${inputValue ? '' : styles.noCode}`}>
+                        {isLocked ?
+                            <button onClick={onRemove}>Remove</button>
                             :
-                            <button disabled={!statePromoCode} onClick={() => applyPromoCode(statePromoCode)}>Apply</button>
+                            <button disabled={!canApply} onClick={() => onApply(inputValue)}>Apply</button>
                         }
                     </div>
                 </div>

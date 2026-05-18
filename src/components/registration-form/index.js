@@ -13,7 +13,7 @@
  * RegistrationForm - Core registration form component
  **/
 
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import { connect } from "react-redux";
 import PropTypes from 'prop-types';
 import { withReduxProvider } from '../../utils/withReduxProvider';
@@ -42,9 +42,12 @@ import {
     removePromoCode,
     applyPromoCode,
     validatePromoCode,
+    discoverPromoCodes,
     startWidgetLoading,
     stopWidgetLoading
 } from '../../actions';
+
+import usePromoCode from '../../hooks/usePromoCode';
 
 import AjaxLoader from "openstack-uicore-foundation/lib/components/ajaxloader";
 import Clock from "openstack-uicore-foundation/lib/components/clock";
@@ -59,13 +62,13 @@ import ButtonBarComponent from '../button-bar';
 import PurchaseComplete from '../purchase-complete';
 import PasswordlessLoginComponent from '../login-passwordless';
 import TicketOwnedComponent from '../ticket-owned';
-import { buildTrackEvent, getCurrentProvider, handleSentryException } from '../../utils/utils';
+import { buildTrackEvent, getCurrentProvider } from '../../utils/utils';
 import NoAllowedTickets from '../no-allowed-tickets';
 import TicketTaxesError from '../ticket-taxes-error';
 import T from 'i18n-react';
 import { getCurrentUserLanguage } from '../../utils/utils';
 import {
-    ADD_TO_CART, BEGIN_CHECKOUT, PURCHASE_COMPLETE,
+    ADD_TO_CART, BEGIN_CHECKOUT, PURCHASE_COMPLETE, PROMO_STATUS,
     STEP_COMPLETE,
     STEP_PAYMENT,
     STEP_PERSONAL_INFO,
@@ -134,6 +137,7 @@ const RegistrationFormContent = (
         getMyInvitation,
         showMultipleTicketTexts,
         noAllowedTicketsMessage,
+        noTicketsAvailableMessage,
         ticketTaxesErrorMessage,
         authErrorCallback,
         clearWidgetState,
@@ -158,11 +162,13 @@ const RegistrationFormContent = (
         promoCodeVerified,
         promoCodeValidating,
         promoCodeAllowsReassign,
+        discoveredPromoCodes,
         hasDiscount,
         getTicketDiscount,
         removePromoCode,
         applyPromoCode,
         validatePromoCode,
+        discoverPromoCodes,
         startWidgetLoading,
         stopWidgetLoading,
         closeHandlerRef,
@@ -182,12 +188,13 @@ const RegistrationFormContent = (
 
     const [ticketDataError, setTicketDataError] = useState(false);
     const [ticketDataLoaded, setTicketDataLoaded] = useState(false);
+    const [unappliedCodeWarning, setUnappliedCodeWarning] = useState(null);
 
     const { values: formValues, errors: formErrors } = registrationForm;
 
-    const setFormValues = (values) => setRegistrationForm({ ...registrationForm, values });
+    const mergeFormValues = useCallback((partial) => setRegistrationForm(prev => ({ ...prev, values: { ...prev.values, ...partial } })), []);
 
-    const setFormErrors = (errors) => setRegistrationForm({ ...registrationForm, errors });
+    const setFormErrors = useCallback((errors) => setRegistrationForm(prev => ({ ...prev, errors })), []);
 
     const { publicKey, provider } = getCurrentProvider(summitData);
 
@@ -229,7 +236,44 @@ const RegistrationFormContent = (
 
     useEffect(() => {
         setFormErrors([]);
-    }, [step, promoCode])
+    }, [step])
+
+    // Discovery: fetch qualifying promo codes after auth
+    useEffect(() => {
+        if (profileData && summitData?.id) {
+            discoverPromoCodes(summitData.id);
+        }
+    }, [profileData, summitData?.id]);
+
+    const handleFormPromoCodeChange = useCallback((code) => mergeFormValues({ promoCode: code }), [mergeFormValues]);
+
+    const promo = usePromoCode({
+        discoveredPromoCodes,
+        promoCode,
+        promoCodeVerified,
+        promoCodeValidating,
+        applyPromoCode,
+        removePromoCode,
+        validatePromoCode,
+        setFormPromoCode: handleFormPromoCodeChange,
+        ticketDataLoaded: ticketDataLoaded && !ticketDataError,
+        hasTickets: allowedTicketTypes.length > 0,
+    });
+
+    // Local destructure for readability at call sites.
+    const { state: promoState, actions: promoActions } = promo;
+
+    // Error rendered in the promo notice slot — form-level warning layered on top
+    // of the hook's own validation error (API rejection or status-derived).
+    const ticketStepError = unappliedCodeWarning ?? promoState.validationError;
+
+    // Clear the unapplied-code warning once the condition that would have raised it
+    // no longer holds (input cleared, code applied, or a suggestion is showing).
+    useEffect(() => {
+        if (!formValues?.promoCode || promoCode || promoState.status === PROMO_STATUS.SUGGESTED) {
+            setUnappliedCodeWarning(null);
+        }
+    }, [formValues?.promoCode, promoCode, promoState.status])
 
     const [ref, { height }] = useMeasure();
 
@@ -284,39 +328,24 @@ const RegistrationFormContent = (
             });
     }
 
-    const handlePromoCodeValidation = async (ticketData) => {
-        try {
-            await validatePromoCode(ticketData);
-            return true;
-        } catch (e) {
-            if (e?.res?.body) {
-                const errors = e.res.body.errors || [e.res.body.message || 'An error occurred'];
-                setFormErrors(errors);
-            }
-            handleSentryException(e);
-            return false;
-        }
-    }
-
-    const handleValidatePromocode = (data, { onError }) => {
-        // Check if promo code entered but not applied
-        if (data.promoCode && !promoCode) {
-            const errorMsg = `You entered a promo code but it hasn't been applied. Make sure to click the 'Apply' button or remove it before continuing.`;
-            onError(null, { body: { errors: [errorMsg] } });
+    const handleAdvanceFromTicketStep = async (data) => {
+        if (formValues?.promoCode && !promoCode && promoState.status !== PROMO_STATUS.SUGGESTED) {
+            setUnappliedCodeWarning(T.translate('promo_code.unapplied_code_warning'));
             return;
         }
-
-        startWidgetLoading();
-        handlePromoCodeValidation(data)
-            .then((valid) => {
-                if (valid) {
-                    trackAddToCart(data);
-                    changeStep(STEP_PERSONAL_INFO);
-                }
-            })
-            .finally(() => {
+        // Re-validate manual codes with final quantity before advancing
+        if (promoCode && !promoState.isDiscoveredCode) {
+            startWidgetLoading();
+            let valid = false;
+            try {
+                valid = await promoActions.onRevalidate(formValues.ticketType, data.ticketQuantity);
+            } finally {
                 stopWidgetLoading();
-            });
+            }
+            if (!valid) return;
+        }
+        trackAddToCart(data);
+        changeStep(STEP_PERSONAL_INFO);
     }
 
     const trackViewItem = (data) => {
@@ -350,8 +379,6 @@ const RegistrationFormContent = (
             <Clock onTick={(timestamp) => updateClock(timestamp)} timezone={summitData.time_zone_id} />
 
             {profileData && ticketDataError && <TicketTaxesError ticketTaxesErrorMessage={ticketTaxesErrorMessage} retryTicketTaxes={() => handleGetTicketTypesAndTaxes(summitData?.id)} />}
-
-            {noAvailableTickets && <NoAllowedTickets noAllowedTicketsMessage={noAllowedTicketsMessage} />}
 
             {!ticketDataError && (
                 <>
@@ -398,21 +425,14 @@ const RegistrationFormContent = (
                                 reservation={reservation}
                                 isActive={step === STEP_SELECT_TICKET_TYPE}
                                 allowPromoCodes={allowPromoCodes}
-                                applyPromoCode={applyPromoCode}
-                                validatePromoCode={handlePromoCodeValidation}
-                                removePromoCode={() => {
-                                    setFormErrors({});
-                                    setFormValues({ ...formValues, promoCode: "" });
-                                    removePromoCode()
-                                }}
+                                promo={promo}
+                                validationError={ticketStepError}
                                 promoCode={promoCode}
-                                promoCodeVerified={promoCodeVerified}
-                                promoCodeValidating={promoCodeValidating}
                                 promoCodeAllowsReassign={promoCodeAllowsReassign}
-                                formErrors={formErrors}
-                                changeForm={ticketForm => setFormValues({ ...formValues, ...ticketForm })}
+                                changeForm={mergeFormValues}
                                 trackViewItem={trackViewItem}
                                 showMultipleTicketTexts={showMultipleTicketTexts}
+                                noTicketsAvailableMessage={noTicketsAvailableMessage}
                             />
 
                             <PersonalInfoComponent
@@ -422,10 +442,7 @@ const RegistrationFormContent = (
                                 invitation={invitation}
                                 summitId={summitData.id}
                                 changeForm={(personalInformation) => {
-                                    setFormValues({
-                                        ...registrationForm.values,
-                                        personalInformation
-                                    });
+                                    mergeFormValues({ personalInformation });
 
                                     reserveTicket({
                                         provider,
@@ -481,14 +498,9 @@ const RegistrationFormContent = (
                                 step={step}
                                 inPersonDisclaimer={inPersonDisclaimer}
                                 formValues={formValues}
-                                promoCode={promoCode}
-                                promoCodeVerified={promoCodeVerified}
-                                promoCodeValidating={promoCodeValidating}
+                                promoIsReady={promoState.isReady}
                                 removeReservedTicket={removeReservedTicket}
-                                validatePromoCode={handleValidatePromocode}
-                                onValidateError={{
-                                    onError: (err, res) => setFormErrors(res.body.errors)
-                                }}
+                                onNextStep={handleAdvanceFromTicketStep}
                                 changeStep={changeStep}
                             />
                         </>
@@ -543,6 +555,7 @@ const mapStateToProps = ({ registrationLiteState }) => ({
     promoCodeVerified: registrationLiteState.promoCodeVerified,
     promoCodeValidating: registrationLiteState.promoCodeValidating,
     promoCodeAllowsReassign: registrationLiteState.promoCodeAllowsReassign,
+    discoveredPromoCodes: registrationLiteState.discoveredPromoCodes,
 })
 
 const RegistrationForm = connect(mapStateToProps, {
@@ -562,6 +575,7 @@ const RegistrationForm = connect(mapStateToProps, {
     applyPromoCode,
     removePromoCode,
     validatePromoCode,
+    discoverPromoCodes,
     startWidgetLoading,
     stopWidgetLoading
 })(RegistrationFormContent);

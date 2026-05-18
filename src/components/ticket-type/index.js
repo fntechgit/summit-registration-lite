@@ -21,10 +21,10 @@ import { isInPersonTicketType } from "../../actions";
 import ReactTooltip from 'react-tooltip';
 import { formatCurrency } from '../../helpers';
 import { getTicketMaxQuantity } from '../../helpers';
-import { avoidTooltipOverflow, getTicketCost, getTicketTaxes, isPrePaidOrder, handleSentryException } from '../../utils/utils';
+import { avoidTooltipOverflow, getTicketCost, getTicketTaxes, isPrePaidOrder } from '../../utils/utils';
 
 import PromoCodeInput from '../promocode-input';
-import PromoCodeNotice from '../promo-code-notice';
+import TicketNotice from '../ticket-notice';
 import { VIEW_ITEM } from '../../utils/constants';
 
 const TicketTypeComponent = ({
@@ -33,25 +33,34 @@ const TicketTypeComponent = ({
     taxTypes,
     isActive,
     changeForm,
-    formErrors,
     reservation,
     inPersonDisclaimer,
     showMultipleTicketTexts,
     allowPromoCodes,
-    applyPromoCode,
-    removePromoCode,
-    validatePromoCode,
+    promo = {},
+    validationError,
     promoCode,
-    promoCodeVerified,
-    promoCodeValidating,
     promoCodeAllowsReassign = true,
-    trackViewItem
+    trackViewItem,
+    noTicketsAvailableMessage,
 }) => {
+    const { state: promoState = {}, actions: promoActions = {} } = promo;
+
     const [ticket, setTicket] = useState(null);
     const [quantity, setQuantity] = useState(1);
 
     const minQuantity = 1;
-    const maxQuantity = getTicketMaxQuantity(ticket);
+    const maxQuantity = getTicketMaxQuantity(ticket, promoState.maxQuantityFromPromo);
+
+    // Clamp quantity when max changes (e.g. per-account limit kicks in after auto-apply).
+    // If the cap drops below minQuantity (e.g. cap of 0), use the cap directly rather
+    // than flooring at minQuantity, otherwise quantity would end up above the cap.
+    useEffect(() => {
+        if (!ticket) return;
+        if (quantity > maxQuantity) {
+            setQuantity(maxQuantity < minQuantity ? 0 : maxQuantity);
+        }
+    }, [maxQuantity, quantity, ticket]);
 
     const [ref, { height }] = useMeasure();
 
@@ -72,15 +81,20 @@ const TicketTypeComponent = ({
     }, [])
 
     useEffect(() => {
-        changeForm({ ticketType: ticket, ticketQuantity: quantity });
-    }, [ticket, quantity])
+        const ticketSelectionValid = !!ticket && quantity >= minQuantity && quantity <= maxQuantity;
+        changeForm({ ticketType: ticket, ticketQuantity: quantity, ticketSelectionValid });
+    }, [ticket, quantity, maxQuantity])
 
     useEffect(() => {
-        // if the promo code had changed ( set or not set)
-        // try to find the updated ticket from the original ticket types collection from api
-        // and update the current ticket that exist on component state
-        // bc a discount could be applied to the current selected ticket type
-        if (!ticket) return;
+        // When promo code changes, the API returns updated ticket types with/without discount.
+        // Sync the selected ticket with the refreshed data.
+        if (!ticket) {
+            // Auto-select if only one ticket type available after promo code applied
+            if (promoCode && originalTicketTypes.length === 1) {
+                handleTicketChange(originalTicketTypes[0]);
+            }
+            return;
+        }
         const updatedCurrentTicket = originalTicketTypes.find(t => t?.id === ticket.id);
         if (updatedCurrentTicket) {
             changeForm({ ticketType: updatedCurrentTicket })
@@ -89,8 +103,9 @@ const TicketTypeComponent = ({
             setTicket(null);
             setQuantity(minQuantity);
         }
-        if (!promoCode) changeForm({ promoCode: '' })
     }, [promoCode, originalTicketTypes])
+
+    const showTicketSelector = allowedTicketTypes.length > 0;
 
     const isPrePaidReservation = useMemo(
         () => reservation ? isPrePaidOrder(reservation) : false,
@@ -101,39 +116,55 @@ const TicketTypeComponent = ({
     const ticketTypeAllowsReassign = ticket?.allows_to_reassign !== false;
     const canReassign = promoCodeAllowsReassign && ticketTypeAllowsReassign;
 
-    const handleTicketChange = (t) => {
+    // Per-order cap is interesting only when it's tighter than what inventory
+    // would otherwise allow (i.e. the binding constraint on the stepper).
+    const ticketPerOrderLimit = useMemo(() => {
+        if (!ticket) return null;
+        const cap = ticket.max_quantity_per_order;
+        const inventory = (ticket.quantity_2_sell ?? Number.MAX_SAFE_INTEGER) - (ticket.quantity_sold ?? 0);
+        return cap != null && cap > 0 && cap < inventory ? cap : null;
+    }, [ticket]);
+
+    // Messages composed for the info notice (stacked in display order):
+    // (1) promo per-account cap, (2) ticket-type per-order cap, (3) non-transferable.
+    const infoMessage = useMemo(() => {
+        if (!ticket) return [];
+        const lines = [];
+        if (promoState.perAccountLimit != null) {
+            lines.push(T.translate(
+                promoState.perAccountLimit === 1
+                    ? 'promo_code.per_account_limit_one'
+                    : 'promo_code.per_account_limit_other',
+                { limit: promoState.perAccountLimit }
+            ));
+        }
+        if (ticketPerOrderLimit != null) {
+            lines.push(T.translate(
+                ticketPerOrderLimit === 1
+                    ? 'ticket_type.max_per_order_one'
+                    : 'ticket_type.max_per_order_other',
+                { limit: ticketPerOrderLimit }
+            ));
+        }
+        if (!canReassign) {
+            lines.push(T.translate('promo_code.non_transferable'));
+        }
+        return lines;
+    }, [ticket, promoState.perAccountLimit, ticketPerOrderLimit, canReassign]);
+
+    const handleTicketChange = async (t) => {
         setTicket(t);
         setQuantity(minQuantity);
         trackViewItem(t);
-        if (promoCode) {
-            validatePromoCode({ id: t.id, ticketQuantity: minQuantity, sub_type: t.sub_type });
-        }
-    }
-
-    const handlePromoCodeChange = (code) => {
-        changeForm({ promoCode: code });
+        await promoActions.onTicketSelected(t);
     }
 
     const incrementQuantity = () => setQuantity(quantity + 1);
 
     const decrementQuantity = () => setQuantity(quantity - 1);
 
-    const promoCodeError = Object.keys(formErrors).length > 0 ? formErrors : null;
-
-    const handleRemovePromoCode = () => {
-        removePromoCode();
-    }
-
     const handleApplyPromoCode = async (code) => {
-        try {
-            await applyPromoCode(code);
-        } catch (e) {
-            handleSentryException(e);
-            return;
-        }
-        if (ticket) {
-            await validatePromoCode({ id: ticket.id, ticketQuantity: quantity, sub_type: ticket.sub_type });
-        }
+        await promoActions.onApply(code, ticket, quantity);
     }
 
     return (
@@ -212,35 +243,43 @@ const TicketTypeComponent = ({
 
                     <animated.div style={{ overflow: 'hidden', ...toggleAnimation }}>
                         <div ref={ref}>
-                            <div className={styles.form}>
-                                <div className={styles.dropdown}>
-                                    <TicketDropdownComponent selectedTicket={ticket}
-                                        ticketTypes={allowedTicketTypes}
-                                        taxTypes={taxTypes}
-                                        onTicketSelect={handleTicketChange}
-                                    />
-                                </div>
+                            {showTicketSelector && (
+                                <div className={styles.form}>
+                                    <div className={styles.dropdown}>
+                                        <TicketDropdownComponent selectedTicket={ticket}
+                                            ticketTypes={allowedTicketTypes}
+                                            taxTypes={taxTypes}
+                                            onTicketSelect={handleTicketChange}
+                                        />
+                                    </div>
 
-                                {ticket && (
-                                    <>
-                                        <div className={styles.quantity}>
-                                            <div className="input-group">
-                                                <span className="input-group-btn">
-                                                    <button aria-label="remove a ticket" className="btn btn-default" onClick={decrementQuantity} disabled={maxQuantity === 0 || quantity === minQuantity}>
-                                                        <i className="fa fa-minus"></i>
-                                                    </button>
-                                                </span>
-                                                <input className="form-control" aria-label="ticket quanity" name="ticket_quantity" type="text" value={quantity} readOnly={true} disabled={maxQuantity === 0} />
-                                                <span className="input-group-btn">
-                                                    <button aria-label="add a ticket" className="btn btn-default" onClick={incrementQuantity} disabled={maxQuantity === 0 || quantity >= maxQuantity}>
-                                                        <i className="fa fa-plus" />
-                                                    </button>
-                                                </span>
+                                    {ticket && (
+                                        <>
+                                            <div className={styles.quantity}>
+                                                <div className="input-group">
+                                                    <span className="input-group-btn">
+                                                        <button aria-label="remove a ticket" className="btn btn-default" onClick={decrementQuantity} disabled={maxQuantity === 0 || quantity === minQuantity}>
+                                                            <i className="fa fa-minus"></i>
+                                                        </button>
+                                                    </span>
+                                                    <input className="form-control" aria-label="ticket quanity" name="ticket_quantity" type="text" value={quantity} readOnly={true} disabled={maxQuantity === 0} />
+                                                    <span className="input-group-btn">
+                                                        <button aria-label="add a ticket" className="btn btn-default" onClick={incrementQuantity} disabled={maxQuantity === 0 || quantity >= maxQuantity}>
+                                                            <i className="fa fa-plus" />
+                                                        </button>
+                                                    </span>
+                                                </div>
                                             </div>
-                                        </div>
-                                    </>
-                                )}
-                            </div>
+                                        </>
+                                    )}
+                                </div>
+                            )}
+                            {!showTicketSelector && (
+                                <TicketNotice
+                                    message={noTicketsAvailableMessage || T.translate("ticket_type.no_tickets_available")}
+                                    variant="info"
+                                />
+                            )}
                             <ReactTooltip id="ticket-quantity-info" place="bottom" overridePosition={avoidTooltipOverflow}>
                                 <div className={styles.moreInfoTooltip}>
                                     {T.translate("ticket_type.ticket_quantity_tooltip")}
@@ -250,24 +289,18 @@ const TicketTypeComponent = ({
                             {allowPromoCodes &&
                                 <>
                                     <PromoCodeInput
+                                        promoStatus={promoState.status}
                                         promoCode={promoCode}
-                                        promoCodeVerified={promoCodeVerified}
-                                        promoCodeValidating={promoCodeValidating}
-                                        applyPromoCode={handleApplyPromoCode}
-                                        showMultipleTicketTexts={showMultipleTicketTexts}
-                                        removePromoCode={handleRemovePromoCode}
-                                        onPromoCodeChange={handlePromoCodeChange} />
+                                        suggestedCode={promoState.suggestedCode}
+                                        isAutoApplied={promoState.isAutoApplied}
+                                        onInputChange={promoActions.onInputChange}
+                                        onApply={handleApplyPromoCode}
+                                        onRemove={promoActions.onRemove}
+                                        showMultipleTicketTexts={showMultipleTicketTexts} />
                                 </>
                             }
-                            {promoCodeError &&
-                                <PromoCodeNotice message={Object.values(promoCodeError).join(' ')} variant="error" />
-                            }
-                            {ticket && !canReassign &&
-                                <PromoCodeNotice
-                                    message="This ticket will be automatically assigned to you and cannot be reassigned."
-                                    variant="info"
-                                />
-                            }
+                            <TicketNotice message={validationError} variant="error" />
+                            <TicketNotice message={infoMessage} variant="info" />
                         </div>
                     </animated.div>
 

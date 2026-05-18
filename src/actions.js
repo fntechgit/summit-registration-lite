@@ -56,6 +56,8 @@ export const VALIDATE_PROMO_CODE = 'VALIDATE_PROMO_CODE';
 export const VALIDATE_PROMO_CODE_SUCCESS = 'VALIDATE_PROMO_CODE_SUCCESS';
 export const VALIDATE_PROMO_CODE_ERROR = 'VALIDATE_PROMO_CODE_ERROR';
 export const VALIDATE_PROMO_CODE_RATE_LIMITED = 'VALIDATE_PROMO_CODE_RATE_LIMITED';
+export const DISCOVER_PROMO_CODES = 'DISCOVER_PROMO_CODES';
+export const DISCOVER_PROMO_CODES_SUCCESS = 'DISCOVER_PROMO_CODES_SUCCESS';
 
 export const startWidgetLoading = createAction(START_WIDGET_LOADING);
 export const stopWidgetLoading = createAction(STOP_WIDGET_LOADING);
@@ -99,6 +101,27 @@ const customErrorHandler = (err, res) => (dispatch, state) => {
     }
     return authErrorHandler(err, res)(dispatch, state);
 };
+
+/*********************************************************************************/
+/*                            PROMO CODE DISCOVERY                               */
+/*********************************************************************************/
+
+export const discoverPromoCodes = (summitId) => async (dispatch, getState, { apiBaseUrl, getAccessToken }) => {
+    try {
+        const accessToken = await getAccessToken();
+        return getRequest(
+            createAction(DISCOVER_PROMO_CODES),
+            createAction(DISCOVER_PROMO_CODES_SUCCESS),
+            `${apiBaseUrl}/api/v1/summits/${summitId}/promo-codes/all/discover`,
+            // Discovery is non-blocking - errors silently ignored.
+            // Auth errors will surface on the next user-initiated action.
+            null
+        )({ access_token: accessToken })(dispatch);
+    } catch (e) {
+        console.log(e);
+        return null;
+    }
+}
 
 /*********************************************************************************/
 /*                               TICKETS                                         */

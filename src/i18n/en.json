@@ -11,9 +11,23 @@
     "event_will_start_text": "The event will start on {date} at {time} {time_zone_label}"
   },
   "ticket_type": {
-    "ticket_quantity_tooltip": "Only one ticket type can be selected per order. To purchase multiple ticket types, please place a separate registration order for each ticket type."
+    "ticket_quantity_tooltip": "Only one ticket type can be selected per order. To purchase multiple ticket types, please place a separate registration order for each ticket type.",
+    "no_tickets_available": "There are no tickets currently available for purchase. If you have a promo code, enter it below to check for eligible tickets.",
+    "max_per_order_one": "This ticket type is limited to 1 per order.",
+    "max_per_order_other": "This ticket type is limited to {limit} per order."
   },
   "promo_code": {
-    "promo_code_tooltip": "Only one promo code can be used per order; the code will be applied to all tickets in this order. If you'd like to use multiple promo codes, please place a separate registration order for each promo code."
+    "promo_code_tooltip": "Only one promo code can be used per order; the code will be applied to all tickets in this order. If you'd like to use multiple promo codes, please place a separate registration order for each promo code.",
+    "default_label": "Do you have a promo code?",
+    "auto_applied_label": "Following promo code was automatically applied:",
+    "applied_label": "Applied promo code:",
+    "applying_label": "Applying promo code...",
+    "suggestion_label": "You qualify for the following promo code:",
+    "per_account_limit_one": "Promo code limits {limit} ticket per account.",
+    "per_account_limit_other": "Promo code limits {limit} tickets per account.",
+    "non_transferable": "This ticket will be automatically assigned to you and cannot be reassigned.",
+    "unapplied_code_warning": "You entered a promo code but it hasn't been applied. Make sure to click the 'Apply' button or remove it before continuing.",
+    "invalid_code": "Promo code entered is not valid.",
+    "validation_error": "An error occurred while validating the promo code."
   }
 }

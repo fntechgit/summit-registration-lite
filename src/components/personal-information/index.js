@@ -36,7 +36,7 @@ const PersonalInfoComponent = ({
   summitId,
   handleCompanyError,
   formValues,
-  formErrors = {},
+  formErrors = [],
   invitation,
   showCompanyInput = true,
   companyDDLPlaceholder,
