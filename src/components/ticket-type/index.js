@@ -52,12 +52,15 @@ const TicketTypeComponent = ({
     const minQuantity = 1;
     const maxQuantity = getTicketMaxQuantity(ticket, promoState.maxQuantityFromPromo);
 
-    // Clamp quantity when max changes (e.g. per-account limit kicks in after auto-apply)
+    // Clamp quantity when max changes (e.g. per-account limit kicks in after auto-apply).
+    // If the cap drops below minQuantity (e.g. cap of 0), use the cap directly rather
+    // than flooring at minQuantity, otherwise quantity would end up above the cap.
     useEffect(() => {
+        if (!ticket) return;
         if (quantity > maxQuantity) {
-            setQuantity(Math.max(maxQuantity, minQuantity));
+            setQuantity(maxQuantity < minQuantity ? 0 : maxQuantity);
         }
-    }, [maxQuantity, quantity]);
+    }, [maxQuantity, quantity, ticket]);
 
     const [ref, { height }] = useMeasure();
 
