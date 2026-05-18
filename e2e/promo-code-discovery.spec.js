@@ -202,6 +202,18 @@ test.describe('per-account limit', () => {
         await selectTicket(page, 'Early Bird Ticket');
         await expect(page.locator('text=Promo code limits 1 ticket per account.')).toBeVisible();
     });
+
+    test('disables Next when remaining_quantity_per_account is 0', async ({ page }) => {
+        const exhaustedCode = discoveredCode({ auto_apply: true, quantity_per_account: 2, remaining_quantity_per_account: 0 });
+        await setupRoutes(page, {
+            tickets: [ticketType()],
+            discovery: [exhaustedCode],
+            validation: { status: 200, body: validationResponse() },
+        });
+        await page.goto('/');
+        await selectTicket(page, 'Early Bird Ticket');
+        await expect(page.locator('button:has-text("Next")')).toBeDisabled();
+    });
 });
 
 test.describe('non-transferable notice', () => {

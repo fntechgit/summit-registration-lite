@@ -81,8 +81,9 @@ const TicketTypeComponent = ({
     }, [])
 
     useEffect(() => {
-        changeForm({ ticketType: ticket, ticketQuantity: quantity });
-    }, [ticket, quantity])
+        const ticketSelectionValid = !!ticket && quantity >= minQuantity && quantity <= maxQuantity;
+        changeForm({ ticketType: ticket, ticketQuantity: quantity, ticketSelectionValid });
+    }, [ticket, quantity, maxQuantity])
 
     useEffect(() => {
         // When promo code changes, the API returns updated ticket types with/without discount.
