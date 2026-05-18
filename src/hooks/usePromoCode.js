@@ -214,6 +214,7 @@ const usePromoCode = ({
         try {
             await applyPromoCode(code);
         } catch (e) {
+            handleValidationError(e);
             setApplyingCode(false);
             return;
         }
@@ -221,7 +222,7 @@ const usePromoCode = ({
             await onRevalidate(ticket, quantity);
         }
         setApplyingCode(false);
-    }, [applyPromoCode, onRevalidate]);
+    }, [applyPromoCode, onRevalidate, handleValidationError]);
 
     const onRemove = useCallback(() => {
         if (isAutoApplied || isDiscoveredCode) setUserRemovedAutoApply(true);
