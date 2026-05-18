@@ -1,6 +1,6 @@
 {
   "name": "summit-registration-lite",
-  "version": "7.0.1",
+  "version": "7.0.2",
   "description": "Summit Registration Lite",
   "main": "index.js",
   "scripts": {
@@ -78,7 +78,6 @@
     "mini-css-extract-plugin": "^2.6.0",
     "moment": "^2.22.2",
     "moment-timezone": "^0.5.21",
-    "sass": "^1.77.0",
     "openstack-uicore-foundation": "4.2.14",
     "optimize-css-assets-webpack-plugin": "^6.0.1",
     "path": "^0.12.7",
@@ -103,6 +102,7 @@
     "redux-persist": "^5.9.1",
     "redux-thunk": "^2.3.0",
     "regenerator-runtime": "^0.13.7",
+    "sass": "^1.77.0",
     "sass-loader": "^12.6.0",
     "style-loader": "^3.3.1",
     "superagent": "^3.8.1",
