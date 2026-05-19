@@ -14,16 +14,35 @@
 import React, { useMemo } from 'react';
 import styles from "./index.module.scss";
 
-const TicketOwnedComponent = ({ ownedTickets}) => {
-    const ownedTicketsString = useMemo(() => ownedTickets.reduce((acc, ownedTicket, index) => {
-        return `
-            ${acc}${acc ? `${index+1===ownedTickets.length? ' and ' : ', '}` : ''}
-            ${ownedTicket.qty} ${ownedTicket.type_name}${index === 0 ? !ownedTicket.type_name.toLowerCase().endsWith('ticket') ? ' ticket' : '' : ownedTicket.type_name.toLowerCase().endsWith('ticket') ? '' : ''}${ownedTicket.qty > 1 ? 's' : ''}`;
-    }, ''), [ownedTickets]);
+const TicketOwnedComponent = ({ ownedTickets }) => {
+
+    const formatOwnedTicketStrings = (tickets) => (
+        tickets.reduce((acc, ownedTicket, index) => {
+            const { qty, type_name } = ownedTicket;
+            const firstTicket = index === 0;
+            const lastTicket = index + 1 === tickets.length;
+            const separator = acc ? (lastTicket ? ' and ' : ', ') : '';
+
+            let updatedTypeName = type_name;
+
+            if (firstTicket) {
+                // For the first ticket, replace 'ticket' with 'Ticket(s)' or add ' Ticket(s)'
+                if (/ticket/i.test(type_name)) {
+                    updatedTypeName = type_name.replace(/ticket/i, 'Ticket(s)');
+                } else {
+                    updatedTypeName += ' Ticket(s)';
+                }
+            }
+
+            return `${acc}${separator}${qty} ${updatedTypeName}`;
+        }, '')
+    );
+
+    const ownedTicketsString = useMemo(() => formatOwnedTicketStrings(ownedTickets), [ownedTickets]);
 
     return (
         <div className={styles.ticketOwnedWrapper}>
-            <div className={`${styles.alert} alert alert-warning`} role="alert">
+            <div className={`${styles.alert} alert alert-warning`} role="alert" data-testid="owned-tickets">
                 You have already ordered {ownedTicketsString}. If you would like to order more, please do so below.
             </div>
         </div>
