@@ -202,7 +202,7 @@ const RegistrationFormContent = (
 
     const { publicKey, provider } = getCurrentProvider(summitData);
 
-    const allowedTicketTypes = hasTicketData ? ticketTypes.filter((tt) => tt.sub_type === TICKET_TYPE_SUBTYPE_PREPAID || (tt.sales_start_date === null && tt.sales_end_date === null) || (nowUtc >= tt.sales_start_date && nowUtc <= tt.sales_end_date)) : [];
+    const allowedTicketTypes = useMemo(() => hasTicketData ? ticketTypes.filter((tt) => tt.sub_type === TICKET_TYPE_SUBTYPE_PREPAID || (tt.sales_start_date === null && tt.sales_end_date === null) || (nowUtc >= tt.sales_start_date && nowUtc <= tt.sales_end_date)) : [], [hasTicketData, ticketTypes, nowUtc]);
 
     const noAvailableTickets = useMemo(() => isAuthenticated && hasTicketData && !ticketDataError && allowedTicketTypes.length === 0 && step !== STEP_COMPLETE, [isAuthenticated, hasTicketData, ticketDataError, allowedTicketTypes, step]);
     const alreadyOwnedTickets = useMemo(() => isAuthenticated && hasTicketData && !ticketDataError && allowedTicketTypes.length > 0 && ownedTickets.length > 0, [isAuthenticated, hasTicketData, ticketDataError, allowedTicketTypes, ownedTickets]);
