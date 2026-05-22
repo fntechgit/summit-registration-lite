@@ -284,3 +284,131 @@ it('handleCloseClick calls clearWidgetState and changeStep when no reservation',
     expect(mockChangeStep).toHaveBeenCalledWith(STEP_SELECT_TICKET_TYPE);
     expect(mockClearWidgetState).toHaveBeenCalled();
 });
+
+// Regression tests for the post-purchase remount loop. Effects must depend
+// on the semantic signals (summitId, isAuthenticated, userId), not on the
+// profileData / summitData object references — consumers commonly mint new
+// references on no-op refreshes, and re-firing the effects would cascade
+// through handleGetTicketTypesAndTaxes → setHasTicketData → null-render
+// guard → child unmount → mount-effects re-firing.
+
+it('does not refetch ticket types when profileData reference changes but content is identical', async () => {
+    const initialProfile = { id: 42, given_name: 'John', email: 'john@example.com' };
+    const summitData = { id: 1, name: 'Test Summit', time_zone_id: 'UTC' };
+    const store = createTestStore();
+    const closeHandlerRef = React.createRef();
+    closeHandlerRef.current = () => {};
+
+    const { rerender } = render(
+        <Provider store={store}>
+            <RegistrationForm
+                {...defaultProps}
+                summitData={summitData}
+                profileData={initialProfile}
+                closeHandlerRef={closeHandlerRef}
+            />
+        </Provider>
+    );
+    await act(async () => {});
+
+    expect(mockGetTicketTypesAndTaxes).toHaveBeenCalledTimes(1);
+    mockGetTicketTypesAndTaxes.mockClear();
+
+    // New object identity, same semantic content (same id, same auth state).
+    const newProfileSameContent = { id: 42, given_name: 'John', email: 'john@example.com' };
+    rerender(
+        <Provider store={store}>
+            <RegistrationForm
+                {...defaultProps}
+                summitData={summitData}
+                profileData={newProfileSameContent}
+                closeHandlerRef={closeHandlerRef}
+            />
+        </Provider>
+    );
+    await act(async () => {});
+
+    expect(mockGetTicketTypesAndTaxes).not.toHaveBeenCalled();
+});
+
+it('does not re-dispatch loadProfileData / discoverPromoCodes when profileData reference changes but userId is the same', async () => {
+    const initialProfile = { id: 42, given_name: 'John' };
+    const summitData = { id: 1, name: 'Test Summit', time_zone_id: 'UTC' };
+    const store = createTestStore();
+    const closeHandlerRef = React.createRef();
+    closeHandlerRef.current = () => {};
+
+    const { rerender } = render(
+        <Provider store={store}>
+            <RegistrationForm
+                {...defaultProps}
+                summitData={summitData}
+                profileData={initialProfile}
+                closeHandlerRef={closeHandlerRef}
+            />
+        </Provider>
+    );
+    await act(async () => {});
+
+    expect(mockLoadProfileData).toHaveBeenCalledTimes(1);
+    expect(mockDiscoverPromoCodes).toHaveBeenCalledTimes(1);
+    mockLoadProfileData.mockClear();
+    mockDiscoverPromoCodes.mockClear();
+
+    const newProfileSameId = { id: 42, given_name: 'John' };
+    rerender(
+        <Provider store={store}>
+            <RegistrationForm
+                {...defaultProps}
+                summitData={summitData}
+                profileData={newProfileSameId}
+                closeHandlerRef={closeHandlerRef}
+            />
+        </Provider>
+    );
+    await act(async () => {});
+
+    expect(mockLoadProfileData).not.toHaveBeenCalled();
+    expect(mockDiscoverPromoCodes).not.toHaveBeenCalled();
+});
+
+it('refires ticket-types fetch and promo discovery when summit id changes', async () => {
+    const profileData = { id: 42, given_name: 'John' };
+    const store = createTestStore();
+    const closeHandlerRef = React.createRef();
+    closeHandlerRef.current = () => {};
+
+    const { rerender } = render(
+        <Provider store={store}>
+            <RegistrationForm
+                {...defaultProps}
+                summitData={{ id: 1, name: 'Summit One', time_zone_id: 'UTC' }}
+                profileData={profileData}
+                closeHandlerRef={closeHandlerRef}
+            />
+        </Provider>
+    );
+    await act(async () => {});
+
+    expect(mockGetTicketTypesAndTaxes).toHaveBeenCalledTimes(1);
+    expect(mockDiscoverPromoCodes).toHaveBeenCalledTimes(1);
+    mockGetTicketTypesAndTaxes.mockClear();
+    mockDiscoverPromoCodes.mockClear();
+
+    rerender(
+        <Provider store={store}>
+            <RegistrationForm
+                {...defaultProps}
+                summitData={{ id: 2, name: 'Summit Two', time_zone_id: 'UTC' }}
+                profileData={profileData}
+                closeHandlerRef={closeHandlerRef}
+            />
+        </Provider>
+    );
+    await act(async () => {});
+
+    expect(mockGetTicketTypesAndTaxes).toHaveBeenCalledTimes(1);
+    expect(mockGetTicketTypesAndTaxes).toHaveBeenCalledWith(2);
+    expect(mockDiscoverPromoCodes).toHaveBeenCalledTimes(1);
+    expect(mockDiscoverPromoCodes).toHaveBeenCalledWith(2);
+});

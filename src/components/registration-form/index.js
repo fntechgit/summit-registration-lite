@@ -186,9 +186,13 @@ const RegistrationFormContent = (
         errors: []
     });
 
+    const [hasTicketData, setHasTicketData] = useState(false);
     const [ticketDataError, setTicketDataError] = useState(false);
-    const [ticketDataLoaded, setTicketDataLoaded] = useState(false);
     const [unappliedCodeWarning, setUnappliedCodeWarning] = useState(null);
+
+    const isAuthenticated = !!profileData;
+    const summitId = summitData?.id;
+    const userId = profileData?.id;
 
     const { values: formValues, errors: formErrors } = registrationForm;
 
@@ -198,15 +202,15 @@ const RegistrationFormContent = (
 
     const { publicKey, provider } = getCurrentProvider(summitData);
 
-    const allowedTicketTypes = ticketDataLoaded ? ticketTypes.filter((tt) => tt.sub_type === TICKET_TYPE_SUBTYPE_PREPAID || (tt.sales_start_date === null && tt.sales_end_date === null) || (nowUtc >= tt.sales_start_date && nowUtc <= tt.sales_end_date)) : [];
+    const allowedTicketTypes = useMemo(() => hasTicketData ? ticketTypes.filter((tt) => tt.sub_type === TICKET_TYPE_SUBTYPE_PREPAID || (tt.sales_start_date === null && tt.sales_end_date === null) || (nowUtc >= tt.sales_start_date && nowUtc <= tt.sales_end_date)) : [], [hasTicketData, ticketTypes, nowUtc]);
 
-    const noAvailableTickets = useMemo(() => profileData && ticketDataLoaded && !ticketDataError && allowedTicketTypes.length === 0 && step !== STEP_COMPLETE, [profileData, ticketDataLoaded, ticketDataError, allowedTicketTypes, step]);
-    const alreadyOwnedTickets = useMemo(() => profileData && ticketDataLoaded && !ticketDataError && allowedTicketTypes.length > 0 && ownedTickets.length > 0, [profileData, ticketDataLoaded, ticketDataError, allowedTicketTypes, ownedTickets]);
+    const noAvailableTickets = useMemo(() => isAuthenticated && hasTicketData && !ticketDataError && allowedTicketTypes.length === 0 && step !== STEP_COMPLETE, [isAuthenticated, hasTicketData, ticketDataError, allowedTicketTypes, step]);
+    const alreadyOwnedTickets = useMemo(() => isAuthenticated && hasTicketData && !ticketDataError && allowedTicketTypes.length > 0 && ownedTickets.length > 0, [isAuthenticated, hasTicketData, ticketDataError, allowedTicketTypes, ownedTickets]);
 
     useEffect(() => {
         if (profileData)
             loadProfileData(profileData);
-    }, [profileData])
+    }, [userId])
 
     useEffect(() => {
         loadSession({ ...rest, summitData, profileData });
@@ -216,17 +220,17 @@ const RegistrationFormContent = (
     }, [])
 
     useEffect(() => {
-        if (summitData && profileData) {
+        if (summitId && isAuthenticated) {
             const ensureInvitation = () =>
                 summitData.invite_only_registration
-                    ? getMyInvitation(summitData.id)
+                    ? getMyInvitation(summitId)
                     : Promise.resolve();
 
             ensureInvitation()
                 .catch(e => console.log(e))
-                .finally(() => handleGetTicketTypesAndTaxes(summitData.id));
+                .finally(() => handleGetTicketTypesAndTaxes(summitId));
         }
-    }, [summitData?.id, profileData]);
+    }, [summitId, isAuthenticated]);
 
     useEffect(() => {
         if (step > STEP_SELECT_TICKET_TYPE && !registrationForm.values?.ticketType && !reservation) {
@@ -240,10 +244,10 @@ const RegistrationFormContent = (
 
     // Discovery: fetch qualifying promo codes after auth
     useEffect(() => {
-        if (profileData && summitData?.id) {
-            discoverPromoCodes(summitData.id);
+        if (isAuthenticated && summitId) {
+            discoverPromoCodes(summitId);
         }
-    }, [profileData, summitData?.id]);
+    }, [isAuthenticated, summitId]);
 
     const handleFormPromoCodeChange = useCallback((code) => mergeFormValues({ promoCode: code }), [mergeFormValues]);
 
@@ -256,7 +260,7 @@ const RegistrationFormContent = (
         removePromoCode,
         validatePromoCode,
         setFormPromoCode: handleFormPromoCodeChange,
-        ticketDataLoaded: ticketDataLoaded && !ticketDataError,
+        ticketDataLoaded: hasTicketData && !ticketDataError,
         hasTickets: allowedTicketTypes.length > 0,
     });
 
@@ -311,8 +315,10 @@ const RegistrationFormContent = (
 
     const handleGetTicketTypesAndTaxes = (summitId) => {
         setTicketDataError(false);
-        setTicketDataLoaded(false);
         getTicketTypesAndTaxes(summitId)
+            .then(() => {
+                setHasTicketData(true);
+            })
             .catch((error) => {
                 let { message } = error;
                 if (message && (message.includes(AUTH_ERROR_MISSING_AUTH_INFO) ||
@@ -322,9 +328,6 @@ const RegistrationFormContent = (
                     return authErrorCallback(error);
                 }
                 setTicketDataError(true);
-            })
-            .finally(() => {
-                setTicketDataLoaded(true);
             });
     }
 
@@ -368,10 +371,9 @@ const RegistrationFormContent = (
         trackEvent(PURCHASE_COMPLETE, { order });
     }
 
-    // If user is logged in but ticket data hasn't loaded yet (and no error occurred),
-    // don't render to avoid flash. Uses local state instead of Redux to prevent
-    // race conditions with redux-persist rehydration.
-    if (profileData && !ticketDataLoaded && !ticketDataError) return null;
+    // Authenticated first-load: wait until ticket data is in before rendering
+    // to avoid a flash of empty/wrong state.
+    if (isAuthenticated && !hasTicketData && !ticketDataError) return null;
 
     return (
         <div className="summit-registration-lite">
