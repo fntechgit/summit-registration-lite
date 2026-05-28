@@ -3,8 +3,9 @@ import { cleanup, render } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { Provider, connect } from 'react-redux';
 import { createStore, combineReducers } from 'redux';
+import { useClockSelector } from 'openstack-uicore-foundation/lib/components/clock-context';
 
-import { withReduxProvider } from '../withReduxProvider';
+import { withWidgetProviders } from '../withWidgetProviders';
 
 // Mock the store module
 const mockStore = { getState: jest.fn(), subscribe: jest.fn(), dispatch: jest.fn() };
@@ -31,7 +32,7 @@ const StubComponent = ({ clientId, apiBaseUrl, getAccessToken, ...rest }) => <di
 StubComponent.displayName = 'StubComponent';
 
 it('renders with Provider and creates a store via getStore/getPersistor', () => {
-    const Wrapped = withReduxProvider(StubComponent);
+    const Wrapped = withWidgetProviders(StubComponent);
     const { getByTestId } = render(
         <Wrapped clientId="test-client" apiBaseUrl="https://api.test.com" getAccessToken={() => 'token'} />
     );
@@ -42,7 +43,7 @@ it('renders with Provider and creates a store via getStore/getPersistor', () => 
 });
 
 it('passes props through to the wrapped component', () => {
-    const Wrapped = withReduxProvider(StubComponent);
+    const Wrapped = withWidgetProviders(StubComponent);
     const { getByTestId } = render(
         <Wrapped clientId="c1" apiBaseUrl="https://api.test.com" getAccessToken={() => 'token'} data-custom="hello" />
     );
@@ -52,7 +53,7 @@ it('passes props through to the wrapped component', () => {
 });
 
 it('caches store across re-renders (class constructor runs once)', () => {
-    const Wrapped = withReduxProvider(StubComponent);
+    const Wrapped = withWidgetProviders(StubComponent);
     const { rerender } = render(
         <Wrapped clientId="c1" apiBaseUrl="https://api.test.com" getAccessToken={() => 'token'} />
     );
@@ -68,13 +69,32 @@ it('caches store across re-renders (class constructor runs once)', () => {
 });
 
 it('sets displayName based on wrapped component', () => {
-    const Wrapped = withReduxProvider(StubComponent);
-    expect(Wrapped.displayName).toBe('WithReduxProvider(StubComponent)');
+    const Wrapped = withWidgetProviders(StubComponent);
+    expect(Wrapped.displayName).toBe('WithWidgetProviders(StubComponent)');
 });
 
 it('uses fallback displayName for anonymous component', () => {
-    const Wrapped = withReduxProvider(() => <div />);
-    expect(Wrapped.displayName).toBe('WithReduxProvider(Component)');
+    const Wrapped = withWidgetProviders(() => <div />);
+    expect(Wrapped.displayName).toBe('WithWidgetProviders(Component)');
+});
+
+it('provides ClockProvider so useClockSelector resolves against a live timestamp', () => {
+    const ClockConsumer = () => {
+        const year = useClockSelector((nowUtc) =>
+            nowUtc ? new Date(nowUtc * 1000).getUTCFullYear() : null
+        );
+        return <div data-testid="year">{year ?? 'null'}</div>;
+    };
+    const Wrapped = withWidgetProviders(ClockConsumer);
+    const { getByTestId } = render(
+        <Wrapped
+            clientId="c1"
+            apiBaseUrl="https://api.test.com"
+            getAccessToken={() => 'token'}
+            summitData={{ time_zone_id: 'UTC' }}
+        />
+    );
+    expect(Number(getByTestId('year').textContent)).toBeGreaterThanOrEqual(2024);
 });
 
 describe('REGRESSION: widget works under a foreign Provider', () => {
@@ -115,7 +135,7 @@ describe('REGRESSION: widget works under a foreign Provider', () => {
         // Override the mock so the HOC's getStore returns our real store
         mockGetStore.mockReturnValue(realStore);
 
-        const WrappedWithHOC = withReduxProvider(ConnectedComponent);
+        const WrappedWithHOC = withWidgetProviders(ConnectedComponent);
 
         // Create a FOREIGN store that does NOT have registrationLiteState
         const foreignStore = createStore(

@@ -2,9 +2,9 @@ import React from 'react';
 import { cleanup, fireEvent, render } from '@testing-library/react';
 import '@testing-library/jest-dom';
 
-// Mock withReduxProvider as identity HOC (modal default export wraps with it)
-jest.mock('../../../utils/withReduxProvider', () => ({
-    withReduxProvider: (Component) => Component,
+// Mock withWidgetProviders as identity HOC (modal default export wraps with it)
+jest.mock('../../../utils/withWidgetProviders', () => ({
+    withWidgetProviders: (Component) => Component,
     __esModule: true,
     default: (Component) => Component,
 }));

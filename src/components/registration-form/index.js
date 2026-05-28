@@ -14,9 +14,10 @@
  **/
 
 import React, { useEffect, useState, useMemo, useCallback } from 'react';
-import { connect } from "react-redux";
+import { connect, shallowEqual } from "react-redux";
 import PropTypes from 'prop-types';
-import { withReduxProvider } from '../../utils/withReduxProvider';
+import { withWidgetProviders } from '../../utils/withWidgetProviders';
+import { useClockSelector } from 'openstack-uicore-foundation/lib/components/clock-context';
 import { animated, config, useSpring } from "react-spring";
 import { useMeasure } from "react-use";
 import {
@@ -37,7 +38,6 @@ import {
     removeReservedTicket,
     reserveTicket,
     clearWidgetState,
-    updateClock,
     loadProfileData,
     removePromoCode,
     applyPromoCode,
@@ -50,7 +50,6 @@ import {
 import usePromoCode from '../../hooks/usePromoCode';
 
 import AjaxLoader from "openstack-uicore-foundation/lib/components/ajaxloader";
-import Clock from "openstack-uicore-foundation/lib/components/clock";
 
 import '../../styles/styles.scss';
 
@@ -86,6 +85,14 @@ try {
 } catch (e) {
     T.setTexts(require(`../../i18n/en.json`));
 }
+
+const isTicketCurrentlyAvailable = (tt, nowUtc) =>
+    // prepaid tickets are always available (sales windows don't apply)
+    tt.sub_type === TICKET_TYPE_SUBTYPE_PREPAID ||
+    // no sales window configured → ticket is open-ended, always available
+    (tt.sales_start_date === null && tt.sales_end_date === null) ||
+    // ticket is within its configured sales window
+    (nowUtc >= tt.sales_start_date && nowUtc <= tt.sales_end_date);
 
 
 const RegistrationFormContent = (
@@ -142,8 +149,6 @@ const RegistrationFormContent = (
         allowPromoCodes,
         showCompanyInput,
         companyDDLPlaceholder,
-        nowUtc,
-        updateClock,
         completedExtraQuestions,
         loadProfileData,
         closeWidget,
@@ -200,7 +205,18 @@ const RegistrationFormContent = (
 
     const { publicKey, provider } = getCurrentProvider(summitData);
 
-    const allowedTicketTypes = useMemo(() => hasTicketData ? ticketTypes.filter((tt) => tt.sub_type === TICKET_TYPE_SUBTYPE_PREPAID || (tt.sales_start_date === null && tt.sales_end_date === null) || (nowUtc >= tt.sales_start_date && nowUtc <= tt.sales_end_date)) : [], [hasTicketData, ticketTypes, nowUtc]);
+    // Re-runs every clock tick but only commits a new array when the filtered
+    // contents shift (a sale window opens/closes), so the form tree stops
+    // re-rendering once per second.
+    const allowedTicketTypes = useClockSelector(
+        useCallback(
+            (nowUtc) => hasTicketData
+                ? ticketTypes.filter(tt => isTicketCurrentlyAvailable(tt, nowUtc))
+                : [],
+            [hasTicketData, ticketTypes]
+        ),
+        shallowEqual
+    );
 
     const alreadyOwnedTickets = useMemo(() => isAuthenticated && hasTicketData && !ticketDataError && allowedTicketTypes.length > 0 && ownedTickets.length > 0, [isAuthenticated, hasTicketData, ticketDataError, allowedTicketTypes, ownedTickets]);
 
@@ -375,7 +391,6 @@ const RegistrationFormContent = (
     return (
         <div className="summit-registration-lite">
             <AjaxLoader relative={true} color={'#ffffff'} show={widgetLoading || loading} size={80} />
-            <Clock onTick={(timestamp) => updateClock(timestamp)} timezone={summitData.time_zone_id} />
 
             {profileData && ticketDataError && <TicketTaxesError ticketTaxesErrorMessage={ticketTaxesErrorMessage} retryTicketTaxes={() => handleGetTicketTypesAndTaxes(summitData?.id)} />}
 
@@ -515,7 +530,6 @@ const RegistrationFormContent = (
                             goToMyOrders={goToMyOrders}
                             goToExtraQuestions={goToExtraQuestions}
                             completedExtraQuestions={completedExtraQuestions}
-                            nowUtc={nowUtc}
                             clearWidgetState={clearWidgetState}
                             closeWidget={closeWidget}
                             hasVirtualAccessLevel={hasVirtualAccessLevel}
@@ -549,7 +563,6 @@ const mapStateToProps = ({ registrationLiteState }) => ({
     passwordlessCodeLifeTime: registrationLiteState.passwordless.otp_lifetime,
     passwordlessCodeSent: registrationLiteState.passwordless.code_sent,
     passwordlessCodeError: registrationLiteState.passwordless.error,
-    nowUtc: registrationLiteState.nowUtc,
     promoCode: registrationLiteState.promoCode,
     promoCodeVerified: registrationLiteState.promoCodeVerified,
     promoCodeValidating: registrationLiteState.promoCodeValidating,
@@ -569,7 +582,6 @@ const RegistrationForm = connect(mapStateToProps, {
     goToLogin,
     getMyInvitation,
     clearWidgetState,
-    updateClock,
     loadProfileData,
     applyPromoCode,
     removePromoCode,
@@ -628,4 +640,4 @@ RegistrationForm.propTypes = {
 };
 
 export { RegistrationForm };
-export default withReduxProvider(RegistrationForm);
+export default withWidgetProviders(RegistrationForm);

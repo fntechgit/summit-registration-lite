@@ -7512,10 +7512,12 @@ open@^8.0.9:
     is-docker "^2.1.1"
     is-wsl "^2.2.0"
 
-openstack-uicore-foundation@4.2.14:
-  version "4.2.14"
-  resolved "https://registry.npmjs.org/openstack-uicore-foundation/-/openstack-uicore-foundation-4.2.14.tgz#d759a6358ede869f356fdf387065632b341bcf6a"
-  integrity sha512-ECwPZ7QOUrhW/fKbyWUfsYx/x207WPuLx9VfDLS2i46p3CoD+z6XT2a4AoUzYBoOa9iRdhXAtJUsymN8sGIzYA==
+openstack-uicore-foundation@4.2.31:
+  version "4.2.31"
+  resolved "https://registry.yarnpkg.com/openstack-uicore-foundation/-/openstack-uicore-foundation-4.2.31.tgz#593b12ee1cd80cfa299f813b2470dcbde46cc580"
+  integrity sha512-DE44A0hr5mM9OCak8h4uEdNSjqBzeI+9yPf1/J+TgfzJPtZNrkW2+y43Z8jIHoByI6lBOCug31FuAo6ysDyaiw==
+  dependencies:
+    use-sync-external-store "^1.6.0"
 
 optimize-css-assets-webpack-plugin@^6.0.1:
   version "6.0.1"
@@ -10170,6 +10172,11 @@ use-debounce@^6.0.1:
   version "6.0.1"
   resolved "https://registry.yarnpkg.com/use-debounce/-/use-debounce-6.0.1.tgz#ed1eb2b30189408fb9792ea2887f4c6c3cb401a3"
   integrity sha512-kpvIxpa0vOLz/2I2sfNJ72mUeaT2CMNCu5BT1f2HkV9qZK27UVSOFf1sSSu+wjJE4TcR2VTXS2SM569+m3TN7Q==
+
+use-sync-external-store@^1.6.0:
+  version "1.6.0"
+  resolved "https://registry.yarnpkg.com/use-sync-external-store/-/use-sync-external-store-1.6.0.tgz#b174bfa65cb2b526732d9f2ac0a408027876f32d"
+  integrity sha512-Pp6GSwGP/NrPIrxVFAIkOQeyw8lFenOHijQWkUTrDvrF4ALqylP2C/KCkeS9dpUM3KvYRQhna5vt7IL95+ZQ9w==
 
 use@^3.1.0:
   version "3.1.1"

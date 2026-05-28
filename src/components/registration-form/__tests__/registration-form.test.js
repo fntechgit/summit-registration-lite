@@ -5,11 +5,17 @@ import { Provider } from 'react-redux';
 import { createStore, combineReducers, applyMiddleware } from 'redux';
 import thunk from 'redux-thunk';
 
-// Mock withReduxProvider as identity HOC
-jest.mock('../../../utils/withReduxProvider', () => ({
-    withReduxProvider: (Component) => Component,
+// Mock withWidgetProviders as identity HOC
+jest.mock('../../../utils/withWidgetProviders', () => ({
+    withWidgetProviders: (Component) => Component,
     __esModule: true,
     default: (Component) => Component,
+}));
+
+// Stub the uicore clock-context so the selector runs once against a fixed timestamp
+jest.mock('openstack-uicore-foundation/lib/components/clock-context', () => ({
+    useClockSelector: (selector) => selector(1000000),
+    ClockProvider: ({ children }) => children,
 }));
 
 // Mock action creators
@@ -24,7 +30,6 @@ const mockGetLoginCode = jest.fn();
 const mockPasswordlessLogin = jest.fn();
 const mockGoToLogin = jest.fn();
 const mockGetMyInvitation = jest.fn(() => Promise.resolve());
-const mockUpdateClock = jest.fn();
 const mockLoadProfileData = jest.fn();
 const mockApplyPromoCode = jest.fn();
 const mockRemovePromoCode = jest.fn();
@@ -78,10 +83,6 @@ jest.mock('../../../actions', () => ({
         mockGetMyInvitation(...args);
         return Promise.resolve();
     },
-    updateClock: (...args) => {
-        mockUpdateClock(...args);
-        return { type: 'NOOP' };
-    },
     loadProfileData: (...args) => {
         mockLoadProfileData(...args);
         return { type: 'NOOP' };
@@ -117,10 +118,6 @@ jest.mock('openstack-uicore-foundation/lib/components/ajaxloader', () => {
     return (props) => <div data-testid="ajax-loader" />;
 });
 
-jest.mock('openstack-uicore-foundation/lib/components/clock', () => {
-    return (props) => <div data-testid="clock" />;
-});
-
 jest.mock('openstack-uicore-foundation/lib/security/constants', () => ({
     AUTH_ERROR_MISSING_AUTH_INFO: 'Missing Auth info',
     AUTH_ERROR_MISSING_REFRESH_TOKEN: 'missing Refresh Token',
@@ -154,7 +151,7 @@ jest.mock('react-use', () => ({
     useMeasure: () => [jest.fn(), { height: 100 }],
 }));
 
-// Import default (which is withReduxProvider(RegistrationForm) but our mock makes it identity)
+// Import default (which is withWidgetProviders(RegistrationForm) but our mock makes it identity)
 import RegistrationForm from '..';
 
 const STEP_SELECT_TICKET_TYPE = 0;
@@ -180,7 +177,6 @@ const defaultReduxState = {
             summitId: null,
             userProfile: null,
         },
-        nowUtc: 1000000,
         promoCode: '',
         promoCodeVerified: null,
         promoCodeValidating: false,

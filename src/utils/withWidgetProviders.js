@@ -10,38 +10,44 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * HOC to wrap a component with Redux Provider and PersistGate.
+ * HOC to wrap a widget root with Redux, PersistGate, and ClockProvider.
  **/
 
 import React from 'react';
 import { Provider } from "react-redux";
 import { PersistGate } from "redux-persist/integration/react";
+import { ClockProvider } from "openstack-uicore-foundation/lib/components/clock-context";
 import { getStore, getPersistor } from "../store";
 
-export const withReduxProvider = (WrappedComponent) => {
-    class WithReduxProvider extends React.PureComponent {
+export const withWidgetProviders = (WrappedComponent) => {
+    class WithWidgetProviders extends React.PureComponent {
         constructor(props) {
             super(props);
             this.store = getStore(props.clientId, props.apiBaseUrl, props.getAccessToken);
         }
 
         render() {
+            const { summitData } = this.props;
             return (
                 <Provider store={this.store}>
                     <PersistGate persistor={getPersistor()}>
-                        <WrappedComponent {...this.props} />
+                        <ClockProvider
+                            timezone={summitData?.time_zone_id || 'UTC'}
+                            now={Math.round(Date.now() / 1000)}
+                        >
+                            <WrappedComponent {...this.props} />
+                        </ClockProvider>
                     </PersistGate>
                 </Provider>
             );
         }
     }
 
-    // Copy propTypes and defaultProps from wrapped component
-    WithReduxProvider.propTypes = WrappedComponent.propTypes;
-    WithReduxProvider.defaultProps = WrappedComponent.defaultProps;
-    WithReduxProvider.displayName = `WithReduxProvider(${WrappedComponent.displayName || WrappedComponent.name || 'Component'})`;
+    WithWidgetProviders.propTypes = WrappedComponent.propTypes;
+    WithWidgetProviders.defaultProps = WrappedComponent.defaultProps;
+    WithWidgetProviders.displayName = `WithWidgetProviders(${WrappedComponent.displayName || WrappedComponent.name || 'Component'})`;
 
-    return WithReduxProvider;
+    return WithWidgetProviders;
 };
 
-export default withReduxProvider;
+export default withWidgetProviders;

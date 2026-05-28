@@ -11,9 +11,10 @@
  * limitations under the License.
  **/
 
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import styles from './index.module.scss';
 import { epochToMomentTimeZone } from 'openstack-uicore-foundation/lib/utils/methods';
+import { useClockSelector } from 'openstack-uicore-foundation/lib/components/clock-context';
 import ContentLoader from 'react-content-loader';
 import { isEmptyString, ticketHasAccessLevel } from '../../utils/utils';
 import { VirtualAccessLevel } from '../../utils/constants';
@@ -39,7 +40,6 @@ const PurchaseComplete = ({
                               goToMyOrders,
                               completedExtraQuestions,
                               summit,
-                              nowUtc,
                               clearWidgetState,
                               closeWidget,
                               supportEmail,
@@ -54,7 +54,14 @@ const PurchaseComplete = ({
     const [requireExtraQuestions, setRequireExtraQuestions] = useState(null);
     const [extraQuestionsLoaded, setExtraQuestonsLoaded] = useState(false);
     const isMultiOrder = useMemo(() => checkout?.tickets.length > 1, [checkout]);
-    const isActive = useMemo(() => summit.start_date <= nowUtc && summit.end_date >= nowUtc, [summit, nowUtc]);
+    // Re-runs every clock tick but the boolean only changes on summit
+    // active/inactive transitions (typically zero times per session).
+    const isActive = useClockSelector(
+        useCallback(
+            (nowUtc) => summit.start_date <= nowUtc && summit.end_date >= nowUtc,
+            [summit.start_date, summit.end_date]
+        )
+    );
     const currentTicket = useMemo(
         () => isMultiOrder ? checkout?.tickets.find(t => t?.owner?.email === user?.email) : checkout?.tickets.find(t => t?.owner),
         [user]

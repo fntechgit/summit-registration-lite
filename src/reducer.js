@@ -31,7 +31,6 @@ import {
     CLEAR_MY_INVITATION,
     CLEAR_WIDGET_STATE,
     REQUESTED_TICKET_TYPES,
-    UPDATE_CLOCK,
     LOAD_PROFILE_DATA,
     SET_CURRENT_PROMO_CODE,
     CLEAR_CURRENT_PROMO_CODE,
@@ -43,11 +42,7 @@ import {
 } from './actions';
 
 import { LOGOUT_USER } from 'openstack-uicore-foundation/lib/security/actions';
-import moment from 'moment';
 import { STEP_SELECT_TICKET_TYPE } from './utils/constants';
-
-const localNowUtc = moment().unix();
-
 
 const DEFAULT_STATE = {
     reservation: null,
@@ -72,7 +67,6 @@ const DEFAULT_STATE = {
         summitId: null,
         userProfile: null,
     },
-    nowUtc: localNowUtc,
     promoCode: '',
     promoCodeVerified: null,
     promoCodeValidating: false,
@@ -168,10 +162,6 @@ const RegistrationLiteReducer = (state = DEFAULT_STATE, action) => {
         }
         case CLEAR_MY_INVITATION: {
             return { ...state, invitation: null };
-        }
-        case UPDATE_CLOCK: {
-            const { timestamp } = payload;
-            return { ...state, nowUtc: timestamp };
         }
         case CLEAR_CURRENT_PROMO_CODE: {
             return { ...state, promoCode: '', promoCodeVerified: null, promoCodeValidating: false, promoCodeAllowsReassign: true }

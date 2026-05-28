@@ -47,7 +47,6 @@ export const GO_TO_LOGIN = 'GO_TO_LOGIN';
 export const GET_MY_INVITATION = 'GET_MY_INVITATION';
 export const CLEAR_MY_INVITATION = 'CLEAR_MY_INVITATION';
 export const CLEAR_WIDGET_STATE = 'CLEAR_WIDGET_STATE';
-export const UPDATE_CLOCK = 'UPDATE_CLOCK';
 export const LOAD_PROFILE_DATA = 'LOAD_PROFILE_DATA';
 
 export const SET_CURRENT_PROMO_CODE = 'SET_CURRENT_PROMO_CODE';
@@ -525,6 +524,3 @@ export const getMyInvitation = (summitId) => async (dispatch, getState, { apiBas
     }
 }
 
-export const updateClock = (timestamp) => (dispatch) => {
-    dispatch(createAction(UPDATE_CLOCK)({ timestamp }));
-};
