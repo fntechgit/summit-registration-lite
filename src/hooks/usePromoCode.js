@@ -175,15 +175,14 @@ const usePromoCode = ({
 
         if (!discoveredPromoCode) return;
 
-        // Discovered code is currently applied
+        // Discovered code is currently applied — re-validate against the new
+        // ticket. The backend rejects if the code doesn't apply, surfacing
+        // INVALID to the user (they can then choose to Remove or pick another
+        // ticket). Previously we silently removed the code on a non-qualifying
+        // pick, which hid the rejection.
         if (isDiscoveredCode) {
-            if (!qualifies) {
-                setIsAutoApplied(false);
-                removePromoCode();
-            } else {
-                const valid = await onRevalidate(ticket, 1);
-                if (!valid) setIsAutoApplied(false);
-            }
+            const valid = await onRevalidate(ticket, 1);
+            if (!valid) setIsAutoApplied(false);
             return;
         }
 
@@ -192,7 +191,7 @@ const usePromoCode = ({
             await tryAutoApply(ticket);
         }
     }, [discoveredPromoCode, isApplied, isDiscoveredCode, userRemovedAutoApply, discoveredPromoCodes,
-        isCodeValidForTicket, removePromoCode, onRevalidate, tryAutoApply]);
+        isCodeValidForTicket, onRevalidate, tryAutoApply]);
 
     // Early auto-apply: when no tickets are available and a single auto_apply code
     // was discovered, apply it so the API returns WithPromoCode ticket types.
