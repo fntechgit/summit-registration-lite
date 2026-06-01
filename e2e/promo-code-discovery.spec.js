@@ -154,15 +154,29 @@ test.describe('auto-apply flow (auto_apply: true)', () => {
         await expect(page.locator('text=You qualify for the following promo code:')).toBeVisible();
     });
 
-    test('does not auto-apply for non-qualifying ticket', async ({ page }) => {
+    test('auto-applies on load and surfaces INVALID when the only ticket is non-qualifying', async ({ page }) => {
         const nonQualifyingTicket = ticketType({ id: 999, name: 'Standard Ticket' });
         await setupRoutes(page, {
             tickets: [nonQualifyingTicket],
             discovery: [autoCode],
+            // Per the SDS, early auto-apply fires whenever a single auto_apply code
+            // exists — independent of which tickets are present. Re-validation against
+            // the lone non-qualifying ticket then catches the mismatch and the user
+            // sees the backend's rejection message.
+            validation: (route) => {
+                if (route.request().url().includes('ticket_type_id%3D%3D999')) {
+                    return route.fulfill({
+                        status: 412,
+                        contentType: 'application/json',
+                        body: JSON.stringify(validationError('Promo code AUTO100 can not be applied to Ticket Type Standard Ticket.')),
+                    });
+                }
+                return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(validationResponse()) });
+            },
         });
         await page.goto('/');
-        await selectTicket(page, 'Standard Ticket');
-        await expect(page.locator('text=Do you have a promo code?')).toBeVisible();
+        await expect(page.locator('input[placeholder="Enter your promo code"]')).toHaveValue('AUTO100');
+        await expect(page.locator('text=Promo code AUTO100 can not be applied to Ticket Type Standard Ticket.')).toBeVisible();
     });
 });
 

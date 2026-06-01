@@ -135,10 +135,12 @@ const usePromoCode = ({
     //
     // Note on concurrency: the two call sites (early-auto-apply effect and
     // onTicketSelected's auto-apply branch) operate on disjoint states by design
-    // (the effect requires `!hasTickets`, the branch requires a selected ticket),
-    // so a true concurrent invocation is unreachable in practice. If a future
-    // change makes that overlap possible, gate this body with a ref-tracked
-    // in-flight flag rather than `applyingCode` (which is captured stale here).
+    // (the effect requires `!isApplied`, the branch fires only on a user-driven
+    // ticket selection — by which point isApplied is already true if early
+    // auto-apply ran), so a true concurrent invocation is unreachable in
+    // practice. If a future change makes that overlap possible, gate this body
+    // with a ref-tracked in-flight flag rather than `applyingCode` (which is
+    // captured stale here).
     const tryAutoApply = useCallback(async (ticket) => {
         setIsAutoApplied(true);
         setApplyingCode(true);
@@ -193,19 +195,20 @@ const usePromoCode = ({
     }, [discoveredPromoCode, isApplied, isDiscoveredCode, userRemovedAutoApply, discoveredPromoCodes,
         isCodeValidForTicket, onRevalidate, tryAutoApply]);
 
-    // Early auto-apply: when no tickets are available and a single auto_apply code
-    // was discovered, apply it so the API returns WithPromoCode ticket types.
-    // On failure, mark as removed to prevent re-fire loops.
+    // Early auto-apply on load (per SDS: silently apply a discovered single
+    // auto_apply code when no code is currently applied). Wait on
+    // ticketDataLoaded only to avoid racing the initial fetch. On failure,
+    // mark as removed to prevent re-fire loops.
     useEffect(() => {
         if (userRemovedAutoApply || isApplied) return;
-        if (!ticketDataLoaded || hasTickets) return;
+        if (!ticketDataLoaded) return;
         if (!discoveredPromoCode?.auto_apply) return;
         if (discoveredPromoCodes.length !== 1) return;
 
         tryAutoApply(null).then(success => {
             if (!success) setUserRemovedAutoApply(true);
         });
-    }, [userRemovedAutoApply, ticketDataLoaded, hasTickets, discoveredPromoCode, discoveredPromoCodes, isApplied, tryAutoApply]);
+    }, [userRemovedAutoApply, ticketDataLoaded, discoveredPromoCode, discoveredPromoCodes, isApplied, tryAutoApply]);
 
     const onApply = useCallback(async (code, ticket, quantity) => {
         setManualError(null);
