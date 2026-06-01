@@ -95,10 +95,12 @@ const TicketTypeComponent = ({
             // Once apply settles, prefer the first ticket the discovered code applies
             // to (so per-ticket validation succeeds); fall back to the only ticket
             // when there's a single option.
-            if (promoCode && !promoState.applyingCode && originalTicketTypes.length > 0) {
+            // Scan allowedTicketTypes (date-filtered) so we never auto-select
+            // a ticket the user couldn't have picked themselves from the dropdown.
+            if (promoCode && !promoState.applyingCode && allowedTicketTypes.length > 0) {
                 const isValid = promoState.isCodeValidForTicket;
-                const qualifying = isValid && originalTicketTypes.find(isValid);
-                const toSelect = qualifying || (originalTicketTypes.length === 1 ? originalTicketTypes[0] : null);
+                const qualifying = isValid && allowedTicketTypes.find(isValid);
+                const toSelect = qualifying || (allowedTicketTypes.length === 1 ? allowedTicketTypes[0] : null);
                 if (toSelect) handleTicketChange(toSelect);
             }
             return;
@@ -111,7 +113,7 @@ const TicketTypeComponent = ({
             setTicket(null);
             setQuantity(minQuantity);
         }
-    }, [promoCode, promoState.applyingCode, originalTicketTypes])
+    }, [promoCode, promoState.applyingCode, allowedTicketTypes, originalTicketTypes])
 
     const showTicketSelector = allowedTicketTypes.length > 0;
 
