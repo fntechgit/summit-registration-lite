@@ -165,7 +165,13 @@ const usePromoCode = ({
 
     const onTicketSelected = useCallback(async (ticket) => {
         const qualifies = discoveredPromoCode && isCodeValidForTicket(ticket);
-        setSuggestionActive(qualifies);
+        // Only turn the suggestion on when the current ticket qualifies; don't
+        // turn it off otherwise. With auto-switch-on-Apply, the suggestion is
+        // still useful when the user has a non-qualifying ticket selected
+        // (Apply will switch them to the qualifying one). The status logic
+        // hides the banner whenever a code is applied, so leaving this true
+        // doesn't surface a stale suggestion.
+        if (qualifies) setSuggestionActive(true);
         setSuggestionDismissed(false);
         setManualError(null);
 
@@ -251,6 +257,11 @@ const usePromoCode = ({
             status,
             isReady,
             validationError,
+            // True while applyPromoCode is in flight (covers the window where
+            // promoCode is set but the refreshed ticketTypes haven't landed
+            // yet). Callers should defer ticket-list-driven side effects
+            // until this clears to avoid acting on a stale list.
+            applyingCode,
 
             // Applied code origin
             isDiscoveredCode,
@@ -258,6 +269,10 @@ const usePromoCode = ({
 
             // Discovery / suggestion
             suggestedCode,
+            // Predicate the caller can use to find a ticket the discovered
+            // promo applies to (auto-selection after auto-apply, ticket
+            // switching on Apply).
+            isCodeValidForTicket,
 
             // Quantity caps from the active discovered code
             maxQuantityFromPromo,

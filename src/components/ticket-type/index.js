@@ -89,9 +89,17 @@ const TicketTypeComponent = ({
         // When promo code changes, the API returns updated ticket types with/without discount.
         // Sync the selected ticket with the refreshed data.
         if (!ticket) {
-            // Auto-select if only one ticket type available after promo code applied
-            if (promoCode && originalTicketTypes.length === 1) {
-                handleTicketChange(originalTicketTypes[0]);
+            // Auto-select after a promo code is applied. Defer while applyingCode is
+            // true: the reducer sets promoCode synchronously before the refreshed
+            // ticketTypes land, so acting now would auto-select from a stale list.
+            // Once apply settles, prefer the first ticket the discovered code applies
+            // to (so per-ticket validation succeeds); fall back to the only ticket
+            // when there's a single option.
+            if (promoCode && !promoState.applyingCode && originalTicketTypes.length > 0) {
+                const isValid = promoState.isCodeValidForTicket;
+                const qualifying = isValid && originalTicketTypes.find(isValid);
+                const toSelect = qualifying || (originalTicketTypes.length === 1 ? originalTicketTypes[0] : null);
+                if (toSelect) handleTicketChange(toSelect);
             }
             return;
         }
@@ -103,7 +111,7 @@ const TicketTypeComponent = ({
             setTicket(null);
             setQuantity(minQuantity);
         }
-    }, [promoCode, originalTicketTypes])
+    }, [promoCode, promoState.applyingCode, originalTicketTypes])
 
     const showTicketSelector = allowedTicketTypes.length > 0;
 
@@ -164,7 +172,22 @@ const TicketTypeComponent = ({
     const decrementQuantity = () => setQuantity(quantity - 1);
 
     const handleApplyPromoCode = async (code) => {
-        await promoActions.onApply(code, ticket, quantity);
+        // If the user applies the suggested/discovered code while a
+        // non-qualifying ticket is selected, deselect first. The qualifying
+        // ticket may not yet be in originalTicketTypes (it's revealed by the
+        // code-filtered refetch inside applyPromoCode). After apply resolves,
+        // the post-apply effect picks the qualifying ticket from the
+        // refreshed list. Manual non-discovered codes still validate against
+        // the current ticket — backend decides.
+        const isDiscovered = code === promoState.suggestedCode;
+        const isValid = promoState.isCodeValidForTicket;
+        let targetTicket = ticket;
+        if (isDiscovered && isValid && ticket && !isValid(ticket)) {
+            setTicket(null);
+            setQuantity(minQuantity);
+            targetTicket = null;
+        }
+        await promoActions.onApply(code, targetTicket, quantity);
     }
 
     return (
