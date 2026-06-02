@@ -12,7 +12,9 @@ const TicketNotice = ({ message, variant = 'info' }) => {
     return (
         <div className={`${styles.notice} ${styles[variant]}`}>
             {variant === 'error' && <span className={styles.icon}>⚠</span>}
-            {items.map((m, i) => <div key={i}>{m}</div>)}
+            <div className={styles.content}>
+                {items.map((m, i) => <div key={i}>{m}</div>)}
+            </div>
         </div>
     );
 };

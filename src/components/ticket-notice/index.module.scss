@@ -1,8 +1,15 @@
 .notice {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
   margin-top: 10px;
   padding: 10px 12px;
   border-radius: 4px;
   font-size: 13px;
+}
+
+.content {
+  flex: 1;
 
   > div + div {
     margin-top: 1px;
@@ -22,5 +29,6 @@
 }
 
 .icon {
-  margin-right: 6px;
+  flex-shrink: 0;
+  line-height: 1.4;
 }
