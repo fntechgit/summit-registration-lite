@@ -42,7 +42,7 @@ const TicketTypeComponent = ({
     promoCode,
     promoCodeAllowsReassign = true,
     trackViewItem,
-    noTicketsAvailableMessage,
+    noAllowedTicketsMessage,
 }) => {
     const { state: promoState = {}, actions: promoActions = {} } = promo;
 
@@ -276,8 +276,9 @@ const TicketTypeComponent = ({
                             )}
                             {!showTicketSelector && (
                                 <TicketNotice
-                                    message={noTicketsAvailableMessage || T.translate("ticket_type.no_tickets_available")}
+                                    message={noAllowedTicketsMessage || T.translate("ticket_type.no_tickets_available")}
                                     variant="info"
+                                    html={!!noAllowedTicketsMessage}
                                 />
                             )}
                             <ReactTooltip id="ticket-quantity-info" place="bottom" overridePosition={avoidTooltipOverflow}>

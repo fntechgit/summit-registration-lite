@@ -275,13 +275,15 @@ test.describe('validation errors', () => {
 });
 
 test.describe('no tickets available', () => {
-    test('shows no tickets message', async ({ page }) => {
+    test('renders the noAllowedTicketsMessage in place of the dropdown', async ({ page }) => {
         await setupRoutes(page, {
             tickets: [],
             discovery: [discoveredCode()],
         });
         await page.goto('/');
-        await expect(page.locator('text=no tickets currently available')).toBeVisible();
+        // Dev harness sets a default noAllowedTicketsMessage; the inline notice
+        // renders it (as HTML, so the my-tickets link is clickable).
+        await expect(page.locator('text=You already have purchased all available tickets')).toBeVisible();
     });
 });
 
