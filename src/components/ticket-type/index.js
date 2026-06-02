@@ -278,6 +278,7 @@ const TicketTypeComponent = ({
                                 <TicketNotice
                                     message={noAllowedTicketsMessage || T.translate("ticket_type.no_tickets_available")}
                                     variant="info"
+                                    html={!!noAllowedTicketsMessage}
                                 />
                             )}
                             <ReactTooltip id="ticket-quantity-info" place="bottom" overridePosition={avoidTooltipOverflow}>
