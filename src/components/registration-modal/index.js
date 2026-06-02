@@ -85,7 +85,6 @@ RegistrationModal.propTypes = {
     initialOrderComplete1stParagraph: PropTypes.string,
     initialOrderComplete2ndParagraph: PropTypes.string,
     initialOrderCompleteButton: PropTypes.string,
-    noTicketsAvailableMessage: PropTypes.string,
     orderCompleteTitle: PropTypes.string,
     orderComplete1stParagraph: PropTypes.string,
     orderComplete2ndParagraph: PropTypes.string,

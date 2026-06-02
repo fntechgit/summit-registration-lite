@@ -135,7 +135,6 @@ jest.mock('../../button-bar', () => () => <div data-testid="button-bar" />);
 jest.mock('../../purchase-complete', () => () => <div data-testid="purchase-complete" />);
 jest.mock('../../login-passwordless', () => () => <div data-testid="passwordless-login" />);
 jest.mock('../../ticket-owned', () => () => <div data-testid="ticket-owned" />);
-jest.mock('../../no-allowed-tickets', () => () => <div data-testid="no-allowed-tickets" />);
 jest.mock('../../ticket-taxes-error', () => () => <div data-testid="ticket-taxes-error" />);
 
 jest.mock('../../../utils/utils', () => ({
