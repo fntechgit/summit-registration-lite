@@ -12,9 +12,12 @@ jest.mock('../../../utils/withWidgetProviders', () => ({
     default: (Component) => Component,
 }));
 
-// Stub the uicore clock-context so the selector runs once against a fixed timestamp
+// Stub the uicore clock-context so the selector runs once against a fixed
+// timestamp. The seed is settable per test via `mockClockNow` (the `mock`
+// prefix is the only identifier jest.mock allows the factory to capture).
+let mockClockNow = 1000000;
 jest.mock('openstack-uicore-foundation/lib/components/clock-context', () => ({
-    useClockSelector: (selector) => selector(1000000),
+    useClockSelector: (selector) => selector(mockClockNow),
     ClockProvider: ({ children }) => children,
 }));
 
@@ -127,7 +130,11 @@ jest.mock('openstack-uicore-foundation/lib/security/constants', () => ({
 jest.mock('../../login', () => () => <div data-testid="login" />);
 jest.mock('../../payment', () => () => <div data-testid="payment" />);
 jest.mock('../../personal-information', () => () => <div data-testid="personal-info" />);
-jest.mock('../../ticket-type', () => () => <div data-testid="ticket-type" />);
+const mockTicketTypeProps = { current: null };
+jest.mock('../../ticket-type', () => (props) => {
+    mockTicketTypeProps.current = props;
+    return <div data-testid="ticket-type" />;
+});
 jest.mock('../../button-bar', () => () => <div data-testid="button-bar" />);
 jest.mock('../../purchase-complete', () => () => <div data-testid="purchase-complete" />);
 jest.mock('../../login-passwordless', () => () => <div data-testid="passwordless-login" />);
@@ -236,6 +243,8 @@ const renderWithStore = (props = {}, stateOverrides = {}) => {
 afterEach(() => {
     cleanup();
     jest.clearAllMocks();
+    mockClockNow = 1000000;
+    mockTicketTypeProps.current = null;
 });
 
 it('closeHandlerRef is assigned handleCloseClick via useEffect', () => {
@@ -406,4 +415,52 @@ it('refires ticket-types fetch and promo discovery when summit id changes', asyn
     expect(mockGetTicketTypesAndTaxes).toHaveBeenCalledWith(2);
     expect(mockDiscoverPromoCodes).toHaveBeenCalledTimes(1);
     expect(mockDiscoverPromoCodes).toHaveBeenCalledWith(2);
+});
+
+// Exercises isTicketCurrentlyAvailable through the rendered prop, with the
+// clock seed deliberately landing inside one ticket's sales window and outside
+// the other's. Without this, a regression in the helper would slip through
+// because the rest of the suite uses a 1970 seed against which every realistic
+// window evaluates to false.
+it('allowedTicketTypes contains the ticket whose sales window covers the clock seed', async () => {
+    mockClockNow = 1700000000; // 2023-11-14, well inside the in-window fixture
+    const inWindow = {
+        id: 101,
+        name: 'In Window',
+        sub_type: 'Regular',
+        sales_start_date: 1699000000,
+        sales_end_date: 1701000000,
+    };
+    const expired = {
+        id: 102,
+        name: 'Expired',
+        sub_type: 'Regular',
+        sales_start_date: 1690000000,
+        sales_end_date: 1695000000,
+    };
+    const alwaysOpen = {
+        id: 103,
+        name: 'Always Open',
+        sub_type: 'Regular',
+        sales_start_date: null,
+        sales_end_date: null,
+    };
+    const prepaidExpired = {
+        id: 104,
+        name: 'Prepaid Past',
+        sub_type: 'PrePaid',
+        sales_start_date: 1690000000,
+        sales_end_date: 1695000000,
+    };
+
+    renderWithStore(
+        { ownedTickets: [] },
+        { ticketTypes: [inWindow, expired, alwaysOpen, prepaidExpired] },
+    );
+    await act(async () => {});
+
+    expect(mockTicketTypeProps.current).not.toBeNull();
+    const ids = mockTicketTypeProps.current.allowedTicketTypes.map((t) => t.id);
+    expect(ids).toEqual(expect.arrayContaining([101, 103, 104]));
+    expect(ids).not.toContain(102);
 });
