@@ -124,6 +124,27 @@ test.describe('suggestion flow (auto_apply: false)', () => {
         await page.fill('input[placeholder="Enter your promo code"]', 'SUGGEST50');
         await expect(page.locator('text=You qualify for the following promo code:')).toBeVisible();
     });
+
+    test('banner swaps to "applies to a different ticket" copy after switching to a non-qualifying ticket', async ({ page }) => {
+        const qualifying = ticketType({ id: 188, name: 'Early Bird Ticket' });
+        const nonQualifying = ticketType({ id: 999, name: 'Standard Ticket' });
+        const code = discoveredCode({ auto_apply: false, code: 'SUGGEST50', allowed_ticket_types: [188] });
+
+        await setupRoutes(page, {
+            tickets: [qualifying, nonQualifying],
+            discovery: [code],
+        });
+        await page.goto('/');
+
+        await selectTicket(page, 'Early Bird Ticket');
+        await expect(page.locator('text=You qualify for the following promo code:')).toBeVisible();
+
+        await selectTicket(page, 'Standard Ticket');
+        await expect(page.locator('text=Following promo code applies to a different ticket. Apply to switch.')).toBeVisible();
+        // The personal "You qualify" copy must be gone — banner stays visible
+        // but accurate about the current pick.
+        await expect(page.locator('text=You qualify for the following promo code:')).toHaveCount(0);
+    });
 });
 
 test.describe('auto-apply flow (auto_apply: true)', () => {

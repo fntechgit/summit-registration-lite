@@ -319,6 +319,7 @@ const TicketTypeComponent = ({
                                         promoCode={promoCode}
                                         suggestedCode={promoState.suggestedCode}
                                         isAutoApplied={promoState.isAutoApplied}
+                                        isCurrentTicketQualifying={promoState.isCodeValidForTicket(ticket)}
                                         onInputChange={promoActions.onInputChange}
                                         onApply={handleApplyPromoCode}
                                         onRemove={promoActions.onRemove}
