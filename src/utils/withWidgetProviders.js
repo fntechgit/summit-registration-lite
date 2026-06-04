@@ -33,7 +33,7 @@ export const withWidgetProviders = (WrappedComponent) => {
                     <PersistGate persistor={getPersistor()}>
                         <ClockProvider
                             timezone={summitData?.time_zone_id || 'UTC'}
-                            now={Math.round(Date.now() / 1000)}
+                            now={Math.floor(Date.now() / 1000)}
                         >
                             <WrappedComponent {...this.props} />
                         </ClockProvider>
