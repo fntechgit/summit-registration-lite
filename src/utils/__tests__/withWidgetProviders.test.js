@@ -97,6 +97,38 @@ it('provides ClockProvider so useClockSelector resolves against a live timestamp
     expect(Number(getByTestId('year').textContent)).toBeGreaterThanOrEqual(2024);
 });
 
+it('keeps useClockSelector live after summitData.time_zone_id changes', () => {
+    // PureComponent re-renders on prop change, which feeds a fresh `timezone`
+    // and `now` into ClockProvider. The consumer must still resolve to a
+    // valid timestamp after that propagation.
+    const ClockConsumer = () => {
+        const year = useClockSelector((nowUtc) =>
+            nowUtc ? new Date(nowUtc * 1000).getUTCFullYear() : null
+        );
+        return <div data-testid="year">{year ?? 'null'}</div>;
+    };
+    const Wrapped = withWidgetProviders(ClockConsumer);
+    const { getByTestId, rerender } = render(
+        <Wrapped
+            clientId="c1"
+            apiBaseUrl="https://api.test.com"
+            getAccessToken={() => 'token'}
+            summitData={{ time_zone_id: 'UTC' }}
+        />
+    );
+    expect(Number(getByTestId('year').textContent)).toBeGreaterThanOrEqual(2024);
+
+    rerender(
+        <Wrapped
+            clientId="c1"
+            apiBaseUrl="https://api.test.com"
+            getAccessToken={() => 'token'}
+            summitData={{ time_zone_id: 'America/New_York' }}
+        />
+    );
+    expect(Number(getByTestId('year').textContent)).toBeGreaterThanOrEqual(2024);
+});
+
 describe('REGRESSION: widget works under a foreign Provider', () => {
     // This test proves the HOC always creates its own Provider, regardless of
     // any outer Provider. A connect()-based component that reads from
