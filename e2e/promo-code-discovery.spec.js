@@ -124,6 +124,27 @@ test.describe('suggestion flow (auto_apply: false)', () => {
         await page.fill('input[placeholder="Enter your promo code"]', 'SUGGEST50');
         await expect(page.locator('text=You qualify for the following promo code:')).toBeVisible();
     });
+
+    test('banner swaps to "applies to a different ticket" copy after switching to a non-qualifying ticket', async ({ page }) => {
+        const qualifying = ticketType({ id: 188, name: 'Early Bird Ticket' });
+        const nonQualifying = ticketType({ id: 999, name: 'Standard Ticket' });
+        const code = discoveredCode({ auto_apply: false, code: 'SUGGEST50', allowed_ticket_types: [188] });
+
+        await setupRoutes(page, {
+            tickets: [qualifying, nonQualifying],
+            discovery: [code],
+        });
+        await page.goto('/');
+
+        await selectTicket(page, 'Early Bird Ticket');
+        await expect(page.locator('text=You qualify for the following promo code:')).toBeVisible();
+
+        await selectTicket(page, 'Standard Ticket');
+        await expect(page.locator('text=Following promo code applies to a different ticket. Apply to switch.')).toBeVisible();
+        // The personal "You qualify" copy must be gone — banner stays visible
+        // but accurate about the current pick.
+        await expect(page.locator('text=You qualify for the following promo code:')).toHaveCount(0);
+    });
 });
 
 test.describe('auto-apply flow (auto_apply: true)', () => {
@@ -154,15 +175,29 @@ test.describe('auto-apply flow (auto_apply: true)', () => {
         await expect(page.locator('text=You qualify for the following promo code:')).toBeVisible();
     });
 
-    test('does not auto-apply for non-qualifying ticket', async ({ page }) => {
+    test('auto-applies on load and surfaces INVALID when the only ticket is non-qualifying', async ({ page }) => {
         const nonQualifyingTicket = ticketType({ id: 999, name: 'Standard Ticket' });
         await setupRoutes(page, {
             tickets: [nonQualifyingTicket],
             discovery: [autoCode],
+            // Per the SDS, early auto-apply fires whenever a single auto_apply code
+            // exists — independent of which tickets are present. Re-validation against
+            // the lone non-qualifying ticket then catches the mismatch and the user
+            // sees the backend's rejection message.
+            validation: (route) => {
+                if (route.request().url().includes('ticket_type_id%3D%3D999')) {
+                    return route.fulfill({
+                        status: 412,
+                        contentType: 'application/json',
+                        body: JSON.stringify(validationError('Promo code AUTO100 can not be applied to Ticket Type Standard Ticket.')),
+                    });
+                }
+                return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(validationResponse()) });
+            },
         });
         await page.goto('/');
-        await selectTicket(page, 'Standard Ticket');
-        await expect(page.locator('text=Do you have a promo code?')).toBeVisible();
+        await expect(page.locator('input[placeholder="Enter your promo code"]')).toHaveValue('AUTO100');
+        await expect(page.locator('text=Promo code AUTO100 can not be applied to Ticket Type Standard Ticket.')).toBeVisible();
     });
 });
 
@@ -288,7 +323,7 @@ test.describe('no tickets available', () => {
 });
 
 test.describe('ticket switching with applied code', () => {
-    test('removes discovered code when switching to non-qualifying ticket', async ({ page }) => {
+    test('keeps code applied and surfaces INVALID when switching to non-qualifying ticket', async ({ page }) => {
         const qualifying = ticketType({ id: 188, name: 'Early Bird Ticket' });
         const nonQualifying = ticketType({ id: 999, name: 'Standard Ticket' });
         const code = discoveredCode({ auto_apply: true, allowed_ticket_types: [188] });
@@ -296,15 +331,28 @@ test.describe('ticket switching with applied code', () => {
         await setupRoutes(page, {
             tickets: [qualifying, nonQualifying],
             discovery: [code],
-            validation: { status: 200, body: validationResponse() },
+            // Reject the validate call when targeting the non-qualifying ticket type.
+            validation: (route) => {
+                if (route.request().url().includes('ticket_type_id%3D%3D999')) {
+                    return route.fulfill({
+                        status: 412,
+                        contentType: 'application/json',
+                        body: JSON.stringify(validationError('Promo code EARLYBIRD can not be applied to Ticket Type Standard Ticket.')),
+                    });
+                }
+                return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(validationResponse()) });
+            },
         });
         await page.goto('/');
         await selectTicket(page, 'Early Bird Ticket');
         await expect(page.locator('text=Following promo code was automatically applied:')).toBeVisible();
 
         await selectTicket(page, 'Standard Ticket');
-        await expect(page.locator('text=Do you have a promo code?')).toBeVisible();
-        await expect(page.locator('input[placeholder="Enter your promo code"]')).toHaveValue('');
+        // The code is no longer silently removed on a non-qualifying ticket switch;
+        // it stays applied and is re-validated, surfacing the backend rejection so
+        // the user can choose to Remove or pick another qualifying ticket.
+        await expect(page.locator('input[placeholder="Enter your promo code"]')).toHaveValue('EARLYBIRD');
+        await expect(page.locator('text=Promo code EARLYBIRD can not be applied to Ticket Type Standard Ticket.')).toBeVisible();
     });
 
     test('suggestion appears when switching back to qualifying ticket', async ({ page }) => {

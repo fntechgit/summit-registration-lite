@@ -284,13 +284,20 @@ const RegistrationFormContent = (
     // of the hook's own validation error (API rejection or status-derived).
     const ticketStepError = unappliedCodeWarning ?? promoState.validationError;
 
-    // Clear the unapplied-code warning once the condition that would have raised it
-    // no longer holds (input cleared, code applied, or a suggestion is showing).
+    // Clear the unapplied-code warning once it's no longer the right message to show.
+    // The hook's own validationError takes precedence: if the user actually clicked
+    // Apply and the backend rejected, surfacing "you didn't apply" would mask the
+    // specific rejection reason. Depending on validationError (rather than on
+    // applyPromoCode's brief Redux promoCode=truthy window) keeps the cleanup
+    // robust against refactors of the apply action's sequencing.
     useEffect(() => {
-        if (!formValues?.promoCode || promoCode || promoState.status === PROMO_STATUS.SUGGESTED) {
+        if (!formValues?.promoCode
+            || promoCode
+            || promoState.status === PROMO_STATUS.SUGGESTED
+            || promoState.validationError) {
             setUnappliedCodeWarning(null);
         }
-    }, [formValues?.promoCode, promoCode, promoState.status])
+    }, [formValues?.promoCode, promoCode, promoState.status, promoState.validationError])
 
     const [ref, { height }] = useMeasure();
 

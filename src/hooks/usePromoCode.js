@@ -135,10 +135,12 @@ const usePromoCode = ({
     //
     // Note on concurrency: the two call sites (early-auto-apply effect and
     // onTicketSelected's auto-apply branch) operate on disjoint states by design
-    // (the effect requires `!hasTickets`, the branch requires a selected ticket),
-    // so a true concurrent invocation is unreachable in practice. If a future
-    // change makes that overlap possible, gate this body with a ref-tracked
-    // in-flight flag rather than `applyingCode` (which is captured stale here).
+    // (the effect requires `!isApplied`, the branch fires only on a user-driven
+    // ticket selection — by which point isApplied is already true if early
+    // auto-apply ran), so a true concurrent invocation is unreachable in
+    // practice. If a future change makes that overlap possible, gate this body
+    // with a ref-tracked in-flight flag rather than `applyingCode` (which is
+    // captured stale here).
     const tryAutoApply = useCallback(async (ticket) => {
         setIsAutoApplied(true);
         setApplyingCode(true);
@@ -163,7 +165,13 @@ const usePromoCode = ({
 
     const onTicketSelected = useCallback(async (ticket) => {
         const qualifies = discoveredPromoCode && isCodeValidForTicket(ticket);
-        setSuggestionActive(qualifies);
+        // Only turn the suggestion on when the current ticket qualifies; don't
+        // turn it off otherwise. With auto-switch-on-Apply, the suggestion is
+        // still useful when the user has a non-qualifying ticket selected
+        // (Apply will switch them to the qualifying one). The status logic
+        // hides the banner whenever a code is applied, so leaving this true
+        // doesn't surface a stale suggestion.
+        if (qualifies) setSuggestionActive(true);
         setSuggestionDismissed(false);
         setManualError(null);
 
@@ -175,15 +183,14 @@ const usePromoCode = ({
 
         if (!discoveredPromoCode) return;
 
-        // Discovered code is currently applied
+        // Discovered code is currently applied — re-validate against the new
+        // ticket. The backend rejects if the code doesn't apply, surfacing
+        // INVALID to the user (they can then choose to Remove or pick another
+        // ticket). Previously we silently removed the code on a non-qualifying
+        // pick, which hid the rejection.
         if (isDiscoveredCode) {
-            if (!qualifies) {
-                setIsAutoApplied(false);
-                removePromoCode();
-            } else {
-                const valid = await onRevalidate(ticket, 1);
-                if (!valid) setIsAutoApplied(false);
-            }
+            const valid = await onRevalidate(ticket, 1);
+            if (!valid) setIsAutoApplied(false);
             return;
         }
 
@@ -192,21 +199,22 @@ const usePromoCode = ({
             await tryAutoApply(ticket);
         }
     }, [discoveredPromoCode, isApplied, isDiscoveredCode, userRemovedAutoApply, discoveredPromoCodes,
-        isCodeValidForTicket, removePromoCode, onRevalidate, tryAutoApply]);
+        isCodeValidForTicket, onRevalidate, tryAutoApply]);
 
-    // Early auto-apply: when no tickets are available and a single auto_apply code
-    // was discovered, apply it so the API returns WithPromoCode ticket types.
-    // On failure, mark as removed to prevent re-fire loops.
+    // Early auto-apply on load (per SDS: silently apply a discovered single
+    // auto_apply code when no code is currently applied). Wait on
+    // ticketDataLoaded only to avoid racing the initial fetch. On failure,
+    // mark as removed to prevent re-fire loops.
     useEffect(() => {
         if (userRemovedAutoApply || isApplied) return;
-        if (!ticketDataLoaded || hasTickets) return;
+        if (!ticketDataLoaded) return;
         if (!discoveredPromoCode?.auto_apply) return;
         if (discoveredPromoCodes.length !== 1) return;
 
         tryAutoApply(null).then(success => {
             if (!success) setUserRemovedAutoApply(true);
         });
-    }, [userRemovedAutoApply, ticketDataLoaded, hasTickets, discoveredPromoCode, discoveredPromoCodes, isApplied, tryAutoApply]);
+    }, [userRemovedAutoApply, ticketDataLoaded, discoveredPromoCode, discoveredPromoCodes, isApplied, tryAutoApply]);
 
     const onApply = useCallback(async (code, ticket, quantity) => {
         setManualError(null);
@@ -249,6 +257,11 @@ const usePromoCode = ({
             status,
             isReady,
             validationError,
+            // True while applyPromoCode is in flight (covers the window where
+            // promoCode is set but the refreshed ticketTypes haven't landed
+            // yet). Callers should defer ticket-list-driven side effects
+            // until this clears to avoid acting on a stale list.
+            applyingCode,
 
             // Applied code origin
             isDiscoveredCode,
@@ -256,6 +269,10 @@ const usePromoCode = ({
 
             // Discovery / suggestion
             suggestedCode,
+            // Predicate the caller can use to find a ticket the discovered
+            // promo applies to (auto-selection after auto-apply, ticket
+            // switching on Apply).
+            isCodeValidForTicket,
 
             // Quantity caps from the active discovered code
             maxQuantityFromPromo,

@@ -18,7 +18,7 @@ import styles from "./index.module.scss";
 import { avoidTooltipOverflow } from '../../utils/utils';
 import { PROMO_STATUS } from '../../utils/constants';
 
-const PromoCodeInput = ({ promoStatus, promoCode, suggestedCode, isAutoApplied, onApply, onRemove, onInputChange, showMultipleTicketTexts }) => {
+const PromoCodeInput = ({ promoStatus, promoCode, suggestedCode, isAutoApplied, isCurrentTicketQualifying, onApply, onRemove, onInputChange, showMultipleTicketTexts }) => {
 
     const [userTypedValue, setUserTypedValue] = useState('');
 
@@ -49,11 +49,17 @@ const PromoCodeInput = ({ promoStatus, promoCode, suggestedCode, isAutoApplied, 
             case PROMO_STATUS.INVALID:
                 return undefined;
             case PROMO_STATUS.SUGGESTED:
-                return T.translate('promo_code.suggestion_label');
+                // The suggestion banner stays visible across non-qualifying ticket
+                // picks (so the "Apply will switch you" affordance persists). Swap
+                // the copy so it stays accurate: tell the user the code applies to
+                // a different ticket and that Apply will switch them.
+                return isCurrentTicketQualifying
+                    ? T.translate('promo_code.suggestion_label')
+                    : T.translate('promo_code.suggestion_label_switch');
             default:
                 return undefined;
         }
-    }, [promoStatus, isAutoApplied]);
+    }, [promoStatus, isAutoApplied, isCurrentTicketQualifying]);
 
     const canApply = !isLocked && !!inputValue;
 

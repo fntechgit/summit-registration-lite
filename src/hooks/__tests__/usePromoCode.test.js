@@ -288,12 +288,14 @@ describe('onTicketSelected', () => {
         expect(result.current.state.status).toBe(PROMO_STATUS.SUGGESTED);
     });
 
-    it('removes discovered code when switching to non-qualifying ticket', async () => {
+    it('re-validates discovered code when switching to non-qualifying ticket', async () => {
+        const validatePromoCode = jest.fn(() => Promise.resolve());
         const removePromoCode = jest.fn();
         const props = createDefaultProps({
             discoveredPromoCodes: mockDiscoveredCodes,
             promoCode: 'AUTO1',
             promoCodeVerified: true,
+            validatePromoCode,
             removePromoCode,
         });
         const { result } = renderHook(() => usePromoCode(props));
@@ -301,10 +303,12 @@ describe('onTicketSelected', () => {
         await act(async () => {
             await result.current.actions.onTicketSelected(mockTicketNonQualifying);
         });
-        expect(removePromoCode).toHaveBeenCalled();
+        // Per c60b30e: surface backend rejection instead of silently removing.
+        expect(validatePromoCode).toHaveBeenCalled();
+        expect(removePromoCode).not.toHaveBeenCalled();
     });
 
-    it('removes discovered code when ticket is not in allowed list', async () => {
+    it('re-validates discovered code when ticket is not in allowed list', async () => {
         const validatePromoCode = jest.fn(() => Promise.resolve());
         const removePromoCode = jest.fn();
         const ticket2 = { id: 2, sub_type: 'Regular' };
@@ -320,9 +324,10 @@ describe('onTicketSelected', () => {
         await act(async () => {
             await result.current.actions.onTicketSelected(ticket2);
         });
-        // AUTO1 allowed_ticket_types is [{ id: 1 }], ticket2 has id: 2
-        expect(removePromoCode).toHaveBeenCalled();
-        expect(validatePromoCode).not.toHaveBeenCalled();
+        // AUTO1 allowed_ticket_types is [{ id: 1 }], ticket2 has id: 2.
+        // Backend decides — hook re-validates rather than removing client-side.
+        expect(validatePromoCode).toHaveBeenCalled();
+        expect(removePromoCode).not.toHaveBeenCalled();
     });
 
     it('re-validates manual code when switching tickets', async () => {
@@ -906,18 +911,20 @@ describe('early auto-apply', () => {
         expect(applyPromoCode).toHaveBeenCalledWith('AUTO1');
     });
 
-    it('does not fire when tickets are already available', async () => {
+    it('fires even when tickets are already available (per SDS)', async () => {
+        // Per a8590e2: the hasTickets gate was removed; single auto_apply codes
+        // fire as soon as ticket data has loaded regardless of public availability.
         const applyPromoCode = jest.fn(() => Promise.resolve());
-        renderHook(() =>
-            usePromoCode(createDefaultProps({
-                discoveredPromoCodes: singleAutoApplyCode,
-                applyPromoCode,
-                ticketDataLoaded: true,
-                hasTickets: true,
-            }))
-        );
+        const baseProps = createDefaultProps({
+            discoveredPromoCodes: singleAutoApplyCode,
+            applyPromoCode,
+            ticketDataLoaded: true,
+            hasTickets: true,
+        });
+        const { rerender } = renderHook((props) => usePromoCode(props), { initialProps: baseProps });
         await act(async () => { await flushPromises(); });
-        expect(applyPromoCode).not.toHaveBeenCalled();
+        rerender({ ...baseProps, promoCode: 'AUTO1' });
+        expect(applyPromoCode).toHaveBeenCalledWith('AUTO1');
     });
 
     it('does not fire when ticket data is still loading', async () => {
