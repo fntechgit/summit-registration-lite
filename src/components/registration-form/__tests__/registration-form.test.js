@@ -5,11 +5,20 @@ import { Provider } from 'react-redux';
 import { createStore, combineReducers, applyMiddleware } from 'redux';
 import thunk from 'redux-thunk';
 
-// Mock withReduxProvider as identity HOC
-jest.mock('../../../utils/withReduxProvider', () => ({
-    withReduxProvider: (Component) => Component,
+// Mock withWidgetProviders as identity HOC
+jest.mock('../../../utils/withWidgetProviders', () => ({
+    withWidgetProviders: (Component) => Component,
     __esModule: true,
     default: (Component) => Component,
+}));
+
+// Stub the uicore clock-context so the selector runs once against a fixed
+// timestamp. The seed is settable per test via `mockClockNow` (the `mock`
+// prefix is the only identifier jest.mock allows the factory to capture).
+let mockClockNow = 1000000;
+jest.mock('openstack-uicore-foundation/lib/components/clock-context', () => ({
+    useClockSelector: (selector) => selector(mockClockNow),
+    ClockProvider: ({ children }) => children,
 }));
 
 // Mock action creators
@@ -24,7 +33,6 @@ const mockGetLoginCode = jest.fn();
 const mockPasswordlessLogin = jest.fn();
 const mockGoToLogin = jest.fn();
 const mockGetMyInvitation = jest.fn(() => Promise.resolve());
-const mockUpdateClock = jest.fn();
 const mockLoadProfileData = jest.fn();
 const mockApplyPromoCode = jest.fn();
 const mockRemovePromoCode = jest.fn();
@@ -78,10 +86,6 @@ jest.mock('../../../actions', () => ({
         mockGetMyInvitation(...args);
         return Promise.resolve();
     },
-    updateClock: (...args) => {
-        mockUpdateClock(...args);
-        return { type: 'NOOP' };
-    },
     loadProfileData: (...args) => {
         mockLoadProfileData(...args);
         return { type: 'NOOP' };
@@ -117,10 +121,6 @@ jest.mock('openstack-uicore-foundation/lib/components/ajaxloader', () => {
     return (props) => <div data-testid="ajax-loader" />;
 });
 
-jest.mock('openstack-uicore-foundation/lib/components/clock', () => {
-    return (props) => <div data-testid="clock" />;
-});
-
 jest.mock('openstack-uicore-foundation/lib/security/constants', () => ({
     AUTH_ERROR_MISSING_AUTH_INFO: 'Missing Auth info',
     AUTH_ERROR_MISSING_REFRESH_TOKEN: 'missing Refresh Token',
@@ -130,7 +130,11 @@ jest.mock('openstack-uicore-foundation/lib/security/constants', () => ({
 jest.mock('../../login', () => () => <div data-testid="login" />);
 jest.mock('../../payment', () => () => <div data-testid="payment" />);
 jest.mock('../../personal-information', () => () => <div data-testid="personal-info" />);
-jest.mock('../../ticket-type', () => () => <div data-testid="ticket-type" />);
+const mockTicketTypeProps = { current: null };
+jest.mock('../../ticket-type', () => (props) => {
+    mockTicketTypeProps.current = props;
+    return <div data-testid="ticket-type" />;
+});
 jest.mock('../../button-bar', () => () => <div data-testid="button-bar" />);
 jest.mock('../../purchase-complete', () => () => <div data-testid="purchase-complete" />);
 jest.mock('../../login-passwordless', () => () => <div data-testid="passwordless-login" />);
@@ -154,7 +158,7 @@ jest.mock('react-use', () => ({
     useMeasure: () => [jest.fn(), { height: 100 }],
 }));
 
-// Import default (which is withReduxProvider(RegistrationForm) but our mock makes it identity)
+// Import default (which is withWidgetProviders(RegistrationForm) but our mock makes it identity)
 import RegistrationForm from '..';
 
 const STEP_SELECT_TICKET_TYPE = 0;
@@ -180,7 +184,6 @@ const defaultReduxState = {
             summitId: null,
             userProfile: null,
         },
-        nowUtc: 1000000,
         promoCode: '',
         promoCodeVerified: null,
         promoCodeValidating: false,
@@ -240,6 +243,8 @@ const renderWithStore = (props = {}, stateOverrides = {}) => {
 afterEach(() => {
     cleanup();
     jest.clearAllMocks();
+    mockClockNow = 1000000;
+    mockTicketTypeProps.current = null;
 });
 
 it('closeHandlerRef is assigned handleCloseClick via useEffect', () => {
@@ -410,4 +415,52 @@ it('refires ticket-types fetch and promo discovery when summit id changes', asyn
     expect(mockGetTicketTypesAndTaxes).toHaveBeenCalledWith(2);
     expect(mockDiscoverPromoCodes).toHaveBeenCalledTimes(1);
     expect(mockDiscoverPromoCodes).toHaveBeenCalledWith(2);
+});
+
+// Exercises isTicketCurrentlyAvailable through the rendered prop, with the
+// clock seed deliberately landing inside one ticket's sales window and outside
+// the other's. Without this, a regression in the helper would slip through
+// because the rest of the suite uses a 1970 seed against which every realistic
+// window evaluates to false.
+it('allowedTicketTypes contains the ticket whose sales window covers the clock seed', async () => {
+    mockClockNow = 1700000000; // 2023-11-14, well inside the in-window fixture
+    const inWindow = {
+        id: 101,
+        name: 'In Window',
+        sub_type: 'Regular',
+        sales_start_date: 1699000000,
+        sales_end_date: 1701000000,
+    };
+    const expired = {
+        id: 102,
+        name: 'Expired',
+        sub_type: 'Regular',
+        sales_start_date: 1690000000,
+        sales_end_date: 1695000000,
+    };
+    const alwaysOpen = {
+        id: 103,
+        name: 'Always Open',
+        sub_type: 'Regular',
+        sales_start_date: null,
+        sales_end_date: null,
+    };
+    const prepaidExpired = {
+        id: 104,
+        name: 'Prepaid Past',
+        sub_type: 'PrePaid',
+        sales_start_date: 1690000000,
+        sales_end_date: 1695000000,
+    };
+
+    renderWithStore(
+        { ownedTickets: [] },
+        { ticketTypes: [inWindow, expired, alwaysOpen, prepaidExpired] },
+    );
+    await act(async () => {});
+
+    expect(mockTicketTypeProps.current).not.toBeNull();
+    const ids = mockTicketTypeProps.current.allowedTicketTypes.map((t) => t.id);
+    expect(ids).toEqual(expect.arrayContaining([101, 103, 104]));
+    expect(ids).not.toContain(102);
 });
