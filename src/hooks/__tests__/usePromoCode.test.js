@@ -1004,3 +1004,173 @@ describe('status: INVALID without ticket', () => {
         expect(result.current.state.status).toBe(PROMO_STATUS.APPLYING);
     });
 });
+
+// The exact set of fields the widget requests from the server in
+// actions.js#discoverPromoCodes (via the `fields` and `relations` params).
+// Any field this hook reads on a discovered promo code MUST be in this
+// list — otherwise it will arrive as undefined in production, even though
+// tests that hand-build fixture objects will keep passing.
+const REQUESTED_SCALAR_FIELDS = [
+    'code',
+    'auto_apply',
+    'quantity_per_account',
+    'remaining_quantity_per_account',
+    'quantity_available',
+];
+const REQUESTED_RELATIONS = ['allowed_ticket_types'];
+
+// Why this block exists:
+//   discoverPromoCodes asks the server for a narrow subset of fields. If a
+//   future change to usePromoCode starts reading a field that isn't on the
+//   requested list, the field is undefined at runtime — but a normal unit
+//   test would still pass because its fixture object was built by hand and
+//   happens to include the field. Static grep can miss aliases, computed
+//   access, spread and destructuring. This block catches all of that by
+//   wrapping the fixture in a Proxy and observing what JavaScript actually
+//   reads while the hook runs through its full lifecycle.
+//
+// How it works:
+//   - `observe(target)` returns a Proxy that records every read, `in` check,
+//     and enumeration (`{...code}`, `Object.keys`, `JSON.stringify`).
+//   - Enumeration ops record a sentinel (`__enumeration__`) rather than a
+//     field name, because they leak the whole shape and there's no single
+//     field to blame.
+//   - `exerciseFlows` drives the hook through auto-apply, ticket
+//     qualification, quantity caps, manual entry, and removal.
+//   - The assertion demands every recorded key is in the requested list.
+describe('every field the hook reads on a discovered promo code is one the API request asks for', () => {
+    const observe = (target, accessed) => new Proxy(target, {
+        get(t, prop) {
+            if (typeof prop === 'string') accessed.add(prop);
+            return t[prop];
+        },
+        has(t, prop) {
+            if (typeof prop === 'string') accessed.add(prop);
+            return Reflect.has(t, prop);
+        },
+        ownKeys(t) {
+            accessed.add('__enumeration__');
+            return Reflect.ownKeys(t);
+        },
+        getOwnPropertyDescriptor(t, prop) {
+            accessed.add('__enumeration__');
+            return Reflect.getOwnPropertyDescriptor(t, prop);
+        },
+    });
+
+    const REQUESTED = new Set([...REQUESTED_SCALAR_FIELDS, ...REQUESTED_RELATIONS]);
+    // Keys that fire on any object regardless of consumer code, and so
+    // shouldn't count as a "field access." `then` is checked by `await` /
+    // `Promise.resolve`; `toJSON` is probed by `JSON.stringify` (and the
+    // real leak from stringify is already caught via __enumeration__).
+    const IGNORED_KEYS = new Set(['then', 'toJSON']);
+    const isFieldAccess = (k) => !IGNORED_KEYS.has(k);
+
+    const exerciseFlows = async (proxiedCode, extraProps = {}) => {
+        const applyPromoCode = jest.fn(() => Promise.resolve());
+        const validatePromoCode = jest.fn(() => Promise.resolve());
+        const removePromoCode = jest.fn();
+        const setFormPromoCode = jest.fn();
+        const flushPromises = () => new Promise((resolve) => setImmediate(resolve));
+
+        const baseProps = createDefaultProps({
+            discoveredPromoCodes: [proxiedCode],
+            applyPromoCode,
+            validatePromoCode,
+            removePromoCode,
+            setFormPromoCode,
+            ticketDataLoaded: true,
+            ...extraProps,
+        });
+
+        const { result, rerender } = renderHook((p) => usePromoCode(p), {
+            initialProps: baseProps,
+        });
+
+        // Early auto-apply effect fires
+        await act(async () => { await flushPromises(); });
+
+        // Simulate Redux state update after auto-apply
+        const appliedProps = { ...baseProps, promoCode: proxiedCode.code, promoCodeVerified: true };
+        rerender(appliedProps);
+
+        // Read every state field the hook exposes (some are memoised — force
+        // them to compute by touching them)
+        void result.current.state.status;
+        void result.current.state.suggestedCode;
+        void result.current.state.isDiscoveredCode;
+        void result.current.state.isAutoApplied;
+        void result.current.state.maxQuantityFromPromo;
+        void result.current.state.perAccountLimit;
+        void result.current.state.validationError;
+        void result.current.state.isReady;
+
+        // Ticket qualification against a matching + non-matching id
+        result.current.state.isCodeValidForTicket({ id: 1 });
+        result.current.state.isCodeValidForTicket({ id: 999 });
+
+        // Ticket selection (auto-apply path + revalidation path)
+        await act(async () => {
+            await result.current.actions.onTicketSelected({ id: 1, sub_type: 'Regular' });
+        });
+
+        // Input change + suggestion dismiss/restore
+        act(() => { result.current.actions.onInputChange(proxiedCode.code); });
+        act(() => { result.current.actions.onInputChange('different'); });
+
+        // Removal
+        act(() => { result.current.actions.onRemove(); });
+    };
+
+    it('reads no field outside the requested list across the full hook lifecycle', async () => {
+        const accessed = new Set();
+        const proxied = observe({
+            code: 'AUDIT_CODE',
+            auto_apply: true,
+            allowed_ticket_types: [{ id: 1 }],
+            quantity_per_account: 5,
+            remaining_quantity_per_account: 3,
+            quantity_available: 20,
+        }, accessed);
+
+        await exerciseFlows(proxied);
+
+        const fieldAccesses = [...accessed].filter(isFieldAccess);
+        const outsideWhitelist = fieldAccesses.filter((f) => !REQUESTED.has(f));
+
+        // If this fails, either add the new field to the `fields` /
+        // `relations` params in actions.js#discoverPromoCodes OR remove the
+        // stray access from the hook.
+        expect(outsideWhitelist).toEqual([]);
+        // Belt-and-suspenders: the recorded set equals the subset of the
+        // requested list that this run actually touched. Skipped when the
+        // first assertion fires.
+        expect([...accessed].filter(isFieldAccess).sort()).toEqual(
+            [...REQUESTED].filter((f) => fieldAccesses.includes(f)).sort()
+        );
+    });
+
+    it('actually exercises the hook — at least code, auto_apply, and allowed_ticket_types are read', async () => {
+        const accessed = new Set();
+        const proxied = observe({
+            code: 'AUDIT_CODE',
+            auto_apply: false, // suggestion path, not auto-apply
+            allowed_ticket_types: [{ id: 1 }],
+            quantity_per_account: 5,
+            remaining_quantity_per_account: 3,
+            quantity_available: 20,
+        }, accessed);
+
+        await exerciseFlows(proxied);
+
+        const fieldAccesses = new Set([...accessed].filter(isFieldAccess));
+        // Guards the audit from silently degrading into a no-op. If
+        // exerciseFlows ever stopped driving the hook (or the Proxy stopped
+        // observing), the previous test could pass trivially with an empty
+        // access set. These three reads happen in every meaningful run of
+        // usePromoCode; requiring them means the audit is doing real work.
+        expect(fieldAccesses.has('code')).toBe(true);
+        expect(fieldAccesses.has('auto_apply')).toBe(true);
+        expect(fieldAccesses.has('allowed_ticket_types')).toBe(true);
+    });
+});

@@ -108,6 +108,11 @@ const customErrorHandler = (err, res) => (dispatch, state) => {
 export const discoverPromoCodes = (summitId) => async (dispatch, getState, { apiBaseUrl, getAccessToken }) => {
     try {
         const accessToken = await getAccessToken();
+        const params = {
+            access_token: accessToken,
+            fields: 'code,auto_apply,quantity_per_account,remaining_quantity_per_account,quantity_available',
+            relations: 'allowed_ticket_types'
+        };
         return getRequest(
             createAction(DISCOVER_PROMO_CODES),
             createAction(DISCOVER_PROMO_CODES_SUCCESS),
@@ -115,7 +120,7 @@ export const discoverPromoCodes = (summitId) => async (dispatch, getState, { api
             // Discovery is non-blocking - errors silently ignored.
             // Auth errors will surface on the next user-initiated action.
             null
-        )({ access_token: accessToken })(dispatch);
+        )(params)(dispatch);
     } catch (e) {
         console.log(e);
         return null;
