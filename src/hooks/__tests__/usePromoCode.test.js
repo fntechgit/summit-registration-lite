@@ -75,25 +75,55 @@ describe('status derivation', () => {
         expect(result.current.state.status).toBe(PROMO_STATUS.IDLE);
     });
 
-    it('returns APPLYING when code applied and promoCodeVerified is null', () => {
+    it('returns PROCESSING when code applied and ticket data has not loaded yet', () => {
         const { result } = renderHook(() =>
             usePromoCode(createDefaultProps({ promoCode: 'CODE', promoCodeVerified: null }))
         );
-        expect(result.current.state.status).toBe(PROMO_STATUS.APPLYING);
+        expect(result.current.state.status).toBe(PROMO_STATUS.PROCESSING);
     });
 
-    it('returns VALIDATING when code applied and promoCodeValidating is true', () => {
+    it('returns PROCESSING when validation is in flight', () => {
         const { result } = renderHook(() =>
             usePromoCode(createDefaultProps({ promoCode: 'CODE', promoCodeValidating: true }))
         );
-        expect(result.current.state.status).toBe(PROMO_STATUS.VALIDATING);
+        expect(result.current.state.status).toBe(PROMO_STATUS.PROCESSING);
     });
 
-    it('returns VALID when code applied and promoCodeVerified is true', () => {
+    it('returns PROCESSING during re-validation after a failed verdict', () => {
+        // The reducer keeps promoCodeVerified=false while a re-validation is in
+        // flight, so both signals coexist. In-flight must win over the stale
+        // verdict: spinner, not error icon.
+        const { result } = renderHook(() =>
+            usePromoCode(createDefaultProps({
+                promoCode: 'CODE',
+                promoCodeVerified: false,
+                promoCodeValidating: true,
+            }))
+        );
+        expect(result.current.state.status).toBe(PROMO_STATUS.PROCESSING);
+        expect(result.current.state.validationError).toBeNull();
+    });
+
+    it('returns APPLIED when code verified for the selected ticket', () => {
         const { result } = renderHook(() =>
             usePromoCode(createDefaultProps({ promoCode: 'CODE', promoCodeVerified: true }))
         );
-        expect(result.current.state.status).toBe(PROMO_STATUS.VALID);
+        expect(result.current.state.status).toBe(PROMO_STATUS.APPLIED);
+    });
+
+    it('returns APPLIED when code accepted with tickets available but none picked yet', () => {
+        // Code was applied without a ticket selected: the code-filtered ticket
+        // list came back non-empty, nothing is in flight, and no per-ticket
+        // validation has run. This is a resting state, not a spinner state.
+        const { result } = renderHook(() =>
+            usePromoCode(createDefaultProps({
+                promoCode: 'CODE',
+                promoCodeVerified: null,
+                ticketDataLoaded: true,
+                hasTickets: true,
+            }))
+        );
+        expect(result.current.state.status).toBe(PROMO_STATUS.APPLIED);
     });
 
     it('returns INVALID when code applied and promoCodeVerified is false', () => {
@@ -137,21 +167,34 @@ describe('derived values', () => {
         expect(result.current.state.isReady).toBe(true);
     });
 
-    it('isReady true for VALID', () => {
+    it('isReady true for verified code', () => {
         const { result } = renderHook(() =>
             usePromoCode(createDefaultProps({ promoCode: 'CODE', promoCodeVerified: true }))
         );
         expect(result.current.state.isReady).toBe(true);
     });
 
-    it('isReady false for APPLYING', () => {
+    it('isReady true for applied code awaiting ticket selection', () => {
+        // Promo layer is settled; ticket selection is enforced by its own gate.
+        const { result } = renderHook(() =>
+            usePromoCode(createDefaultProps({
+                promoCode: 'CODE',
+                promoCodeVerified: null,
+                ticketDataLoaded: true,
+                hasTickets: true,
+            }))
+        );
+        expect(result.current.state.isReady).toBe(true);
+    });
+
+    it('isReady false while ticket data is loading', () => {
         const { result } = renderHook(() =>
             usePromoCode(createDefaultProps({ promoCode: 'CODE', promoCodeVerified: null }))
         );
         expect(result.current.state.isReady).toBe(false);
     });
 
-    it('isReady false for VALIDATING', () => {
+    it('isReady false while validation is in flight', () => {
         const { result } = renderHook(() =>
             usePromoCode(createDefaultProps({ promoCode: 'CODE', promoCodeValidating: true }))
         );
@@ -992,7 +1035,7 @@ describe('status: INVALID without ticket', () => {
         expect(result.current.state.validationError).toBe(T.translate('promo_code.invalid_code'));
     });
 
-    it('stays APPLYING while ticket data is still loading', () => {
+    it('stays PROCESSING while ticket data is still loading', () => {
         const { result } = renderHook(() =>
             usePromoCode(createDefaultProps({
                 promoCode: 'PENDING',
@@ -1001,6 +1044,55 @@ describe('status: INVALID without ticket', () => {
                 hasTickets: false,
             }))
         );
-        expect(result.current.state.status).toBe(PROMO_STATUS.APPLYING);
+        expect(result.current.state.status).toBe(PROMO_STATUS.PROCESSING);
+    });
+});
+
+// ── Applied without ticket: transition out on ticket pick ──
+
+describe('applied code awaiting ticket selection', () => {
+    it('fires validatePromoCode when the user then picks a ticket', async () => {
+        const validatePromoCode = jest.fn(() => Promise.resolve());
+        const { result } = renderHook(() =>
+            usePromoCode(createDefaultProps({
+                promoCode: 'MANUAL',
+                promoCodeVerified: null,
+                ticketDataLoaded: true,
+                hasTickets: true,
+                validatePromoCode,
+            }))
+        );
+        expect(result.current.state.status).toBe(PROMO_STATUS.APPLIED);
+        await act(async () => {
+            await result.current.actions.onTicketSelected({ id: 1, sub_type: 'Regular' });
+        });
+        expect(validatePromoCode).toHaveBeenCalledWith({ id: 1, ticketQuantity: 1, sub_type: 'Regular' });
+    });
+});
+
+// ── isSuggested signal (consumed by registration-form) ──
+
+describe('isSuggested', () => {
+    it('true while the suggestion banner is showing', async () => {
+        const { result } = renderHook(() =>
+            usePromoCode(createDefaultProps({
+                discoveredPromoCodes: [{ code: 'S1', auto_apply: false, allowed_ticket_types: [{ id: 1 }] }],
+            }))
+        );
+        await act(async () => {
+            await result.current.actions.onTicketSelected(mockTicketQualifying);
+        });
+        expect(result.current.state.isSuggested).toBe(true);
+    });
+
+    it('false once a code is applied, even if the suggestion was active', async () => {
+        const { result } = renderHook(() =>
+            usePromoCode(createDefaultProps({
+                discoveredPromoCodes: [{ code: 'S1', auto_apply: false, allowed_ticket_types: [{ id: 1 }] }],
+                promoCode: 'S1',
+                promoCodeVerified: true,
+            }))
+        );
+        expect(result.current.state.isSuggested).toBe(false);
     });
 });

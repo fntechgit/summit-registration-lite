@@ -66,7 +66,7 @@ import TicketTaxesError from '../ticket-taxes-error';
 import T from 'i18n-react';
 import { getCurrentUserLanguage } from '../../utils/utils';
 import {
-    ADD_TO_CART, BEGIN_CHECKOUT, PURCHASE_COMPLETE, PROMO_STATUS,
+    ADD_TO_CART, BEGIN_CHECKOUT, PURCHASE_COMPLETE,
     STEP_COMPLETE,
     STEP_PAYMENT,
     STEP_PERSONAL_INFO,
@@ -293,11 +293,11 @@ const RegistrationFormContent = (
     useEffect(() => {
         if (!formValues?.promoCode
             || promoCode
-            || promoState.status === PROMO_STATUS.SUGGESTED
+            || promoState.isSuggested
             || promoState.validationError) {
             setUnappliedCodeWarning(null);
         }
-    }, [formValues?.promoCode, promoCode, promoState.status, promoState.validationError])
+    }, [formValues?.promoCode, promoCode, promoState.isSuggested, promoState.validationError])
 
     const [ref, { height }] = useMeasure();
 
@@ -352,7 +352,7 @@ const RegistrationFormContent = (
     }
 
     const handleAdvanceFromTicketStep = async (data) => {
-        if (formValues?.promoCode && !promoCode && promoState.status !== PROMO_STATUS.SUGGESTED) {
+        if (formValues?.promoCode && !promoCode && !promoState.isSuggested) {
             setUnappliedCodeWarning(T.translate('promo_code.unapplied_code_warning'));
             return;
         }

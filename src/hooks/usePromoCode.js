@@ -40,32 +40,45 @@ const usePromoCode = ({
     const isApplied = !!promoCode;
     const isDiscoveredCode = isApplied && discoveredPromoCode?.code === promoCode;
 
-    // --- Status ---
+    // --- Canonical signals ---
+    // The raw Redux signals can overlap (e.g. a stale promoCodeVerified=false
+    // persists while a re-validation is in flight), so precedence is encoded
+    // here, once, rather than in each consumer.
 
+    // Something genuinely in flight: applying the code, validating it against
+    // a ticket, or waiting on the code-filtered ticket list with no settled
+    // verdict to show in the meantime.
+    const isBusy = applyingCode || promoCodeValidating
+        || (isApplied && promoCodeVerified == null && !ticketDataLoaded);
+
+    // Settled rejection: the backend rejected the code for the selected
+    // ticket, or the code-filtered ticket list came back empty.
+    const isInvalid = !isBusy && isApplied
+        && (promoCodeVerified === false || (promoCodeVerified == null && !hasTickets));
+
+    const isSuggested = !isApplied && suggestionActive && !suggestionDismissed;
+
+    // --- Display status: a pure projection of the signals, total order.
+    // Gate rendering on this; gate behavior on the signals above.
     const status = useMemo(() => {
-        if (isApplied) {
-            if (promoCodeValidating) return PROMO_STATUS.VALIDATING;
-            if (promoCodeVerified === true) return PROMO_STATUS.VALID;
-            if (promoCodeVerified === false) return PROMO_STATUS.INVALID;
-            // Applied but no tickets returned and not currently applying: code is invalid
-            if (!applyingCode && ticketDataLoaded && !hasTickets) return PROMO_STATUS.INVALID;
-            return PROMO_STATUS.APPLYING;
-        }
-        if (suggestionActive && !suggestionDismissed) return PROMO_STATUS.SUGGESTED;
+        if (isBusy) return PROMO_STATUS.PROCESSING;
+        if (isInvalid) return PROMO_STATUS.INVALID;
+        if (isApplied) return PROMO_STATUS.APPLIED;
+        if (isSuggested) return PROMO_STATUS.SUGGESTED;
         return PROMO_STATUS.IDLE;
-    }, [isApplied, promoCodeVerified, promoCodeValidating, suggestionActive, suggestionDismissed, applyingCode, ticketDataLoaded, hasTickets]);
+    }, [isBusy, isInvalid, isApplied, isSuggested]);
 
     // Hook's own validation error. Composed from the in-flight API error (if any)
-    // and the status-derived "invalid code" message when status is INVALID.
+    // and the "invalid code" message when the code is rejected.
     // Consumers may layer their own warning on top before display.
     const validationError = manualError
-        ?? (status === PROMO_STATUS.INVALID ? T.translate('promo_code.invalid_code') : null);
+        ?? (isInvalid ? T.translate('promo_code.invalid_code') : null);
 
     // --- Derived values ---
 
     const suggestedCode = discoveredPromoCode?.code || null;
 
-    const activeDiscoveredCode = (status === PROMO_STATUS.VALID && isDiscoveredCode)
+    const activeDiscoveredCode = (promoCodeVerified === true && !promoCodeValidating && isDiscoveredCode)
         ? discoveredPromoCode : null;
 
     const perAccountLimit = activeDiscoveredCode?.quantity_per_account > 0
@@ -85,10 +98,9 @@ const usePromoCode = ({
     }, [activeDiscoveredCode]);
 
     // True when the user can safely advance from the ticket step
-    // (no in-flight promo apply/validate and no INVALID state to block on).
-    const isReady = status === PROMO_STATUS.IDLE
-        || status === PROMO_STATUS.SUGGESTED
-        || status === PROMO_STATUS.VALID;
+    // (nothing in flight and no rejection to block on). Ticket selection
+    // is enforced by its own gate.
+    const isReady = !isBusy && !isInvalid;
 
     // --- Discovery: ticket qualification ---
 
@@ -253,9 +265,11 @@ const usePromoCode = ({
 
     return {
         state: {
-            // Status (what's happening with the applied/suggested code)
+            // Display status (pure projection of the signals below)
             status,
+            // Canonical signals
             isReady,
+            isSuggested,
             validationError,
             // True while applyPromoCode is in flight (covers the window where
             // promoCode is set but the refreshed ticketTypes haven't landed
