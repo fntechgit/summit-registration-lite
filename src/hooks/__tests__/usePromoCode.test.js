@@ -150,6 +150,41 @@ describe('status derivation', () => {
         expect(result.current.state.validationError).toBe('Too many requests');
     });
 
+    it('ignores a validation response that a later ticket switch superseded', async () => {
+        // Ticket A's request stays pending while ticket B's succeeds. When A
+        // then rejects, its error is about a ticket the user already left, so
+        // it must not surface or block the advance gate.
+        let rejectFirst;
+        const validatePromoCode = jest.fn()
+            .mockImplementationOnce(() => new Promise((_, reject) => { rejectFirst = reject; }))
+            .mockImplementationOnce(() => Promise.resolve());
+
+        const { result } = renderHook(() =>
+            usePromoCode(createDefaultProps({
+                promoCode: 'CODE',
+                promoCodeVerified: true,
+                ticketDataLoaded: true,
+                hasTickets: true,
+                validatePromoCode,
+            }))
+        );
+
+        let firstAttempt;
+        await act(async () => {
+            firstAttempt = result.current.actions.onTicketSelected({ id: 1, sub_type: 'Regular' });
+            await result.current.actions.onTicketSelected({ id: 2, sub_type: 'Regular' });
+        });
+
+        await act(async () => {
+            rejectFirst({ res: { body: { errors: ['stale failure'] } } });
+            await firstAttempt;
+        });
+
+        expect(result.current.state.validationError).toBeNull();
+        expect(result.current.state.isReady).toBe(true);
+        expect(result.current.state.status).toBe(PROMO_STATUS.APPLIED);
+    });
+
     it('returns INVALID when code applied and promoCodeVerified is false', () => {
         const { result } = renderHook(() =>
             usePromoCode(createDefaultProps({ promoCode: 'CODE', promoCodeVerified: false }))
@@ -900,23 +935,22 @@ describe('maxQuantityFromPromo', () => {
 // ── onRevalidate ──
 
 describe('onRevalidate', () => {
-    it('returns true on successful validation', async () => {
+    it('validates the ticket and leaves no error on success', async () => {
         const validatePromoCode = jest.fn(() => Promise.resolve());
         const { result } = renderHook(() =>
             usePromoCode(createDefaultProps({ validatePromoCode }))
         );
 
-        let valid;
         await act(async () => {
-            valid = await result.current.actions.onRevalidate(mockTicketQualifying, 3);
+            await result.current.actions.onRevalidate(mockTicketQualifying, 3);
         });
-        expect(valid).toBe(true);
         expect(validatePromoCode).toHaveBeenCalledWith(
             expect.objectContaining({ id: 1, ticketQuantity: 3, sub_type: 'Regular' })
         );
+        expect(result.current.state.validationError).toBeNull();
     });
 
-    it('returns false and sets validationError on failure', async () => {
+    it('sets validationError on failure', async () => {
         const validatePromoCode = jest.fn(() => Promise.reject({
             res: { body: { errors: ['Promo code X can not be applied more than 3 times.'] } }
         }));
@@ -924,11 +958,9 @@ describe('onRevalidate', () => {
             usePromoCode(createDefaultProps({ validatePromoCode }))
         );
 
-        let valid;
         await act(async () => {
-            valid = await result.current.actions.onRevalidate(mockTicketQualifying, 5);
+            await result.current.actions.onRevalidate(mockTicketQualifying, 5);
         });
-        expect(valid).toBe(false);
         expect(result.current.state.validationError).toBe('Promo code X can not be applied more than 3 times.');
     });
 

@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo, useEffect } from 'react';
+import { useState, useCallback, useMemo, useEffect, useRef } from 'react';
 import T from 'i18n-react';
 import { PROMO_STATUS } from '../utils/constants';
 
@@ -131,14 +131,19 @@ const usePromoCode = ({
 
     // --- Actions ---
 
+    // A ticket switch can leave an earlier validation in flight. Only the most
+    // recent attempt may report a result.
+    const latestValidation = useRef(0);
+
     const onRevalidate = useCallback(async (ticket, quantity) => {
+        const attempt = ++latestValidation.current;
         setApiError(null);
         try {
             await validatePromoCode({ id: ticket.id, ticketQuantity: quantity, sub_type: ticket.sub_type });
-            return true;
         } catch (e) {
+            if (attempt !== latestValidation.current) return;
             handleValidationError(e);
-            return false;
+            setIsAutoApplied(false);
         }
     }, [validatePromoCode, handleValidationError]);
 
@@ -161,11 +166,7 @@ const usePromoCode = ({
         try {
             await applyPromoCode(discoveredPromoCode.code);
             if (ticket) {
-                const valid = await onRevalidate(ticket, 1);
-                if (!valid) {
-                    setIsAutoApplied(false);
-                    return false;
-                }
+                await onRevalidate(ticket, 1);
             }
             return true;
         } catch (e) {
@@ -203,8 +204,7 @@ const usePromoCode = ({
         // ticket). Previously we silently removed the code on a non-qualifying
         // pick, which hid the rejection.
         if (isDiscoveredCode) {
-            const valid = await onRevalidate(ticket, 1);
-            if (!valid) setIsAutoApplied(false);
+            await onRevalidate(ticket, 1);
             return;
         }
 
