@@ -25,10 +25,7 @@ const usePromoCode = ({
     const [isAutoApplied, setIsAutoApplied] = useState(false);
     const [suggestionActive, setSuggestionActive] = useState(false);
     const [suggestionDismissed, setSuggestionDismissed] = useState(false);
-    // Error written by handleValidationError (API) or the form (unapplied-code warning).
-    // The user-facing `validationError` is computed below by merging this with the
-    // status-derived INVALID message.
-    const [manualError, setManualError] = useState(null);
+    const [apiError, setApiError] = useState(null);
     const [applyingCode, setApplyingCode] = useState(false);
 
     // Pick first auto_apply code, or first code if none has auto_apply
@@ -63,15 +60,20 @@ const usePromoCode = ({
     const status = useMemo(() => {
         if (isBusy) return PROMO_STATUS.PROCESSING;
         if (isInvalid) return PROMO_STATUS.INVALID;
-        if (isApplied) return PROMO_STATUS.APPLIED;
+        // APPLIED requires a backend verdict for the selected ticket. Applying
+        // a code without a ticket runs no validation, and the catalog comes
+        // back populated even for a code that does not exist, so anything
+        // short of a confirmed verdict rests as UNVERIFIED.
+        if (isApplied) return (promoCodeVerified === true && apiError == null)
+            ? PROMO_STATUS.APPLIED
+            : PROMO_STATUS.UNVERIFIED;
         if (isSuggested) return PROMO_STATUS.SUGGESTED;
         return PROMO_STATUS.IDLE;
-    }, [isBusy, isInvalid, isApplied, isSuggested]);
+    }, [isBusy, isInvalid, isApplied, isSuggested, promoCodeVerified, apiError]);
 
-    // Hook's own validation error. Composed from the in-flight API error (if any)
-    // and the "invalid code" message when the code is rejected.
-    // Consumers may layer their own warning on top before display.
-    const validationError = manualError
+    // Prefers the message the request returned, falling back to a generic
+    // invalid-code message when the code was rejected without one.
+    const validationError = apiError
         ?? (isInvalid ? T.translate('promo_code.invalid_code') : null);
 
     // --- Derived values ---
@@ -97,10 +99,10 @@ const usePromoCode = ({
         return caps.length > 0 ? Math.min(...caps) : null;
     }, [activeDiscoveredCode]);
 
-    // True when the user can safely advance from the ticket step
-    // (nothing in flight and no rejection to block on). Ticket selection
+    // True when the user can safely advance from the ticket step: nothing in
+    // flight, no rejection, and no unresolved request error. Ticket selection
     // is enforced by its own gate.
-    const isReady = !isBusy && !isInvalid;
+    const isReady = !isBusy && !isInvalid && apiError == null;
 
     // --- Discovery: ticket qualification ---
 
@@ -121,16 +123,16 @@ const usePromoCode = ({
             const msg = /is not a valid code/i.test(firstStr)
                 ? T.translate('promo_code.invalid_code')
                 : firstStr;
-            setManualError(msg);
+            setApiError(msg);
         } else {
-            setManualError(T.translate('promo_code.validation_error'));
+            setApiError(T.translate('promo_code.validation_error'));
         }
     }, []);
 
     // --- Actions ---
 
     const onRevalidate = useCallback(async (ticket, quantity) => {
-        setManualError(null);
+        setApiError(null);
         try {
             await validatePromoCode({ id: ticket.id, ticketQuantity: quantity, sub_type: ticket.sub_type });
             return true;
@@ -185,7 +187,7 @@ const usePromoCode = ({
         // doesn't surface a stale suggestion.
         if (qualifies) setSuggestionActive(true);
         setSuggestionDismissed(false);
-        setManualError(null);
+        setApiError(null);
 
         // Manual (non-discovered) code is applied: re-validate for new ticket
         if (isApplied && !isDiscoveredCode) {
@@ -229,7 +231,7 @@ const usePromoCode = ({
     }, [userRemovedAutoApply, ticketDataLoaded, discoveredPromoCode, discoveredPromoCodes, isApplied, tryAutoApply]);
 
     const onApply = useCallback(async (code, ticket, quantity) => {
-        setManualError(null);
+        setApiError(null);
         setApplyingCode(true);
         try {
             await applyPromoCode(code);
@@ -248,7 +250,7 @@ const usePromoCode = ({
         if (isAutoApplied || isDiscoveredCode) setUserRemovedAutoApply(true);
 
         setIsAutoApplied(false);
-        setManualError(null);
+        setApiError(null);
         setSuggestionDismissed(false);
         if (discoveredPromoCode) setSuggestionActive(true);
 
@@ -258,7 +260,7 @@ const usePromoCode = ({
     }, [isAutoApplied, isDiscoveredCode, discoveredPromoCode, removePromoCode, setFormPromoCode]);
 
     const onInputChange = useCallback((value) => {
-        setManualError(null);
+        setApiError(null);
         setSuggestionDismissed(value !== discoveredPromoCode?.code);
         setFormPromoCode(value);
     }, [discoveredPromoCode, setFormPromoCode]);

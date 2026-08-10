@@ -55,6 +55,7 @@ export const PROMO_STATUS = {
     IDLE: 'idle',
     SUGGESTED: 'suggested',
     PROCESSING: 'processing',
+    UNVERIFIED: 'unverified',
     APPLIED: 'applied',
     INVALID: 'invalid',
 };

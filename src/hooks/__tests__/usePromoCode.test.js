@@ -111,10 +111,12 @@ describe('status derivation', () => {
         expect(result.current.state.status).toBe(PROMO_STATUS.APPLIED);
     });
 
-    it('returns APPLIED when code accepted with tickets available but none picked yet', () => {
-        // Code was applied without a ticket selected: the code-filtered ticket
-        // list came back non-empty, nothing is in flight, and no per-ticket
-        // validation has run. This is a resting state, not a spinner state.
+    it('returns UNVERIFIED when code applied with tickets available but none picked yet', () => {
+        // Code was applied without a ticket selected: the ticket list came back
+        // non-empty, nothing is in flight, and no per-ticket validation has run.
+        // A resting state, but not a verified one: the catalog comes back
+        // populated even for a code that does not exist, so this must not
+        // render as success.
         const { result } = renderHook(() =>
             usePromoCode(createDefaultProps({
                 promoCode: 'CODE',
@@ -123,7 +125,29 @@ describe('status derivation', () => {
                 hasTickets: true,
             }))
         );
+        expect(result.current.state.status).toBe(PROMO_STATUS.UNVERIFIED);
+    });
+
+    it('returns UNVERIFIED when a verified code has an outstanding request error', async () => {
+        // A rate-limited or timed-out re-validation leaves promoCodeVerified at
+        // its previous value while setting an error. The last verdict no longer
+        // covers the current selection, so it must not render as success.
+        const { result } = renderHook(() =>
+            usePromoCode(createDefaultProps({
+                promoCode: 'CODE',
+                promoCodeVerified: true,
+                ticketDataLoaded: true,
+                hasTickets: true,
+                validatePromoCode: jest.fn(() => Promise.reject({ res: { body: { errors: ['Too many requests'] } } })),
+            }))
+        );
         expect(result.current.state.status).toBe(PROMO_STATUS.APPLIED);
+
+        await act(async () => {
+            await result.current.actions.onTicketSelected({ id: 1, sub_type: 'Regular' });
+        });
+        expect(result.current.state.status).toBe(PROMO_STATUS.UNVERIFIED);
+        expect(result.current.state.validationError).toBe('Too many requests');
     });
 
     it('returns INVALID when code applied and promoCodeVerified is false', () => {
@@ -205,6 +229,26 @@ describe('derived values', () => {
         const { result } = renderHook(() =>
             usePromoCode(createDefaultProps({ promoCode: 'CODE', promoCodeVerified: false }))
         );
+        expect(result.current.state.isReady).toBe(false);
+    });
+
+    it('isReady false while a request error is unresolved', async () => {
+        // A failed validation that leaves no verdict must still block the
+        // advance gate, otherwise the user proceeds on an unverified code.
+        const { result } = renderHook(() =>
+            usePromoCode(createDefaultProps({
+                promoCode: 'CODE',
+                promoCodeVerified: null,
+                ticketDataLoaded: true,
+                hasTickets: true,
+                validatePromoCode: jest.fn(() => Promise.reject({ res: { body: { errors: ['Too many requests'] } } })),
+            }))
+        );
+        expect(result.current.state.isReady).toBe(true);
+
+        await act(async () => {
+            await result.current.actions.onTicketSelected({ id: 1, sub_type: 'Regular' });
+        });
         expect(result.current.state.isReady).toBe(false);
     });
 
@@ -1062,7 +1106,7 @@ describe('applied code awaiting ticket selection', () => {
                 validatePromoCode,
             }))
         );
-        expect(result.current.state.status).toBe(PROMO_STATUS.APPLIED);
+        expect(result.current.state.status).toBe(PROMO_STATUS.UNVERIFIED);
         await act(async () => {
             await result.current.actions.onTicketSelected({ id: 1, sub_type: 'Regular' });
         });

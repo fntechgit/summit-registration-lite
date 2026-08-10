@@ -47,12 +47,11 @@ const twoTickets = [
     ticketType({ id: 189, name: 'General Admission', cost: 900 }),
 ];
 
-// Scoped to the promo input wrapper: the dev harness renders an unrelated
-// payment-section spinner elsewhere on the page.
-const promoSpinner = (page) => page.locator('[class*="promoCodeInput"] [class*="spinner"]');
+const promoSpinner = (page) => page.getByTestId('promo-spinner');
+const promoApplied = (page) => page.getByTestId('promo-applied');
 
 test.describe('apply promo code before selecting a ticket', () => {
-    test('settles on checkmark instead of spinning forever', async ({ page }) => {
+    test('settles instead of spinning forever', async ({ page }) => {
         await setupRoutes(page, {
             tickets: twoTickets,
             discovery: [],
@@ -64,12 +63,13 @@ test.describe('apply promo code before selecting a ticket', () => {
         await page.fill('input[placeholder="Enter your promo code"]', 'EARLYCODE');
         await page.click('button:has-text("Apply")');
 
-        // Input locks with the code accepted
+        // Input locks with a Remove affordance
         await expect(page.locator('input[placeholder="Enter your promo code"][readonly]')).toBeVisible();
+        await expect(page.locator('button:has-text("Remove")')).toBeVisible();
 
-        // Checkmark shown, no promo spinner stuck on screen
-        await expect(page.locator('text=✓')).toBeVisible();
+        // No spinner. No success mark either: nothing has verified the code.
         await expect(promoSpinner(page)).toHaveCount(0);
+        await expect(promoApplied(page)).toHaveCount(0);
     });
 
     test('validates the code once a ticket is picked afterwards', async ({ page }) => {
@@ -86,13 +86,51 @@ test.describe('apply promo code before selecting a ticket', () => {
 
         await page.fill('input[placeholder="Enter your promo code"]', 'EARLYCODE');
         await page.click('button:has-text("Apply")');
-        await expect(page.locator('text=✓')).toBeVisible();
+        await expect(page.locator('button:has-text("Remove")')).toBeVisible();
+        await expect(promoApplied(page)).toHaveCount(0);
         expect(validationCalls).toBe(0);
 
-        // Picking a ticket triggers the deferred promo+ticket validation
+        // Picking a ticket triggers the deferred promo+ticket validation,
+        // which is what promotes the code to verified.
         await selectTicket(page, 'General Admission');
         await expect.poll(() => validationCalls).toBeGreaterThan(0);
-        await expect(page.locator('text=✓')).toBeVisible();
+        await expect(promoApplied(page)).toBeVisible();
+        await expect(promoSpinner(page)).toHaveCount(0);
+    });
+
+    test('shows the spinner only while validation is in flight', async ({ page }) => {
+        // The other assertions in this file check the spinner is absent, which
+        // would also pass if the locator stopped matching anything. Holding the
+        // validation open pins the spinner with a positive assertion, so a
+        // renamed or removed icon fails here instead of passing silently.
+        await setupRoutes(page, { tickets: twoTickets, discovery: [] });
+
+        // Slow the validation enough to observe the in-flight state.
+        await page.route('**/promo-codes/*/apply*', async (route) => {
+            await new Promise((resolve) => setTimeout(resolve, 2000));
+            await route.fulfill({
+                status: 200,
+                contentType: 'application/json',
+                body: JSON.stringify(validationResponse()),
+            });
+        });
+
+        await page.goto('/');
+        await page.fill('input[placeholder="Enter your promo code"]', 'EARLYCODE');
+        await page.click('button:has-text("Apply")');
+
+        // Resting unverified: no validation has been requested yet.
+        await expect(page.locator('button:has-text("Remove")')).toBeVisible();
+        await expect(promoSpinner(page)).toHaveCount(0);
+
+        // Selecting a ticket starts the validation, which is now slow enough
+        // to catch mid-flight.
+        await selectTicket(page, 'General Admission');
+        await expect(promoSpinner(page)).toBeVisible();
+        await expect(promoApplied(page)).toHaveCount(0);
+
+        // And it resolves to verified once the request lands.
+        await expect(promoApplied(page)).toBeVisible();
         await expect(promoSpinner(page)).toHaveCount(0);
     });
 });

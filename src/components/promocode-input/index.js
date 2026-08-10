@@ -30,6 +30,7 @@ const PromoCodeInput = ({ promoStatus, promoCode, suggestedCode, isAutoApplied, 
     // or has settled (applied or invalid). The user must explicitly Remove to edit again.
     const isLocked = promoStatus === PROMO_STATUS.PROCESSING
         || promoStatus === PROMO_STATUS.APPLIED
+        || promoStatus === PROMO_STATUS.UNVERIFIED
         || promoStatus === PROMO_STATUS.INVALID;
 
     const inputValue = useMemo(() => {
@@ -41,6 +42,7 @@ const PromoCodeInput = ({ promoStatus, promoCode, suggestedCode, isAutoApplied, 
     const label = useMemo(() => {
         switch (promoStatus) {
             case PROMO_STATUS.APPLIED:
+            case PROMO_STATUS.UNVERIFIED:
                 if (isAutoApplied) return T.translate('promo_code.auto_applied_label');
                 return T.translate('promo_code.applied_label');
             case PROMO_STATUS.PROCESSING:
@@ -91,9 +93,9 @@ const PromoCodeInput = ({ promoStatus, promoCode, suggestedCode, isAutoApplied, 
                         }}
                         readOnly={isLocked} />
 
-                    {promoStatus === PROMO_STATUS.PROCESSING && <span className={`${styles.statusIcon} ${styles.spinner}`} />}
-                    {promoStatus === PROMO_STATUS.APPLIED && <span className={`${styles.statusIcon} ${styles.valid}`}>✓</span>}
-                    {promoStatus === PROMO_STATUS.INVALID && <span className={`${styles.statusIcon} ${styles.invalid}`}>✕</span>}
+                    {promoStatus === PROMO_STATUS.PROCESSING && <span data-testid="promo-spinner" className={`${styles.statusIcon} ${styles.spinner}`} />}
+                    {promoStatus === PROMO_STATUS.APPLIED && <span data-testid="promo-applied" className={`${styles.statusIcon} ${styles.valid}`}>✓</span>}
+                    {promoStatus === PROMO_STATUS.INVALID && <span data-testid="promo-invalid" className={`${styles.statusIcon} ${styles.invalid}`}>✕</span>}
                     <div className={`${styles.codeButtonWrapper} ${inputValue ? '' : styles.noCode}`}>
                         {isLocked ?
                             <button onClick={onRemove}>Remove</button>
