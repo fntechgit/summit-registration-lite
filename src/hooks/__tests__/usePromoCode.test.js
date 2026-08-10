@@ -185,6 +185,29 @@ describe('status derivation', () => {
         expect(result.current.state.status).toBe(PROMO_STATUS.APPLIED);
     });
 
+    it('does not let a superseded attempt advance the caller', async () => {
+        let resolveFirst;
+        const validatePromoCode = jest.fn()
+            .mockImplementationOnce(() => new Promise((resolve) => { resolveFirst = resolve; }))
+            .mockImplementationOnce(() => Promise.resolve());
+        const { result } = renderHook(() =>
+            usePromoCode(createDefaultProps({ validatePromoCode }))
+        );
+
+        let firstAttempt;
+        await act(async () => {
+            firstAttempt = result.current.actions.onRevalidate({ id: 1, sub_type: 'Regular' }, 1);
+            await result.current.actions.onRevalidate({ id: 2, sub_type: 'Regular' }, 1);
+        });
+
+        let canAdvance;
+        await act(async () => {
+            resolveFirst();
+            canAdvance = await firstAttempt;
+        });
+        expect(canAdvance).toBe(false);
+    });
+
     it('returns INVALID when code applied and promoCodeVerified is false', () => {
         const { result } = renderHook(() =>
             usePromoCode(createDefaultProps({ promoCode: 'CODE', promoCodeVerified: false }))
@@ -935,22 +958,26 @@ describe('maxQuantityFromPromo', () => {
 // ── onRevalidate ──
 
 describe('onRevalidate', () => {
-    it('validates the ticket and leaves no error on success', async () => {
+    it('reports the caller may advance on success', async () => {
+        // registration-form gates changeStep on this value, so a missing or
+        // wrong return dead-ends the ticket step.
         const validatePromoCode = jest.fn(() => Promise.resolve());
         const { result } = renderHook(() =>
             usePromoCode(createDefaultProps({ validatePromoCode }))
         );
 
+        let canAdvance;
         await act(async () => {
-            await result.current.actions.onRevalidate(mockTicketQualifying, 3);
+            canAdvance = await result.current.actions.onRevalidate(mockTicketQualifying, 3);
         });
+        expect(canAdvance).toBe(true);
         expect(validatePromoCode).toHaveBeenCalledWith(
             expect.objectContaining({ id: 1, ticketQuantity: 3, sub_type: 'Regular' })
         );
         expect(result.current.state.validationError).toBeNull();
     });
 
-    it('sets validationError on failure', async () => {
+    it('reports the caller may not advance on failure, and sets validationError', async () => {
         const validatePromoCode = jest.fn(() => Promise.reject({
             res: { body: { errors: ['Promo code X can not be applied more than 3 times.'] } }
         }));
@@ -958,9 +985,11 @@ describe('onRevalidate', () => {
             usePromoCode(createDefaultProps({ validatePromoCode }))
         );
 
+        let canAdvance;
         await act(async () => {
-            await result.current.actions.onRevalidate(mockTicketQualifying, 5);
+            canAdvance = await result.current.actions.onRevalidate(mockTicketQualifying, 5);
         });
+        expect(canAdvance).toBe(false);
         expect(result.current.state.validationError).toBe('Promo code X can not be applied more than 3 times.');
     });
 

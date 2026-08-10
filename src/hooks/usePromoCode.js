@@ -135,15 +135,19 @@ const usePromoCode = ({
     // recent attempt may report a result.
     const latestValidation = useRef(0);
 
+    // Returns whether the caller may advance: true only when the code
+    // validated and no later attempt has replaced this one.
     const onRevalidate = useCallback(async (ticket, quantity) => {
         const attempt = ++latestValidation.current;
         setApiError(null);
         try {
             await validatePromoCode({ id: ticket.id, ticketQuantity: quantity, sub_type: ticket.sub_type });
+            return attempt === latestValidation.current;
         } catch (e) {
-            if (attempt !== latestValidation.current) return;
+            if (attempt !== latestValidation.current) return false;
             handleValidationError(e);
             setIsAutoApplied(false);
+            return false;
         }
     }, [validatePromoCode, handleValidationError]);
 

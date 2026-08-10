@@ -359,13 +359,13 @@ const RegistrationFormContent = (
         // Re-validate manual codes with final quantity before advancing
         if (promoCode && !promoState.isDiscoveredCode) {
             startWidgetLoading();
-            let valid = false;
+            let canAdvance = false;
             try {
-                valid = await promoActions.onRevalidate(formValues.ticketType, data.ticketQuantity);
+                canAdvance = await promoActions.onRevalidate(formValues.ticketType, data.ticketQuantity);
             } finally {
                 stopWidgetLoading();
             }
-            if (!valid) return;
+            if (!canAdvance) return;
         }
         trackAddToCart(data);
         changeStep(STEP_PERSONAL_INFO);
