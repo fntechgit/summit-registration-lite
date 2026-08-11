@@ -163,7 +163,6 @@ const RegistrationFormContent = (
         companyDDLOptions2Show,
         promoCode,
         promoCodeVerified,
-        promoCodeValidating,
         promoCodeAllowsReassign,
         discoveredPromoCodes,
         hasDiscount,
@@ -268,7 +267,6 @@ const RegistrationFormContent = (
         discoveredPromoCodes,
         promoCode,
         promoCodeVerified,
-        promoCodeValidating,
         applyPromoCode,
         removePromoCode,
         validatePromoCode,
@@ -572,7 +570,6 @@ const mapStateToProps = ({ registrationLiteState }) => ({
     passwordlessCodeError: registrationLiteState.passwordless.error,
     promoCode: registrationLiteState.promoCode,
     promoCodeVerified: registrationLiteState.promoCodeVerified,
-    promoCodeValidating: registrationLiteState.promoCodeValidating,
     promoCodeAllowsReassign: registrationLiteState.promoCodeAllowsReassign,
     discoveredPromoCodes: registrationLiteState.discoveredPromoCodes,
 })

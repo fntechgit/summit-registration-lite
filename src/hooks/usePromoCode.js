@@ -7,7 +7,6 @@ const usePromoCode = ({
     discoveredPromoCodes,
     promoCode,
     promoCodeVerified,
-    promoCodeValidating,
 
     // Redux dispatchers
     applyPromoCode,
@@ -27,6 +26,10 @@ const usePromoCode = ({
     const [suggestionDismissed, setSuggestionDismissed] = useState(false);
     const [apiError, setApiError] = useState(null);
     const [applyingCode, setApplyingCode] = useState(false);
+    // In-flight flags belong to whoever awaits the request. Keeping this next
+    // to applyingCode means every way a validation can end, including the
+    // failures that never reach the reducer, clears it in one place.
+    const [validatingCode, setValidatingCode] = useState(false);
 
     // Pick first auto_apply code, or first code if none has auto_apply
     const discoveredPromoCode = useMemo(() => {
@@ -45,7 +48,7 @@ const usePromoCode = ({
     // Something genuinely in flight: applying the code, validating it against
     // a ticket, or waiting on the code-filtered ticket list with no settled
     // verdict to show in the meantime.
-    const isBusy = applyingCode || promoCodeValidating
+    const isBusy = applyingCode || validatingCode
         || (isApplied && promoCodeVerified == null && !ticketDataLoaded);
 
     // Settled rejection: the backend rejected the code for the selected
@@ -80,7 +83,7 @@ const usePromoCode = ({
 
     const suggestedCode = discoveredPromoCode?.code || null;
 
-    const activeDiscoveredCode = (promoCodeVerified === true && !promoCodeValidating && isDiscoveredCode)
+    const activeDiscoveredCode = (promoCodeVerified === true && !validatingCode && isDiscoveredCode)
         ? discoveredPromoCode : null;
 
     const perAccountLimit = activeDiscoveredCode?.quantity_per_account > 0
@@ -140,6 +143,7 @@ const usePromoCode = ({
     const onRevalidate = useCallback(async (ticket, quantity) => {
         const attempt = ++latestValidation.current;
         setApiError(null);
+        setValidatingCode(true);
         try {
             await validatePromoCode({ id: ticket.id, ticketQuantity: quantity, sub_type: ticket.sub_type });
             return attempt === latestValidation.current;
@@ -148,6 +152,10 @@ const usePromoCode = ({
             handleValidationError(e);
             setIsAutoApplied(false);
             return false;
+        } finally {
+            // A later attempt is still running and owns the flag, so leave it
+            // set for that one to clear.
+            if (attempt === latestValidation.current) setValidatingCode(false);
         }
     }, [validatePromoCode, handleValidationError]);
 

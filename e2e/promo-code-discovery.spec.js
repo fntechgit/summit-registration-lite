@@ -292,6 +292,31 @@ test.describe('validation errors', () => {
         await expect(page.locator('text=Promo code XYZ can not be applied to Ticket Type Early Bird Ticket.')).toBeVisible();
     });
 
+    test('a server error leaves the field usable instead of stuck processing', async ({ page }) => {
+        // A 500 carries no verdict, so it never reaches the reducer. The
+        // in-flight state has to be cleared by whoever awaited the request,
+        // otherwise the promo field spins for the rest of the session and the
+        // user can neither retry nor continue.
+        await setupRoutes(page, {
+            tickets: [ticketType()],
+            discovery: [],
+            validation: { status: 500, body: { message: 'Server error' } },
+        });
+        await page.goto('/');
+        await selectTicket(page, 'Early Bird Ticket');
+        await page.fill('input[placeholder="Enter your promo code"]', 'ANYCODE');
+        await page.click('button:has-text("Apply")');
+
+        // uicore surfaces unhandled statuses in its own modal; dismiss it the
+        // way a user would before checking the field underneath.
+        const dismiss = page.locator('.swal2-confirm');
+        if (await dismiss.isVisible().catch(() => false)) await dismiss.click();
+
+        // Settled, not spinning, and still operable.
+        await expect(page.getByTestId('promo-spinner')).toHaveCount(0);
+        await expect(page.locator('button:has-text("Remove")')).toBeEnabled();
+    });
+
     test('error clears when user types', async ({ page }) => {
         await setupRoutes(page, {
             tickets: [ticketType()],

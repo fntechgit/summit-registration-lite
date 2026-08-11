@@ -54,7 +54,6 @@ export const CLEAR_CURRENT_PROMO_CODE = 'CLEAR_CURRENT_PROMO_CODE';
 export const VALIDATE_PROMO_CODE = 'VALIDATE_PROMO_CODE';
 export const VALIDATE_PROMO_CODE_SUCCESS = 'VALIDATE_PROMO_CODE_SUCCESS';
 export const VALIDATE_PROMO_CODE_ERROR = 'VALIDATE_PROMO_CODE_ERROR';
-export const VALIDATE_PROMO_CODE_RATE_LIMITED = 'VALIDATE_PROMO_CODE_RATE_LIMITED';
 export const DISCOVER_PROMO_CODES = 'DISCOVER_PROMO_CODES';
 export const DISCOVER_PROMO_CODES_SUCCESS = 'DISCOVER_PROMO_CODES_SUCCESS';
 
@@ -80,11 +79,14 @@ const promoCodeErrorHandler = (err, res) => (dispatch, state) => {
         dispatch(createAction(VALIDATE_PROMO_CODE_ERROR)({}));
         return;
     }
-    // 429: rate limited - transient, preserve current promo state
-    if (res && res.statusCode === 429) {
-        dispatch(createAction(VALIDATE_PROMO_CODE_RATE_LIMITED)({}));
-        return;
-    }
+    // 429: rate limited. Transient, and it says nothing about the code, so
+    // leave the promo state alone and don't bother the user with it.
+    if (res && res.statusCode === 429) return;
+
+    // Anything else (a server error, a timeout, a dropped connection, which
+    // arrives with no response at all) also decides nothing about the code, so
+    // no verdict is written here either. The caller's promise rejects and the
+    // hook clears its in-flight flag from there.
     return authErrorHandler(err, res)(dispatch, state);
 };
 

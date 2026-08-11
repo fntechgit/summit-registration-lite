@@ -33,13 +33,23 @@ const createDefaultProps = (overrides = {}) => ({
     discoveredPromoCodes: [],
     promoCode: '',
     promoCodeVerified: null,
-    promoCodeValidating: false,
     applyPromoCode: jest.fn(() => Promise.resolve()),
     removePromoCode: jest.fn(),
     validatePromoCode: jest.fn(() => Promise.resolve()),
     setFormPromoCode: jest.fn(),
     ...overrides,
 });
+
+// Lets a test hold a validation open and decide when (and how) it ends, so
+// in-flight state is produced by an actual pending request rather than asserted
+// from a value handed to the hook.
+const deferred = () => {
+    let settle = {};
+    const promise = new Promise((resolve, reject) => { settle = { resolve, reject }; });
+    // Nothing here awaits a rejection before it is attached below.
+    promise.catch(() => {});
+    return { promise, ...settle };
+};
 
 // ── Discovery selection ──
 
@@ -82,26 +92,71 @@ describe('status derivation', () => {
         expect(result.current.state.status).toBe(PROMO_STATUS.PROCESSING);
     });
 
-    it('returns PROCESSING when validation is in flight', () => {
+    it('returns PROCESSING while a validation is in flight, and stops when it ends', async () => {
+        // ticketDataLoaded/promoCodeVerified are set so the other two inputs to
+        // isBusy are already false: the only thing that can produce PROCESSING
+        // here is the pending validation itself.
+        const pending = deferred();
         const { result } = renderHook(() =>
-            usePromoCode(createDefaultProps({ promoCode: 'CODE', promoCodeValidating: true }))
+            usePromoCode(createDefaultProps({
+                promoCode: 'CODE',
+                promoCodeVerified: true,
+                ticketDataLoaded: true,
+                hasTickets: true,
+                validatePromoCode: jest.fn(() => pending.promise),
+            }))
         );
+        expect(result.current.state.status).toBe(PROMO_STATUS.APPLIED);
+
+        act(() => { result.current.actions.onRevalidate(mockTicketQualifying, 1); });
         expect(result.current.state.status).toBe(PROMO_STATUS.PROCESSING);
+
+        await act(async () => { pending.resolve(); });
+        expect(result.current.state.status).toBe(PROMO_STATUS.APPLIED);
     });
 
     it('returns PROCESSING during re-validation after a failed verdict', () => {
-        // The reducer keeps promoCodeVerified=false while a re-validation is in
-        // flight, so both signals coexist. In-flight must win over the stale
-        // verdict: spinner, not error icon.
+        // A rejected verdict stays in the store while a re-validation runs, so
+        // both signals coexist. In-flight must win over the stale verdict:
+        // spinner, not error icon.
+        const pending = deferred();
         const { result } = renderHook(() =>
             usePromoCode(createDefaultProps({
                 promoCode: 'CODE',
                 promoCodeVerified: false,
-                promoCodeValidating: true,
+                ticketDataLoaded: true,
+                hasTickets: true,
+                validatePromoCode: jest.fn(() => pending.promise),
             }))
         );
+        expect(result.current.state.status).toBe(PROMO_STATUS.INVALID);
+
+        act(() => { result.current.actions.onRevalidate(mockTicketQualifying, 1); });
         expect(result.current.state.status).toBe(PROMO_STATUS.PROCESSING);
         expect(result.current.state.validationError).toBeNull();
+    });
+
+    it('stops PROCESSING when the validation fails without a verdict', async () => {
+        // A server error, a timeout or a dropped connection never reaches the
+        // reducer. If the hook does not clear its own flag the field spins for
+        // the rest of the session.
+        const pending = deferred();
+        const { result } = renderHook(() =>
+            usePromoCode(createDefaultProps({
+                promoCode: 'CODE',
+                promoCodeVerified: true,
+                ticketDataLoaded: true,
+                hasTickets: true,
+                validatePromoCode: jest.fn(() => pending.promise),
+            }))
+        );
+
+        act(() => { result.current.actions.onRevalidate(mockTicketQualifying, 1); });
+        expect(result.current.state.status).toBe(PROMO_STATUS.PROCESSING);
+
+        await act(async () => { pending.reject({ res: { body: { message: 'Server error' } } }); });
+        expect(result.current.state.status).not.toBe(PROMO_STATUS.PROCESSING);
+        expect(result.current.state.validationError).toBe('Server error');
     });
 
     it('returns APPLIED when code verified for the selected ticket', () => {
@@ -277,9 +332,19 @@ describe('derived values', () => {
     });
 
     it('isReady false while validation is in flight', () => {
+        const pending = deferred();
         const { result } = renderHook(() =>
-            usePromoCode(createDefaultProps({ promoCode: 'CODE', promoCodeValidating: true }))
+            usePromoCode(createDefaultProps({
+                promoCode: 'CODE',
+                promoCodeVerified: true,
+                ticketDataLoaded: true,
+                hasTickets: true,
+                validatePromoCode: jest.fn(() => pending.promise),
+            }))
         );
+        expect(result.current.state.isReady).toBe(true);
+
+        act(() => { result.current.actions.onRevalidate(mockTicketQualifying, 1); });
         expect(result.current.state.isReady).toBe(false);
     });
 
