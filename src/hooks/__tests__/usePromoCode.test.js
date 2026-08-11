@@ -159,6 +159,74 @@ describe('status derivation', () => {
         expect(result.current.state.validationError).toBe('Server error');
     });
 
+    it('does not strand the applying flag when a validation never settles', async () => {
+        // uicore aborts an in-flight request as soon as a newer one targets the
+        // same URL, and superagent does not invoke the callback for an aborted
+        // request, so that promise neither resolves nor rejects. Any flag
+        // cleared only after awaiting it stays set for the rest of the session.
+        // Recovery comes from the newer request, which is the one that caused
+        // the abort, so nothing may depend on the abandoned one finishing.
+        const abandoned = new Promise(() => {});
+        const newer = deferred();
+        let call = 0;
+        const validatePromoCode = jest.fn(() => (call++ === 0 ? abandoned : newer.promise));
+
+        const { result } = renderHook(() =>
+            usePromoCode(createDefaultProps({
+                promoCode: 'CODE',
+                promoCodeVerified: true,
+                ticketDataLoaded: true,
+                hasTickets: true,
+                validatePromoCode,
+            }))
+        );
+
+        // Deliberately not awaited: this call never returns.
+        await act(async () => { result.current.actions.onApply('CODE', mockTicketQualifying, 1); });
+        expect(result.current.state.status).toBe(PROMO_STATUS.PROCESSING);
+
+        // The newer request lands. It clears its own in-flight flag, and with
+        // nothing else stuck the field settles.
+        await act(async () => {
+            result.current.actions.onRevalidate(mockTicketQualifying, 1);
+            newer.resolve();
+        });
+        expect(result.current.state.status).toBe(PROMO_STATUS.APPLIED);
+    });
+
+    it('stays busy across the handoff from applying to validating', async () => {
+        // Two flags cover consecutive stretches of one user action. React 16
+        // does not batch these updates, so clearing the first before the second
+        // is set renders a frame with neither: the spinner blinks off and Next
+        // is briefly clickable mid-apply.
+        const statuses = [];
+        const pending = deferred();
+        const { result } = renderHook(() => {
+            const promo = usePromoCode(createDefaultProps({
+                promoCode: 'CODE',
+                promoCodeVerified: true,
+                ticketDataLoaded: true,
+                hasTickets: true,
+                validatePromoCode: jest.fn(() => pending.promise),
+            }));
+            statuses.push(promo.state.status);
+            return promo;
+        });
+
+        await act(async () => { result.current.actions.onApply('CODE', mockTicketQualifying, 1); });
+
+        // From the moment it goes busy until the validation settles, every
+        // rendered frame must still be busy.
+        const firstBusy = statuses.indexOf(PROMO_STATUS.PROCESSING);
+        expect(firstBusy).toBeGreaterThanOrEqual(0);
+        expect(statuses.slice(firstBusy)).toEqual(
+            statuses.slice(firstBusy).map(() => PROMO_STATUS.PROCESSING)
+        );
+
+        await act(async () => { pending.resolve(); });
+        expect(result.current.state.status).toBe(PROMO_STATUS.APPLIED);
+    });
+
     it('returns APPLIED when code verified for the selected ticket', () => {
         const { result } = renderHook(() =>
             usePromoCode(createDefaultProps({ promoCode: 'CODE', promoCodeVerified: true }))

@@ -256,10 +256,15 @@ const usePromoCode = ({
             setApplyingCode(false);
             return;
         }
-        if (ticket) {
-            await onRevalidate(ticket, quantity);
-        }
+        // This flag covers the apply request; revalidation has its own. Start
+        // revalidation before clearing this one so the two overlap: cleared
+        // first, there is a render with neither set and the field drops out of
+        // its busy state and back in. Clearing it only after awaiting the
+        // revalidation is worse still, because an aborted request never settles
+        // and the flag would never clear at all.
+        const revalidating = ticket ? onRevalidate(ticket, quantity) : null;
         setApplyingCode(false);
+        await revalidating;
     }, [applyPromoCode, onRevalidate, handleValidationError]);
 
     const onRemove = useCallback(() => {
