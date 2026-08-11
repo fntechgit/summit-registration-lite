@@ -181,10 +181,10 @@ const usePromoCode = ({
         setApplyingCode(true);
         try {
             await applyPromoCode(discoveredPromoCode.code);
-            if (ticket) {
-                await onRevalidate(ticket, 1);
-            }
-            return true;
+            // onRevalidate reports a failed validation by returning false
+            // rather than throwing, so its result has to be passed on or this
+            // reports success for a code that was never verified.
+            return ticket ? await onRevalidate(ticket, 1) : true;
         } catch (e) {
             setIsAutoApplied(false);
             handleValidationError(e);
