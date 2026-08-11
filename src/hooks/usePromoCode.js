@@ -296,7 +296,6 @@ const usePromoCode = ({
             applyingCode,
 
             // Applied code origin
-            isDiscoveredCode,
             isAutoApplied,
 
             // Discovery / suggestion

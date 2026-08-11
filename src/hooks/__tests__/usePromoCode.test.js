@@ -873,46 +873,6 @@ describe('validationError', () => {
 
 });
 
-// ── isDiscoveredCode ──
-
-describe('isDiscoveredCode', () => {
-    it('true when applied code matches discovered code', () => {
-        const { result } = renderHook(() =>
-            usePromoCode(createDefaultProps({
-                discoveredPromoCodes: mockDiscoveredCodes,
-                promoCode: 'AUTO1',
-                promoCodeVerified: true,
-            }))
-        );
-        expect(result.current.state.isDiscoveredCode).toBe(true);
-    });
-
-    it('false when applied code does not match discovered code', () => {
-        const { result } = renderHook(() =>
-            usePromoCode(createDefaultProps({
-                discoveredPromoCodes: mockDiscoveredCodes,
-                promoCode: 'MANUAL',
-                promoCodeVerified: true,
-            }))
-        );
-        expect(result.current.state.isDiscoveredCode).toBe(false);
-    });
-
-    it('false when no code applied', () => {
-        const { result } = renderHook(() =>
-            usePromoCode(createDefaultProps({ discoveredPromoCodes: mockDiscoveredCodes }))
-        );
-        expect(result.current.state.isDiscoveredCode).toBe(false);
-    });
-
-    it('false when no discovered codes', () => {
-        const { result } = renderHook(() =>
-            usePromoCode(createDefaultProps({ promoCode: 'CODE', promoCodeVerified: true }))
-        );
-        expect(result.current.state.isDiscoveredCode).toBe(false);
-    });
-});
-
 // ── maxQuantityFromPromo ──
 
 describe('maxQuantityFromPromo', () => {
