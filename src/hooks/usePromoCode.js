@@ -210,9 +210,13 @@ const usePromoCode = ({
             // Only these mean the API judged the code and turned it down.
             // Every other failure decided nothing, so the previous answer, or
             // the absence of one, stands and the error is surfaced instead.
-            if (isRejection(e)) setLastValidation({ code, verified: false, allowsReassign: true });
+            if (isRejection(e)) {
+                setLastValidation({ code, verified: false, allowsReassign: true });
+                // How the code came to be applied is only worth revising when
+                // the API actually turned it down.
+                setIsAutoApplied(false);
+            }
             handleValidationError(e);
-            setIsAutoApplied(false);
             return false;
         } finally {
             // A later attempt is still running and owns the flag, so leave it

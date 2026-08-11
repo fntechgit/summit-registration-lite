@@ -187,6 +187,43 @@ describe('applying a code', () => {
     });
 });
 
+// ── What a failure that decided nothing may change ──
+
+describe('a validation that decided nothing', () => {
+    const failing = (statusCode) => jest.fn()
+        .mockImplementationOnce(() => Promise.resolve({ response: { allows_to_reassign: true } }))
+        .mockImplementationOnce(() => Promise.reject({ res: { statusCode, body: {} } }));
+
+    it('does not downgrade an auto-applied code to a manual one', async () => {
+        // The label says the widget applied this code on the user's behalf.
+        // A server error says nothing about the code, so it cannot quietly
+        // rewrite how the code came to be applied.
+        // Built once: createDefaultProps mints new mocks per call, and unstable
+        // identities restart the auto-apply effect on every render.
+        const props = createDefaultProps({
+            discoveredPromoCodes: [mockDiscoveredCodes[1]],
+            promoCode: '',
+            ticketDataLoaded: true,
+            hasTickets: true,
+            validatePromoCode: jest.fn(() => Promise.reject({ res: { statusCode: 500, body: {} } })),
+        });
+        const view = renderHook((over) => usePromoCode({ ...props, ...over }), { initialProps: {} });
+
+        // Let the early auto-apply run, which is the only thing that marks a
+        // code as applied on the user's behalf.
+        await act(async () => {});
+        expect(view.result.current.state.isAutoApplied).toBe(true);
+
+        view.rerender({ promoCode: 'AUTO1' });
+
+        await act(async () => {
+            await view.result.current.actions.onRevalidate(mockTicketQualifying, 1);
+        });
+        expect(view.result.current.state.isAutoApplied).toBe(true);
+    });
+
+});
+
 // ── Discovery selection ──
 
 describe('discovery selection', () => {
@@ -810,7 +847,7 @@ describe('onTicketSelected', () => {
         const singleCode = [mockDiscoveredCodes[1]]; // AUTO1 only
         const applyPromoCode = jest.fn(() => Promise.resolve());
         const validatePromoCode = jest.fn(() => Promise.reject({
-            res: { body: { errors: ['Quantity exceeded'] } }
+            res: { statusCode: 412, body: { errors: ['Quantity exceeded'] } }
         }));
         const { result } = renderHook(() =>
             usePromoCode(createDefaultProps({
