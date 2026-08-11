@@ -37,17 +37,21 @@ const usePromoCode = ({
     // failures that never reach the reducer, clears it in one place.
     const [validatingCode, setValidatingCode] = useState(false);
 
-    // What the API decided about the applied code, owned here because this is
-    // what awaits the request and so the only thing that knows which attempt is
-    // still the current one. Held in the store it took a second record of that
-    // ordering to stay in step with this one, and the two could disagree.
+    // Whether the API accepted the applied code for the selected ticket, and
+    // which code it was asked about. Owned here because this is what awaits the
+    // request, and so the only thing that knows which attempt is still current.
     //
-    // null means undecided: either nothing has been validated yet, or the last
-    // attempt failed in a way that decided nothing.
-    const [verdict, setVerdict] = useState(null);
+    // Recording the code is what lets an answer stop counting on its own once
+    // that code is no longer applied, including when the store clears it
+    // without asking: on checkout, logout or a dropped reservation.
+    const [lastValidation, setLastValidation] = useState(null);
 
-    const promoCodeVerified = verdict === null ? null : verdict.verified;
-    const allowsReassign = verdict?.allowsReassign ?? true;
+    // null means nothing has been accepted or turned down for the code now
+    // applied: nothing validated yet, the last attempt decided nothing, or what
+    // it decided was about a code since replaced.
+    const validation = lastValidation?.code === promoCode ? lastValidation : null;
+    const promoCodeVerified = validation === null ? null : validation.verified;
+    const allowsReassign = validation?.allowsReassign ?? true;
 
     // Pick first auto_apply code, or first code if none has auto_apply
     const discoveredPromoCode = useMemo(() => {
@@ -65,7 +69,7 @@ const usePromoCode = ({
 
     // Something genuinely in flight: applying the code, validating it against
     // a ticket, or waiting on the code-filtered ticket list with no settled
-    // verdict to show in the meantime.
+    // answer to show in the meantime.
     const isBusy = applyingCode || validatingCode
         || (isApplied && promoCodeVerified == null && !ticketDataLoaded);
 
@@ -81,10 +85,11 @@ const usePromoCode = ({
     const status = useMemo(() => {
         if (isBusy) return PROMO_STATUS.PROCESSING;
         if (isInvalid) return PROMO_STATUS.INVALID;
-        // APPLIED requires a backend verdict for the selected ticket. Applying
+        // APPLIED requires the API to have accepted the code for the selected
+        // ticket. Applying
         // a code without a ticket runs no validation, and the catalog comes
         // back populated even for a code that does not exist, so anything
-        // short of a confirmed verdict rests as UNVERIFIED.
+        // short of an accepted validation rests as UNVERIFIED.
         if (isApplied) return (promoCodeVerified === true && apiError == null)
             ? PROMO_STATUS.APPLIED
             : PROMO_STATUS.UNVERIFIED;
@@ -160,6 +165,13 @@ const usePromoCode = ({
     // recent attempt may report a result.
     const latestValidation = useRef(0);
 
+    // The applied code as of the latest render. Read when a validation starts
+    // rather than closed over, because applying a code takes a round trip and
+    // the callback that starts the validation was created before it: closing
+    // over the prop would record the answer against the code being replaced.
+    const appliedCode = useRef(promoCode);
+    appliedCode.current = promoCode;
+
     // Everything a validation in flight still owns: the right to answer, and
     // the busy state it put the field into. Both have to go the moment the code
     // it was asked about stops being the applied one, or the field stays locked
@@ -167,25 +179,22 @@ const usePromoCode = ({
     // whatever the user did next.
     //
     // Advancing the counter is what withdraws the right to answer, so every
-    // caller that drops the verdict has to come through here.
+    // caller that drops the recorded answer has to come through here.
     const abandonValidation = useCallback(() => {
         latestValidation.current += 1;
         setValidatingCode(false);
-        setVerdict(null);
+        setLastValidation(null);
         setApiError(null);
     }, []);
 
-    // The code can also be cleared without this hook being asked: checkout,
-    // logout, a cleared reservation. Nothing decided about the old code
-    // survives that either.
-    useEffect(() => {
-        if (!promoCode) abandonValidation();
-    }, [promoCode, abandonValidation]);
 
     // Returns whether the caller may advance: true only when the code
     // validated and no later attempt has replaced this one.
     const onRevalidate = useCallback(async (ticket, quantity) => {
         const attempt = ++latestValidation.current;
+        // Which code this answer will be about, fixed now rather than when it
+        // lands, so a code applied afterwards cannot inherit it.
+        const code = appliedCode.current;
         setApiError(null);
         setValidatingCode(true);
         try {
@@ -194,14 +203,14 @@ const usePromoCode = ({
             // No code applied means no request went out, so nothing was decided
             // and the caller has nothing to advance on.
             if (!result) return false;
-            setVerdict({ verified: true, allowsReassign: result.response?.allows_to_reassign ?? true });
+            setLastValidation({ code, verified: true, allowsReassign: result.response?.allows_to_reassign ?? true });
             return true;
         } catch (e) {
             if (attempt !== latestValidation.current) return false;
             // Only these mean the API judged the code and turned it down.
-            // Every other failure decided nothing, so the previous verdict, or
+            // Every other failure decided nothing, so the previous answer, or
             // the absence of one, stands and the error is surfaced instead.
-            if (isRejection(e)) setVerdict({ verified: false, allowsReassign: true });
+            if (isRejection(e)) setLastValidation({ code, verified: false, allowsReassign: true });
             handleValidationError(e);
             setIsAutoApplied(false);
             return false;

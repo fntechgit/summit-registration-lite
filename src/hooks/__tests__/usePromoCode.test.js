@@ -39,9 +39,9 @@ const createDefaultProps = (overrides = {}) => ({
     ...overrides,
 });
 
-// The verdict is the hook's own state, reached only by validating, so a test
-// that needs a verified code has to earn one the way the app does. This renders
-// the hook and runs one successful validation against it.
+// Whether the code was accepted is the hook's own state, reached only by
+// validating, so a test that needs an accepted code has to earn one the way the
+// app does: this renders the hook and runs one successful validation against it.
 const renderVerified = async (overrides = {}, response = {}) => {
     const view = renderHook((props) =>
         usePromoCode(createDefaultProps({
@@ -130,7 +130,7 @@ describe('abandoning an in-flight validation', () => {
 
         // The store blanking the code is a separate mechanism, so this asserts
         // only what onRemove itself has to guarantee: the abandoned answer
-        // never becomes a verdict, and its reassignment restriction never
+        // is never recorded, and its reassignment restriction never
         // reaches the rest of the flow.
         expect(view.result.current.state.status).not.toBe(PROMO_STATUS.APPLIED);
         expect(view.result.current.state.allowsReassign).toBe(true);
@@ -148,7 +148,7 @@ describe('abandoning an in-flight validation', () => {
         expect(view.result.current.state.allowsReassign).toBe(true);
     });
 
-    it('drops the verdict when the applied code is cleared from outside', async () => {
+    it('drops the recorded validation when the applied code is cleared from outside', async () => {
         // Checkout, logout and a cleared reservation all blank the code in the
         // store without going through this hook.
         const view = await renderVerified({}, { allows_to_reassign: false });
@@ -157,6 +157,33 @@ describe('abandoning an in-flight validation', () => {
         view.rerender({ promoCode: '' });
 
         expect(view.result.current.state.allowsReassign).toBe(true);
+    });
+});
+
+// ── Applying a code end to end ──
+
+describe('applying a code', () => {
+    it('reaches APPLIED once the applied code validates', async () => {
+        // Applying is a round trip, and the code only arrives as a prop when it
+        // is over, so the callback that starts the validation was created while
+        // no code was applied. Anything the validation records about "the
+        // applied code" has to be read when it runs, not when it was created,
+        // or the answer is filed against the wrong code and never counts.
+        let view;
+        const props = createDefaultProps({
+            promoCode: '',
+            ticketDataLoaded: true,
+            hasTickets: true,
+            applyPromoCode: jest.fn(async () => { view.rerender({ promoCode: 'CODE' }); }),
+            validatePromoCode: jest.fn(() => Promise.resolve({ response: {} })),
+        });
+        view = renderHook((over) => usePromoCode({ ...props, ...over }), { initialProps: {} });
+
+        await act(async () => {
+            await view.result.current.actions.onApply('CODE', mockTicketQualifying, 1);
+        });
+
+        expect(view.result.current.state.status).toBe(PROMO_STATUS.APPLIED);
     });
 });
 
@@ -220,9 +247,9 @@ describe('status derivation', () => {
         expect(result.current.state.status).toBe(PROMO_STATUS.APPLIED);
     });
 
-    it('returns PROCESSING during re-validation after a failed verdict', async () => {
-        // A rejected verdict stays in the store while a re-validation runs, so
-        // both signals coexist. In-flight must win over the stale verdict:
+    it('returns PROCESSING while re-validating a code the API turned down', async () => {
+        // A rejection stays recorded while a re-validation runs, so both signals
+        // coexist. In-flight must win over the stale rejection:
         // spinner, not error icon.
         const pending = deferred();
         const { result } = await renderRejected({
@@ -237,7 +264,7 @@ describe('status derivation', () => {
         expect(result.current.state.validationError).toBeNull();
     });
 
-    it('stops PROCESSING when the validation fails without a verdict', async () => {
+    it('stops PROCESSING when the validation fails without deciding anything', async () => {
         // A server error, a timeout or a dropped connection never reaches the
         // reducer. If the hook does not clear its own flag the field spins for
         // the rest of the session.
@@ -350,7 +377,7 @@ describe('status derivation', () => {
 
     it('returns UNVERIFIED when a verified code has an outstanding request error', async () => {
         // A rate-limited or timed-out re-validation leaves promoCodeVerified at
-        // its previous value while setting an error. The last verdict no longer
+        // its previous value while setting an error. The last answer no longer
         // covers the current selection, so it must not render as success.
         const { result } = await renderVerified({
             validatePromoCode: jest.fn()
@@ -533,7 +560,7 @@ describe('derived values', () => {
     });
 
     it('isReady stays true after a request error so the user can retry', async () => {
-        // A failed request leaves no verdict, so it must not latch the gate
+        // A failed request decides nothing, so it must not latch the gate
         // shut: the user has to be able to try again. Not proceeding on an
         // unverified code is enforced by re-validating on advance and refusing
         // to move on unless it succeeds, which is covered end to end.
