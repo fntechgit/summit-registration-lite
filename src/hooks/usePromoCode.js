@@ -2,11 +2,17 @@ import { useState, useCallback, useMemo, useEffect, useRef } from 'react';
 import T from 'i18n-react';
 import { PROMO_STATUS } from '../utils/constants';
 
+// 404: the code or the ticket type does not exist.
+// 412: the code does not apply to this ticket type or quantity.
+// Both are the API judging the code. Anything else -- a server error, a rate
+// limit, a timeout, a dropped connection, which arrives with no response at all
+// -- says nothing about whether the code is good.
+const isRejection = (e) => [404, 412].includes(e?.res?.statusCode);
+
 const usePromoCode = ({
     // Redux state
     discoveredPromoCodes,
     promoCode,
-    promoCodeVerified,
 
     // Redux dispatchers
     applyPromoCode,
@@ -30,6 +36,18 @@ const usePromoCode = ({
     // to applyingCode means every way a validation can end, including the
     // failures that never reach the reducer, clears it in one place.
     const [validatingCode, setValidatingCode] = useState(false);
+
+    // What the API decided about the applied code, owned here because this is
+    // what awaits the request and so the only thing that knows which attempt is
+    // still the current one. Held in the store it took a second record of that
+    // ordering to stay in step with this one, and the two could disagree.
+    //
+    // null means undecided: either nothing has been validated yet, or the last
+    // attempt failed in a way that decided nothing.
+    const [verdict, setVerdict] = useState(null);
+
+    const promoCodeVerified = verdict === null ? null : verdict.verified;
+    const allowsReassign = verdict?.allowsReassign ?? true;
 
     // Pick first auto_apply code, or first code if none has auto_apply
     const discoveredPromoCode = useMemo(() => {
@@ -149,10 +167,19 @@ const usePromoCode = ({
         setApiError(null);
         setValidatingCode(true);
         try {
-            await validatePromoCode({ id: ticket.id, ticketQuantity: quantity, sub_type: ticket.sub_type });
-            return attempt === latestValidation.current;
+            const result = await validatePromoCode({ id: ticket.id, ticketQuantity: quantity, sub_type: ticket.sub_type });
+            if (attempt !== latestValidation.current) return false;
+            // No code applied means no request went out, so nothing was decided
+            // and the caller has nothing to advance on.
+            if (!result) return false;
+            setVerdict({ verified: true, allowsReassign: result.response?.allows_to_reassign ?? true });
+            return true;
         } catch (e) {
             if (attempt !== latestValidation.current) return false;
+            // Only these mean the API judged the code and turned it down.
+            // Every other failure decided nothing, so the previous verdict, or
+            // the absence of one, stands and the error is surfaced instead.
+            if (isRejection(e)) setVerdict({ verified: false, allowsReassign: true });
             handleValidationError(e);
             setIsAutoApplied(false);
             return false;
@@ -179,6 +206,7 @@ const usePromoCode = ({
     const tryAutoApply = useCallback(async (ticket) => {
         setIsAutoApplied(true);
         setApplyingCode(true);
+        setVerdict(null);
         try {
             await applyPromoCode(discoveredPromoCode.code);
             // onRevalidate reports a failed validation by returning false
@@ -249,6 +277,9 @@ const usePromoCode = ({
     const onApply = useCallback(async (code, ticket, quantity) => {
         setApiError(null);
         setApplyingCode(true);
+        // A different application of a code, even the same string, has not been
+        // judged yet; whatever was decided about the last one does not carry.
+        setVerdict(null);
         try {
             await applyPromoCode(code);
         } catch (e) {
@@ -272,6 +303,7 @@ const usePromoCode = ({
 
         setIsAutoApplied(false);
         setApiError(null);
+        setVerdict(null);
         setSuggestionDismissed(false);
         if (discoveredPromoCode) setSuggestionActive(true);
 
@@ -299,6 +331,10 @@ const usePromoCode = ({
             // yet). Callers should defer ticket-list-driven side effects
             // until this clears to avoid acting on a stale list.
             applyingCode,
+
+            // False only when the API said so for the applied code, so it
+            // defaults open while nothing has been decided.
+            allowsReassign,
 
             // Applied code origin
             isAutoApplied,

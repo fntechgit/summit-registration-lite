@@ -162,8 +162,6 @@ const RegistrationFormContent = (
         showCompanyInputDefaultOptions,
         companyDDLOptions2Show,
         promoCode,
-        promoCodeVerified,
-        promoCodeAllowsReassign,
         discoveredPromoCodes,
         hasDiscount,
         getTicketDiscount,
@@ -266,7 +264,6 @@ const RegistrationFormContent = (
     const promo = usePromoCode({
         discoveredPromoCodes,
         promoCode,
-        promoCodeVerified,
         applyPromoCode,
         removePromoCode,
         validatePromoCode,
@@ -450,7 +447,7 @@ const RegistrationFormContent = (
                                 promo={promo}
                                 validationError={ticketStepError}
                                 promoCode={promoCode}
-                                promoCodeAllowsReassign={promoCodeAllowsReassign}
+                                promoCodeAllowsReassign={promoState.allowsReassign}
                                 changeForm={mergeFormValues}
                                 trackViewItem={trackViewItem}
                                 showMultipleTicketTexts={showMultipleTicketTexts}
@@ -495,7 +492,7 @@ const RegistrationFormContent = (
                                 companyDDLPlaceholder={companyDDLPlaceholder}
                                 showCompanyInputDefaultOptions={showCompanyInputDefaultOptions}
                                 companyDDLOptions2Show={companyDDLOptions2Show}
-                                promoCodeAllowsReassign={promoCodeAllowsReassign}
+                                promoCodeAllowsReassign={promoState.allowsReassign}
                             />
 
                             <animated.div style={{ ...toggleAnimation }}>
@@ -572,8 +569,6 @@ const mapStateToProps = ({ registrationLiteState }) => ({
     passwordlessCodeSent: registrationLiteState.passwordless.code_sent,
     passwordlessCodeError: registrationLiteState.passwordless.error,
     promoCode: registrationLiteState.promoCode,
-    promoCodeVerified: registrationLiteState.promoCodeVerified,
-    promoCodeAllowsReassign: registrationLiteState.promoCodeAllowsReassign,
     discoveredPromoCodes: registrationLiteState.discoveredPromoCodes,
 })
 

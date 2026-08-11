@@ -32,13 +32,49 @@ const mockTicketNonQualifying = { id: 99, sub_type: 'Regular' };
 const createDefaultProps = (overrides = {}) => ({
     discoveredPromoCodes: [],
     promoCode: '',
-    promoCodeVerified: null,
     applyPromoCode: jest.fn(() => Promise.resolve()),
     removePromoCode: jest.fn(),
     validatePromoCode: jest.fn(() => Promise.resolve()),
     setFormPromoCode: jest.fn(),
     ...overrides,
 });
+
+// The verdict is the hook's own state, reached only by validating, so a test
+// that needs a verified code has to earn one the way the app does. This renders
+// the hook and runs one successful validation against it.
+const renderVerified = async (overrides = {}, response = {}) => {
+    const view = renderHook(() =>
+        usePromoCode(createDefaultProps({
+            promoCode: 'CODE',
+            ticketDataLoaded: true,
+            hasTickets: true,
+            validatePromoCode: jest.fn(() => Promise.resolve({ response })),
+            ...overrides,
+        }))
+    );
+    await act(async () => {
+        await view.result.current.actions.onRevalidate(mockTicketQualifying, 1);
+    });
+    return view;
+};
+
+// Same, for a code the API turned down. 412 is the status that means "does not
+// apply to this ticket type or quantity".
+const renderRejected = async (overrides = {}, body = {}) => {
+    const view = renderHook(() =>
+        usePromoCode(createDefaultProps({
+            promoCode: 'CODE',
+            ticketDataLoaded: true,
+            hasTickets: true,
+            validatePromoCode: jest.fn(() => Promise.reject({ res: { statusCode: 412, body } })),
+            ...overrides,
+        }))
+    );
+    await act(async () => {
+        await view.result.current.actions.onRevalidate(mockTicketQualifying, 1);
+    });
+    return view;
+};
 
 // Lets a test hold a validation open and decide when (and how) it ends, so
 // in-flight state is produced by an actual pending request rather than asserted
@@ -61,7 +97,7 @@ describe('discovery selection', () => {
         expect(result.current.state.suggestedCode).toBe('AUTO1');
     });
 
-    it('falls back to first code when none has auto_apply', () => {
+    it('falls back to first code when none has auto_apply', async () => {
         const codes = [{ code: 'A', auto_apply: false }, { code: 'B', auto_apply: false }];
         const { result } = renderHook(() =>
             usePromoCode(createDefaultProps({ discoveredPromoCodes: codes }))
@@ -97,38 +133,30 @@ describe('status derivation', () => {
         // isBusy are already false: the only thing that can produce PROCESSING
         // here is the pending validation itself.
         const pending = deferred();
-        const { result } = renderHook(() =>
-            usePromoCode(createDefaultProps({
-                promoCode: 'CODE',
-                promoCodeVerified: true,
-                ticketDataLoaded: true,
-                hasTickets: true,
-                validatePromoCode: jest.fn(() => pending.promise),
-            }))
-        );
+        const { result } = await renderVerified({
+            validatePromoCode: jest.fn()
+                .mockImplementationOnce(() => Promise.resolve({ response: {} }))
+                .mockImplementationOnce(() => pending.promise),
+        });
         expect(result.current.state.status).toBe(PROMO_STATUS.APPLIED);
 
         act(() => { result.current.actions.onRevalidate(mockTicketQualifying, 1); });
         expect(result.current.state.status).toBe(PROMO_STATUS.PROCESSING);
 
-        await act(async () => { pending.resolve(); });
+        await act(async () => { pending.resolve({ response: {} }); });
         expect(result.current.state.status).toBe(PROMO_STATUS.APPLIED);
     });
 
-    it('returns PROCESSING during re-validation after a failed verdict', () => {
+    it('returns PROCESSING during re-validation after a failed verdict', async () => {
         // A rejected verdict stays in the store while a re-validation runs, so
         // both signals coexist. In-flight must win over the stale verdict:
         // spinner, not error icon.
         const pending = deferred();
-        const { result } = renderHook(() =>
-            usePromoCode(createDefaultProps({
-                promoCode: 'CODE',
-                promoCodeVerified: false,
-                ticketDataLoaded: true,
-                hasTickets: true,
-                validatePromoCode: jest.fn(() => pending.promise),
-            }))
-        );
+        const { result } = await renderRejected({
+            validatePromoCode: jest.fn()
+                .mockImplementationOnce(() => Promise.reject({ res: { statusCode: 412, body: {} } }))
+                .mockImplementationOnce(() => pending.promise),
+        });
         expect(result.current.state.status).toBe(PROMO_STATUS.INVALID);
 
         act(() => { result.current.actions.onRevalidate(mockTicketQualifying, 1); });
@@ -174,7 +202,6 @@ describe('status derivation', () => {
         const { result } = renderHook(() =>
             usePromoCode(createDefaultProps({
                 promoCode: 'CODE',
-                promoCodeVerified: true,
                 ticketDataLoaded: true,
                 hasTickets: true,
                 validatePromoCode,
@@ -189,7 +216,7 @@ describe('status derivation', () => {
         // nothing else stuck the field settles.
         await act(async () => {
             result.current.actions.onRevalidate(mockTicketQualifying, 1);
-            newer.resolve();
+            newer.resolve({ response: {} });
         });
         expect(result.current.state.status).toBe(PROMO_STATUS.APPLIED);
     });
@@ -204,7 +231,6 @@ describe('status derivation', () => {
         const { result } = renderHook(() => {
             const promo = usePromoCode(createDefaultProps({
                 promoCode: 'CODE',
-                promoCodeVerified: true,
                 ticketDataLoaded: true,
                 hasTickets: true,
                 validatePromoCode: jest.fn(() => pending.promise),
@@ -223,14 +249,12 @@ describe('status derivation', () => {
             statuses.slice(firstBusy).map(() => PROMO_STATUS.PROCESSING)
         );
 
-        await act(async () => { pending.resolve(); });
+        await act(async () => { pending.resolve({ response: {} }); });
         expect(result.current.state.status).toBe(PROMO_STATUS.APPLIED);
     });
 
-    it('returns APPLIED when code verified for the selected ticket', () => {
-        const { result } = renderHook(() =>
-            usePromoCode(createDefaultProps({ promoCode: 'CODE', promoCodeVerified: true }))
-        );
+    it('returns APPLIED when code verified for the selected ticket', async () => {
+        const { result } = await renderVerified();
         expect(result.current.state.status).toBe(PROMO_STATUS.APPLIED);
     });
 
@@ -255,15 +279,11 @@ describe('status derivation', () => {
         // A rate-limited or timed-out re-validation leaves promoCodeVerified at
         // its previous value while setting an error. The last verdict no longer
         // covers the current selection, so it must not render as success.
-        const { result } = renderHook(() =>
-            usePromoCode(createDefaultProps({
-                promoCode: 'CODE',
-                promoCodeVerified: true,
-                ticketDataLoaded: true,
-                hasTickets: true,
-                validatePromoCode: jest.fn(() => Promise.reject({ res: { body: { errors: ['Too many requests'] } } })),
-            }))
-        );
+        const { result } = await renderVerified({
+            validatePromoCode: jest.fn()
+                .mockImplementationOnce(() => Promise.resolve({ response: {} }))
+                .mockImplementationOnce(() => Promise.reject({ res: { body: { errors: ['Too many requests'] } } })),
+        });
         expect(result.current.state.status).toBe(PROMO_STATUS.APPLIED);
 
         await act(async () => {
@@ -280,12 +300,11 @@ describe('status derivation', () => {
         let rejectFirst;
         const validatePromoCode = jest.fn()
             .mockImplementationOnce(() => new Promise((_, reject) => { rejectFirst = reject; }))
-            .mockImplementationOnce(() => Promise.resolve());
+            .mockImplementationOnce(() => Promise.resolve({ response: {} }));
 
         const { result } = renderHook(() =>
             usePromoCode(createDefaultProps({
                 promoCode: 'CODE',
-                promoCodeVerified: true,
                 ticketDataLoaded: true,
                 hasTickets: true,
                 validatePromoCode,
@@ -331,11 +350,29 @@ describe('status derivation', () => {
         expect(canAdvance).toBe(false);
     });
 
-    it('returns INVALID when code applied and promoCodeVerified is false', () => {
-        const { result } = renderHook(() =>
-            usePromoCode(createDefaultProps({ promoCode: 'CODE', promoCodeVerified: false }))
-        );
+    it('returns INVALID when the API turned the code down', async () => {
+        const { result } = await renderRejected();
         expect(result.current.state.status).toBe(PROMO_STATUS.INVALID);
+    });
+
+    it.each([404, 412])('treats %s as the API rejecting the code', async (statusCode) => {
+        const { result } = await renderRejected({
+            validatePromoCode: jest.fn(() => Promise.reject({ res: { statusCode, body: {} } })),
+        });
+        expect(result.current.state.status).toBe(PROMO_STATUS.INVALID);
+    });
+
+    it.each([429, 500, 503, undefined])('does not report the code as rejected on %s', async (statusCode) => {
+        // These decide nothing about the code. Showing INVALID would tell the
+        // user their code is bad when nothing ever judged it. undefined stands
+        // for a request that produced no response at all.
+        const { result } = await renderRejected({
+            validatePromoCode: jest.fn(() => Promise.reject(
+                statusCode === undefined ? {} : { res: { statusCode, body: {} } }
+            )),
+        });
+        expect(result.current.state.status).not.toBe(PROMO_STATUS.INVALID);
+        expect(result.current.state.status).toBe(PROMO_STATUS.UNVERIFIED);
     });
 
     it('returns SUGGESTED after selecting qualifying ticket with discovered codes', async () => {
@@ -372,10 +409,8 @@ describe('derived values', () => {
         expect(result.current.state.isReady).toBe(true);
     });
 
-    it('isReady true for verified code', () => {
-        const { result } = renderHook(() =>
-            usePromoCode(createDefaultProps({ promoCode: 'CODE', promoCodeVerified: true }))
-        );
+    it('isReady true for verified code', async () => {
+        const { result } = await renderVerified();
         expect(result.current.state.isReady).toBe(true);
     });
 
@@ -466,14 +501,8 @@ describe('derived values', () => {
         expect(canAdvance).toBe(false);
     });
 
-    it('perAccountLimit from active discovered code when valid', () => {
-        const { result } = renderHook(() =>
-            usePromoCode(createDefaultProps({
-                discoveredPromoCodes: mockDiscoveredCodes,
-                promoCode: 'AUTO1',
-                promoCodeVerified: true,
-            }))
-        );
+    it('perAccountLimit from active discovered code when valid', async () => {
+        const { result } = await renderVerified({ discoveredPromoCodes: mockDiscoveredCodes, promoCode: 'AUTO1' });
         expect(result.current.state.perAccountLimit).toBe(4);
     });
 
@@ -944,19 +973,13 @@ describe('validationError', () => {
 // ── maxQuantityFromPromo ──
 
 describe('maxQuantityFromPromo', () => {
-    it('returns tightest cap from remaining_quantity_per_account and quantity_available', () => {
-        const { result } = renderHook(() =>
-            usePromoCode(createDefaultProps({
-                discoveredPromoCodes: mockDiscoveredCodes,
-                promoCode: 'AUTO1',
-                promoCodeVerified: true,
-            }))
-        );
+    it('returns tightest cap from remaining_quantity_per_account and quantity_available', async () => {
+        const { result } = await renderVerified({ discoveredPromoCodes: mockDiscoveredCodes, promoCode: 'AUTO1' });
         // remaining_quantity_per_account=4, quantity_available=100 → min is 4
         expect(result.current.state.maxQuantityFromPromo).toBe(4);
     });
 
-    it('uses quantity_available when it is tighter', () => {
+    it('uses quantity_available when it is tighter', async () => {
         const codes = [{
             code: 'LIMITED',
             auto_apply: true,
@@ -965,13 +988,7 @@ describe('maxQuantityFromPromo', () => {
             remaining_quantity_per_account: 8,
             quantity_available: 3,
         }];
-        const { result } = renderHook(() =>
-            usePromoCode(createDefaultProps({
-                discoveredPromoCodes: codes,
-                promoCode: 'LIMITED',
-                promoCodeVerified: true,
-            }))
-        );
+        const { result } = await renderVerified({ discoveredPromoCodes: codes, promoCode: 'LIMITED' });
         // remaining=8, quantity_available=3 → min is 3
         expect(result.current.state.maxQuantityFromPromo).toBe(3);
     });
@@ -994,7 +1011,7 @@ describe('maxQuantityFromPromo', () => {
         expect(result.current.state.maxQuantityFromPromo).toBeNull();
     });
 
-    it('uses only remaining_quantity_per_account when quantity_available is null (unlimited)', () => {
+    it('uses only remaining_quantity_per_account when quantity_available is null (unlimited)', async () => {
         const codes = [{
             code: 'UNLIM',
             auto_apply: true,
@@ -1003,17 +1020,11 @@ describe('maxQuantityFromPromo', () => {
             remaining_quantity_per_account: 3,
             quantity_available: null,
         }];
-        const { result } = renderHook(() =>
-            usePromoCode(createDefaultProps({
-                discoveredPromoCodes: codes,
-                promoCode: 'UNLIM',
-                promoCodeVerified: true,
-            }))
-        );
+        const { result } = await renderVerified({ discoveredPromoCodes: codes, promoCode: 'UNLIM' });
         expect(result.current.state.maxQuantityFromPromo).toBe(3);
     });
 
-    it('caps at 0 when quantity_available is 0 (sold out)', () => {
+    it('caps at 0 when quantity_available is 0 (sold out)', async () => {
         const codes = [{
             code: 'SOLDOUT',
             auto_apply: true,
@@ -1022,17 +1033,11 @@ describe('maxQuantityFromPromo', () => {
             remaining_quantity_per_account: 3,
             quantity_available: 0,
         }];
-        const { result } = renderHook(() =>
-            usePromoCode(createDefaultProps({
-                discoveredPromoCodes: codes,
-                promoCode: 'SOLDOUT',
-                promoCodeVerified: true,
-            }))
-        );
+        const { result } = await renderVerified({ discoveredPromoCodes: codes, promoCode: 'SOLDOUT' });
         expect(result.current.state.maxQuantityFromPromo).toBe(0);
     });
 
-    it('uses only quantity_available when remaining_quantity_per_account is null', () => {
+    it('uses only quantity_available when remaining_quantity_per_account is null', async () => {
         const codes = [{
             code: 'NOACCOUNTLIMIT',
             auto_apply: true,
@@ -1041,17 +1046,11 @@ describe('maxQuantityFromPromo', () => {
             remaining_quantity_per_account: null,
             quantity_available: 5,
         }];
-        const { result } = renderHook(() =>
-            usePromoCode(createDefaultProps({
-                discoveredPromoCodes: codes,
-                promoCode: 'NOACCOUNTLIMIT',
-                promoCodeVerified: true,
-            }))
-        );
+        const { result } = await renderVerified({ discoveredPromoCodes: codes, promoCode: 'NOACCOUNTLIMIT' });
         expect(result.current.state.maxQuantityFromPromo).toBe(5);
     });
 
-    it('null when both limits are unlimited', () => {
+    it('null when both limits are unlimited', async () => {
         const codes = [{
             code: 'ALLFREE',
             auto_apply: true,
@@ -1060,13 +1059,7 @@ describe('maxQuantityFromPromo', () => {
             remaining_quantity_per_account: null,
             quantity_available: null,
         }];
-        const { result } = renderHook(() =>
-            usePromoCode(createDefaultProps({
-                discoveredPromoCodes: codes,
-                promoCode: 'ALLFREE',
-                promoCodeVerified: true,
-            }))
-        );
+        const { result } = await renderVerified({ discoveredPromoCodes: codes, promoCode: 'ALLFREE' });
         expect(result.current.state.maxQuantityFromPromo).toBeNull();
     });
 });
@@ -1077,9 +1070,9 @@ describe('onRevalidate', () => {
     it('reports the caller may advance on success', async () => {
         // registration-form gates changeStep on this value, so a missing or
         // wrong return dead-ends the ticket step.
-        const validatePromoCode = jest.fn(() => Promise.resolve());
+        const validatePromoCode = jest.fn(() => Promise.resolve({ response: {} }));
         const { result } = renderHook(() =>
-            usePromoCode(createDefaultProps({ validatePromoCode }))
+            usePromoCode(createDefaultProps({ promoCode: 'CODE', validatePromoCode }))
         );
 
         let canAdvance;

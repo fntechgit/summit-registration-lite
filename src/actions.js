@@ -73,20 +73,11 @@ export const clearWidgetState = () => (dispatch) => {
 }
 
 const promoCodeErrorHandler = (err, res) => (dispatch, state) => {
-    // 404: promo code or ticket type not found
-    // 412: promo code invalid for this ticket type/qty
-    if (res && [404, 412].includes(res.statusCode)) {
-        dispatch(createAction(VALIDATE_PROMO_CODE_ERROR)({}));
-        return;
-    }
-    // 429: rate limited. Transient, and it says nothing about the code, so
-    // leave the promo state alone and don't bother the user with it.
-    if (res && res.statusCode === 429) return;
+    // 404 and 412 are the API judging the code, and 429 is transient. None of
+    // them is an auth or session problem, and the caller sees the rejection
+    // either way, so there is nothing to escalate.
+    if (res && [404, 412, 429].includes(res.statusCode)) return;
 
-    // Anything else (a server error, a timeout, a dropped connection, which
-    // arrives with no response at all) also decides nothing about the code, so
-    // no verdict is written here either. The caller's promise rejects and the
-    // hook clears its in-flight flag from there.
     return authErrorHandler(err, res)(dispatch, state);
 };
 
