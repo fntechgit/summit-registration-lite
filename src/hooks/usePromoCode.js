@@ -160,6 +160,28 @@ const usePromoCode = ({
     // recent attempt may report a result.
     const latestValidation = useRef(0);
 
+    // Everything a validation in flight still owns: the right to answer, and
+    // the busy state it put the field into. Both have to go the moment the code
+    // it was asked about stops being the applied one, or the field stays locked
+    // behind a request nobody is waiting for and that request's answer lands on
+    // whatever the user did next.
+    //
+    // Advancing the counter is what withdraws the right to answer, so every
+    // caller that drops the verdict has to come through here.
+    const abandonValidation = useCallback(() => {
+        latestValidation.current += 1;
+        setValidatingCode(false);
+        setVerdict(null);
+        setApiError(null);
+    }, []);
+
+    // The code can also be cleared without this hook being asked: checkout,
+    // logout, a cleared reservation. Nothing decided about the old code
+    // survives that either.
+    useEffect(() => {
+        if (!promoCode) abandonValidation();
+    }, [promoCode, abandonValidation]);
+
     // Returns whether the caller may advance: true only when the code
     // validated and no later attempt has replaced this one.
     const onRevalidate = useCallback(async (ticket, quantity) => {
@@ -206,7 +228,7 @@ const usePromoCode = ({
     const tryAutoApply = useCallback(async (ticket) => {
         setIsAutoApplied(true);
         setApplyingCode(true);
-        setVerdict(null);
+        abandonValidation();
         try {
             await applyPromoCode(discoveredPromoCode.code);
             // onRevalidate reports a failed validation by returning false
@@ -275,11 +297,12 @@ const usePromoCode = ({
     }, [userRemovedAutoApply, ticketDataLoaded, discoveredPromoCode, discoveredPromoCodes, isApplied, tryAutoApply]);
 
     const onApply = useCallback(async (code, ticket, quantity) => {
-        setApiError(null);
         setApplyingCode(true);
         // A different application of a code, even the same string, has not been
-        // judged yet; whatever was decided about the last one does not carry.
-        setVerdict(null);
+        // judged yet, and applying takes a whole round trip before any new
+        // validation starts. Withdrawing the old one now stops it filling that
+        // window with an answer about the code it replaced.
+        abandonValidation();
         try {
             await applyPromoCode(code);
         } catch (e) {
@@ -302,8 +325,7 @@ const usePromoCode = ({
         if (isAutoApplied || isDiscoveredCode) setUserRemovedAutoApply(true);
 
         setIsAutoApplied(false);
-        setApiError(null);
-        setVerdict(null);
+        abandonValidation();
         setSuggestionDismissed(false);
         if (discoveredPromoCode) setSuggestionActive(true);
 

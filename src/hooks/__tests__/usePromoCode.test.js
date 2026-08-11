@@ -43,14 +43,15 @@ const createDefaultProps = (overrides = {}) => ({
 // that needs a verified code has to earn one the way the app does. This renders
 // the hook and runs one successful validation against it.
 const renderVerified = async (overrides = {}, response = {}) => {
-    const view = renderHook(() =>
+    const view = renderHook((props) =>
         usePromoCode(createDefaultProps({
             promoCode: 'CODE',
             ticketDataLoaded: true,
             hasTickets: true,
             validatePromoCode: jest.fn(() => Promise.resolve({ response })),
             ...overrides,
-        }))
+            ...props,
+        })), { initialProps: {} }
     );
     await act(async () => {
         await view.result.current.actions.onRevalidate(mockTicketQualifying, 1);
@@ -86,6 +87,78 @@ const deferred = () => {
     promise.catch(() => {});
     return { promise, ...settle };
 };
+
+// ── Abandoning a validation ──
+
+// A validation is only about the code that was applied when it started. These
+// cover what has to happen to one that is still running when the user changes
+// that code: it stops owning the field, and it stops being allowed to answer.
+describe('abandoning an in-flight validation', () => {
+    const inFlight = async (extra = {}) => {
+        const pending = deferred();
+        const view = renderHook(() =>
+            usePromoCode(createDefaultProps({
+                promoCode: 'CODE',
+                ticketDataLoaded: true,
+                hasTickets: true,
+                validatePromoCode: jest.fn(() => pending.promise),
+                ...extra,
+            }))
+        );
+        act(() => { view.result.current.actions.onRevalidate(mockTicketQualifying, 1); });
+        expect(view.result.current.state.status).toBe(PROMO_STATUS.PROCESSING);
+        return { view, pending };
+    };
+
+    it('frees the field when the code is removed mid-validation', async () => {
+        // Otherwise the input stays read-only behind a spinner and Next stays
+        // disabled until the abandoned request lands, which for an aborted one
+        // is never.
+        const { view } = await inFlight();
+
+        act(() => { view.result.current.actions.onRemove(); });
+
+        expect(view.result.current.state.status).not.toBe(PROMO_STATUS.PROCESSING);
+        expect(view.result.current.state.isReady).toBe(true);
+    });
+
+    it('ignores the answer to a validation for a code since removed', async () => {
+        const { view, pending } = await inFlight();
+
+        act(() => { view.result.current.actions.onRemove(); });
+        await act(async () => { pending.resolve({ response: { allows_to_reassign: false } }); });
+
+        // The store blanking the code is a separate mechanism, so this asserts
+        // only what onRemove itself has to guarantee: the abandoned answer
+        // never becomes a verdict, and its reassignment restriction never
+        // reaches the rest of the flow.
+        expect(view.result.current.state.status).not.toBe(PROMO_STATUS.APPLIED);
+        expect(view.result.current.state.allowsReassign).toBe(true);
+    });
+
+    it('ignores the answer to a validation for a code since replaced', async () => {
+        // The window between applying a code and validating it is a whole
+        // round trip; the previous code's answer must not fill it.
+        const { view, pending } = await inFlight();
+
+        await act(async () => { view.result.current.actions.onApply('OTHER', null, 1); });
+        await act(async () => { pending.resolve({ response: { allows_to_reassign: false } }); });
+
+        expect(view.result.current.state.status).not.toBe(PROMO_STATUS.APPLIED);
+        expect(view.result.current.state.allowsReassign).toBe(true);
+    });
+
+    it('drops the verdict when the applied code is cleared from outside', async () => {
+        // Checkout, logout and a cleared reservation all blank the code in the
+        // store without going through this hook.
+        const view = await renderVerified({}, { allows_to_reassign: false });
+        expect(view.result.current.state.allowsReassign).toBe(false);
+
+        view.rerender({ promoCode: '' });
+
+        expect(view.result.current.state.allowsReassign).toBe(true);
+    });
+});
 
 // ── Discovery selection ──
 
@@ -328,12 +401,14 @@ describe('status derivation', () => {
     });
 
     it('does not let a superseded attempt advance the caller', async () => {
+        // Resolves with a real response body, so nothing but the supersede
+        // check can stop the superseded attempt reporting success.
         let resolveFirst;
         const validatePromoCode = jest.fn()
             .mockImplementationOnce(() => new Promise((resolve) => { resolveFirst = resolve; }))
-            .mockImplementationOnce(() => Promise.resolve());
+            .mockImplementationOnce(() => Promise.resolve({ response: {} }));
         const { result } = renderHook(() =>
-            usePromoCode(createDefaultProps({ validatePromoCode }))
+            usePromoCode(createDefaultProps({ promoCode: 'CODE', validatePromoCode }))
         );
 
         let firstAttempt;
@@ -344,7 +419,7 @@ describe('status derivation', () => {
 
         let canAdvance;
         await act(async () => {
-            resolveFirst();
+            resolveFirst({ response: {} });
             canAdvance = await firstAttempt;
         });
         expect(canAdvance).toBe(false);
@@ -451,10 +526,9 @@ describe('derived values', () => {
         expect(result.current.state.isReady).toBe(false);
     });
 
-    it('isReady false for INVALID', () => {
-        const { result } = renderHook(() =>
-            usePromoCode(createDefaultProps({ promoCode: 'CODE', promoCodeVerified: false }))
-        );
+    it('isReady false for INVALID', async () => {
+        const { result } = await renderRejected();
+        expect(result.current.state.status).toBe(PROMO_STATUS.INVALID);
         expect(result.current.state.isReady).toBe(false);
     });
 
