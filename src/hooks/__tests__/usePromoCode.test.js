@@ -222,6 +222,24 @@ describe('a validation that decided nothing', () => {
         expect(view.result.current.state.isAutoApplied).toBe(true);
     });
 
+    it('stops applying the code quantity caps', async () => {
+        // status drops to UNVERIFIED after this, so the caps a verified code
+        // imposes must drop with it rather than keep acting on an answer that
+        // no longer covers the selection.
+        const view = await renderVerified({
+            discoveredPromoCodes: [mockDiscoveredCodes[1]],
+            promoCode: 'AUTO1',
+            validatePromoCode: failing(500),
+        });
+        expect(view.result.current.state.maxQuantityFromPromo).toBe(4);
+
+        await act(async () => {
+            await view.result.current.actions.onRevalidate(mockTicketQualifying, 1);
+        });
+        expect(view.result.current.state.status).toBe(PROMO_STATUS.UNVERIFIED);
+        expect(view.result.current.state.maxQuantityFromPromo).toBeNull();
+        expect(view.result.current.state.perAccountLimit).toBeNull();
+    });
 });
 
 // ── Discovery selection ──

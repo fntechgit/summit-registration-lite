@@ -106,7 +106,13 @@ const usePromoCode = ({
 
     const suggestedCode = discoveredPromoCode?.code || null;
 
-    const activeDiscoveredCode = (promoCodeVerified === true && !validatingCode && isDiscoveredCode)
+    // The caps a discovered code carries apply while it is the applied code and
+    // the last thing heard about it was that it was good. An outstanding error
+    // means that answer no longer covers the current selection, which is what
+    // status reflects too, so the caps go with it. They deliberately survive a
+    // re-validation in flight: dropping them there would briefly uncap the
+    // stepper for a code that is still applied.
+    const activeDiscoveredCode = (isDiscoveredCode && promoCodeVerified === true && apiError == null)
         ? discoveredPromoCode : null;
 
     const perAccountLimit = activeDiscoveredCode?.quantity_per_account > 0
