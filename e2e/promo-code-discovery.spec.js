@@ -307,10 +307,14 @@ test.describe('validation errors', () => {
         await page.fill('input[placeholder="Enter your promo code"]', 'ANYCODE');
         await page.click('button:has-text("Apply")');
 
-        // uicore surfaces unhandled statuses in its own modal; dismiss it the
-        // way a user would before checking the field underneath.
-        const dismiss = page.locator('.swal2-confirm');
-        if (await dismiss.isVisible().catch(() => false)) await dismiss.click();
+        // uicore surfaces unhandled statuses in its own modal, which overlays
+        // the form. Wait for it rather than sampling: it renders a beat after
+        // the response lands, and dismissing it is what a user would do before
+        // looking at the field underneath.
+        const confirm = page.locator('.swal2-confirm');
+        await confirm.waitFor({ state: 'visible' });
+        await confirm.click();
+        await expect(page.locator('.swal2-container')).toHaveCount(0);
 
         // Settled, not spinning, and still operable.
         await expect(page.getByTestId('promo-spinner')).toHaveCount(0);
