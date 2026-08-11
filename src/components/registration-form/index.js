@@ -354,8 +354,11 @@ const RegistrationFormContent = (
             setUnappliedCodeWarning(T.translate('promo_code.unapplied_code_warning'));
             return;
         }
-        // Re-validate manual codes with final quantity before advancing
-        if (promoCode && !promoState.isDiscoveredCode) {
+        // Re-validate the applied code against the final quantity before
+        // advancing. This is also the retry for a validation that failed
+        // earlier, so it covers discovered codes too: their quantity caps make
+        // them just as quantity-dependent as a manually entered one.
+        if (promoCode) {
             startWidgetLoading();
             let canAdvance = false;
             try {

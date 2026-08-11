@@ -355,9 +355,11 @@ describe('derived values', () => {
         expect(result.current.state.isReady).toBe(false);
     });
 
-    it('isReady false while a request error is unresolved', async () => {
-        // A failed validation that leaves no verdict must still block the
-        // advance gate, otherwise the user proceeds on an unverified code.
+    it('isReady stays true after a request error so the user can retry', async () => {
+        // A failed request leaves no verdict, so it must not latch the gate
+        // shut: the user has to be able to try again. Not proceeding on an
+        // unverified code is enforced by re-validating on advance and refusing
+        // to move on unless it succeeds, which is covered end to end.
         const { result } = renderHook(() =>
             usePromoCode(createDefaultProps({
                 promoCode: 'CODE',
@@ -372,7 +374,28 @@ describe('derived values', () => {
         await act(async () => {
             await result.current.actions.onTicketSelected({ id: 1, sub_type: 'Regular' });
         });
-        expect(result.current.state.isReady).toBe(false);
+        expect(result.current.state.isReady).toBe(true);
+        // The failure is still reported, it just doesn't disable the gate.
+        expect(result.current.state.validationError).toBe('Too many requests');
+    });
+
+    it('onRevalidate refuses to advance when the request fails', async () => {
+        // The gate that replaced isReady's error check.
+        const { result } = renderHook(() =>
+            usePromoCode(createDefaultProps({
+                promoCode: 'CODE',
+                promoCodeVerified: null,
+                ticketDataLoaded: true,
+                hasTickets: true,
+                validatePromoCode: jest.fn(() => Promise.reject({ res: { body: { message: 'Server error' } } })),
+            }))
+        );
+
+        let canAdvance;
+        await act(async () => {
+            canAdvance = await result.current.actions.onRevalidate({ id: 1, sub_type: 'Regular' }, 1);
+        });
+        expect(canAdvance).toBe(false);
     });
 
     it('perAccountLimit from active discovered code when valid', () => {

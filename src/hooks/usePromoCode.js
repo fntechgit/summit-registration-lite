@@ -102,10 +102,14 @@ const usePromoCode = ({
         return caps.length > 0 ? Math.min(...caps) : null;
     }, [activeDiscoveredCode]);
 
-    // True when the user can safely advance from the ticket step: nothing in
-    // flight, no rejection, and no unresolved request error. Ticket selection
-    // is enforced by its own gate.
-    const isReady = !isBusy && !isInvalid && apiError == null;
+    // True when the user may attempt to advance from the ticket step: nothing
+    // in flight and no rejection. Ticket selection is enforced by its own gate.
+    //
+    // A failed request deliberately does not block here. It says nothing about
+    // the code, and leaving the gate shut would stop the user retrying the very
+    // thing that failed. Advancing re-validates and refuses to move on unless
+    // that succeeds, so an unverified code still cannot get through.
+    const isReady = !isBusy && !isInvalid;
 
     // --- Discovery: ticket qualification ---
 
