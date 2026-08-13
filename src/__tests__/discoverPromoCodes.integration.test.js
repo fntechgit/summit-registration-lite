@@ -21,7 +21,7 @@
  *          would before dispatching the success action.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook, act } from '@testing-library/react-hooks';
 import { createStore, combineReducers, applyMiddleware } from 'redux';
 import thunk from 'redux-thunk';
 
@@ -171,15 +171,20 @@ describe('discoverPromoCodes — request → reducer → hook, end to end', () =
         const { result } = renderHook(() => usePromoCode({
             discoveredPromoCodes,
             promoCode: 'PRESALE',
-            promoCodeVerified: true,
-            promoCodeValidating: false,
             applyPromoCode: jest.fn(() => Promise.resolve()),
             removePromoCode: jest.fn(),
-            validatePromoCode: jest.fn(() => Promise.resolve()),
+            validatePromoCode: jest.fn(() => Promise.resolve({ response: {} })),
             setFormPromoCode: jest.fn(),
             ticketDataLoaded: true,
             hasTickets: true,
         }));
+
+        // Whether the code was accepted is the hook's own state now, not a
+        // prop: earn it the way the app does, with one successful validation
+        // against a qualifying ticket.
+        await act(async () => {
+            await result.current.actions.onRevalidate({ id: 202, sub_type: 'Regular' }, 1);
+        });
 
         expect(result.current.state.suggestedCode).toBe('PRESALE');
         expect(result.current.state.perAccountLimit).toBe(24);
