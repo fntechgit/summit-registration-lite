@@ -66,7 +66,7 @@ import TicketTaxesError from '../ticket-taxes-error';
 import T from 'i18n-react';
 import { getCurrentUserLanguage } from '../../utils/utils';
 import {
-    ADD_TO_CART, BEGIN_CHECKOUT, PURCHASE_COMPLETE, PROMO_STATUS,
+    ADD_TO_CART, BEGIN_CHECKOUT, PURCHASE_COMPLETE,
     STEP_COMPLETE,
     STEP_PAYMENT,
     STEP_PERSONAL_INFO,
@@ -162,9 +162,6 @@ const RegistrationFormContent = (
         showCompanyInputDefaultOptions,
         companyDDLOptions2Show,
         promoCode,
-        promoCodeVerified,
-        promoCodeValidating,
-        promoCodeAllowsReassign,
         discoveredPromoCodes,
         hasDiscount,
         getTicketDiscount,
@@ -267,8 +264,6 @@ const RegistrationFormContent = (
     const promo = usePromoCode({
         discoveredPromoCodes,
         promoCode,
-        promoCodeVerified,
-        promoCodeValidating,
         applyPromoCode,
         removePromoCode,
         validatePromoCode,
@@ -293,11 +288,11 @@ const RegistrationFormContent = (
     useEffect(() => {
         if (!formValues?.promoCode
             || promoCode
-            || promoState.status === PROMO_STATUS.SUGGESTED
+            || promoState.isSuggested
             || promoState.validationError) {
             setUnappliedCodeWarning(null);
         }
-    }, [formValues?.promoCode, promoCode, promoState.status, promoState.validationError])
+    }, [formValues?.promoCode, promoCode, promoState.isSuggested, promoState.validationError])
 
     const [ref, { height }] = useMeasure();
 
@@ -352,20 +347,23 @@ const RegistrationFormContent = (
     }
 
     const handleAdvanceFromTicketStep = async (data) => {
-        if (formValues?.promoCode && !promoCode && promoState.status !== PROMO_STATUS.SUGGESTED) {
+        if (formValues?.promoCode && !promoCode && !promoState.isSuggested) {
             setUnappliedCodeWarning(T.translate('promo_code.unapplied_code_warning'));
             return;
         }
-        // Re-validate manual codes with final quantity before advancing
-        if (promoCode && !promoState.isDiscoveredCode) {
+        // Re-validate the applied code against the final quantity before
+        // advancing. This is also the retry for a validation that failed
+        // earlier, so it covers discovered codes too: their quantity caps make
+        // them just as quantity-dependent as a manually entered one.
+        if (promoCode) {
             startWidgetLoading();
-            let valid = false;
+            let canAdvance = false;
             try {
-                valid = await promoActions.onRevalidate(formValues.ticketType, data.ticketQuantity);
+                canAdvance = await promoActions.onRevalidate(formValues.ticketType, data.ticketQuantity);
             } finally {
                 stopWidgetLoading();
             }
-            if (!valid) return;
+            if (!canAdvance) return;
         }
         trackAddToCart(data);
         changeStep(STEP_PERSONAL_INFO);
@@ -449,7 +447,7 @@ const RegistrationFormContent = (
                                 promo={promo}
                                 validationError={ticketStepError}
                                 promoCode={promoCode}
-                                promoCodeAllowsReassign={promoCodeAllowsReassign}
+                                promoCodeAllowsReassign={promoState.allowsReassign}
                                 changeForm={mergeFormValues}
                                 trackViewItem={trackViewItem}
                                 showMultipleTicketTexts={showMultipleTicketTexts}
@@ -494,7 +492,7 @@ const RegistrationFormContent = (
                                 companyDDLPlaceholder={companyDDLPlaceholder}
                                 showCompanyInputDefaultOptions={showCompanyInputDefaultOptions}
                                 companyDDLOptions2Show={companyDDLOptions2Show}
-                                promoCodeAllowsReassign={promoCodeAllowsReassign}
+                                promoCodeAllowsReassign={promoState.allowsReassign}
                             />
 
                             <animated.div style={{ ...toggleAnimation }}>
@@ -571,9 +569,6 @@ const mapStateToProps = ({ registrationLiteState }) => ({
     passwordlessCodeSent: registrationLiteState.passwordless.code_sent,
     passwordlessCodeError: registrationLiteState.passwordless.error,
     promoCode: registrationLiteState.promoCode,
-    promoCodeVerified: registrationLiteState.promoCodeVerified,
-    promoCodeValidating: registrationLiteState.promoCodeValidating,
-    promoCodeAllowsReassign: registrationLiteState.promoCodeAllowsReassign,
     discoveredPromoCodes: registrationLiteState.discoveredPromoCodes,
 })
 

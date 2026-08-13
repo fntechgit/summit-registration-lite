@@ -1,13 +1,18 @@
-import { useState, useCallback, useMemo, useEffect } from 'react';
+import { useState, useCallback, useMemo, useEffect, useRef } from 'react';
 import T from 'i18n-react';
 import { PROMO_STATUS } from '../utils/constants';
+
+// 404: the code or the ticket type does not exist.
+// 412: the code does not apply to this ticket type or quantity.
+// Both are the API judging the code. Anything else -- a server error, a rate
+// limit, a timeout, a dropped connection, which arrives with no response at all
+// -- says nothing about whether the code is good.
+const isRejection = (e) => [404, 412].includes(e?.res?.statusCode);
 
 const usePromoCode = ({
     // Redux state
     discoveredPromoCodes,
     promoCode,
-    promoCodeVerified,
-    promoCodeValidating,
 
     // Redux dispatchers
     applyPromoCode,
@@ -25,11 +30,28 @@ const usePromoCode = ({
     const [isAutoApplied, setIsAutoApplied] = useState(false);
     const [suggestionActive, setSuggestionActive] = useState(false);
     const [suggestionDismissed, setSuggestionDismissed] = useState(false);
-    // Error written by handleValidationError (API) or the form (unapplied-code warning).
-    // The user-facing `validationError` is computed below by merging this with the
-    // status-derived INVALID message.
-    const [manualError, setManualError] = useState(null);
+    const [apiError, setApiError] = useState(null);
     const [applyingCode, setApplyingCode] = useState(false);
+    // In-flight flags belong to whoever awaits the request. Keeping this next
+    // to applyingCode means every way a validation can end, including the
+    // failures that never reach the reducer, clears it in one place.
+    const [validatingCode, setValidatingCode] = useState(false);
+
+    // Whether the API accepted the applied code for the selected ticket, and
+    // which code it was asked about. Owned here because this is what awaits the
+    // request, and so the only thing that knows which attempt is still current.
+    //
+    // Recording the code is what lets an answer stop counting on its own once
+    // that code is no longer applied, including when the store clears it
+    // without asking: on checkout, logout or a dropped reservation.
+    const [lastValidation, setLastValidation] = useState(null);
+
+    // null means nothing has been accepted or turned down for the code now
+    // applied: nothing validated yet, the last attempt decided nothing, or what
+    // it decided was about a code since replaced.
+    const validation = lastValidation?.code === promoCode ? lastValidation : null;
+    const promoCodeVerified = validation === null ? null : validation.verified;
+    const allowsReassign = validation?.allowsReassign ?? true;
 
     // Pick first auto_apply code, or first code if none has auto_apply
     const discoveredPromoCode = useMemo(() => {
@@ -40,32 +62,57 @@ const usePromoCode = ({
     const isApplied = !!promoCode;
     const isDiscoveredCode = isApplied && discoveredPromoCode?.code === promoCode;
 
-    // --- Status ---
+    // --- Canonical signals ---
+    // The raw Redux signals can overlap (e.g. a stale promoCodeVerified=false
+    // persists while a re-validation is in flight), so precedence is encoded
+    // here, once, rather than in each consumer.
 
+    // Something genuinely in flight: applying the code, validating it against
+    // a ticket, or waiting on the code-filtered ticket list with no settled
+    // answer to show in the meantime.
+    const isBusy = applyingCode || validatingCode
+        || (isApplied && promoCodeVerified == null && !ticketDataLoaded);
+
+    // Settled rejection: the backend rejected the code for the selected
+    // ticket, or the code-filtered ticket list came back empty.
+    const isInvalid = !isBusy && isApplied
+        && (promoCodeVerified === false || (promoCodeVerified == null && !hasTickets));
+
+    const isSuggested = !isApplied && suggestionActive && !suggestionDismissed;
+
+    // --- Display status: a pure projection of the signals, total order.
+    // Gate rendering on this; gate behavior on the signals above.
     const status = useMemo(() => {
-        if (isApplied) {
-            if (promoCodeValidating) return PROMO_STATUS.VALIDATING;
-            if (promoCodeVerified === true) return PROMO_STATUS.VALID;
-            if (promoCodeVerified === false) return PROMO_STATUS.INVALID;
-            // Applied but no tickets returned and not currently applying: code is invalid
-            if (!applyingCode && ticketDataLoaded && !hasTickets) return PROMO_STATUS.INVALID;
-            return PROMO_STATUS.APPLYING;
-        }
-        if (suggestionActive && !suggestionDismissed) return PROMO_STATUS.SUGGESTED;
+        if (isBusy) return PROMO_STATUS.PROCESSING;
+        if (isInvalid) return PROMO_STATUS.INVALID;
+        // APPLIED requires the API to have accepted the code for the selected
+        // ticket. Applying
+        // a code without a ticket runs no validation, and the catalog comes
+        // back populated even for a code that does not exist, so anything
+        // short of an accepted validation rests as UNVERIFIED.
+        if (isApplied) return (promoCodeVerified === true && apiError == null)
+            ? PROMO_STATUS.APPLIED
+            : PROMO_STATUS.UNVERIFIED;
+        if (isSuggested) return PROMO_STATUS.SUGGESTED;
         return PROMO_STATUS.IDLE;
-    }, [isApplied, promoCodeVerified, promoCodeValidating, suggestionActive, suggestionDismissed, applyingCode, ticketDataLoaded, hasTickets]);
+    }, [isBusy, isInvalid, isApplied, isSuggested, promoCodeVerified, apiError]);
 
-    // Hook's own validation error. Composed from the in-flight API error (if any)
-    // and the status-derived "invalid code" message when status is INVALID.
-    // Consumers may layer their own warning on top before display.
-    const validationError = manualError
-        ?? (status === PROMO_STATUS.INVALID ? T.translate('promo_code.invalid_code') : null);
+    // Prefers the message the request returned, falling back to a generic
+    // invalid-code message when the code was rejected without one.
+    const validationError = apiError
+        ?? (isInvalid ? T.translate('promo_code.invalid_code') : null);
 
     // --- Derived values ---
 
     const suggestedCode = discoveredPromoCode?.code || null;
 
-    const activeDiscoveredCode = (status === PROMO_STATUS.VALID && isDiscoveredCode)
+    // The caps a discovered code carries apply while it is the applied code and
+    // the last thing heard about it was that it was good. An outstanding error
+    // means that answer no longer covers the current selection, which is what
+    // status reflects too, so the caps go with it. They deliberately survive a
+    // re-validation in flight: dropping them there would briefly uncap the
+    // stepper for a code that is still applied.
+    const activeDiscoveredCode = (isDiscoveredCode && promoCodeVerified === true && apiError == null)
         ? discoveredPromoCode : null;
 
     const perAccountLimit = activeDiscoveredCode?.quantity_per_account > 0
@@ -84,11 +131,14 @@ const usePromoCode = ({
         return caps.length > 0 ? Math.min(...caps) : null;
     }, [activeDiscoveredCode]);
 
-    // True when the user can safely advance from the ticket step
-    // (no in-flight promo apply/validate and no INVALID state to block on).
-    const isReady = status === PROMO_STATUS.IDLE
-        || status === PROMO_STATUS.SUGGESTED
-        || status === PROMO_STATUS.VALID;
+    // True when the user may attempt to advance from the ticket step: nothing
+    // in flight and no rejection. Ticket selection is enforced by its own gate.
+    //
+    // A failed request deliberately does not block here. It says nothing about
+    // the code, and leaving the gate shut would stop the user retrying the very
+    // thing that failed. Advancing re-validates and refuses to move on unless
+    // that succeeds, so an unverified code still cannot get through.
+    const isReady = !isBusy && !isInvalid;
 
     // --- Discovery: ticket qualification ---
 
@@ -109,22 +159,75 @@ const usePromoCode = ({
             const msg = /is not a valid code/i.test(firstStr)
                 ? T.translate('promo_code.invalid_code')
                 : firstStr;
-            setManualError(msg);
+            setApiError(msg);
         } else {
-            setManualError(T.translate('promo_code.validation_error'));
+            setApiError(T.translate('promo_code.validation_error'));
         }
     }, []);
 
     // --- Actions ---
 
+    // A ticket switch can leave an earlier validation in flight. Only the most
+    // recent attempt may report a result.
+    const latestValidation = useRef(0);
+
+    // The applied code as of the latest render. Read when a validation starts
+    // rather than closed over, because applying a code takes a round trip and
+    // the callback that starts the validation was created before it: closing
+    // over the prop would record the answer against the code being replaced.
+    const appliedCode = useRef(promoCode);
+    appliedCode.current = promoCode;
+
+    // Everything a validation in flight still owns: the right to answer, and
+    // the busy state it put the field into. Both have to go the moment the code
+    // it was asked about stops being the applied one, or the field stays locked
+    // behind a request nobody is waiting for and that request's answer lands on
+    // whatever the user did next.
+    //
+    // Advancing the counter is what withdraws the right to answer, so every
+    // caller that drops the recorded answer has to come through here.
+    const abandonValidation = useCallback(() => {
+        latestValidation.current += 1;
+        setValidatingCode(false);
+        setLastValidation(null);
+        setApiError(null);
+    }, []);
+
+
+    // Returns whether the caller may advance: true only when the code
+    // validated and no later attempt has replaced this one.
     const onRevalidate = useCallback(async (ticket, quantity) => {
-        setManualError(null);
+        const attempt = ++latestValidation.current;
+        // Which code this answer will be about, fixed now rather than when it
+        // lands, so a code applied afterwards cannot inherit it.
+        const code = appliedCode.current;
+        setApiError(null);
+        setValidatingCode(true);
         try {
-            await validatePromoCode({ id: ticket.id, ticketQuantity: quantity, sub_type: ticket.sub_type });
+            const result = await validatePromoCode({ id: ticket.id, ticketQuantity: quantity, sub_type: ticket.sub_type });
+            if (attempt !== latestValidation.current) return false;
+            // No code applied means no request went out, so nothing was decided
+            // and the caller has nothing to advance on.
+            if (!result) return false;
+            setLastValidation({ code, verified: true, allowsReassign: result.response?.allows_to_reassign ?? true });
             return true;
         } catch (e) {
+            if (attempt !== latestValidation.current) return false;
+            // Only these mean the API judged the code and turned it down.
+            // Every other failure decided nothing, so the previous answer, or
+            // the absence of one, stands and the error is surfaced instead.
+            if (isRejection(e)) {
+                setLastValidation({ code, verified: false, allowsReassign: true });
+                // How the code came to be applied is only worth revising when
+                // the API actually turned it down.
+                setIsAutoApplied(false);
+            }
             handleValidationError(e);
             return false;
+        } finally {
+            // A later attempt is still running and owns the flag, so leave it
+            // set for that one to clear.
+            if (attempt === latestValidation.current) setValidatingCode(false);
         }
     }, [validatePromoCode, handleValidationError]);
 
@@ -144,16 +247,13 @@ const usePromoCode = ({
     const tryAutoApply = useCallback(async (ticket) => {
         setIsAutoApplied(true);
         setApplyingCode(true);
+        abandonValidation();
         try {
             await applyPromoCode(discoveredPromoCode.code);
-            if (ticket) {
-                const valid = await onRevalidate(ticket, 1);
-                if (!valid) {
-                    setIsAutoApplied(false);
-                    return false;
-                }
-            }
-            return true;
+            // onRevalidate reports a failed validation by returning false
+            // rather than throwing, so its result has to be passed on or this
+            // reports success for a code that was never verified.
+            return ticket ? await onRevalidate(ticket, 1) : true;
         } catch (e) {
             setIsAutoApplied(false);
             handleValidationError(e);
@@ -173,7 +273,7 @@ const usePromoCode = ({
         // doesn't surface a stale suggestion.
         if (qualifies) setSuggestionActive(true);
         setSuggestionDismissed(false);
-        setManualError(null);
+        setApiError(null);
 
         // Manual (non-discovered) code is applied: re-validate for new ticket
         if (isApplied && !isDiscoveredCode) {
@@ -189,8 +289,7 @@ const usePromoCode = ({
         // ticket). Previously we silently removed the code on a non-qualifying
         // pick, which hid the rejection.
         if (isDiscoveredCode) {
-            const valid = await onRevalidate(ticket, 1);
-            if (!valid) setIsAutoApplied(false);
+            await onRevalidate(ticket, 1);
             return;
         }
 
@@ -217,8 +316,12 @@ const usePromoCode = ({
     }, [userRemovedAutoApply, ticketDataLoaded, discoveredPromoCode, discoveredPromoCodes, isApplied, tryAutoApply]);
 
     const onApply = useCallback(async (code, ticket, quantity) => {
-        setManualError(null);
         setApplyingCode(true);
+        // A different application of a code, even the same string, has not been
+        // judged yet, and applying takes a whole round trip before any new
+        // validation starts. Withdrawing the old one now stops it filling that
+        // window with an answer about the code it replaced.
+        abandonValidation();
         try {
             await applyPromoCode(code);
         } catch (e) {
@@ -226,17 +329,22 @@ const usePromoCode = ({
             setApplyingCode(false);
             return;
         }
-        if (ticket) {
-            await onRevalidate(ticket, quantity);
-        }
+        // This flag covers the apply request; revalidation has its own. Start
+        // revalidation before clearing this one so the two overlap: cleared
+        // first, there is a render with neither set and the field drops out of
+        // its busy state and back in. Clearing it only after awaiting the
+        // revalidation is worse still, because an aborted request never settles
+        // and the flag would never clear at all.
+        const revalidating = ticket ? onRevalidate(ticket, quantity) : null;
         setApplyingCode(false);
+        await revalidating;
     }, [applyPromoCode, onRevalidate, handleValidationError]);
 
     const onRemove = useCallback(() => {
         if (isAutoApplied || isDiscoveredCode) setUserRemovedAutoApply(true);
 
         setIsAutoApplied(false);
-        setManualError(null);
+        abandonValidation();
         setSuggestionDismissed(false);
         if (discoveredPromoCode) setSuggestionActive(true);
 
@@ -246,16 +354,18 @@ const usePromoCode = ({
     }, [isAutoApplied, isDiscoveredCode, discoveredPromoCode, removePromoCode, setFormPromoCode]);
 
     const onInputChange = useCallback((value) => {
-        setManualError(null);
+        setApiError(null);
         setSuggestionDismissed(value !== discoveredPromoCode?.code);
         setFormPromoCode(value);
     }, [discoveredPromoCode, setFormPromoCode]);
 
     return {
         state: {
-            // Status (what's happening with the applied/suggested code)
+            // Display status (pure projection of the signals below)
             status,
+            // Canonical signals
             isReady,
+            isSuggested,
             validationError,
             // True while applyPromoCode is in flight (covers the window where
             // promoCode is set but the refreshed ticketTypes haven't landed
@@ -263,8 +373,11 @@ const usePromoCode = ({
             // until this clears to avoid acting on a stale list.
             applyingCode,
 
+            // False only when the API said so for the applied code, so it
+            // defaults open while nothing has been decided.
+            allowsReassign,
+
             // Applied code origin
-            isDiscoveredCode,
             isAutoApplied,
 
             // Discovery / suggestion

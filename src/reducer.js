@@ -34,10 +34,6 @@ import {
     LOAD_PROFILE_DATA,
     SET_CURRENT_PROMO_CODE,
     CLEAR_CURRENT_PROMO_CODE,
-    VALIDATE_PROMO_CODE,
-    VALIDATE_PROMO_CODE_SUCCESS,
-    VALIDATE_PROMO_CODE_ERROR,
-    VALIDATE_PROMO_CODE_RATE_LIMITED,
     DISCOVER_PROMO_CODES_SUCCESS,
 } from './actions';
 
@@ -68,9 +64,6 @@ const DEFAULT_STATE = {
         userProfile: null,
     },
     promoCode: '',
-    promoCodeVerified: null,
-    promoCodeValidating: false,
-    promoCodeAllowsReassign: true,
     discoveredPromoCodes: [],
 };
 
@@ -102,8 +95,6 @@ const RegistrationLiteReducer = (state = DEFAULT_STATE, action) => {
                 taxTypes: [],
                 invitation: null,
                 promoCode: '',
-                promoCodeVerified: null,
-                promoCodeAllowsReassign: true,
                 discoveredPromoCodes: [],
                 passwordless: { ...DEFAULT_STATE.passwordless },
                 settings: {
@@ -152,10 +143,10 @@ const RegistrationLiteReducer = (state = DEFAULT_STATE, action) => {
             return { ...state, reservation: null }
         }
         case CLEAR_RESERVATION: {
-            return { ...state, reservation: null, promoCode: '', promoCodeVerified: null, promoCodeValidating: false, promoCodeAllowsReassign: true, discoveredPromoCodes: [] }
+            return { ...state, reservation: null, promoCode: '', discoveredPromoCodes: [] }
         }
         case PAY_RESERVATION: {
-            return { ...state, checkout: payload.response, reservation: null, userProfile: null, invitation: null, promoCode: '', promoCodeVerified: null, promoCodeValidating: false, promoCodeAllowsReassign: true, discoveredPromoCodes: [] };
+            return { ...state, checkout: payload.response, reservation: null, userProfile: null, invitation: null, promoCode: '', discoveredPromoCodes: [] };
         }
         case GET_MY_INVITATION: {
             return { ...state, invitation: payload.response };
@@ -164,24 +155,11 @@ const RegistrationLiteReducer = (state = DEFAULT_STATE, action) => {
             return { ...state, invitation: null };
         }
         case CLEAR_CURRENT_PROMO_CODE: {
-            return { ...state, promoCode: '', promoCodeVerified: null, promoCodeValidating: false, promoCodeAllowsReassign: true }
+            return { ...state, promoCode: '' }
         }
         case SET_CURRENT_PROMO_CODE:{
             const { currentPromoCode } = payload;
-            return { ...state, promoCode: currentPromoCode, promoCodeVerified: null, promoCodeValidating: false, promoCodeAllowsReassign: true }
-        }
-        case VALIDATE_PROMO_CODE: {
-            return { ...state, promoCodeValidating: true }
-        }
-        case VALIDATE_PROMO_CODE_SUCCESS: {
-            const { allows_to_reassign } = payload.response;
-            return { ...state, promoCodeVerified: true, promoCodeValidating: false, promoCodeAllowsReassign: allows_to_reassign ?? true }
-        }
-        case VALIDATE_PROMO_CODE_ERROR: {
-            return { ...state, promoCodeVerified: false, promoCodeValidating: false, promoCodeAllowsReassign: true }
-        }
-        case VALIDATE_PROMO_CODE_RATE_LIMITED: {
-            return { ...state, promoCodeValidating: false }
+            return { ...state, promoCode: currentPromoCode }
         }
         case DISCOVER_PROMO_CODES_SUCCESS: {
             return { ...state, discoveredPromoCodes: payload.response?.data || [] }

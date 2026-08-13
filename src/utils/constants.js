@@ -47,13 +47,16 @@ export const ERROR_TYPE_ERROR= 'error_type_error';
 export const ERROR_TYPE_VALIDATION = 'error_type_validation';
 export const ERROR_TYPE_PAYMENT = 'error_type_payment';
 
-// PROMO CODE STATUS
+// PROMO CODE DISPLAY STATUS
+// Derived presentation modes, projected in usePromoCode from the canonical
+// signals (isApplied / isBusy / isInvalid / isSuggested). Gate rendering on
+// these; gate behavior on the signals.
 export const PROMO_STATUS = {
     IDLE: 'idle',
     SUGGESTED: 'suggested',
-    APPLYING: 'applying',
-    VALIDATING: 'validating',
-    VALID: 'valid',
+    PROCESSING: 'processing',
+    UNVERIFIED: 'unverified',
+    APPLIED: 'applied',
     INVALID: 'invalid',
 };
 

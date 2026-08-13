@@ -54,7 +54,6 @@ export const CLEAR_CURRENT_PROMO_CODE = 'CLEAR_CURRENT_PROMO_CODE';
 export const VALIDATE_PROMO_CODE = 'VALIDATE_PROMO_CODE';
 export const VALIDATE_PROMO_CODE_SUCCESS = 'VALIDATE_PROMO_CODE_SUCCESS';
 export const VALIDATE_PROMO_CODE_ERROR = 'VALIDATE_PROMO_CODE_ERROR';
-export const VALIDATE_PROMO_CODE_RATE_LIMITED = 'VALIDATE_PROMO_CODE_RATE_LIMITED';
 export const DISCOVER_PROMO_CODES = 'DISCOVER_PROMO_CODES';
 export const DISCOVER_PROMO_CODES_SUCCESS = 'DISCOVER_PROMO_CODES_SUCCESS';
 
@@ -74,17 +73,11 @@ export const clearWidgetState = () => (dispatch) => {
 }
 
 const promoCodeErrorHandler = (err, res) => (dispatch, state) => {
-    // 404: promo code or ticket type not found
-    // 412: promo code invalid for this ticket type/qty
-    if (res && [404, 412].includes(res.statusCode)) {
-        dispatch(createAction(VALIDATE_PROMO_CODE_ERROR)({}));
-        return;
-    }
-    // 429: rate limited - transient, preserve current promo state
-    if (res && res.statusCode === 429) {
-        dispatch(createAction(VALIDATE_PROMO_CODE_RATE_LIMITED)({}));
-        return;
-    }
+    // 404 and 412 are the API judging the code, and 429 is transient. None of
+    // them is an auth or session problem, and the caller sees the rejection
+    // either way, so there is nothing to escalate.
+    if (res && [404, 412, 429].includes(res.statusCode)) return;
+
     return authErrorHandler(err, res)(dispatch, state);
 };
 

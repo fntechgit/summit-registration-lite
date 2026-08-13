@@ -186,7 +186,6 @@ const defaultReduxState = {
         },
         promoCode: '',
         promoCodeVerified: null,
-        promoCodeValidating: false,
         promoCodeAllowsReassign: true,
         discoveredPromoCodes: [],
         requestedTicketTypes: false,
