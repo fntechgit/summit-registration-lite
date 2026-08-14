@@ -1180,17 +1180,32 @@ describe('maxQuantityFromPromo', () => {
         expect(result.current.state.maxQuantityFromPromo).toBe(3);
     });
 
-    it('caps at 0 when quantity_available is 0 (sold out)', async () => {
+    it('treats quantity_available of 0 as unlimited, falling back to the per-account cap', async () => {
+        // The API treats quantity_available 0 as "no limit" (hasQuantityAvailable),
+        // so it must not zero the stepper; the per-account remaining is the only cap.
         const codes = [{
-            code: 'SOLDOUT',
+            code: 'UNLIMITEDUSES',
             auto_apply: true,
             allowed_ticket_types: [],
             quantity_per_account: 5,
             remaining_quantity_per_account: 3,
             quantity_available: 0,
         }];
-        const { result } = await renderVerified({ discoveredPromoCodes: codes, promoCode: 'SOLDOUT' });
-        expect(result.current.state.maxQuantityFromPromo).toBe(0);
+        const { result } = await renderVerified({ discoveredPromoCodes: codes, promoCode: 'UNLIMITEDUSES' });
+        expect(result.current.state.maxQuantityFromPromo).toBe(3);
+    });
+
+    it('null when quantity_available is 0 and there is no per-account cap', async () => {
+        const codes = [{
+            code: 'FULLYUNLIMITED',
+            auto_apply: true,
+            allowed_ticket_types: [],
+            quantity_per_account: 0,
+            remaining_quantity_per_account: null,
+            quantity_available: 0,
+        }];
+        const { result } = await renderVerified({ discoveredPromoCodes: codes, promoCode: 'FULLYUNLIMITED' });
+        expect(result.current.state.maxQuantityFromPromo).toBeNull();
     });
 
     it('uses only quantity_available when remaining_quantity_per_account is null', async () => {

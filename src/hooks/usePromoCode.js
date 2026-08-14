@@ -119,14 +119,16 @@ const usePromoCode = ({
         ? activeDiscoveredCode.remaining_quantity_per_account : null;
 
     // Tightest promo-code-level quantity cap for the stepper (discovered codes only).
-    // Both cap sources use `!= null` so a value of 0 (sold-out / no remaining) caps the
-    // stepper at 0 instead of being silently ignored.
+    // remaining_quantity_per_account is a real per-account count: null means no limit,
+    // and the API drops a code once the account exhausts it, so it is never 0 here.
+    // quantity_available is a total-use cap where 0 means "no limit" (matches the API's
+    // hasQuantityAvailable), so only a positive value is a real cap on the stepper.
     const maxQuantityFromPromo = useMemo(() => {
         if (!activeDiscoveredCode) return null;
         const caps = [];
         if (activeDiscoveredCode.remaining_quantity_per_account != null)
             caps.push(activeDiscoveredCode.remaining_quantity_per_account);
-        if (activeDiscoveredCode.quantity_available != null)
+        if (activeDiscoveredCode.quantity_available)
             caps.push(activeDiscoveredCode.quantity_available);
         return caps.length > 0 ? Math.min(...caps) : null;
     }, [activeDiscoveredCode]);
