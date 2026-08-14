@@ -31,6 +31,11 @@ describe('getTicketMaxQuantity', () => {
         expect(getTicketMaxQuantity(ticket)).toBe(4);
     });
 
+    it('defaults quantity_sold to 0 when the API omits it', () => {
+        const ticket = { quantity_2_sell: 100, max_quantity_per_order: 5 };
+        expect(getTicketMaxQuantity(ticket)).toBe(5);
+    });
+
     it('still returns <= 0 for a genuinely sold-out ticket', () => {
         // real cap reached: 100 to sell, 100 sold
         const ticket = { quantity_2_sell: 100, quantity_sold: 100, max_quantity_per_order: 5 };
