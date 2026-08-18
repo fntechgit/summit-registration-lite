@@ -131,7 +131,7 @@ const TicketTypeComponent = ({
     const ticketPerOrderLimit = useMemo(() => {
         if (!ticket) return null;
         const cap = ticket.max_quantity_per_order;
-        const inventory = (ticket.quantity_2_sell ?? Number.MAX_SAFE_INTEGER) - (ticket.quantity_sold ?? 0);
+        const inventory = (ticket.quantity_2_sell || Number.MAX_SAFE_INTEGER) - (ticket.quantity_sold ?? 0);
         return cap != null && cap > 0 && cap < inventory ? cap : null;
     }, [ticket]);
 
