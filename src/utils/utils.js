@@ -46,7 +46,20 @@ export const getCurrentUserLanguage = () => {
 };
 
 export const isEmptyString = (val) => {
-    return typeof val === 'string' && val.trim().length == 0;
+    // A missing value (null/undefined) counts as empty too, so callers can guard
+    // an optional override prop with a single `!isEmptyString(prop)` check.
+    return val == null || (typeof val === 'string' && val.trim().length == 0);
+}
+
+// Replaces {token} placeholders in a template string with values from `vars`.
+// Used so marketing-override copy supports the same {attendee}/{adv}/{button}
+// tokens the built-in i18n strings do. Unknown tokens are left untouched.
+export const interpolate = (template, vars = {}) => {
+    if (typeof template !== 'string') return template;
+    return Object.keys(vars).reduce(
+        (out, key) => out.split(`{${key}}`).join(vars[key]),
+        template
+    );
 }
 
 export const getTicketTaxes = (ticket, taxes) => {
