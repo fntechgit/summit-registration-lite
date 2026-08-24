@@ -16,7 +16,7 @@ import styles from './index.module.scss';
 import { epochToMomentTimeZone } from 'openstack-uicore-foundation/lib/utils/methods';
 import { useClockSelector } from 'openstack-uicore-foundation/lib/components/clock-context';
 import ContentLoader from 'react-content-loader';
-import { isEmptyString, ticketHasAccessLevel } from '../../utils/utils';
+import { isEmptyString, interpolate, ticketHasAccessLevel } from '../../utils/utils';
 import { VirtualAccessLevel } from '../../utils/constants';
 import T from 'i18n-react';
 import RawHTML from 'openstack-uicore-foundation/lib/components/raw-html';
@@ -106,8 +106,7 @@ const PurchaseComplete = ({
 
     let orderCompleteButtonText = (
         currentTicket && requireExtraQuestions ?
-            rest.hasOwnProperty('initialOrderCompleteButton') && !isEmptyString(rest.initialOrderCompleteButton)
-                && typeof rest.initialOrderCompleteButton !== 'undefined' ?
+            rest.hasOwnProperty('initialOrderCompleteButton') && !isEmptyString(rest.initialOrderCompleteButton) ?
                 rest.initialOrderCompleteButton
                 :
                 T.translate('purchase_complete_step.initial_order_complete_button')
@@ -119,28 +118,29 @@ const PurchaseComplete = ({
     );
 
     let orderCompleteTitle = (
-        rest.hasOwnProperty('orderCompleteTitle') && !isEmptyString(rest.orderCompleteTitle)
-            && typeof rest.orderCompleteTitle !== 'undefined' ?
+        rest.hasOwnProperty('orderCompleteTitle') && !isEmptyString(rest.orderCompleteTitle) ?
             rest.orderCompleteTitle
             :
             T.translate('purchase_complete_step.title')
     );
 
+    // Shared with both the i18n default and the marketing override so custom
+    // copy can use the same {attendee}/{adv}/{button} tokens.
+    const paragraphVars = {
+        attendee: `${attendeeIsSomeoneElse ? ` ${currentTicket.owner.email}` : 'you'}`,
+        adv: `${attendeeIsSomeoneElse ? `${currentTicket.owner.email}` : 'your'}`,
+        button: orderCompleteButtonText
+    };
+
     let orderComplete1stParagraph = (
         currentTicket ?
             !attendeeIsSomeoneElse && rest.hasOwnProperty('initialOrderComplete1stParagraph') && typeof rest.initialOrderComplete1stParagraph !== 'undefined' ?
-                rest.initialOrderComplete1stParagraph
+                interpolate(rest.initialOrderComplete1stParagraph, paragraphVars)
                 :
-                T.translate('purchase_complete_step.initial_order_complete_1st_paragraph_label',
-                    {
-                        attendee: `${attendeeIsSomeoneElse ? ` ${currentTicket.owner.email}` : 'you'}`,
-                        adv: `${attendeeIsSomeoneElse ? `${currentTicket.owner.email}` : 'your'}`,
-                        button: orderCompleteButtonText
-                    }
-                )
+                T.translate('purchase_complete_step.initial_order_complete_1st_paragraph_label', paragraphVars)
             :
             rest.hasOwnProperty('orderComplete1stParagraph') && typeof rest.orderComplete1stParagraph !== 'undefined' ?
-                rest.orderComplete1stParagraph
+                interpolate(rest.orderComplete1stParagraph, paragraphVars)
                 :
                 T.translate('purchase_complete_step.order_complete_1st_paragraph_label')
     );

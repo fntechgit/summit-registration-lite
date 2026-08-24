@@ -68,6 +68,29 @@ it('renders the active CTA path when the clock seed falls inside the summit wind
     expect(queryByText('View My Orders/Tickets')).toBeInTheDocument();
 });
 
+it('falls back to the default label when orderCompleteButton is passed as undefined', async () => {
+    mockClockNow = SUMMIT.start_date + 1000;
+    // A present-but-undefined prop (marketing key with no value) must not blank
+    // the button — isEmptyString(undefined) is false, so without the typeof
+    // guard the branch returned undefined and rendered an empty button.
+    const { queryByText } = await renderAndFlush({ orderCompleteButton: undefined });
+
+    expect(queryByText('View My Orders/Tickets')).toBeInTheDocument();
+});
+
+it('interpolates {button} in a marketing-override paragraph', async () => {
+    mockClockNow = SUMMIT.start_date + 1000;
+    // A custom paragraph that references the button by token must print the
+    // resolved label, not the literal {button}.
+    const { queryByText } = await renderAndFlush({
+        orderCompleteButton: 'Wrap Up',
+        initialOrderComplete1stParagraph: 'Please click the "{button}" button.',
+    });
+
+    expect(queryByText('Please click the "Wrap Up" button.')).toBeInTheDocument();
+    expect(queryByText(/\{button\}/)).not.toBeInTheDocument();
+});
+
 it('renders the "event will start" copy when the clock seed is outside the summit window', async () => {
     mockClockNow = SUMMIT.end_date + 1; // one second past end
     const { queryByText } = await renderAndFlush();
