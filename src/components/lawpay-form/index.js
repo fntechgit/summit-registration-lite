@@ -13,7 +13,7 @@
 
 import React, { useEffect, useState } from 'react';
 
-import { Dropdown } from 'openstack-uicore-foundation/lib/components'
+import Dropdown from 'openstack-uicore-foundation/lib/components/inputs/dropdown';
 
 import Swal from 'sweetalert2';
 
