@@ -21,10 +21,9 @@ import { VirtualAccessLevel } from '../../utils/constants';
 import T from 'i18n-react';
 import RawHTML from 'openstack-uicore-foundation/lib/components/raw-html';
 
-const CTAButton = ({ cta, clear, close, ...rest }) => {
+const CTAButton = ({ cta, close, ...rest }) => {
     return (
         <button className={`${styles.button} button`} onClick={() => {
-            clear();
             if (close)
                 close();
             cta();
@@ -50,6 +49,12 @@ const PurchaseComplete = ({
     useEffect(() => {
         onPurchaseComplete(checkout);
     }, []);
+
+    // Reset the widget when this screen unmounts (i.e. as a result of the CTA
+    // navigating away), not on the click itself. Clearing on click would reset
+    // the widget to its initial state while the redirect is still in flight,
+    // flashing that state before the destination renders.
+    useEffect(() => () => clearWidgetState(), []);
 
     const [requireExtraQuestions, setRequireExtraQuestions] = useState(null);
     const [extraQuestionsLoaded, setExtraQuestonsLoaded] = useState(false);
@@ -162,7 +167,7 @@ const PurchaseComplete = ({
 
     const getCTAButton = () => {
         return (
-            <CTAButton cta={currentTicket && requireExtraQuestions ? () => goToExtraQuestions(attendeeId) : goToMyOrders} clear={clearWidgetState} close={closeWidget}>
+            <CTAButton cta={currentTicket && requireExtraQuestions ? () => goToExtraQuestions(attendeeId) : goToMyOrders} close={closeWidget}>
                 {orderCompleteButtonText}
             </CTAButton>
         )
@@ -185,7 +190,7 @@ const PurchaseComplete = ({
                         </>
                         :
                         (_hasVirtualAccessLevel) ?
-                            <CTAButton cta={goToEvent} clear={clearWidgetState}
+                            <CTAButton cta={goToEvent}
                                 close={closeWidget}>{T.translate('purchase_complete_step.access_event_button')}</CTAButton>
                             :
                             <>

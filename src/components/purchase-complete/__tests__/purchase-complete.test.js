@@ -1,5 +1,5 @@
 import React from 'react';
-import { cleanup, render, act } from '@testing-library/react';
+import { cleanup, render, act, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
 
 // Settable clock seed (the `mock` prefix is the only identifier jest.mock
@@ -66,6 +66,21 @@ it('renders the active CTA path when the clock seed falls inside the summit wind
     // The CTA in the active path with no required extra questions falls through
     // to the My Orders/Tickets button.
     expect(queryByText('View My Orders/Tickets')).toBeInTheDocument();
+});
+
+it('defers clearing widget state until unmount, not on CTA click', async () => {
+    mockClockNow = SUMMIT.start_date + 1000;
+    const clearWidgetState = jest.fn();
+    const { getByText, unmount } = await renderAndFlush({ clearWidgetState });
+
+    // Clicking the CTA navigates away; it must NOT reset the widget first,
+    // or the completion screen flashes its initial state during the redirect.
+    fireEvent.click(getByText('View My Orders/Tickets'));
+    expect(clearWidgetState).not.toHaveBeenCalled();
+
+    // The reset happens when the completion screen unmounts (navigating away).
+    unmount();
+    expect(clearWidgetState).toHaveBeenCalledTimes(1);
 });
 
 it('renders the "event will start" copy when the clock seed is outside the summit window', async () => {
