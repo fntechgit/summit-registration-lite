@@ -36,4 +36,17 @@ describe('interpolate', () => {
     it('returns a non-string template unchanged', () => {
         expect(interpolate(undefined, { a: '1' })).toBe(undefined);
     });
+
+    it('does not substitute into a value it just inserted', () => {
+        // Values come from marketing overrides, so one that happens to contain
+        // a token must land as written rather than be expanded in turn.
+        expect(interpolate('{attendee} pays', { attendee: '{button}', button: 'Finish Now' }))
+            .toBe('{button} pays');
+    });
+
+    it('is unaffected by the shared regex across calls', () => {
+        const call = () => interpolate('{a} {a}', { a: 'x' });
+        expect(call()).toBe('x x');
+        expect(call()).toBe('x x');
+    });
 });
