@@ -63,13 +63,14 @@ const usePromoCode = ({
     const isDiscoveredCode = isApplied && discoveredPromoCode?.code === promoCode;
 
     // --- Canonical signals ---
-    // The raw Redux signals can overlap (e.g. a stale promoCodeVerified=false
-    // persists while a re-validation is in flight), so precedence is encoded
-    // here, once, rather than in each consumer.
+    // The raw signals can overlap (a rejection stays recorded while a
+    // re-validation runs), so precedence is encoded here, once, rather than
+    // in each consumer.
 
     // Something genuinely in flight: applying the code, validating it against
-    // a ticket, or waiting on the code-filtered ticket list with no settled
-    // answer to show in the meantime.
+    // a ticket, or -- for an anonymous user who applies a code while the
+    // initial ticket list is still loading -- waiting for that list, with no
+    // settled answer to show in the meantime.
     const isBusy = applyingCode || validatingCode
         || (isApplied && promoCodeVerified == null && !ticketDataLoaded);
 

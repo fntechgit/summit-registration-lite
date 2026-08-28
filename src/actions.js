@@ -53,7 +53,6 @@ export const SET_CURRENT_PROMO_CODE = 'SET_CURRENT_PROMO_CODE';
 export const CLEAR_CURRENT_PROMO_CODE = 'CLEAR_CURRENT_PROMO_CODE';
 export const VALIDATE_PROMO_CODE = 'VALIDATE_PROMO_CODE';
 export const VALIDATE_PROMO_CODE_SUCCESS = 'VALIDATE_PROMO_CODE_SUCCESS';
-export const VALIDATE_PROMO_CODE_ERROR = 'VALIDATE_PROMO_CODE_ERROR';
 export const DISCOVER_PROMO_CODES = 'DISCOVER_PROMO_CODES';
 export const DISCOVER_PROMO_CODES_SUCCESS = 'DISCOVER_PROMO_CODES_SUCCESS';
 
@@ -230,9 +229,11 @@ export const removePromoCode = () => (dispatch, getState) => {
 }
 
 /**
- * Validates promo code for a specific ticket selection.
- * Stores allows_to_reassign in Redux state.
- * Returns response or throws error - caller handles UI concerns.
+ * Validates the applied promo code for a ticket selection. Resolves with the
+ * API response (usePromoCode reads allows_to_reassign from it) or rejects;
+ * the caller owns all UI concerns. The two actions dispatched below reach no
+ * reducer; they are devtools breadcrumbs, and getRequest requires a receive
+ * action to deliver the response.
  */
 export const validatePromoCode = (ticketData) => async (dispatch, getState, { apiBaseUrl, getAccessToken }) => {
     const { registrationLiteState: { settings: { summitId }, promoCode: currentPromoCode } } = getState();
