@@ -64,9 +64,7 @@ const stripeErrorCodeMap = {
 };
 
 
-// Name of the slot the PaymentElement is projected into when this form is mounted
-// inside a shadow root. Scoped to each shadow root, so multiple registration
-// widgets on one page don't collide.
+// Slot names are scoped to their shadow root, so widgets on one page don't collide.
 const PAYMENT_SLOT = 'stripe-payment';
 
 const StripeForm = ({ reservation, payTicket, userProfile, provider, hidePostalCode, stripeReturnUrl, onError }) => {
@@ -74,17 +72,9 @@ const StripeForm = ({ reservation, payTicket, userProfile, provider, hidePostalC
     const elements = useElements();
     const [paymentElement, setPaymentElement] = useState(null);
 
-    // Stripe Elements cannot be mounted inside a shadow root — Stripe reaches its
-    // iframes through window.frames, which can't see into shadow trees. Stripe's
-    // own recommended workaround is to keep the Element in the light DOM and
-    // "punch a hole" through the shadow with a <slot> (stripe/stripe-js#143). When
-    // this form is shadow-mounted, render the PaymentElement into a light-DOM node
-    // that is slotted back into the form: it stays in the light DOM (Stripe accepts
-    // it) but displays in-flow at the slot position. `slotHost` is undefined while
-    // detecting, null when already in the light DOM (mount inline), or the shadow
-    // host element when shadow-mounted. A callback ref resolves it when the form
-    // node attaches — during commit, before paint — so the PaymentElement is only
-    // rendered once the context is known and never attempts an in-shadow mount.
+    // Stripe cannot see into a shadow tree, so when shadow-mounted the Element is
+    // kept in the light DOM and slotted back in flow (stripe/stripe-js#143).
+    // undefined while detecting, null in the light DOM, else the shadow host.
     const [slotHost, setSlotHost] = useState(undefined);
     const detectSlotHost = useCallback((node) => {
         if (!node) return;
@@ -180,22 +170,23 @@ const StripeForm = ({ reservation, payTicket, userProfile, provider, hidePostalC
         }
     }
 
-    const paymentEl = <PaymentElement options={paymentOptions} />;
+    const renderPaymentElement = () => {
+        const paymentEl = <PaymentElement options={paymentOptions} />;
+        // Wait for the callback ref: mounting before the context is known would
+        // put the Element in the shadow tree, out of Stripe's reach.
+        if (slotHost === undefined) return null;
+        if (!slotHost) return paymentEl;
+        return (
+            <>
+                <slot name={PAYMENT_SLOT} />
+                {createPortal(<div slot={PAYMENT_SLOT}>{paymentEl}</div>, slotHost)}
+            </>
+        );
+    };
 
     return (
         <form ref={detectSlotHost} className={styles.form} id="payment-form" onSubmit={handleSubmit(onSubmit)}>
-            {slotHost === undefined
-                ? null
-                : slotHost
-                    // Shadow-mounted: keep the Element in the light DOM, slotted in-flow.
-                    ? (
-                        <>
-                            <slot name={PAYMENT_SLOT} />
-                            {createPortal(<div slot={PAYMENT_SLOT}>{paymentEl}</div>, slotHost)}
-                        </>
-                    )
-                    // Already in the light DOM: mount inline as before.
-                    : paymentEl}
+            {renderPaymentElement()}
         </form>
     )
 };
