@@ -99,3 +99,25 @@ it('renders the "event will start" copy when the clock seed is outside the summi
     // CTA still renders in the inactive branch (different layout).
     expect(queryByText('View My Orders/Tickets')).toBeInTheDocument();
 });
+
+// Marketing overrides arrive unfiltered from the embedder, so a key present with
+// no usable value must fall back to the default rather than render nothing.
+describe.each([null, ''])('override paragraph present but empty (%p)', (emptyValue) => {
+    it('falls back to the default 1st paragraph', async () => {
+        mockClockNow = SUMMIT.start_date + 1000;
+        const { queryByText } = await renderAndFlush({
+            initialOrderComplete1stParagraph: emptyValue,
+        });
+
+        expect(queryByText(/A ticket has been assigned to/i)).toBeInTheDocument();
+    });
+
+    it('falls back to the default 2nd paragraph', async () => {
+        mockClockNow = SUMMIT.start_date + 1000;
+        const { queryByText } = await renderAndFlush({
+            initialOrderComplete2ndParagraph: emptyValue,
+        });
+
+        expect(queryByText(/If you wish to transfer your assigned ticket/i)).toBeInTheDocument();
+    });
+});
