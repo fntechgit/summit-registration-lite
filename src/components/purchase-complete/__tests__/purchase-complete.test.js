@@ -68,6 +68,29 @@ it('renders the active CTA path when the clock seed falls inside the summit wind
     expect(queryByText('View My Orders/Tickets')).toBeInTheDocument();
 });
 
+it('falls back to the default label when orderCompleteButton is passed as undefined', async () => {
+    mockClockNow = SUMMIT.start_date + 1000;
+    // A present-but-undefined prop (marketing key with no value) must not blank
+    // the button — isEmptyString(undefined) is false, so without the typeof
+    // guard the branch returned undefined and rendered an empty button.
+    const { queryByText } = await renderAndFlush({ orderCompleteButton: undefined });
+
+    expect(queryByText('View My Orders/Tickets')).toBeInTheDocument();
+});
+
+it('interpolates {button} in a marketing-override paragraph', async () => {
+    mockClockNow = SUMMIT.start_date + 1000;
+    // A custom paragraph that references the button by token must print the
+    // resolved label, not the literal {button}.
+    const { queryByText } = await renderAndFlush({
+        orderCompleteButton: 'Wrap Up',
+        initialOrderComplete1stParagraph: 'Please click the "{button}" button.',
+    });
+
+    expect(queryByText('Please click the "Wrap Up" button.')).toBeInTheDocument();
+    expect(queryByText(/\{button\}/)).not.toBeInTheDocument();
+});
+
 it('renders the "event will start" copy when the clock seed is outside the summit window', async () => {
     mockClockNow = SUMMIT.end_date + 1; // one second past end
     const { queryByText } = await renderAndFlush();
@@ -75,4 +98,26 @@ it('renders the "event will start" copy when the clock seed is outside the summi
     expect(queryByText(/The event will start on January 1 at 09:00 AM UTC/)).toBeInTheDocument();
     // CTA still renders in the inactive branch (different layout).
     expect(queryByText('View My Orders/Tickets')).toBeInTheDocument();
+});
+
+// Marketing overrides arrive unfiltered from the embedder, so a key present with
+// no usable value must fall back to the default rather than render nothing.
+describe.each([null, ''])('override paragraph present but empty (%p)', (emptyValue) => {
+    it('falls back to the default 1st paragraph', async () => {
+        mockClockNow = SUMMIT.start_date + 1000;
+        const { queryByText } = await renderAndFlush({
+            initialOrderComplete1stParagraph: emptyValue,
+        });
+
+        expect(queryByText(/A ticket has been assigned to/i)).toBeInTheDocument();
+    });
+
+    it('falls back to the default 2nd paragraph', async () => {
+        mockClockNow = SUMMIT.start_date + 1000;
+        const { queryByText } = await renderAndFlush({
+            initialOrderComplete2ndParagraph: emptyValue,
+        });
+
+        expect(queryByText(/If you wish to transfer your assigned ticket/i)).toBeInTheDocument();
+    });
 });
