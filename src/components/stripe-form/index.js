@@ -11,7 +11,8 @@
  * limitations under the License.
  **/
 
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { useForm } from 'react-hook-form';
 
 import {
@@ -63,10 +64,23 @@ const stripeErrorCodeMap = {
 };
 
 
+// Slot names are scoped to their shadow root, so widgets on one page don't collide.
+const PAYMENT_SLOT = 'stripe-payment';
+
 const StripeForm = ({ reservation, payTicket, userProfile, provider, hidePostalCode, stripeReturnUrl, onError }) => {
     const stripe = useStripe();
     const elements = useElements();
     const [paymentElement, setPaymentElement] = useState(null);
+
+    // Stripe cannot see into a shadow tree, so when shadow-mounted the Element is
+    // kept in the light DOM and slotted back in flow (stripe/stripe-js#143).
+    // undefined while detecting, null in the light DOM, else the shadow host.
+    const [slotHost, setSlotHost] = useState(undefined);
+    const detectSlotHost = useCallback((node) => {
+        if (!node) return;
+        const rootNode = node.getRootNode();
+        setSlotHost(rootNode instanceof ShadowRoot ? rootNode.host : null);
+    }, []);
 
     useEffect(() => {
         if (elements) {
@@ -156,9 +170,23 @@ const StripeForm = ({ reservation, payTicket, userProfile, provider, hidePostalC
         }
     }
 
+    const renderPaymentElement = () => {
+        const paymentEl = <PaymentElement options={paymentOptions} />;
+        // Wait for the callback ref: mounting before the context is known would
+        // put the Element in the shadow tree, out of Stripe's reach.
+        if (slotHost === undefined) return null;
+        if (!slotHost) return paymentEl;
+        return (
+            <>
+                <slot name={PAYMENT_SLOT} />
+                {createPortal(<div slot={PAYMENT_SLOT}>{paymentEl}</div>, slotHost)}
+            </>
+        );
+    };
+
     return (
-        <form className={styles.form} id="payment-form" onSubmit={handleSubmit(onSubmit)}>
-            <PaymentElement options={paymentOptions} />
+        <form ref={detectSlotHost} className={styles.form} id="payment-form" onSubmit={handleSubmit(onSubmit)}>
+            {renderPaymentElement()}
         </form>
     )
 };
