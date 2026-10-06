@@ -247,7 +247,7 @@ export const validatePromoCode = (ticketData) => async (dispatch, getState, { ap
 
     const access_token = await getAccessToken();
 
-    let apiUrl = URI(`${apiBaseUrl}/api/v1/summits/${summitId}/promo-codes/${currentPromoCode}/apply`);
+    let apiUrl = URI(`${apiBaseUrl}/api/v1/summits/${summitId}/promo-codes/${encodeURIComponent(currentPromoCode)}/apply`);
     apiUrl.addQuery('access_token', access_token);
     apiUrl.addQuery('filter[]', `ticket_type_id==${id}`);
     apiUrl.addQuery('filter[]', `ticket_type_qty==${ticketQuantity}`);
