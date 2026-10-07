@@ -1,18 +1,19 @@
 import React from 'react';
-import { render } from '@testing-library/react';
+import { render, fireEvent, waitFor } from '@testing-library/react';
 
 import StripeForm from '../index';
 
 // Stripe's own hooks reach for a real Elements context and a live iframe, so the
-// SDK is stubbed down to the one thing these tests care about: where in the tree
-// the PaymentElement ends up.
+// SDK is stubbed down to what these tests care about: where in the tree the
+// PaymentElement ends up, and an elements.submit() that never settles, which holds
+// a payment at the point where a second click on Pay Now could start another.
 // Every DOM node the mock is ever mounted into, so a test can assert the Element
 // was never attached inside a shadow tree, not even for one render.
 const mountRoots = [];
 
 jest.mock('@stripe/react-stripe-js', () => ({
     useStripe: () => ({}),
-    useElements: () => ({ getElement: () => null }),
+    useElements: () => ({ getElement: () => null, submit: () => new Promise(() => {}) }),
     PaymentElement: () => (
         <div
             data-testid="payment-element"
@@ -82,5 +83,28 @@ describe('StripeForm shadow DOM handling', () => {
 
         expect(mountRoots.length).toBeGreaterThan(0);
         expect(mountRoots).not.toContain(shadowRoot);
+    });
+
+    it('disables the Pay Now button on submit when shadow-mounted', async () => {
+        const { shadowRoot } = renderInShadowRoot();
+        // The button bar renders Pay Now outside the form, in the same shadow tree.
+        const button = document.createElement('button');
+        button.id = 'payment-form-btn';
+        shadowRoot.appendChild(button);
+
+        fireEvent.submit(shadowRoot.getElementById('payment-form'));
+
+        await waitFor(() => expect(button.disabled).toBe(true));
+    });
+
+    it('disables the Pay Now button on submit in the light DOM', async () => {
+        const { container } = render(<StripeForm {...props} />);
+        const button = document.createElement('button');
+        button.id = 'payment-form-btn';
+        document.body.appendChild(button);
+
+        fireEvent.submit(container.querySelector('form#payment-form'));
+
+        await waitFor(() => expect(button.disabled).toBe(true));
     });
 });

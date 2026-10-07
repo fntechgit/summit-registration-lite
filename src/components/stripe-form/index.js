@@ -11,7 +11,7 @@
  * limitations under the License.
  **/
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useForm } from 'react-hook-form';
 
@@ -76,9 +76,12 @@ const StripeForm = ({ reservation, payTicket, userProfile, provider, hidePostalC
     // kept in the light DOM and slotted back in flow (stripe/stripe-js#143).
     // undefined while detecting, null in the light DOM, else the shadow host.
     const [slotHost, setSlotHost] = useState(undefined);
+    // The form's root node: the document, or the shadow root when shadow-mounted.
+    const rootNodeRef = useRef(null);
     const detectSlotHost = useCallback((node) => {
         if (!node) return;
         const rootNode = node.getRootNode();
+        rootNodeRef.current = rootNode;
         setSlotHost(rootNode instanceof ShadowRoot ? rootNode.host : null);
     }, []);
 
@@ -98,7 +101,7 @@ const StripeForm = ({ reservation, payTicket, userProfile, provider, hidePostalC
             return;
         }
 
-        const btn = document.getElementById('payment-form-btn');
+        const btn = rootNodeRef.current.getElementById('payment-form-btn');
         if (btn) btn.disabled = true;
 
         // Trigger form validation and wallet collection
