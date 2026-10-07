@@ -11,7 +11,7 @@
  * limitations under the License.
  **/
 
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useForm } from 'react-hook-form';
 
@@ -72,18 +72,15 @@ const StripeForm = ({ reservation, payTicket, userProfile, provider, hidePostalC
     const elements = useElements();
     const [paymentElement, setPaymentElement] = useState(null);
 
-    // Stripe cannot see into a shadow tree, so when shadow-mounted the Element is
-    // kept in the light DOM and slotted back in flow (stripe/stripe-js#143).
-    // undefined while detecting, null in the light DOM, else the shadow host.
-    const [slotHost, setSlotHost] = useState(undefined);
-    // The form's root node: the document, or the shadow root when shadow-mounted.
-    const rootNodeRef = useRef(null);
-    const detectSlotHost = useCallback((node) => {
-        if (!node) return;
-        const rootNode = node.getRootNode();
-        rootNodeRef.current = rootNode;
-        setSlotHost(rootNode instanceof ShadowRoot ? rootNode.host : null);
+    // The form's root node: undefined until the form mounts, then the document,
+    // or the shadow root when shadow-mounted.
+    const [rootNode, setRootNode] = useState(undefined);
+    const detectRootNode = useCallback((node) => {
+        if (node) setRootNode(node.getRootNode());
     }, []);
+    // Stripe cannot see into a shadow tree, so there the Element goes on the shadow
+    // host and is slotted back in flow (stripe/stripe-js#143). Only a shadow root has a host.
+    const slotHost = rootNode?.host ?? null;
 
     useEffect(() => {
         if (elements) {
@@ -101,7 +98,7 @@ const StripeForm = ({ reservation, payTicket, userProfile, provider, hidePostalC
             return;
         }
 
-        const btn = rootNodeRef.current.getElementById('payment-form-btn');
+        const btn = rootNode.getElementById('payment-form-btn');
         if (btn) btn.disabled = true;
 
         // Trigger form validation and wallet collection
@@ -174,10 +171,10 @@ const StripeForm = ({ reservation, payTicket, userProfile, provider, hidePostalC
     }
 
     const renderPaymentElement = () => {
-        const paymentEl = <PaymentElement options={paymentOptions} />;
         // Wait for the callback ref: mounting before the context is known would
         // put the Element in the shadow tree, out of Stripe's reach.
-        if (slotHost === undefined) return null;
+        if (rootNode === undefined) return null;
+        const paymentEl = <PaymentElement options={paymentOptions} />;
         if (!slotHost) return paymentEl;
         return (
             <>
@@ -188,7 +185,7 @@ const StripeForm = ({ reservation, payTicket, userProfile, provider, hidePostalC
     };
 
     return (
-        <form ref={detectSlotHost} className={styles.form} id="payment-form" onSubmit={handleSubmit(onSubmit)}>
+        <form ref={detectRootNode} className={styles.form} id="payment-form" onSubmit={handleSubmit(onSubmit)}>
             {renderPaymentElement()}
         </form>
     )
