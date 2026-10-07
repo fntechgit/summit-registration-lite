@@ -11,7 +11,8 @@
  * limitations under the License.
  **/
 
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { useForm } from 'react-hook-form';
 
 import {
@@ -63,10 +64,23 @@ const stripeErrorCodeMap = {
 };
 
 
+// Slot names are scoped to their shadow root, so widgets on one page don't collide.
+const PAYMENT_SLOT = 'stripe-payment';
+
 const StripeForm = ({ reservation, payTicket, userProfile, provider, hidePostalCode, stripeReturnUrl, onError }) => {
     const stripe = useStripe();
     const elements = useElements();
     const [paymentElement, setPaymentElement] = useState(null);
+
+    // The form's root node: undefined until the form mounts, then the document,
+    // or the shadow root when shadow-mounted.
+    const [rootNode, setRootNode] = useState(undefined);
+    const detectRootNode = useCallback((node) => {
+        if (node) setRootNode(node.getRootNode());
+    }, []);
+    // Stripe cannot see into a shadow tree, so there the Element goes on the shadow
+    // host and is slotted back in flow (stripe/stripe-js#143). Only a shadow root has a host.
+    const slotHost = rootNode?.host ?? null;
 
     useEffect(() => {
         if (elements) {
@@ -84,7 +98,7 @@ const StripeForm = ({ reservation, payTicket, userProfile, provider, hidePostalC
             return;
         }
 
-        const btn = document.getElementById('payment-form-btn');
+        const btn = rootNode.getElementById('payment-form-btn');
         if (btn) btn.disabled = true;
 
         // Trigger form validation and wallet collection
@@ -156,9 +170,23 @@ const StripeForm = ({ reservation, payTicket, userProfile, provider, hidePostalC
         }
     }
 
+    const renderPaymentElement = () => {
+        // Wait for the callback ref: mounting before the context is known would
+        // put the Element in the shadow tree, out of Stripe's reach.
+        if (rootNode === undefined) return null;
+        const paymentEl = <PaymentElement options={paymentOptions} />;
+        if (!slotHost) return paymentEl;
+        return (
+            <>
+                <slot name={PAYMENT_SLOT} />
+                {createPortal(<div slot={PAYMENT_SLOT}>{paymentEl}</div>, slotHost)}
+            </>
+        );
+    };
+
     return (
-        <form className={styles.form} id="payment-form" onSubmit={handleSubmit(onSubmit)}>
-            <PaymentElement options={paymentOptions} />
+        <form ref={detectRootNode} className={styles.form} id="payment-form" onSubmit={handleSubmit(onSubmit)}>
+            {renderPaymentElement()}
         </form>
     )
 };
