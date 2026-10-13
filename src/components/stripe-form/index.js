@@ -12,6 +12,7 @@
  **/
 
 import React, { useEffect, useState } from 'react';
+import T from 'i18n-react';
 import { useForm } from 'react-hook-form';
 
 import {
@@ -63,14 +64,19 @@ const stripeErrorCodeMap = {
 };
 
 
-const StripeForm = ({ reservation, payTicket, userProfile, provider, hidePostalCode, stripeReturnUrl, onError }) => {
+const StripeForm = ({ reservation, payTicket, userProfile, provider, hidePostalCode, stripeReturnUrl, onError, onStripeReady }) => {
     const stripe = useStripe();
     const elements = useElements();
     const [paymentElement, setPaymentElement] = useState(null);
 
     useEffect(() => {
         if (elements) {
-            setPaymentElement(elements.getElement('payment'));
+            const pe = elements.getElement("payment");
+            setPaymentElement(pe);
+
+            if (pe) {
+                pe.on("ready", () => onStripeReady());
+            }
         }
     }, [elements]);
 
