@@ -63,7 +63,7 @@ const TicketDropdownComponent = ({ selectedTicket, ticketTypes, taxTypes, onTick
                         const isTicketSoldOut = maxQuantity < 1;
 
                         return (
-                            <div key={t.id} className={isTicketSoldOut ? styles.soldOut : ''} onClick={() => {
+                            <div key={`${t.id}-${t.sub_type}`} className={isTicketSoldOut ? styles.soldOut : ''} onClick={() => {
                                 if (isTicketSoldOut) return;
                                 ticketSelect(t);
                             }}>

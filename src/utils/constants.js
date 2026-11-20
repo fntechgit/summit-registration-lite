@@ -26,6 +26,9 @@ export const TICKET_OWNER_SOMEONE = 'someoneElse';
 export const TICKET_OWNER_UNASSIGNED = 'unassigned';
 
 export const TICKET_TYPE_SUBTYPE_PREPAID = 'PrePaid';
+// Only ever returned while a live promo code unlocks the type.
+export const TICKET_AUDIENCE_WITH_PROMO_CODE = 'WithPromoCode';
+
 export const ORDER_STATUS_PAID = 'Paid';
 export const ORDER_PAYMENT_METHOD_OFFLINE = 'Offline';
 

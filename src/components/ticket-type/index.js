@@ -11,7 +11,7 @@
  * limitations under the License.
  **/
 import RawHTML from 'openstack-uicore-foundation/lib/components/raw-html'
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useSpring, config, animated } from "react-spring";
 import { useMeasure } from "react-use";
 import T from 'i18n-react';
@@ -21,11 +21,11 @@ import { isInPersonTicketType } from "../../actions";
 import ReactTooltip from 'react-tooltip';
 import { formatCurrency } from '../../helpers';
 import { getTicketMaxQuantity } from '../../helpers';
-import { avoidTooltipOverflow, getTicketCost, getTicketTaxes, isPrePaidOrder } from '../../utils/utils';
+import { avoidTooltipOverflow, getTicketCost, getTicketTaxes, hasDiscountApplied, isPrePaidOrder } from '../../utils/utils';
 
 import PromoCodeInput from '../promocode-input';
 import TicketNotice from '../ticket-notice';
-import { VIEW_ITEM } from '../../utils/constants';
+import { TICKET_AUDIENCE_WITH_PROMO_CODE, TICKET_TYPE_SUBTYPE_PREPAID, VIEW_ITEM } from '../../utils/constants';
 
 const TicketTypeComponent = ({
     allowedTicketTypes,
@@ -47,6 +47,10 @@ const TicketTypeComponent = ({
     const { state: promoState = {}, actions: promoActions = {} } = promo;
 
     const [ticket, setTicket] = useState(null);
+    // The code whose pre-selection has already been made. Applying a code
+    // decides once; the catalog is rebuilt whenever any sales window opens or
+    // closes, and deciding again then would overrule what the user chose after.
+    const preSelectedFor = useRef(null);
     const [quantity, setQuantity] = useState(1);
 
     const minQuantity = 1;
@@ -85,27 +89,61 @@ const TicketTypeComponent = ({
         changeForm({ ticketType: ticket, ticketQuantity: quantity, ticketSelectionValid });
     }, [ticket, quantity, maxQuantity])
 
+    // A type on public sale that a prepaid code also claims comes back twice,
+    // as the regular offer and the prepaid one. Identity is the pair.
+    const isSameOffer = (a, b) => a?.id === b?.id && a?.sub_type === b?.sub_type;
+
+    // Three marks the catalog cannot carry unless a code produced them. The
+    // subtype is safe to key on because it is derived, not stored: nothing but
+    // the prepaid decorator can report one.
+    const isAffectedByPromoCode = (t) =>
+        t.audience === TICKET_AUDIENCE_WITH_PROMO_CODE
+        || t.sub_type === TICKET_TYPE_SUBTYPE_PREPAID
+        || hasDiscountApplied(t);
+
+    // A discovered code names the tickets it applies to; a typed one names
+    // nothing, so what it did to the catalog answers instead. Discovery runs for
+    // every logged in user, so the two must not answer for each other, or a
+    // typed code pre-selects for a code nobody applied.
+    //
+    // Only date-filtered tickets: the dropdown cannot show one outside its sales
+    // window, so selecting it would strand the user.
+    const isDiscoveredCode = promoCode === promoState.suggestedCode;
+
+    const ticketToPreSelect = () => {
+        const onlyOne = allowedTicketTypes.length === 1 ? allowedTicketTypes[0] : null;
+
+        if (isDiscoveredCode)
+            return allowedTicketTypes.find(promoState.isCodeValidForTicket) || onlyOne;
+
+        const affected = allowedTicketTypes.filter(isAffectedByPromoCode);
+        return affected.length === 1 ? affected[0] : onlyOne;
+    };
+
     useEffect(() => {
         // When promo code changes, the API returns updated ticket types with/without discount.
         // Sync the selected ticket with the refreshed data.
-        if (!ticket) {
-            // Auto-select after a promo code is applied. Defer while applyingCode is
-            // true: the reducer sets promoCode synchronously before the refreshed
-            // ticketTypes land, so acting now would auto-select from a stale list.
-            // Once apply settles, prefer the first ticket the discovered code applies
-            // to (so per-ticket validation succeeds); fall back to the only ticket
-            // when there's a single option.
-            // Scan allowedTicketTypes (date-filtered) so we never auto-select
-            // a ticket the user couldn't have picked themselves from the dropdown.
-            if (promoCode && !promoState.applyingCode && allowedTicketTypes.length > 0) {
-                const isValid = promoState.isCodeValidForTicket;
-                const qualifying = isValid && allowedTicketTypes.find(isValid);
-                const toSelect = qualifying || (allowedTicketTypes.length === 1 ? allowedTicketTypes[0] : null);
-                if (toSelect) handleTicketChange(toSelect);
+        // Defer while applyingCode is true: promoCode is set in the store before
+        // the refreshed ticketTypes land, so deciding now would read a stale
+        // catalog.
+        if (!promoCode) preSelectedFor.current = null;
+
+        if (promoCode && !promoState.applyingCode && allowedTicketTypes.length > 0
+            && preSelectedFor.current !== promoCode) {
+            preSelectedFor.current = promoCode;
+
+            // A typed code moves the selection even when one was already made.
+            // A discovered code takes the first of the several it names, so it
+            // only decides while nothing is chosen.
+            const toSelect = ticketToPreSelect();
+            const mayMove = !ticket || !isDiscoveredCode;
+            if (toSelect && mayMove && !isSameOffer(toSelect, ticket)) {
+                handleTicketChange(toSelect);
+                return;
             }
-            return;
         }
-        const updatedCurrentTicket = originalTicketTypes.find(t => t?.id === ticket.id);
+        if (!ticket) return;
+        const updatedCurrentTicket = originalTicketTypes.find(t => isSameOffer(t, ticket));
         if (updatedCurrentTicket) {
             changeForm({ ticketType: updatedCurrentTicket })
             setTicket(updatedCurrentTicket);
