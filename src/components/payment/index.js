@@ -21,7 +21,7 @@ import { Helmet } from 'react-helmet';
 import { PAYMENT_PROVIDER_LAWPAY, PAYMENT_PROVIDER_STRIPE } from '../../utils/constants';
 
 
-const PaymentComponent = ({ isActive, userProfile, reservation, payTicket, providerKey, provider, providerOptions, successfulPaymentReturnUrl, timestamp, hidePostalCode, onError, onStripeReady }) => {
+const PaymentComponent = ({ isActive, userProfile, reservation, payTicket, providerKey, provider, providerOptions, successfulPaymentReturnUrl, timestamp, hidePostalCode, onError, onPaymentReady }) => {
 
     const [ref, { height }] = useMeasure();
 
@@ -55,7 +55,7 @@ const PaymentComponent = ({ isActive, userProfile, reservation, payTicket, provi
                                     stripeReturnUrl={successfulPaymentReturnUrl}
                                     hidePostalCode={hidePostalCode}
                                     onError={onError}
-                                    onStripeReady={onStripeReady}
+                                    onPaymentReady={onPaymentReady}
                                 />
                             }
                             {provider === PAYMENT_PROVIDER_LAWPAY &&
@@ -71,6 +71,7 @@ const PaymentComponent = ({ isActive, userProfile, reservation, payTicket, provi
                                         providerKey={providerKey}
                                         timestamp={timestamp}
                                         onError={onError}
+                                        onPaymentReady={onPaymentReady}
                                     />
                                 </>
                             }

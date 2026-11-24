@@ -67,7 +67,7 @@ const stripeErrorCodeMap = {
 // Slot names are scoped to their shadow root, so widgets on one page don't collide.
 const PAYMENT_SLOT = 'stripe-payment';
 
-const StripeForm = ({ reservation, payTicket, userProfile, provider, hidePostalCode, stripeReturnUrl, onError, onStripeReady }) => {
+const StripeForm = ({ reservation, payTicket, userProfile, provider, hidePostalCode, stripeReturnUrl, onError, onPaymentReady }) => {
     const stripe = useStripe();
     const elements = useElements();
     const [paymentElement, setPaymentElement] = useState(null);
@@ -88,7 +88,7 @@ const StripeForm = ({ reservation, payTicket, userProfile, provider, hidePostalC
             setPaymentElement(pe);
 
             if (pe) {
-                pe.on("ready", () => onStripeReady());
+                pe.on("ready", () => onPaymentReady());
             }
         }
     }, [elements]);

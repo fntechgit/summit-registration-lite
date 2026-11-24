@@ -43,7 +43,7 @@ import {
     applyPromoCode,
     validatePromoCode,
     discoverPromoCodes,
-    setStripeReady,
+    setPaymentReady,
     startWidgetLoading,
     stopWidgetLoading
 } from '../../actions';
@@ -170,8 +170,8 @@ const RegistrationFormContent = (
         applyPromoCode,
         validatePromoCode,
         discoverPromoCodes,
-        setStripeReady,
-        stripeReady,
+        setPaymentReady,
+        paymentReady,
         startWidgetLoading,
         stopWidgetLoading,
         closeHandlerRef,
@@ -511,7 +511,7 @@ const RegistrationFormContent = (
                                         providerOptions={providerOptions}
                                         hidePostalCode={hidePostalCode}
                                         onError={onError}
-                                        onStripeReady={setStripeReady}
+                                        onPaymentReady={setPaymentReady}
                                         successfulPaymentReturnUrl={successfulPaymentReturnUrl}
                                     />
                                 </div>
@@ -525,7 +525,7 @@ const RegistrationFormContent = (
                                 removeReservedTicket={removeReservedTicket}
                                 onNextStep={handleAdvanceFromTicketStep}
                                 changeStep={changeStep}
-                                stripeReady={stripeReady}
+                                paymentReady={paymentReady}
                             />
                         </>
                     )}
@@ -574,7 +574,7 @@ const mapStateToProps = ({ registrationLiteState }) => ({
     passwordlessCodeSent: registrationLiteState.passwordless.code_sent,
     passwordlessCodeError: registrationLiteState.passwordless.error,
     promoCode: registrationLiteState.promoCode,
-    stripeReady: registrationLiteState.stripeReady,
+    paymentReady: registrationLiteState.paymentReady,
     discoveredPromoCodes: registrationLiteState.discoveredPromoCodes,
 })
 
@@ -595,7 +595,7 @@ const RegistrationForm = connect(mapStateToProps, {
     removePromoCode,
     discoverPromoCodes,
     validatePromoCode,
-    setStripeReady,
+    setPaymentReady,
     startWidgetLoading,
     stopWidgetLoading
 })(RegistrationFormContent);

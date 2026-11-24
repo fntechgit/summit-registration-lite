@@ -23,7 +23,7 @@ import styles from "./index.module.scss";
 
 import {DefaultTextColor, DefaultHintColor} from '../../utils/constants';
 
-const LawPayForm = ({ reservation, payTicket, userProfile, providerKey, provider, timestamp }) => {
+const LawPayForm = ({ reservation, payTicket, userProfile, providerKey, provider, timestamp, onPaymentReady }) => {
 
     const [hostedFields, setHostedFields] = useState(null);
 
@@ -100,6 +100,10 @@ const LawPayForm = ({ reservation, payTicket, userProfile, providerKey, provider
             ));
         }
     }, [reservation])
+
+    useEffect(() => {
+        if (hostedFields && onPaymentReady) onPaymentReady();
+    }, [hostedFields]);
 
     const onExpireChange = (ev) => {
         setLawPayFields({ ...lawPayFields, [ev.target.id]: ev.target.value });
