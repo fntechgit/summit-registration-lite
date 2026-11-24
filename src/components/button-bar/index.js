@@ -28,7 +28,7 @@ const ButtonBarComponent = ({ step, changeStep, onNextStep, formValues, removeRe
                 <>
                     <div className={`${styles.innerWrapper}`}>
                         <div className={styles.required}>
-                            {step !== STEP_SELECT_TICKET_TYPE && <span>* Required fields <br /> </span>}
+                            {step !== STEP_SELECT_TICKET_TYPE && <span>{T.translate("bar_button.required_fields")} <br /> </span>}
                         </div>
                         <div className={styles.actions}>
                             {/* Back Button */}

@@ -18,6 +18,7 @@ import styles from "./index.module.scss";
 import LawpayForm from '../lawpay-form';
 import StripeProvider from '../stripe-component';
 import { Helmet } from 'react-helmet';
+import T from 'i18n-react';
 import { PAYMENT_PROVIDER_LAWPAY, PAYMENT_PROVIDER_STRIPE } from '../../utils/constants';
 
 
@@ -40,7 +41,7 @@ const PaymentComponent = ({ isActive, userProfile, reservation, payTicket, provi
             <>
                 <div className={`${styles.innerWrapper}`}>
                     <div className={styles.title} >
-                        <span>Payment</span>
+                        <span>{T.translate("payment.title")}</span>
                     </div>
                     <animated.div style={{ overflow: `${isActive ? '' : 'hidden'}`, ...toggleAnimation }}>
                         <div ref={ref}>

@@ -13,6 +13,7 @@
 
 import React, { useMemo } from 'react';
 import merge from 'lodash/merge';
+import T from 'i18n-react';
 import { loadStripe } from '@stripe/stripe-js';
 import { Elements } from '@stripe/react-stripe-js';
 import StripeForm from '../stripe-form';
@@ -118,7 +119,7 @@ const StripeProvider = ({ userProfile, reservation, payTicket, providerKey, prov
             />
         </Elements>
         :
-        <div>Loading...</div>
+        <div>{T.translate("payment.loading")}</div>
     );
 }
 

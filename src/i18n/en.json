@@ -37,9 +37,34 @@
     "accept": "Accept",
     "get_ticket": "Get Ticket",
     "pay_now": "Pay Now",
-    "loading": "Loading"
+    "loading": "Loading",
+    "required_fields": "* Required fields"
   },
   "payment": {
-    "load_error": "The payment form could not be loaded. Please refresh the page and try again."
+    "load_error": "The payment form could not be loaded. Please refresh the page and try again.",
+    "title": "Payment",
+    "loading": "Loading...",
+    "error_title": "Payment error",
+    "required_field": "This field is required.",
+    "credit_card_placeholder": "Credit Card Number",
+    "cvv_placeholder": "CCV",
+    "month_placeholder": "Month",
+    "year_placeholder": "Year",
+    "zip_code_placeholder": "ZIP Code *",
+    "address_placeholder": "Address *",
+    "months": {
+      "01": "1 - January",
+      "02": "2 - February",
+      "03": "3 - March",
+      "04": "4 - April",
+      "05": "5 - May",
+      "06": "6 - June",
+      "07": "7 - July",
+      "08": "8 - August",
+      "09": "9 - September",
+      "10": "10 - October",
+      "11": "11 - November",
+      "12": "12 - December"
+    }
   }
 }
