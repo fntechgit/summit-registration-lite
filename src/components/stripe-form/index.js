@@ -11,7 +11,7 @@
  * limitations under the License.
  **/
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useForm } from 'react-hook-form';
 
@@ -81,17 +81,6 @@ const StripeForm = ({ reservation, payTicket, userProfile, provider, hidePostalC
     // Stripe cannot see into a shadow tree, so there the Element goes on the shadow
     // host and is slotted back in flow (stripe/stripe-js#143). Only a shadow root has a host.
     const slotHost = rootNode?.host ?? null;
-
-    useEffect(() => {
-        if (elements) {
-            const pe = elements.getElement("payment");
-            setPaymentElement(pe);
-
-            if (pe) {
-                pe.on("ready", () => onPaymentReady());
-            }
-        }
-    }, [elements]);
 
     const { register, handleSubmit, formState: { errors } } = useForm();
 
@@ -175,11 +164,27 @@ const StripeForm = ({ reservation, payTicket, userProfile, provider, hidePostalC
         }
     }
 
+    const handlePaymentElementReady = (element) => {
+        setPaymentElement(element);
+        onPaymentReady();
+    };
+
+    const handlePaymentElementLoadError = ({ error }) => {
+        console.log(`StripeForm::PaymentElement load error`, error);
+        onError({ type: ERROR_TYPE_PAYMENT, msg: error?.message, exception: error });
+    };
+
     const renderPaymentElement = () => {
         // Wait for the callback ref: mounting before the context is known would
         // put the Element in the shadow tree, out of Stripe's reach.
         if (rootNode === undefined) return null;
-        const paymentEl = <PaymentElement options={paymentOptions} />;
+        const paymentEl = (
+            <PaymentElement
+                options={paymentOptions}
+                onReady={handlePaymentElementReady}
+                onLoadError={handlePaymentElementLoadError}
+            />
+        );
         if (!slotHost) return paymentEl;
         return (
             <>
