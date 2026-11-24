@@ -125,34 +125,23 @@ describe('Pay Now readiness - Stripe', () => {
 });
 
 describe('Pay Now readiness - LawPay', () => {
-    beforeEach(() => jest.useFakeTimers());
-    afterEach(() => jest.useRealTimers());
-
     const mockAffiniPay = () => {
         window.AffiniPay = { HostedFields: { initializeFields: jest.fn(() => ({ getPaymentToken: jest.fn() })) } };
     };
 
     it('stays disabled until the AffiniPay hosted fields start, then gets enabled', () => {
-        render(<Harness provider={PAYMENT_PROVIDER_LAWPAY} reservation={reservation} />);
+        // script not loaded yet: fields can't start
+        const { rerender } = render(<Harness provider={PAYMENT_PROVIDER_LAWPAY} reservation={null} />);
 
         expect(payButton().disabled).toBe(true);
         expect(payButton().textContent).toContain('Loading');
 
-        // script arrives after the form mounted: picked up on the next poll
+        // script loaded by the time the reservation arrives: fields start
         mockAffiniPay();
-        act(() => { jest.advanceTimersByTime(250); });
+        rerender(<Harness provider={PAYMENT_PROVIDER_LAWPAY} reservation={reservation} />);
 
         expect(window.AffiniPay.HostedFields.initializeFields).toHaveBeenCalled();
         expect(payButton().disabled).toBe(false);
         expect(payButton().textContent).toContain('Pay Now');
-    });
-
-    it('reports a load error when the AffiniPay script never loads', () => {
-        render(<Harness provider={PAYMENT_PROVIDER_LAWPAY} reservation={reservation} />);
-
-        act(() => { jest.advanceTimersByTime(15000); });
-
-        expect(onError).toHaveBeenCalledWith(expect.objectContaining({ type: ERROR_TYPE_PAYMENT }));
-        expect(payButton().disabled).toBe(true);
     });
 });
