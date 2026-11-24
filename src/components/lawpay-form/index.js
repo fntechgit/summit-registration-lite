@@ -12,6 +12,7 @@
  **/
 
 import React, { useEffect, useState } from 'react';
+import T from 'i18n-react';
 
 import Dropdown from 'openstack-uicore-foundation/lib/components/inputs/dropdown';
 
@@ -23,7 +24,7 @@ import styles from "./index.module.scss";
 
 import {DefaultTextColor, DefaultHintColor} from '../../utils/constants';
 
-const LawPayForm = ({ reservation, payTicket, userProfile, providerKey, provider, timestamp }) => {
+const LawPayForm = ({ reservation, payTicket, userProfile, providerKey, provider, timestamp, onPaymentReady = () => {} }) => {
 
     const [hostedFields, setHostedFields] = useState(null);
 
@@ -68,7 +69,7 @@ const LawPayForm = ({ reservation, payTicket, userProfile, providerKey, provider
                 selector: "#my_credit_card_field_id",
                 input: {
                     type: "credit_card_number",
-                    placeholder: "Credit Card Number",
+                    placeholder: T.translate("payment.credit_card_placeholder"),
                     css: style
                 }
             },
@@ -76,7 +77,7 @@ const LawPayForm = ({ reservation, payTicket, userProfile, providerKey, provider
                 selector: "#my_cvv_field_id",
                 input: {
                     type: "cvv",
-                    placeholder: "CCV",
+                    placeholder: T.translate("payment.cvv_placeholder"),
                     css: style
                 }
             }
@@ -101,6 +102,10 @@ const LawPayForm = ({ reservation, payTicket, userProfile, providerKey, provider
         }
     }, [reservation])
 
+    useEffect(() => {
+        if (hostedFields && onPaymentReady) onPaymentReady(true);
+    }, [hostedFields]);
+
     const onExpireChange = (ev) => {
         setLawPayFields({ ...lawPayFields, [ev.target.id]: ev.target.value });
     }
@@ -110,7 +115,7 @@ const LawPayForm = ({ reservation, payTicket, userProfile, providerKey, provider
 
         Object.keys(lawPayFields).map((key) => {
             if (!lawPayFields[key] || lawPayFields[key] === '') {
-                errors = { ...errors, [key]: 'This field is required.' };
+                errors = { ...errors, [key]: T.translate("payment.required_field") };
             }
         });
 
@@ -140,25 +145,13 @@ const LawPayForm = ({ reservation, payTicket, userProfile, providerKey, provider
                 });
                 payTicket(provider, { token });
             } catch (error) {
-                Swal.fire("Payment error", error.message, "warning");
+                Swal.fire(T.translate("payment.error_title"), error.message, "warning");
             }
         }
     };
 
-    const ddl_month = [
-        { label: '1 - January', value: '01' },
-        { label: '2 - February', value: '02' },
-        { label: '3 - March', value: '03' },
-        { label: '4 - April', value: '04' },
-        { label: '5 - May', value: '05' },
-        { label: '6 - June', value: '06' },
-        { label: '7 - July', value: '07' },
-        { label: '8 - August', value: '08' },
-        { label: '9 - September', value: '09' },
-        { label: '10 - October', value: '10' },
-        { label: '11 - November', value: '11' },
-        { label: '12 - December', value: '12' }
-    ]
+    const ddl_month = ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12']
+        .map((value) => ({ label: T.translate(`payment.months.${value}`), value }));
 
     const current_year = epochToMomentTimeZone(timestamp, 'utc').year();
 
@@ -218,11 +211,11 @@ const LawPayForm = ({ reservation, payTicket, userProfile, providerKey, provider
             <div className={styles.fieldWrapper}>
                 <div className={styles.dateWrapper}>
                     <div>
-                        <Dropdown styles={customStyles} className={styles.dropdown} placeholder="Month" onChange={onExpireChange} id="exp_month" options={ddl_month} />
+                        <Dropdown styles={customStyles} className={styles.dropdown} placeholder={T.translate("payment.month_placeholder")} onChange={onExpireChange} id="exp_month" options={ddl_month} />
                         {lawPayErrors.exp_month && <div className={styles.fieldError}>{lawPayErrors.exp_month}</div>}
                     </div>
                     <div>
-                        <Dropdown styles={customStyles} className={styles.dropdown} placeholder="Year" onChange={onExpireChange} id="exp_year" options={year_ddl} />
+                        <Dropdown styles={customStyles} className={styles.dropdown} placeholder={T.translate("payment.year_placeholder")} onChange={onExpireChange} id="exp_year" options={year_ddl} />
                         {lawPayErrors.exp_year && <div className={styles.fieldError}>{lawPayErrors.exp_year}</div>}
                     </div>
                 </div>
@@ -235,7 +228,7 @@ const LawPayForm = ({ reservation, payTicket, userProfile, providerKey, provider
                     <div className={styles.inputWrapper}>
                         <input type="text"
                             name="postal_code"
-                            placeholder="ZIP Code *"
+                            placeholder={T.translate("payment.zip_code_placeholder")}
                             value={lawPayFields.postal_code}
                             onChange={(e) => setLawPayFields({ ...lawPayFields, postal_code: e.target.value })} />
                     </div>
@@ -249,7 +242,7 @@ const LawPayForm = ({ reservation, payTicket, userProfile, providerKey, provider
                 <div className={`${styles.inputWrapper} ${styles.addressField}`}>
                     <input type="text"
                         name="address1"
-                        placeholder="Address *"
+                        placeholder={T.translate("payment.address_placeholder")}
                         value={lawPayFields.address1}
                         onChange={(e) => setLawPayFields({ ...lawPayFields, address1: e.target.value })} />
                 </div>

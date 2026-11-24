@@ -18,10 +18,11 @@ import styles from "./index.module.scss";
 import LawpayForm from '../lawpay-form';
 import StripeProvider from '../stripe-component';
 import { Helmet } from 'react-helmet';
+import T from 'i18n-react';
 import { PAYMENT_PROVIDER_LAWPAY, PAYMENT_PROVIDER_STRIPE } from '../../utils/constants';
 
 
-const PaymentComponent = ({ isActive, userProfile, reservation, payTicket, providerKey, provider, providerOptions, successfulPaymentReturnUrl, timestamp, hidePostalCode, onError }) => {
+const PaymentComponent = ({ isActive, userProfile, reservation, payTicket, providerKey, provider, providerOptions, successfulPaymentReturnUrl, timestamp, hidePostalCode, onError, onPaymentReady }) => {
 
     const [ref, { height }] = useMeasure();
 
@@ -40,7 +41,7 @@ const PaymentComponent = ({ isActive, userProfile, reservation, payTicket, provi
             <>
                 <div className={`${styles.innerWrapper}`}>
                     <div className={styles.title} >
-                        <span>Payment</span>
+                        <span>{T.translate("payment.title")}</span>
                     </div>
                     <animated.div style={{ overflow: `${isActive ? '' : 'hidden'}`, ...toggleAnimation }}>
                         <div ref={ref}>
@@ -55,6 +56,7 @@ const PaymentComponent = ({ isActive, userProfile, reservation, payTicket, provi
                                     stripeReturnUrl={successfulPaymentReturnUrl}
                                     hidePostalCode={hidePostalCode}
                                     onError={onError}
+                                    onPaymentReady={onPaymentReady}
                                 />
                             }
                             {provider === PAYMENT_PROVIDER_LAWPAY &&
@@ -70,6 +72,7 @@ const PaymentComponent = ({ isActive, userProfile, reservation, payTicket, provi
                                         providerKey={providerKey}
                                         timestamp={timestamp}
                                         onError={onError}
+                                        onPaymentReady={onPaymentReady}
                                     />
                                 </>
                             }

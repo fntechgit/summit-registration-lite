@@ -188,6 +188,8 @@ const RegistrationFormContent = (
 
     const [hasTicketData, setHasTicketData] = useState(false);
     const [ticketDataError, setTicketDataError] = useState(false);
+    // local (not Redux) so it isn't persisted; payment forms set it true when ready, false on unmount
+    const [paymentReady, setPaymentReady] = useState(false);
     const [unappliedCodeWarning, setUnappliedCodeWarning] = useState(null);
 
     const isAuthenticated = !!profileData;
@@ -508,6 +510,7 @@ const RegistrationFormContent = (
                                         providerOptions={providerOptions}
                                         hidePostalCode={hidePostalCode}
                                         onError={onError}
+                                        onPaymentReady={setPaymentReady}
                                         successfulPaymentReturnUrl={successfulPaymentReturnUrl}
                                     />
                                 </div>
@@ -521,6 +524,7 @@ const RegistrationFormContent = (
                                 removeReservedTicket={removeReservedTicket}
                                 onNextStep={handleAdvanceFromTicketStep}
                                 changeStep={changeStep}
+                                paymentReady={paymentReady}
                             />
                         </>
                     )}

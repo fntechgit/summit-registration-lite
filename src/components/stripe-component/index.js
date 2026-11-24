@@ -13,6 +13,7 @@
 
 import React, { useMemo } from 'react';
 import merge from 'lodash/merge';
+import T from 'i18n-react';
 import { loadStripe } from '@stripe/stripe-js';
 import { Elements } from '@stripe/react-stripe-js';
 import StripeForm from '../stripe-form';
@@ -21,7 +22,7 @@ import { isFreeOrder, isPrePaidOrder } from '../../utils/utils';
 import { DefaultBGColor, DefaultTextColor, DefaultHintColor } from '../../utils/constants';
 
 
-const StripeProvider = ({ userProfile, reservation, payTicket, providerKey, provider, stripeOptions, stripeReturnUrl, hidePostalCode, onError }) => {
+const StripeProvider = ({ userProfile, reservation, payTicket, providerKey, provider, stripeOptions, stripeReturnUrl, hidePostalCode, onError, onPaymentReady }) => {
 
     const stripePromise = useMemo(() => loadStripe(providerKey), [providerKey]);
 
@@ -114,10 +115,11 @@ const StripeProvider = ({ userProfile, reservation, payTicket, providerKey, prov
                 hidePostalCode={hidePostalCode}
                 stripeReturnUrl={stripeReturnUrl}
                 onError={onError}
+                onPaymentReady={onPaymentReady}
             />
         </Elements>
         :
-        <div>Loading...</div>
+        <div>{T.translate("payment.loading")}</div>
     );
 }
 

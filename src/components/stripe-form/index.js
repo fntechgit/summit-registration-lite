@@ -13,6 +13,7 @@
 
 import React, { useCallback, useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
+import T from 'i18n-react';
 import { useForm } from 'react-hook-form';
 
 import {
@@ -67,7 +68,7 @@ const stripeErrorCodeMap = {
 // Slot names are scoped to their shadow root, so widgets on one page don't collide.
 const PAYMENT_SLOT = 'stripe-payment';
 
-const StripeForm = ({ reservation, payTicket, userProfile, provider, hidePostalCode, stripeReturnUrl, onError }) => {
+const StripeForm = ({ reservation, payTicket, userProfile, provider, hidePostalCode, stripeReturnUrl, onError, onPaymentReady = () => {} }) => {
     const stripe = useStripe();
     const elements = useElements();
     const [paymentElement, setPaymentElement] = useState(null);
@@ -82,11 +83,8 @@ const StripeForm = ({ reservation, payTicket, userProfile, provider, hidePostalC
     // host and is slotted back in flow (stripe/stripe-js#143). Only a shadow root has a host.
     const slotHost = rootNode?.host ?? null;
 
-    useEffect(() => {
-        if (elements) {
-            setPaymentElement(elements.getElement('payment'));
-        }
-    }, [elements]);
+    // form gone: Pay Now must not stay enabled
+    useEffect(() => () => onPaymentReady(false), []);
 
     const { register, handleSubmit, formState: { errors } } = useForm();
 
@@ -170,11 +168,27 @@ const StripeForm = ({ reservation, payTicket, userProfile, provider, hidePostalC
         }
     }
 
+    const handlePaymentElementReady = (element) => {
+        setPaymentElement(element);
+        onPaymentReady(true);
+    };
+
+    const handlePaymentElementLoadError = ({ error }) => {
+        console.log(`StripeForm::PaymentElement load error`, error);
+        onError({ type: ERROR_TYPE_PAYMENT, msg: error?.message || T.translate("payment.load_error"), exception: error });
+    };
+
     const renderPaymentElement = () => {
         // Wait for the callback ref: mounting before the context is known would
         // put the Element in the shadow tree, out of Stripe's reach.
         if (rootNode === undefined) return null;
-        const paymentEl = <PaymentElement options={paymentOptions} />;
+        const paymentEl = (
+            <PaymentElement
+                options={paymentOptions}
+                onReady={handlePaymentElementReady}
+                onLoadError={handlePaymentElementLoadError}
+            />
+        );
         if (!slotHost) return paymentEl;
         return (
             <>

@@ -22,6 +22,9 @@
           display: flex;          
           button {
               margin-left: 10px;
+              &:disabled {
+                cursor: not-allowed !important;
+              }
           }
       }
   }
