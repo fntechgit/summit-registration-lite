@@ -20,7 +20,7 @@ import { STEP_COMPLETE, STEP_PAYMENT, STEP_PERSONAL_INFO, STEP_SELECT_TICKET_TYP
 const ButtonBarComponent = ({ step, changeStep, onNextStep, formValues, removeReservedTicket, inPersonDisclaimer, promoIsReady, paymentReady }) => {
     const { ticketType, ticketQuantity, ticketSelectionValid } = formValues || {};
 
-    const nextButtonText = inPersonDisclaimer && ticketType && isInPersonTicketType(ticketType) ? 'Accept' : 'Next';
+    const nextButtonText = inPersonDisclaimer && ticketType && isInPersonTicketType(ticketType) ? T.translate("bar_button.accept") : T.translate("bar_button.next");
 
     return (
         <div className={`${styles.outerWrapper}`}>

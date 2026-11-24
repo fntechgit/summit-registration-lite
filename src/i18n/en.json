@@ -34,6 +34,7 @@
   "bar_button": {
     "back": "Back",
     "next": "Next",
+    "accept": "Accept",
     "get_ticket": "Get Ticket",
     "pay_now": "Pay Now",
     "loading": "Loading"

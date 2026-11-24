@@ -30,7 +30,7 @@ const AFFINIPAY_POLL_MS = 250;
 // Give up after 15s: covers slow connections, but don't leave the user on "Loading" forever.
 const AFFINIPAY_LOAD_TIMEOUT_MS = 15000;
 
-const LawPayForm = ({ reservation, payTicket, userProfile, providerKey, provider, timestamp, onError, onPaymentReady }) => {
+const LawPayForm = ({ reservation, payTicket, userProfile, providerKey, provider, timestamp, onError, onPaymentReady = () => {} }) => {
 
     const [hostedFields, setHostedFields] = useState(null);
 
@@ -145,11 +145,11 @@ const LawPayForm = ({ reservation, payTicket, userProfile, providerKey, provider
 
     // fields are live: enable the shared Pay Now button
     useEffect(() => {
-        if (hostedFields && onPaymentReady) onPaymentReady(true);
+        if (hostedFields) onPaymentReady(true);
     }, [hostedFields]);
 
     // form gone: Pay Now must not stay enabled
-    useEffect(() => () => onPaymentReady && onPaymentReady(false), []);
+    useEffect(() => () => onPaymentReady(false), []);
 
     const onExpireChange = (ev) => {
         setLawPayFields({ ...lawPayFields, [ev.target.id]: ev.target.value });
