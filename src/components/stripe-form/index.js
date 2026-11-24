@@ -13,6 +13,7 @@
 
 import React, { useCallback, useState } from 'react';
 import { createPortal } from 'react-dom';
+import T from 'i18n-react';
 import { useForm } from 'react-hook-form';
 
 import {
@@ -171,7 +172,7 @@ const StripeForm = ({ reservation, payTicket, userProfile, provider, hidePostalC
 
     const handlePaymentElementLoadError = ({ error }) => {
         console.log(`StripeForm::PaymentElement load error`, error);
-        onError({ type: ERROR_TYPE_PAYMENT, msg: error?.message, exception: error });
+        onError({ type: ERROR_TYPE_PAYMENT, msg: error?.message || T.translate("payment.load_error"), exception: error });
     };
 
     const renderPaymentElement = () => {

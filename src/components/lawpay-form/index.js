@@ -12,6 +12,7 @@
  **/
 
 import React, { useEffect, useState } from 'react';
+import T from 'i18n-react';
 
 import Dropdown from 'openstack-uicore-foundation/lib/components/inputs/dropdown';
 
@@ -21,9 +22,15 @@ import { epochToMomentTimeZone } from "openstack-uicore-foundation/lib/utils/met
 
 import styles from "./index.module.scss";
 
-import {DefaultTextColor, DefaultHintColor} from '../../utils/constants';
+import {DefaultTextColor, DefaultHintColor, ERROR_TYPE_PAYMENT} from '../../utils/constants';
 
-const LawPayForm = ({ reservation, payTicket, userProfile, providerKey, provider, timestamp, onPaymentReady }) => {
+// AffiniPay's script is injected via Helmet and gives no load callback, so we poll for window.AffiniPay.
+// Check every 250ms: fast enough to feel instant once it arrives, cheap enough to not matter.
+const AFFINIPAY_POLL_MS = 250;
+// Give up after 15s: covers slow connections, but don't leave the user on "Loading" forever.
+const AFFINIPAY_LOAD_TIMEOUT_MS = 15000;
+
+const LawPayForm = ({ reservation, payTicket, userProfile, providerKey, provider, timestamp, onError, onPaymentReady }) => {
 
     const [hostedFields, setHostedFields] = useState(null);
 
@@ -92,15 +99,51 @@ const LawPayForm = ({ reservation, payTicket, userProfile, providerKey, provider
         setLawPayErrors({ ...lawPayErrors, ...fieldErrors });
     };
 
-    useEffect(() => {
-        if (window.AffiniPay && !hostedFields) {
-            setHostedFields(window.AffiniPay.HostedFields.initializeFields(
-                hostedFieldsConfiguration,
-                hostedFieldsCallBack
-            ));
-        }
-    }, [reservation])
+    const reportLoadError = (exception) => {
+        console.log(`LawPayForm::hosted fields load error`, exception);
+        if (onError) onError({ type: ERROR_TYPE_PAYMENT, msg: T.translate("payment.load_error"), exception });
+    };
 
+    // Start the AffiniPay hosted fields as soon as the script is available.
+    useEffect(() => {
+        // already started: nothing to do
+        if (hostedFields) return;
+
+        const initFields = () => {
+            try {
+                setHostedFields(window.AffiniPay.HostedFields.initializeFields(
+                    hostedFieldsConfiguration,
+                    hostedFieldsCallBack
+                ));
+            } catch (e) {
+                reportLoadError(e);
+            }
+        };
+
+        // script already loaded: start right away
+        if (window.AffiniPay) {
+            initFields();
+            return;
+        }
+
+        // script still loading: wait for it, report an error if it never shows up
+        let elapsed = 0;
+        const timer = setInterval(() => {
+            elapsed += AFFINIPAY_POLL_MS;
+            if (window.AffiniPay) {
+                clearInterval(timer);
+                initFields();
+            } else if (elapsed >= AFFINIPAY_LOAD_TIMEOUT_MS) {
+                clearInterval(timer);
+                reportLoadError(new Error('AffiniPay script did not load'));
+            }
+        }, AFFINIPAY_POLL_MS);
+
+        // stop polling if the form unmounts or the effect re-runs
+        return () => clearInterval(timer);
+    }, [reservation, hostedFields])
+
+    // fields are live: enable the shared Pay Now button
     useEffect(() => {
         if (hostedFields && onPaymentReady) onPaymentReady();
     }, [hostedFields]);

@@ -37,5 +37,8 @@
     "get_ticket": "Get Ticket",
     "pay_now": "Pay Now",
     "loading": "Loading"
+  },
+  "payment": {
+    "load_error": "The payment form could not be loaded. Please refresh the page and try again."
   }
 }
