@@ -145,8 +145,11 @@ const LawPayForm = ({ reservation, payTicket, userProfile, providerKey, provider
 
     // fields are live: enable the shared Pay Now button
     useEffect(() => {
-        if (hostedFields && onPaymentReady) onPaymentReady();
+        if (hostedFields && onPaymentReady) onPaymentReady(true);
     }, [hostedFields]);
+
+    // form gone: Pay Now must not stay enabled
+    useEffect(() => () => onPaymentReady && onPaymentReady(false), []);
 
     const onExpireChange = (ev) => {
         setLawPayFields({ ...lawPayFields, [ev.target.id]: ev.target.value });

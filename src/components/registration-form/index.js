@@ -43,7 +43,6 @@ import {
     applyPromoCode,
     validatePromoCode,
     discoverPromoCodes,
-    setPaymentReady,
     startWidgetLoading,
     stopWidgetLoading
 } from '../../actions';
@@ -170,8 +169,6 @@ const RegistrationFormContent = (
         applyPromoCode,
         validatePromoCode,
         discoverPromoCodes,
-        setPaymentReady,
-        paymentReady,
         startWidgetLoading,
         stopWidgetLoading,
         closeHandlerRef,
@@ -191,6 +188,8 @@ const RegistrationFormContent = (
 
     const [hasTicketData, setHasTicketData] = useState(false);
     const [ticketDataError, setTicketDataError] = useState(false);
+    // local (not Redux) so it isn't persisted; payment forms set it true when ready, false on unmount
+    const [paymentReady, setPaymentReady] = useState(false);
     const [unappliedCodeWarning, setUnappliedCodeWarning] = useState(null);
 
     const isAuthenticated = !!profileData;
@@ -574,7 +573,6 @@ const mapStateToProps = ({ registrationLiteState }) => ({
     passwordlessCodeSent: registrationLiteState.passwordless.code_sent,
     passwordlessCodeError: registrationLiteState.passwordless.error,
     promoCode: registrationLiteState.promoCode,
-    paymentReady: registrationLiteState.paymentReady,
     discoveredPromoCodes: registrationLiteState.discoveredPromoCodes,
 })
 
@@ -593,9 +591,8 @@ const RegistrationForm = connect(mapStateToProps, {
     loadProfileData,
     applyPromoCode,
     removePromoCode,
-    discoverPromoCodes,
     validatePromoCode,
-    setPaymentReady,
+    discoverPromoCodes,
     startWidgetLoading,
     stopWidgetLoading
 })(RegistrationFormContent);

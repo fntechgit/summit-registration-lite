@@ -11,7 +11,7 @@
  * limitations under the License.
  **/
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import T from 'i18n-react';
 import { useForm } from 'react-hook-form';
@@ -82,6 +82,9 @@ const StripeForm = ({ reservation, payTicket, userProfile, provider, hidePostalC
     // Stripe cannot see into a shadow tree, so there the Element goes on the shadow
     // host and is slotted back in flow (stripe/stripe-js#143). Only a shadow root has a host.
     const slotHost = rootNode?.host ?? null;
+
+    // form gone: Pay Now must not stay enabled
+    useEffect(() => () => onPaymentReady(false), []);
 
     const { register, handleSubmit, formState: { errors } } = useForm();
 
@@ -167,7 +170,7 @@ const StripeForm = ({ reservation, payTicket, userProfile, provider, hidePostalC
 
     const handlePaymentElementReady = (element) => {
         setPaymentElement(element);
-        onPaymentReady();
+        onPaymentReady(true);
     };
 
     const handlePaymentElementLoadError = ({ error }) => {

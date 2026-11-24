@@ -35,7 +35,6 @@ import {
     SET_CURRENT_PROMO_CODE,
     CLEAR_CURRENT_PROMO_CODE,
     DISCOVER_PROMO_CODES_SUCCESS,
-    PAYMENT_READY,
 } from './actions';
 
 import { LOGOUT_USER } from 'openstack-uicore-foundation/lib/security/actions';
@@ -66,7 +65,6 @@ const DEFAULT_STATE = {
     },
     promoCode: '',
     discoveredPromoCodes: [],
-    paymentReady: false
 };
 
 const RegistrationLiteReducer = (state = DEFAULT_STATE, action) => {
@@ -116,7 +114,7 @@ const RegistrationLiteReducer = (state = DEFAULT_STATE, action) => {
             };
         }
         case CHANGE_STEP: {
-            return { ...state, step: payload, paymentReady: false }
+            return { ...state, step: payload }
         }
         case GET_TICKET_TYPES: {
             return { ...state, ticketTypes: payload.response.data, requestedTicketTypes: true };
@@ -165,9 +163,6 @@ const RegistrationLiteReducer = (state = DEFAULT_STATE, action) => {
         }
         case DISCOVER_PROMO_CODES_SUCCESS: {
             return { ...state, discoveredPromoCodes: payload.response?.data || [] }
-        }
-        case PAYMENT_READY: {
-            return { ...state, paymentReady: true }
         }
         default: {
             return state;
